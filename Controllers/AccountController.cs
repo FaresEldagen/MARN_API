@@ -1,6 +1,8 @@
 ﻿using MARN_API.DTOs;
+using MARN_API.Enums;
 using MARN_API.Services.Implementations;
 using MARN_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -39,56 +41,94 @@ namespace MARN_API.Controllers
         /// <response code="400">If the request is invalid or login fails</response>
         /// <response code="401">If the user is not found</response>
         /// <response code="429">If rate limit is exceeded</response>
+        /// <response code="202">If require 2FA</response>
         [HttpPost("login")]
         [EnableRateLimiting("StrictAuth")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<ActionResult<TokenDto>> Login(LogInDto logInDto)
+        public async Task<ActionResult<LoginResponseDto>> Login(LogInDto logInDto)
         {
-            _logger.LogInformation("Login attempt for email: {Email}", logInDto.Email);
-
             if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("Login failed: Invalid model state for email: {Email}", logInDto.Email);
                 return BadRequest(ModelState);
+
+            var result = await _accountService.LoginAsync(logInDto);
+
+            if (!result.Success)
+                return Unauthorized(result.Message);
+
+            if (result.ResultType == ServiceResultType.RequiresTwoFactor)
+            {
+                return Accepted(result.Data);
             }
 
-            var user = await _accountService.GetUserByEmailAsync(logInDto.Email);
-
-            if (user == null)
-            {
-                _logger.LogWarning("Login failed: User not found for email: {Email}", logInDto.Email);
-                return Unauthorized("Invalid email or password");
-            }
-
-            if (user.EmailConfirmed == false)
-            {
-                _logger.LogWarning("Login failed: Email not confirmed for user: {UserId}", user.Id);
-                return Unauthorized("Email not confirmed. Please check your email for confirmation instructions.");
-            }
-
-            bool isValid = await _accountService.CheckPasswordAsync(user, logInDto.Password);
-
-            if (!isValid)
-            {
-                _logger.LogWarning("Login failed: Invalid password for user: {UserId}", user.Id);
-                return Unauthorized("Invalid email or password");
-            }
-
-            var roles = await _accountService.GetUserRolesAsync(user);
-            var expiration = DateTime.UtcNow.AddDays(7);
-            var tokenString = _tokenService.CreateToken(user, roles, expiration);
-
-            _logger.LogInformation("Login successful for user: {UserId}", user.Id);
-
-            return Ok(new TokenDto
-            {
-                Token = tokenString,
-                Expiration = expiration
-            });
+            return Ok(result.Data);
         }
+
+
+        /// <summary>
+        /// Verify the Two-Factor Authentication (2FA) code sent to the user's email.
+        /// </summary>
+        /// <param name="dto">User email and 2FA code</param>
+        /// <returns>JWT token if verification is successful</returns>
+        /// <response code="200">Returns JWT token if 2FA verification is successful</response>
+        /// <response code="400">If the request is invalid (bad model)</response>
+        /// <response code="401">If verification code is invalid or user not found</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [HttpPost("verify-2fa")]
+        [EnableRateLimiting("StrictAuth")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> VerifyTwoFactor(VerifyTwoFactorDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _accountService.VerifyTwoFactorAsync(dto);
+
+            if (!result.Success)
+                return Unauthorized(result.Message);
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Toggle Two-Factor Authentication (2FA) for the authenticated user.
+        /// </summary>
+        /// <param name="dto">Optional password for verification</param>
+        /// <returns>Current 2FA status (enabled/disabled)</returns>
+        /// <response code="200">Returns the current 2FA status after toggle</response>
+        /// <response code="400">If toggle failed (invalid password, etc.)</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+
+        [HttpPost("toggle-2fa")]
+        [EnableRateLimiting("StrictAuth")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> ToggleTwoFactor(ToggleTwoFactorDto dto)
+        {
+            // remove this - just for debuging 
+            var debugUserPrinciple =User;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not found in token");
+
+            var result = await _accountService.ToggleTwoFactorAsync(userId, dto.Password);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(new { enabled = result.Data, message = result.Message });
+        }
+        /////
 
         /// <summary>
         /// Registers a new user account
@@ -316,6 +356,20 @@ namespace MARN_API.Controllers
                 return BadRequest(result);
 
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("auth")]
+        public async Task<IActionResult> testRequireAuthEndPoint()
+        {
+            return Ok("works");
+        }
+
+
+        [HttpGet("notAuth")]
+        public async Task<IActionResult> testNotRequireAuthEndPoint()
+        {
+            return Ok("works");
         }
     }
 }

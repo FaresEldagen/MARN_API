@@ -118,5 +118,76 @@ namespace MARN_API.Services.Implementations
             await SendEmailAsync(to, "Reset Password - MARN", body, true);
 
         }
+
+        public async Task Send2FAEmailAsync(string to, string subject, string code)
+        {
+            var body = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>2FA Code</title>
+    </head>
+    <body style='margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;'>
+        <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f4f6f8; padding:20px 0;'>
+            <tr>
+                <td align='center'>
+                    <table width='100%' cellpadding='0' cellspacing='0' 
+                           style='max-width:500px; background:#ffffff; border-radius:8px; padding:40px 30px; box-shadow:0 4px 10px rgba(0,0,0,0.05);'>
+                        
+                        <tr>
+                            <td align='center' style='font-size:22px; font-weight:bold; color:#333333; padding-bottom:10px;'>
+                                Two-Factor Authentication
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td align='center' style='font-size:14px; color:#555555; padding-bottom:30px;'>
+                                Use the verification code below to complete your sign-in.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td align='center'>
+                                <div style='
+                                    display:inline-block;
+                                    font-size:28px;
+                                    font-weight:bold;
+                                    letter-spacing:6px;
+                                    color:#2d3748;
+                                    background:#edf2f7;
+                                    padding:15px 25px;
+                                    border-radius:6px;'>
+                                    {code}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td align='center' style='font-size:13px; color:#888888; padding-top:30px;'>
+                                This code will expire in 5 minutes.<br/>
+                                If you did not request this code, please ignore this email.
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    <table width='100%' cellpadding='0' cellspacing='0' style='max-width:500px; padding-top:15px;'>
+                        <tr>
+                            <td align='center' style='font-size:12px; color:#aaaaaa;'>
+                                © {DateTime.UtcNow.Year} Your Company. All rights reserved.
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>";
+
+            await SendEmailAsync(to, subject, body, isBodyHtml: true);
+        }
     }
 }

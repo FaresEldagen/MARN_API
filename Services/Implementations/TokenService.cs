@@ -18,17 +18,21 @@ namespace MARN_API.Services.Implementations
             _jwtOptions = jwtOptions.Value;
         }
 
-        public string CreateToken(ApplicationUser user, ICollection<string> roles, DateTime expiration)
+        public string CreateToken(ApplicationUser user, ICollection<string> roles, DateTime expiration, bool includeMfaClaim = false)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName!),
-                new Claim(ClaimTypes.Email, user.Email!)
+                new Claim(ClaimTypes.Email, user.Email!),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
             };
 
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
+
+            if (includeMfaClaim)
+                claims.Add(new Claim("amr", "mfa"));
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_jwtOptions.SecretKey)

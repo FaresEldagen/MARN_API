@@ -24,5 +24,13 @@ namespace MARN_API.Services.Interfaces
         Task<ServiceResult<bool>> ValidateResetTokenAsync(ValidateResetTokenRequestDto request);
 
         Task<ServiceResult<bool>> ResetPasswordAsync(ResetPasswordRequestDto request);
+
+        //  Task<ServiceResult<LoginResponseDto>> VerifyTwoFactorAsync(VerifyTwoFactorDto dto);
+
+        Task<ServiceResult<LoginResponseDto>> LoginAsync(LogInDto dto);
+        Task<bool> GetTwoFactorEnabledAsync(ApplicationUser user);
+        Task<string> GenerateTwoFactorTokenAsync(ApplicationUser user);
+        Task<ServiceResult<LoginResponseDto>> VerifyTwoFactorAsync(VerifyTwoFactorDto dto);
+        Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null);
     }
 }

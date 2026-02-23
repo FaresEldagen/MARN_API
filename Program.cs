@@ -102,14 +102,34 @@ namespace MARN_API
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(option =>
             {
                 option.User.RequireUniqueEmail = true;
+                option.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+                option.SignIn.RequireConfirmedEmail = true;
                 // option.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+                option.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // 15 minutes
+                option.Lockout.MaxFailedAccessAttempts = 5; // lockout after 5 invalid attempts
+                option.Lockout.AllowedForNewUsers = true;  // lockout enabled for all new users
             })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
             builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
             {
-                opt.TokenLifespan = TimeSpan.FromHours(1); // 1 hour expiration
+                // Default provider (used for email confirmation & password reset)
+                opt.TokenLifespan = TimeSpan.FromHours(1);
+            });
+
+            // Configure the email token provider specifically
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(TokenOptions.DefaultEmailProvider, opt =>
+            {
+                // 2FA codes expire quickly
+                opt.TokenLifespan = TimeSpan.FromMinutes(5);
+            });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireMfa", policy =>
+                {
+                    policy.RequireClaim("amr", "mfa");
+                });
             });
 
 

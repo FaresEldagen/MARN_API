@@ -10,10 +10,10 @@ namespace MARN_API.Models
         public List<string>? Errors { get; set; }
         public ServiceResultType ResultType { get; set; } // The "Why"
 
-        public static ServiceResult<T> Ok(T data, string? message = null)
-            => new() { Success = true, Data = data, Message = message };
+        public static ServiceResult<T> Ok(T data, string? message = null, ServiceResultType resultType = ServiceResultType.Success)
+            => new() { Success = true, Data = data, Message = message, ResultType = resultType };
 
-        public static ServiceResult<T> Fail(string message, List<string>? errors = null)
-            => new() { Success = false, Message = message, Errors = errors };
+        public static ServiceResult<T> Fail(string message, List<string>? errors = null, ServiceResultType resultType = ServiceResultType.BadRequest)
+            => new() { Success = false, Message = message, Errors = errors, ResultType = resultType };
     }
 }
