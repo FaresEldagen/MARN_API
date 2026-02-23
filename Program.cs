@@ -107,6 +107,11 @@ namespace MARN_API
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+            {
+                opt.TokenLifespan = TimeSpan.FromHours(1); // 1 hour expiration
+            });
+
 
             // CORS Policy
             builder.Services.AddCors(options =>
@@ -213,7 +218,7 @@ namespace MARN_API
             // Configure the HTTP request pipeline.
             // Request logging should be early in the pipeline
             app.UseMiddleware<RequestLoggingMiddleware>();
-            
+
 
             // Global exception handling should be registered early
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();

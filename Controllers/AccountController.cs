@@ -185,40 +185,137 @@ namespace MARN_API.Controllers
         /// <response code="200">Returns success message if email is confirmed</response>
         /// <response code="400">If the userId or token is invalid or confirmation fails</response>
         /// <response code="429">If rate limit is exceeded</response>
-        //[HttpGet("confirm-email")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //[ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        //public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token)
-        //{
-        //    _logger.LogInformation("Email confirmation attempt for user: {UserId}", userId);
+        [HttpGet("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token)
+        {
+            _logger.LogInformation("Email confirmation attempt for user: {UserId}", userId);
 
-        //    // 1. Validation
-        //    if (userId == Guid.Empty || string.IsNullOrWhiteSpace(token))
-        //    {
-        //        _logger.LogWarning("Email confirmation failed: Invalid userId or token");
-        //        return BadRequest(new { Message = "User ID and Token are required." });
-        //    }
+            // 1. Validation
+            if (userId == Guid.Empty || string.IsNullOrWhiteSpace(token))
+            {
+                _logger.LogWarning("Email confirmation failed: Invalid userId or token");
+                return BadRequest(new { Message = "User ID and Token are required." });
+            }
 
-        //    // 2. Call Service
-        //    var result = await _accountService.ConfirmEmailAsync(userId, token);
+            // 2. Call Service
+            var result = await _accountService.ConfirmEmailAsync(userId, token);
 
-        //    // 3. Handle Success
-        //    if (result.Succeeded)
-        //    {
-        //        _logger.LogInformation("Email confirmed successfully for user: {UserId}", userId);
-        //        return Ok(new { Message = "Email confirmed successfully!" });
-        //    }
+            // 3. Handle Success
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Email confirmed successfully for user: {UserId}", userId);
+                return Ok(new { Message = "Email confirmed successfully!" });
+            }
 
-        //    // 4. Handle Identity Failures (Expired token, invalid token, etc.)
-        //    _logger.LogWarning("Email confirmation failed for user: {UserId}. Errors: {Errors}", 
-        //        userId, string.Join(", ", result.Errors.Select(e => e.Description)));
+            // 4. Handle Identity Failures (Expired token, invalid token, etc.)
+            _logger.LogWarning("Email confirmation failed for user: {UserId}. Errors: {Errors}",
+                userId, string.Join(", ", result.Errors.Select(e => e.Description)));
 
-        //    return BadRequest(new
-        //    {
-        //        Message = "Email confirmation failed.",
-        //        Errors = result.Errors.Select(e => e.Description)
-        //    });
-        //}
+            return BadRequest(new
+            {
+                Message = "Email confirmation failed.",
+                Errors = result.Errors.Select(e => e.Description)
+            });
+        }
+
+        /// <summary>
+        /// Initiates the password reset process by sending a reset link to the user's email address.
+        /// </summary>
+        /// <param name="request">Contains the user's email address.</param>
+        /// <returns>Success message regardless of whether the email exists (for security reasons).</returns>
+        /// <response code="200">
+        /// Returns a success message indicating that if the email exists, a reset link has been sent.
+        /// </response>
+        /// <response code="400">
+        /// If the request model is invalid (e.g., malformed email).
+        /// </response>
+        /// <response code="429">
+        /// If the rate limit for password reset requests is exceeded.
+        /// </response>
+
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequestDto request)
+        {
+            var result = await _accountService.ForgotPasswordAsync(request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Resets the user's password using a valid password reset token.
+        /// </summary>
+        /// <param name="request">
+        /// Contains the user's email address, reset token, new password, and confirmation password.
+        /// </param>
+        /// <returns>
+        /// Success message if the password is successfully reset.
+        /// </returns>
+        /// <response code="200">
+        /// Returns success message if the password was reset successfully.
+        /// </response>
+        /// <response code="400">
+        /// If the reset token is invalid, expired, or the password reset fails.
+        /// </response>
+        /// <response code="429">
+        /// If the rate limit is exceeded.
+        /// </response>
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> ResetPassword(
+            [FromBody] ResetPasswordRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _accountService.ResetPasswordAsync(request);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Validates the password reset token before allowing the user to set a new password.
+        /// </summary>
+        /// <param name="request">
+        /// Contains the user's email address and the reset token received via email.
+        /// </param>
+        /// <returns>
+        /// Returns validation result indicating whether the token is valid or expired.
+        /// </returns>
+        /// <response code="200">
+        /// If the reset token is valid.
+        /// </response>
+        /// <response code="400">
+        /// If the token is invalid, expired, or the request is malformed.
+        /// </response>
+        /// <response code="429">
+        /// If the rate limit is exceeded.
+        /// </response>
+        [HttpPost("validate-reset-token")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> ValidateResetToken(
+        [FromBody] ValidateResetTokenRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _accountService.ValidateResetTokenAsync(request);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }

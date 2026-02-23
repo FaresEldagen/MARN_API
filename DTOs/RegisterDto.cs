@@ -22,7 +22,7 @@ namespace MARN_API.DTOs
         [Required(ErrorMessage = "Email Address is Required")]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string Email { get; set; } = null!; // to do remote
-
+        
         [DataType(DataType.Date)]
         [Display(Name = "Date of Birth")]
         public DateTime? DateOfBirth { get; set; }

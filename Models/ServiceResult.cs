@@ -1,4 +1,6 @@
-﻿namespace MARN_API.Models
+﻿using MARN_API.Enums;
+
+namespace MARN_API.Models
 {
     public class ServiceResult<T>
     {
@@ -6,6 +8,7 @@
         public string? Message { get; set; }
         public T? Data { get; set; }
         public List<string>? Errors { get; set; }
+        public ServiceResultType ResultType { get; set; } // The "Why"
 
         public static ServiceResult<T> Ok(T data, string? message = null)
             => new() { Success = true, Data = data, Message = message };

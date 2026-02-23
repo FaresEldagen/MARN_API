@@ -1,6 +1,7 @@
 ﻿using MARN_API.DTOs;
 using MARN_API.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MARN_API.Services.Interfaces
 {
@@ -13,9 +14,15 @@ namespace MARN_API.Services.Interfaces
         public Task<IdentityResult> UpdateUserAsync(UpdateUserDto updateUserDto);
         public Task<IdentityResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
         public Task<IdentityResult> DeleteUserAsync(long id);
+        public Task<IdentityResult> ConfirmEmailAsync(Guid userId, string token);
         public Task<IdentityResult> RegisterUserAsync(RegisterDto model);
-        //Task<IdentityResult> ConfirmEmailAsync(Guid userId, string token);
+        // public  Task<ActionResult<TokenDto>> Login(LogInDto logInDto);
         Task ResendEmailConfirmationAsync(string email);
-        //Task<bool> CheckEmailTakenAlready(string email);
+
+        Task<ServiceResult<bool>> ForgotPasswordAsync(ForgotPasswordRequestDto request);
+
+        Task<ServiceResult<bool>> ValidateResetTokenAsync(ValidateResetTokenRequestDto request);
+
+        Task<ServiceResult<bool>> ResetPasswordAsync(ResetPasswordRequestDto request);
     }
 }

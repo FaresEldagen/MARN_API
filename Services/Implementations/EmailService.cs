@@ -74,6 +74,7 @@ namespace MARN_API.Services.Implementations
             await SendEmailAsync(toEmail, "Email Confirmation - MARN", htmlContent, true);
         }
 
+
         private async Task SendEmailAsync(string toEmail, string subject, string body, bool isBodyHtml = false)
         {
             try
@@ -104,6 +105,18 @@ namespace MARN_API.Services.Implementations
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        public async Task SendResetPasswordEmailAsync(string to, string resetLink)
+        {
+            var body = $@"
+    <h2>Password Reset</h2>
+    <p>Click the link below to reset your password:</p>
+    <a href='{resetLink}'>Reset Password</a>
+    <p>This link will expire in 1 hour.</p>
+";
+            await SendEmailAsync(to, "Reset Password - MARN", body, true);
+
         }
     }
 }

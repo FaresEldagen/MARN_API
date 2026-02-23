@@ -119,29 +119,29 @@ namespace MARN_API.Services.Implementations
             return encodedToken;
         }
 
-        //public async Task<IdentityResult> ConfirmEmailAsync(Guid userId, string token)
-        //{
-        //    if (userId == Guid.Empty || string.IsNullOrEmpty(token))
-        //        return IdentityResult.Failed(new IdentityError { Description = "Invalid token or user ID." });
+        public async Task<IdentityResult> ConfirmEmailAsync(Guid userId, string token)
+        {
+           if (userId == Guid.Empty || string.IsNullOrEmpty(token))
+               return IdentityResult.Failed(new IdentityError { Description = "Invalid token or user ID." });
 
-        //    var user = await _userManager.FindByIdAsync(userId.ToString());
+           var user = await _userManager.FindByIdAsync(userId.ToString());
 
-        //    if (user == null)
-        //        return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+           if (user == null)
+               return IdentityResult.Failed(new IdentityError { Description = "User not found." });
 
-        //    var decodedBytes = WebEncoders.Base64UrlDecode(token);
-        //    var decodedToken = Encoding.UTF8.GetString(decodedBytes);
-        //    var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+           var decodedBytes = WebEncoders.Base64UrlDecode(token);
+           var decodedToken = Encoding.UTF8.GetString(decodedBytes);
+           var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-        //    if (result.Succeeded)
-        //    {
-        //        var baseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-        //        var loginLink = $"{baseUrl}/Account/Login";
-        //        await _emailService.SendAccountCreatedEmailAsync(user.Email!, user.FirstName!, loginLink);
-        //    }
+           if (result.Succeeded)
+           {
+               var baseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+               var loginLink = $"{baseUrl}/Account/Login";
+               await _emailService.SendAccountCreatedEmailAsync(user.Email!, user.FirstName!, loginLink);
+           }
 
-        //    return result;
-        //}
+           return result;
+        }
 
         public async Task ResendEmailConfirmationAsync(string email)
         {
@@ -173,5 +173,84 @@ namespace MARN_API.Services.Implementations
         //    if (user == null) return true;
         //    return false;
         //}
+
+
+public async Task<ServiceResult<bool>> ForgotPasswordAsync(ForgotPasswordRequestDto request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user != null)
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var encodedToken = WebEncoders.Base64UrlEncode(
+                Encoding.UTF8.GetBytes(token)
+            );
+
+            var resetLink = $"https://yourfrontend.com/reset-password?email={user.Email}&token={encodedToken}";
+
+            await _emailService.SendResetPasswordEmailAsync(user.Email, resetLink);
+        }
+
+        // Always return OK (security)
+        return ServiceResult<bool>.Ok(true, "If the email exists, a reset link was sent.");
+    }
+
+    public async Task<ServiceResult<bool>> ValidateResetTokenAsync(ValidateResetTokenRequestDto request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user == null)
+            return ServiceResult<bool>.Fail("Invalid request.");
+
+        var decodedToken = Encoding.UTF8.GetString(
+            WebEncoders.Base64UrlDecode(request.Token)
+        );
+
+        var isValid = await _userManager.VerifyUserTokenAsync(
+            user,
+            TokenOptions.DefaultProvider,
+            "ResetPassword",
+            decodedToken
+        );
+
+        return isValid
+            ? ServiceResult<bool>.Ok(true)
+            : ServiceResult<bool>.Fail("Invalid or expired token.");
+    }
+
+    public async Task<ServiceResult<bool>> ResetPasswordAsync(ResetPasswordRequestDto request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user == null)
+            return ServiceResult<bool>.Fail("Invalid request.");
+
+        var decodedToken = Encoding.UTF8.GetString(
+            WebEncoders.Base64UrlDecode(request.Token)
+        );
+
+        var result = await _userManager.ResetPasswordAsync(
+            user,
+            decodedToken,
+            request.NewPassword
+        );
+
+        if (!result.Succeeded)
+        {
+            return ServiceResult<bool>.Fail(
+                "Password reset failed.",
+                result.Errors.Select(e => e.Description).ToList()
+            );
+        }
+
+        return ServiceResult<bool>.Ok(true, "Password reset successful.");
+    }
+
+
+
+
+
+        ////
     }
 }
