@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Apis.Auth;
 using MARN_API.DTOs;
 using MARN_API.Enums;
 using MARN_API.Models;
@@ -317,7 +318,9 @@ namespace MARN_API.Services.Implementations
             {
                 Token = tokenString,
                 Expiration = expiration,
-                RequiresTwoFactor = false
+                RequiresTwoFactor = false,
+                IsExternalLogin = false,
+                ExternalProvider = null
             });
         }
 
@@ -404,5 +407,112 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(newState, $"Two-Factor Authentication is now {(newState ? "enabled" : "disabled")}");
         }
         ////
+        public async Task<GoogleJsonWebSignature.Payload?> ValidateGoogleTokenAsync(string idToken)
+        {
+            try
+            {
+
+                var settings = new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["Authentication:Google:ClientId"] }
+                };
+
+                var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+                return payload;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+
+        public async Task<ServiceResult<LoginResponseDto>> GoogleLoginAsync(GoogleLoginDto dto)
+        {
+            _logger.LogInformation("Google login attempt");
+
+            var payload = await ValidateGoogleTokenAsync(dto.IdToken);
+
+            if (payload == null)
+            {
+                _logger.LogWarning("Google login failed: Invalid token");
+                return ServiceResult<LoginResponseDto>.Fail("Invalid Google token");
+            }
+
+            if (!payload.EmailVerified)
+            {
+                _logger.LogWarning("Google login failed: Email not verified by provider");
+                return ServiceResult<LoginResponseDto>.Fail("Google email not verified");
+            }
+
+            var user = await GetUserByEmailAsync(payload.Email);
+
+            if (user == null)
+            {
+                _logger.LogInformation("Creating new user for Google email: {Email}", payload.Email);
+
+                user = new ApplicationUser
+                {
+                    UserName = payload.Email,
+                    Email = payload.Email,
+                    EmailConfirmed = true
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+
+                if (!createResult.Succeeded)
+                {
+                    _logger.LogError("Failed to create user for Google login");
+                    return ServiceResult<LoginResponseDto>.Fail("User creation failed");
+                }
+                var existingLogins = await _userManager.GetLoginsAsync(user);
+
+                if (!existingLogins.Any(l => l.LoginProvider == "Google"))
+                {
+                    await _userManager.AddLoginAsync(user,
+                        new UserLoginInfo("Google", payload.Subject, "Google"));
+                }
+
+                await _userManager.AddLoginAsync(user,
+                    new UserLoginInfo("Google", payload.Subject, "Google"));
+            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                _logger.LogWarning("Google login failed: User locked out: {UserId}", user.Id);
+                return ServiceResult<LoginResponseDto>.Fail("Account is locked. Try again later.");
+            }
+
+            if (await GetTwoFactorEnabledAsync(user))
+            {
+                var code = await GenerateTwoFactorTokenAsync(user);
+
+                await _emailService.Send2FAEmailAsync(user.Email, "2FA Code - MARN", code);
+
+                _logger.LogInformation("Sent 2FA code to Google user: {UserId}", user.Id);
+
+                return ServiceResult<LoginResponseDto>.Ok(new LoginResponseDto
+                {
+                    RequiresTwoFactor = true,
+                    TwoFactorProvider = "Email"
+                }, resultType: ServiceResultType.RequiresTwoFactor);
+            }
+
+            var roles = await GetUserRolesAsync(user);
+
+            var expiration = DateTime.UtcNow.AddDays(7);
+            var tokenString = _tokenService.CreateToken(user, roles, expiration);
+
+            _logger.LogInformation("Google login successful for user: {UserId}", user.Id);
+
+            return ServiceResult<LoginResponseDto>.Ok(new LoginResponseDto
+            {
+                Token = tokenString,
+                Expiration = expiration,
+                RequiresTwoFactor = false,
+                IsExternalLogin = true,
+                ExternalProvider = "Google"
+            });
+        }
     }
 }

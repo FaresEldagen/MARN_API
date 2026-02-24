@@ -14,6 +14,7 @@ namespace MARN_API.Enums
         Conflict,        // 409 Conflict (e.g., email already exists)
         InternalError, // 500 Server Error
         BadRequest,
+        Forbidden,
         RequiresTwoFactor
     }
 }

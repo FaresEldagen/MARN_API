@@ -12,6 +12,9 @@ namespace MARN_API.DTOs
 
         // NEW
         public bool RequiresTwoFactor { get; set; }
-        public string? TwoFactorProvider  { get; set; }
+        public string? TwoFactorProvider { get; set; }
+
+        public bool IsExternalLogin { get; set; }
+        public string? ExternalProvider { get; set; } // e.g. "Google", "Facebook"
     }
 }

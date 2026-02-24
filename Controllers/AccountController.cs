@@ -1,5 +1,6 @@
 ﻿using MARN_API.DTOs;
 using MARN_API.Enums;
+using MARN_API.Models;
 using MARN_API.Services.Implementations;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -116,7 +117,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> ToggleTwoFactor(ToggleTwoFactorDto dto)
         {
             // remove this - just for debuging 
-            var debugUserPrinciple =User;
+            // var debugUserPrinciple =User;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not found in token");
@@ -370,6 +371,29 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> testNotRequireAuthEndPoint()
         {
             return Ok("works");
+        }
+
+        [HttpPost("external/google")]
+        public async Task<IActionResult> GoogleLogin(GoogleLoginDto dto)
+        {
+            var result = await _accountService.GoogleLoginAsync(dto);
+            return HandleServiceResult(result);
+        }
+
+
+        protected IActionResult HandleServiceResult<T>(ServiceResult<T> result)
+        {
+            if (result.Success)
+                return Ok(result.Data);
+
+            return result.ResultType switch
+            {
+                ServiceResultType.RequiresTwoFactor => Accepted(result.Data),
+                ServiceResultType.NotFound => NotFound(result.Message),
+                ServiceResultType.Unauthorized => Unauthorized(result.Message),
+                ServiceResultType.Forbidden => Forbid(),
+                _ => BadRequest(result.Message)
+            };
         }
     }
 }

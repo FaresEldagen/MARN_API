@@ -1,4 +1,5 @@
-﻿using MARN_API.DTOs;
+﻿using Google.Apis.Auth;
+using MARN_API.DTOs;
 using MARN_API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,5 +33,7 @@ namespace MARN_API.Services.Interfaces
         Task<string> GenerateTwoFactorTokenAsync(ApplicationUser user);
         Task<ServiceResult<LoginResponseDto>> VerifyTwoFactorAsync(VerifyTwoFactorDto dto);
         Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null);
+        public Task<GoogleJsonWebSignature.Payload?> ValidateGoogleTokenAsync(string idToken);
+        public  Task<ServiceResult<LoginResponseDto>> GoogleLoginAsync(GoogleLoginDto dto);
     }
 }
