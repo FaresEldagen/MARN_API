@@ -8,6 +8,7 @@ namespace MARN_API.Enums
     public enum ServiceResultType
     {
         Success,
+        Created,
         InvalidInput,    // 400 Bad Request
         Unauthorized,    // 401 Unauthorized
         NotFound,        // 404 Not Found

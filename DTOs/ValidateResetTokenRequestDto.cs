@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace MARN_API.DTOs
 {
-
     public class ValidateResetTokenRequestDto
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Email address is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
         public string Email { get; set; } = string.Empty;
-        [Required]
+
+        [Required(ErrorMessage = "Token is required.")]
         public string Token { get; set; } = string.Empty;
     }
 }

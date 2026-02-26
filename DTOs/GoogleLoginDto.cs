@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace MARN_API.DTOs
 {
-public class GoogleLoginDto
-{
-    [Required]
-    public string IdToken { get; set; } = string.Empty;
-}
+    public class GoogleLoginDto
+    {
+        [Required]
+        public string IdToken { get; set; } = string.Empty;
+
+        [Required]
+        public bool RememberMe { get; set; } = false;
+    }
 }

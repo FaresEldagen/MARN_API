@@ -11,6 +11,7 @@ using MARN_API.Services.Implementations;
 using MARN_API.Configurations;
 using MARN_API.Mapping;
 using MARN_API.Middleware;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MARN_API
 {
@@ -37,6 +38,18 @@ namespace MARN_API
             {
                 builder.Logging.AddEventSourceLogger();
             }
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var logger = context.HttpContext.RequestServices
+                        .GetRequiredService<ILogger<Program>>();
+
+                    logger.LogWarning("Model validation failed");
+
+                    return new BadRequestObjectResult(context.ModelState);
+                };
+            });
 
 
             // Add services to the container.

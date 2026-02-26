@@ -4,11 +4,15 @@ namespace MARN_API.DTOs
 {
     public class LogInDto
     {
-        [Required(ErrorMessage = "Email Address is Required")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [Required(ErrorMessage = "Email address is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        [StringLength(256, ErrorMessage = "Email address cannot exceed 256 characters.")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Password is Required")]
+        [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; } = string.Empty;
+
+        [Required]
+        public bool RememberMe { get; set; } = false;
     }
 }
