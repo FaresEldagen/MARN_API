@@ -72,14 +72,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.LoginAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
-
-            //if (!result.Success)
-            //    return Unauthorized(new { message = result.Message });
-
-            //if (result.ResultType == ServiceResultType.RequiresTwoFactor)
-            //    return Accepted(result.Data);
-
-            //return Ok(new { message = result.Message, data = result.Data });
         }
 
         /// <summary>
@@ -101,10 +93,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.VerifyTwoFactorAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
-
-            //return result.Success
-            //    ? Ok(new { message = result.Message, data = result.Data })
-            //    : Unauthorized(new { message = result.Message });
         }
 
         /// <summary>
@@ -121,15 +109,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.GoogleLoginAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
-
-            //if (!result.Success)
-            //{
-            //    return result.ResultType == ServiceResultType.Unauthorized
-            //        ? Unauthorized(new { message = result.Message })
-            //        : BadRequest(new { message = result.Message, errors = result.Errors });
-            //}
-
-            //return Ok(new { message = result.Message, data = result.Data });
         }
         #endregion
 
@@ -152,10 +131,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.RegisterUserAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //return result.Success
-            //    ? Created()
-            //    : BadRequest(new { message = result.Message, errors = result.Errors });
         }
 
         /// <summary>
@@ -183,10 +158,6 @@ namespace MARN_API.Controllers
 
             var result = await _accountService.ConfirmEmailAsync(userId, token);
             return HandleServiceResult<bool>(result);
-
-            //return result.Success
-            //    ? Ok(new { message = result.Message })
-            //    : BadRequest(new { message = result.Message, errors = result.Errors });
         }
 
         /// <summary>
@@ -205,8 +176,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ResendEmailConfirmationAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //return Ok(new { message = result.Message });
         }
         #endregion
 
@@ -234,8 +203,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ForgotPasswordAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //return Ok(new { message = result.Message });
         }
 
         /// <summary>
@@ -267,10 +234,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ValidateResetTokenAsync(request);
             return HandleServiceResult<bool>(result);
-
-            //return result.Success
-            //    ? Ok(new { message = result.Message })
-            //    : Unauthorized(new { message = result.Message });
         }
 
         /// <summary>
@@ -303,15 +266,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ResetPasswordAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //if (!result.Success)
-            //{
-            //    return result.ResultType == ServiceResultType.Unauthorized
-            //        ? Unauthorized(new { message = result.Message })
-            //        : BadRequest(new { message = result.Message, errors = result.Errors });
-            //}
-
-            //return Ok(new { message = result.Message });
         }
         #endregion
 

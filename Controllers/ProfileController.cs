@@ -19,14 +19,14 @@ namespace MARN_API.Controllers
     [ApiController]
     public class ProfileController : ControllerBase
     {
-        private readonly IAccountService _accountService;
+        private readonly IProfileService _profileService;
         private readonly ILogger<ProfileController> _logger;
 
         public ProfileController(
-            IAccountService accountService,
+            IProfileService profileService,
             ILogger<ProfileController> logger)
         {
-            _accountService = accountService;
+            _profileService = profileService;
             _logger = logger;
         }
 
@@ -74,7 +74,7 @@ namespace MARN_API.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not found in token");
 
-            var result = await _accountService.ToggleTwoFactorAsync(userId, dto.Password);
+            var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
 
             return result.Success
                 ? Ok(new { message = result.Message, data = result.Data })

@@ -23,6 +23,7 @@ namespace MARN_API.Models
         public DateTime? UpdatedAt { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public PaymentFrequency PaymentFrequency { get; set; }
         public bool IsLocked { get; set; } = false;
         public int Version { get; set; } = 1;
         public string? IPAddress { get; set; }
@@ -31,7 +32,6 @@ namespace MARN_API.Models
 
         public virtual Property Property { get; set; } = null!;
         public virtual ApplicationUser Renter { get; set; } = null!;
-        public virtual Owner Owner { get; set; } = null!;
         public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
     }
 }

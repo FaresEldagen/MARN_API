@@ -14,16 +14,6 @@ namespace MARN_API.Data.Configurations
                    .WithOne(p => p.Owner)
                    .HasForeignKey(p => p.OwnerId)
                    .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(o => o.BookingRequestsAsOwner)
-                   .WithOne(br => br.Owner)
-                   .HasForeignKey(br => br.OwnerId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(o => o.ContractsAsOwner)
-                   .WithOne(c => c.Owner)
-                   .HasForeignKey(c => c.OwnerId)
-                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

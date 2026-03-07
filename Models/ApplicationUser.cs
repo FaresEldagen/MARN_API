@@ -33,7 +33,6 @@ namespace MARN_API.Models
         public virtual RoommatePreference? RoommatePreference { get; set; }
         public virtual ICollection<BookingRequest> BookingRequestsAsRenter { get; set; } = new HashSet<BookingRequest>();
         public virtual ICollection<Contract> ContractsAsRenter { get; set; } = new HashSet<Contract>();
-        public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
         public virtual ICollection<ChatMessage> ChatMessages { get; set; } = new HashSet<ChatMessage>();
         public virtual ICollection<ChatRoomParticipant> ChatRoomParticipants { get; set; } = new HashSet<ChatRoomParticipant>();

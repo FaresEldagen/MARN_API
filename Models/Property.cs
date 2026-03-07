@@ -12,7 +12,8 @@ namespace MARN_API.Models
         public string Description { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
         public decimal Price { get; set; }
-        public int RentalDuration { get; set; } // e.g., number of days or months depending on business rules
+        public int RentalDuration { get; set; }
+        public RentalUnit RentalUnit { get; set; }
         public int MaxOccupants { get; set; }
         public string Address { get; set; } = string.Empty;
         public double Latitude { get; set; }
@@ -22,6 +23,8 @@ namespace MARN_API.Models
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeletedAt { get; set; }
+        public int Views { get; set; } = 0;
+        public bool IsShared { get; set; }
 
         public virtual Owner Owner { get; set; } = null!;
         public virtual ICollection<Contract> Contracts { get; set; } = new HashSet<Contract>();

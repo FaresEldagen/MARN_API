@@ -37,8 +37,6 @@
 
   <ItemGroup>
     <Folder Include="Data\Seed\" />
-    <Folder Include="Repositories\Implementations\" />
-    <Folder Include="Repositories\Interfaces\" />
   </ItemGroup>
 
 </Project>

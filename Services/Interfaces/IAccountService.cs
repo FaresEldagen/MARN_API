@@ -27,13 +27,5 @@ namespace MARN_API.Services.Interfaces
         public Task<ServiceResult<bool>> ValidateResetTokenAsync(ValidateResetTokenRequestDto request);
         public Task<ServiceResult<bool>> ResetPasswordAsync(ResetPasswordRequestDto request);
         #endregion
-
-
-        #region Others
-        public Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null);
-        //public Task<IdentityResult> UpdateUserAsync(UpdateUserDto updateUserDto);
-        //public Task<IdentityResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
-        //public Task<IdentityResult> DeleteUserAsync(long id);
-        #endregion
     }
 }
