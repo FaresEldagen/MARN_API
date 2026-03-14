@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MARN_API.Enums;
 using MARN_API.Validation;
 
-namespace MARN_API.DTOs
+namespace MARN_API.DTOs.Auth
 {
     public class RegisterDto
     {

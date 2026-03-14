@@ -12,7 +12,6 @@ namespace MARN_API.Data.Configurations
             builder.Property(br => br.StartDate).IsRequired();
             builder.Property(br => br.EndDate).IsRequired();
             builder.Property(br => br.PropertyId).IsRequired();
-            builder.Property(br => br.OwnerId).IsRequired();
             builder.Property(br => br.RenterId).IsRequired();
 
             builder.Property(br => br.Status).HasConversion<int>();
@@ -30,7 +29,7 @@ namespace MARN_API.Data.Configurations
                    .HasForeignKey(br => br.RenterId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(br => new { br.PropertyId, br.OwnerId, br.RenterId });
+            builder.HasIndex(br => new { br.PropertyId, br.RenterId });
         }
     }
 }

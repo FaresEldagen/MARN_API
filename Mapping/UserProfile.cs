@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using MARN_API.DTOs;
+using MARN_API.DTOs.Auth;
+using MARN_API.DTOs.Profile;
 using MARN_API.Models;
 
 namespace MARN_API.Mapping
@@ -11,7 +12,7 @@ namespace MARN_API.Mapping
             CreateMap<RegisterDto, ApplicationUser>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email));
 
-            CreateMap<UpdateUserDto, ApplicationUser>();
+            CreateMap<UpdateProfileDto, ApplicationUser>();
         }
     }
 }

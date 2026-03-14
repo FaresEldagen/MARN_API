@@ -1,11 +1,12 @@
-﻿using MARN_API.Models;
+﻿using MARN_API.DTOs.Dashboard;
+using MARN_API.Models;
 
 namespace MARN_API.Repositories.Interfaces
 {
     public interface IContractRepo
     {
         #region User Dashboard
-        public Task<List<Contract>> GetActiveRentals(Guid userId);
+        public Task<List<ActiveRentalCardDto>> GetActiveRentals(Guid userId);
         #endregion
 
 

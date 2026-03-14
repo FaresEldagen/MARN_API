@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311154652_Hotfixes")]
+    partial class Hotfixes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,77 +147,6 @@ namespace MARN_API.Migrations
                     b.HasDiscriminator().HasValue("Renter");
 
                     b.UseTphMappingStrategy();
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-RENTER-A-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "renter.a@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Renter",
-                            Gender = 1,
-                            Language = 0,
-                            LastName = "Alpha",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "RENTER.A@EXAMPLE.COM",
-                            NormalizedUserName = "RENTER.A@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-RENTER-A-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "renter.a@example.com"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-RENTER-B-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "renter.b@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Renter",
-                            Gender = 2,
-                            Language = 0,
-                            LastName = "Beta",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "RENTER.B@EXAMPLE.COM",
-                            NormalizedUserName = "RENTER.B@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-RENTER-B-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "renter.b@example.com"
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-RENTER-C-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "renter.c@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Renter",
-                            Gender = 1,
-                            Language = 0,
-                            LastName = "Gamma",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "RENTER.C@EXAMPLE.COM",
-                            NormalizedUserName = "RENTER.C@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-RENTER-C-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "renter.c@example.com"
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.BookingRequest", b =>
@@ -254,38 +186,6 @@ namespace MARN_API.Migrations
                     b.ToTable("BookingRequests", t =>
                         {
                             t.HasCheckConstraint("CK_BookingRequest_Dates", "[EndDate] > [StartDate]");
-                        });
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 5001L,
-                            CreatedAt = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EndDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PropertyId = 1002L,
-                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
-                        },
-                        new
-                        {
-                            Id = 5002L,
-                            CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EndDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PropertyId = 1002L,
-                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = 5003L,
-                            CreatedAt = new DateTime(2025, 4, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PropertyId = 1003L,
-                            RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
                         });
                 });
 
@@ -463,60 +363,6 @@ namespace MARN_API.Migrations
                         {
                             t.HasCheckConstraint("CK_Contract_Dates", "[EndDate] > [StartDate]");
                         });
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 3001L,
-                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DocumentHash = "SEED-CONTRACT-1-HASH",
-                            DocumentPath = "/contracts/seed/contract1.pdf",
-                            EndDate = new DateTime(2027, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsLocked = false,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            OwnerSignature = "OwnerX-Signature",
-                            PaymentFrequency = 1,
-                            PropertyId = 1001L,
-                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            RenterSignature = "RenterA-Signature",
-                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1,
-                            Version = 1
-                        },
-                        new
-                        {
-                            Id = 3002L,
-                            CreatedAt = new DateTime(2025, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DocumentHash = "SEED-CONTRACT-2-HASH",
-                            DocumentPath = "/contracts/seed/contract2.pdf",
-                            EndDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsLocked = false,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            OwnerSignature = "OwnerX-Signature",
-                            PaymentFrequency = 1,
-                            PropertyId = 1002L,
-                            RenterId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            RenterSignature = "RenterC-Signature",
-                            StartDate = new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1,
-                            Version = 1
-                        },
-                        new
-                        {
-                            Id = 3003L,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DocumentHash = "SEED-CONTRACT-3-HASH",
-                            DocumentPath = "/contracts/seed/contract3.pdf",
-                            EndDate = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsLocked = false,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            PaymentFrequency = 1,
-                            PropertyId = 1003L,
-                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 3,
-                            Version = 1
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Notification", b =>
@@ -557,55 +403,6 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 6001L,
-                            Body = "Your next rent payment is due soon.",
-                            CreatedAt = new DateTime(2025, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Upcoming Payment Due",
-                            Type = 0,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = 6002L,
-                            Body = "Your booking request has been accepted.",
-                            CreatedAt = new DateTime(2025, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Booking Request Update",
-                            Type = 0,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = 6003L,
-                            Body = "Thanks for signing up!",
-                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ReadAt = new DateTime(2025, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Welcome to the platform",
-                            Type = 0,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = 6004L,
-                            Body = "Your booking request is pending owner approval.",
-                            CreatedAt = new DateTime(2025, 4, 7, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Booking Pending",
-                            Type = 0,
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
-                        },
-                        new
-                        {
-                            Id = 6005L,
-                            Body = "Add more details to your profile to get better recommendations.",
-                            CreatedAt = new DateTime(2025, 3, 3, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ReadAt = new DateTime(2025, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Complete Your Profile",
-                            Type = 0,
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Payment", b =>
@@ -650,51 +447,6 @@ namespace MARN_API.Migrations
                     b.HasIndex("DueDate");
 
                     b.ToTable("Payments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 4001L,
-                            Amount = 5000m,
-                            ContractId = 3001L,
-                            CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "EGP",
-                            DueDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
-                        },
-                        new
-                        {
-                            Id = 4002L,
-                            Amount = 5000m,
-                            ContractId = 3001L,
-                            CreatedAt = new DateTime(2025, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "EGP",
-                            DueDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PaidAt = new DateTime(2026, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = 4003L,
-                            Amount = 7500m,
-                            ContractId = 3002L,
-                            CreatedAt = new DateTime(2025, 6, 30, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "EGP",
-                            DueDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PaidAt = new DateTime(2025, 7, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = 4004L,
-                            Amount = 7500m,
-                            ContractId = 3002L,
-                            CreatedAt = new DateTime(2025, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "EGP",
-                            DueDate = new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PaidAt = new DateTime(2025, 8, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Property", b =>
@@ -785,80 +537,6 @@ namespace MARN_API.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("Properties");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1001L,
-                            Address = "123 Seed Street, Cairo",
-                            Availability = 0,
-                            AverageRating = 4.5f,
-                            Bathrooms = 1,
-                            Bedrooms = 2,
-                            Beds = 3,
-                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "A cozy seeded apartment suitable for testing active rentals.",
-                            IsActive = true,
-                            IsShared = false,
-                            Latitude = 30.0444,
-                            Longitude = 31.235700000000001,
-                            MaxOccupants = 3,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Price = 5000m,
-                            RentalUnit = 1,
-                            Status = 1,
-                            Title = "Cozy Seed Apartment",
-                            Type = 0,
-                            Views = 5
-                        },
-                        new
-                        {
-                            Id = 1002L,
-                            Address = "456 Integration Avenue, Cairo",
-                            Availability = 0,
-                            AverageRating = 4f,
-                            Bathrooms = 1,
-                            Bedrooms = 1,
-                            Beds = 1,
-                            CreatedAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "A modern loft used for pending booking and payments tests.",
-                            IsActive = true,
-                            IsShared = false,
-                            Latitude = 30.050000000000001,
-                            Longitude = 31.239999999999998,
-                            MaxOccupants = 2,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Price = 7500m,
-                            RentalUnit = 1,
-                            Status = 1,
-                            Title = "Modern Seed Loft",
-                            Type = 0,
-                            Views = 3
-                        },
-                        new
-                        {
-                            Id = 1003L,
-                            Address = "789 Scenario Road, Cairo",
-                            Availability = 0,
-                            AverageRating = 3.8f,
-                            Bathrooms = 1,
-                            Bedrooms = 1,
-                            Beds = 1,
-                            CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "A small studio property used for saved properties and pending bookings.",
-                            IsActive = true,
-                            IsShared = false,
-                            Latitude = 30.059999999999999,
-                            Longitude = 31.245000000000001,
-                            MaxOccupants = 1,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Price = 3500m,
-                            RentalUnit = 1,
-                            Status = 1,
-                            Title = "Seed Studio Flat",
-                            Type = 4,
-                            Views = 1
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyAmenity", b =>
@@ -897,29 +575,6 @@ namespace MARN_API.Migrations
                     b.HasIndex("PropertyId");
 
                     b.ToTable("PropertyMedia");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 2001L,
-                            IsPrimary = true,
-                            Path = "/images/seed/property1-main.jpg",
-                            PropertyId = 1001L
-                        },
-                        new
-                        {
-                            Id = 2002L,
-                            IsPrimary = true,
-                            Path = "/images/seed/property2-main.jpg",
-                            PropertyId = 1002L
-                        },
-                        new
-                        {
-                            Id = 2003L,
-                            IsPrimary = true,
-                            Path = "/images/seed/property3-main.jpg",
-                            PropertyId = 1003L
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyRule", b =>
@@ -1097,23 +752,6 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("SavedProperties");
-
-                    b.HasData(
-                        new
-                        {
-                            PropertyId = 1001L,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            PropertyId = 1003L,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            PropertyId = 1002L,
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.UserActivity", b =>
@@ -1181,19 +819,19 @@ namespace MARN_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Id = new Guid("1114503b-92fc-4768-9635-535bef7cdc95"),
                             Name = "Renter",
                             NormalizedName = "RENTER"
                         },
                         new
                         {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Id = new Guid("997ff7b2-6752-4e75-a177-086a4bf5a68c"),
                             Name = "Owner",
                             NormalizedName = "OWNER"
                         },
                         new
                         {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            Id = new Guid("2d0929b0-d45f-4c1e-ade1-c0dc32656ea1"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -1317,56 +955,6 @@ namespace MARN_API.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasDiscriminator().HasValue("Owner");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-OWNER-X-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "owner.x@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Owner",
-                            Gender = 1,
-                            Language = 0,
-                            LastName = "X",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "OWNER.X@EXAMPLE.COM",
-                            NormalizedUserName = "OWNER.X@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-OWNER-X-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "owner.x@example.com",
-                            WithdrawableEarnings = 10000m
-                        },
-                        new
-                        {
-                            Id = new Guid("55555555-5555-5555-5555-555555555555"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-OWNER-Y-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "owner.y@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Owner",
-                            Gender = 2,
-                            Language = 0,
-                            LastName = "Y",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "OWNER.Y@EXAMPLE.COM",
-                            NormalizedUserName = "OWNER.Y@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-OWNER-Y-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "owner.y@example.com",
-                            WithdrawableEarnings = 0m
-                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.BookingRequest", b =>

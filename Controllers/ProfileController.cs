@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs;
+﻿using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
 using MARN_API.Models;
 using MARN_API.Services.Implementations;
@@ -30,10 +30,49 @@ namespace MARN_API.Controllers
             _logger = logger;
         }
 
-        //public IActionResult Index()
-        //{
-        //    return Ok("Profile Controller is working!");
-        //}
+
+        protected ActionResult HandleServiceResult<T>(ServiceResult<T> result)
+        {
+            return result.ResultType switch
+            {
+                ServiceResultType.Success => Ok(new { message = result.Message, data = result.Data }),
+                ServiceResultType.Created => StatusCode(201, new { message = result.Message, data = result.Data }),
+                ServiceResultType.RequiresTwoFactor => Accepted(new { message = result.Message, data = result.Data }),
+                ServiceResultType.Unauthorized => Unauthorized(new { message = result.Message }),
+                ServiceResultType.NotFound => NotFound(new { message = result.Message }),
+                ServiceResultType.Forbidden => StatusCode(403, new { message = result.Message }),
+                ServiceResultType.Conflict => Conflict(new { message = result.Message, errors = result.Errors }),
+                _ => BadRequest(new { message = result.Message, errors = result.Errors })
+            };
+        }
+
+
+
+        /// <summary>
+        /// Return the renter dashboard data for this user for the authenticated user.
+        /// </summary>
+        /// <returns>Renter dashboard data for this user</returns>
+        /// <response code="200">Returns the renter dashboard data for this user</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpGet("renter-dashboard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> RenterDashboard()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized("User id not found in token");
+
+            if (!Guid.TryParse(userIdString, out var userId))
+                return Unauthorized("Invalid user id");
+
+            var result = await _profileService.RenterDashboardAsync(userId);
+            return HandleServiceResult<RenterDashboardDto>(result);
+        }
 
         //public IActionResult ChangePassword()
         //{
@@ -68,17 +107,13 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> ToggleTwoFactor(ToggleTwoFactorDto dto)
         {
-            // remove this - just for debuging 
-            // var debugUserPrinciple =User;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not found in token");
 
             var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
-
-            return result.Success
-                ? Ok(new { message = result.Message, data = result.Data })
-                : BadRequest(new { message = result.Message });
+            return HandleServiceResult<bool>(result);
         }
     }
 }

@@ -24,14 +24,14 @@ namespace MARN_API.Repositories.Implementations
         public Task<int> GetOwnedPropertiesViewsCount(Guid userId)
         {
             return Context.Properties
-                .Where(p => p.OwnerId == userId)
+                .Where(p => p.OwnerId == userId && p.DeletedAt == null)
                 .SumAsync(p => p.Views);
         }
 
         public Task<int> GetOwnedPropertiesPlacesCount(Guid userId)
         {
             return Context.Properties
-                .Where(p => p.OwnerId == userId)
+                .Where(p => p.OwnerId == userId && p.DeletedAt == null)
                 .SumAsync(p => p.MaxOccupants);
         }
     }

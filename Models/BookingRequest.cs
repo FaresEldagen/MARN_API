@@ -8,7 +8,6 @@ namespace MARN_API.Models
     {
         public long Id { get; set; }
         public long PropertyId { get; set; }
-        public Guid OwnerId { get; set; }
         public Guid RenterId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

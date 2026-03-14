@@ -17,7 +17,7 @@ namespace MARN_API.Data.Configurations
                    .HasDefaultValueSql("GETUTCDATE()");
             builder.Property(n => n.Type).HasConversion<int>();
 
-            builder.HasIndex(n => new { n.UserId, n.IsRead });
+            builder.HasIndex(n => n.UserId);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Google.Apis.Auth;
-using MARN_API.DTOs;
+using MARN_API.DTOs.Auth;
 using MARN_API.Enums;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;

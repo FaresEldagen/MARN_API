@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MARN_API.DTOs
+namespace MARN_API.DTOs.Profile
 {
     public class ChangePasswordDto
     {

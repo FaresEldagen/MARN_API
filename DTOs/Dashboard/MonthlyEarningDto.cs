@@ -1,4 +1,4 @@
-﻿namespace MARN_API.DTOs
+﻿namespace MARN_API.DTOs.Dashboard
 {
     public class MonthlyEarningDto
     {

@@ -7,25 +7,34 @@ namespace MARN_API.Models
     public class Property
     {
         public long Id { get; set; }
-        public Guid OwnerId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
-        public decimal Price { get; set; }
-        public int RentalDuration { get; set; }
-        public RentalUnit RentalUnit { get; set; }
+        public bool IsShared { get; set; }
+
         public int MaxOccupants { get; set; }
+        public int Bedrooms { get; set; }
+        public int Beds { get; set; }
+        public int Bathrooms { get; set; }
+        public int Views { get; set; } = 0;
+        public float AverageRating { get; set; } = 0;
+
+        public decimal Price { get; set; }
+        public RentalUnit RentalUnit { get; set; }
+
         public string Address { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+
+        public bool IsActive { get; set; } = true;
         public PropertyAvailability Availability { get; set; } = PropertyAvailability.Available;
         public PropertyStatus Status { get; set; } = PropertyStatus.Pending;
-        public bool IsActive { get; set; } = true;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeletedAt { get; set; }
-        public int Views { get; set; } = 0;
-        public bool IsShared { get; set; }
 
+
+        public Guid OwnerId { get; set; }
         public virtual Owner Owner { get; set; } = null!;
         public virtual ICollection<Contract> Contracts { get; set; } = new HashSet<Contract>();
         public virtual ICollection<BookingRequest> BookingRequests { get; set; } = new HashSet<BookingRequest>();

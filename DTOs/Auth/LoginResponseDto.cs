@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MARN_API.DTOs
+namespace MARN_API.DTOs.Auth
 {
     public class LoginResponseDto
     {
         public string? Token { get; set; }
         public DateTime? Expiration { get; set; }
 
-        // NEW
         public bool RequiresTwoFactor { get; set; }
         public string? TwoFactorProvider { get; set; }
 

@@ -1,5 +1,5 @@
 ﻿using Google.Apis.Auth;
-using MARN_API.DTOs;
+using MARN_API.DTOs.Auth;
 using MARN_API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

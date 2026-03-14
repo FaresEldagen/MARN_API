@@ -12,6 +12,8 @@ using MARN_API.Configurations;
 using MARN_API.Mapping;
 using MARN_API.Middleware;
 using Microsoft.AspNetCore.Mvc;
+using MARN_API.Repositories.Interfaces;
+using MARN_API.Repositories.Implementations;
 
 namespace MARN_API
 {
@@ -100,9 +102,19 @@ namespace MARN_API
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            // Repos
+            builder.Services.AddScoped<IBookingRequestRepo, BookingRequestRepo>();
+            builder.Services.AddScoped<IContractRepo, ContractRepo>();
+            builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
+            builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
+            builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
+            builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
+            builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
+            // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IProfileService, ProfileService>();
 
 
             // Health Checks

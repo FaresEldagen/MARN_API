@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs;
+﻿using MARN_API.DTOs.Dashboard;
 using MARN_API.Models;
 
 namespace MARN_API.Repositories.Interfaces
@@ -6,7 +6,8 @@ namespace MARN_API.Repositories.Interfaces
     public interface IPaymentRepo
     {
         #region User Dashboard
-        public Task<DateTime?> GetNextPayment(Guid userId);
+        public Task<RenterNextPaymentDto?> GetNextPayment(Guid userId);
+
         #endregion
 
 

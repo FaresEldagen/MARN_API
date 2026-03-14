@@ -1,6 +1,6 @@
-﻿namespace MARN_API.DTOs
+﻿namespace MARN_API.DTOs.Profile
 {
-    public class UpdateUserDto
+    public class UpdateProfileDto
     {
         public long id { get; set; }
         public string? FirstName { get; set; }

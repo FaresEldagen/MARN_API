@@ -10,7 +10,6 @@ namespace MARN_API.Models
         public decimal Amount { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime? PaidAt { get; set; }
-        public bool IsPaid { get; set; }
         public string? StripePaymentIntentId { get; set; }
         public string Currency { get; set; } = "EGP";
         public PaymentStatus Status { get; set; }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MARN_API.Models;
@@ -62,6 +62,15 @@ namespace MARN_API.Data
 
             // Seed initial data
             builder.ApplyConfiguration(new RoleSeed());
+            builder.ApplyConfiguration(new UserSeed());
+            builder.ApplyConfiguration(new OwnerSeed());
+            builder.ApplyConfiguration(new PropertySeed());
+            builder.ApplyConfiguration(new PropertyMediaSeed());
+            builder.ApplyConfiguration(new ContractSeed());
+            builder.ApplyConfiguration(new PaymentSeed());
+            builder.ApplyConfiguration(new BookingRequestSeed());
+            builder.ApplyConfiguration(new SavedPropertySeed());
+            builder.ApplyConfiguration(new NotificationSeed());
         }
     }
 }

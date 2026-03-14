@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MARN_API.DTOs
+namespace MARN_API.DTOs.Dashboard
 {
     public class ToggleTwoFactorDto
     {
