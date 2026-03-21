@@ -17,7 +17,7 @@ namespace MARN_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProfileController : ControllerBase
+    public class ProfileController : BaseController
     {
         private readonly IProfileService _profileService;
         private readonly ILogger<ProfileController> _logger;
@@ -30,28 +30,23 @@ namespace MARN_API.Controllers
             _logger = logger;
         }
 
-
-        protected ActionResult HandleServiceResult<T>(ServiceResult<T> result)
-        {
-            return result.ResultType switch
-            {
-                ServiceResultType.Success => Ok(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Created => StatusCode(201, new { message = result.Message, data = result.Data }),
-                ServiceResultType.RequiresTwoFactor => Accepted(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Unauthorized => Unauthorized(new { message = result.Message }),
-                ServiceResultType.NotFound => NotFound(new { message = result.Message }),
-                ServiceResultType.Forbidden => StatusCode(403, new { message = result.Message }),
-                ServiceResultType.Conflict => Conflict(new { message = result.Message, errors = result.Errors }),
-                _ => BadRequest(new { message = result.Message, errors = result.Errors })
-            };
-        }
-
-
-
+        #region Dasboards
         /// <summary>
         /// Return the renter dashboard data for this user for the authenticated user.
         /// </summary>
-        /// <returns>Renter dashboard data for this user</returns>
+        /// <returns>
+        /// Renter dashboard data for this user
+        /// - Active rentals count
+        /// - Next payment info (amount, due date, is paid) for the next pending payment across all active rentals
+        /// - Saved properties count
+        /// - Unread notifications count
+        /// - Account status (verified, suspended, etc.)
+        /// - Collections of active rentals (Active rental card contains contract id, contract status, start date, end date, property title, address, primary image url, rental period, next payment amount, due date, is paid (if there isn't these three will return null)) if there is any active rentals.
+        /// - Collections of pending booking requests (Booking request card contains request id, request status, start date, end date,property Id, property title, owner Id, owner name, owner profile image) if there is any pending booking requests.
+        /// - Collections of saved properties (property card contains property id, title, address, primary image url, price, rental unit, type, average rating, ratings count, max occupants, bedrooms count, bathrooms count) if there is any saved properties.
+        /// - Collections of notifications (notification card contains notification id, title, is read, created at) if there is any notifications.
+        /// - Collections of personalized recommendations 
+        /// </returns>
         /// <response code="200">Returns the renter dashboard data for this user</response>
         /// <response code="401">If the user is not authenticated</response>
         /// <response code="429">If rate limit is exceeded</response>
@@ -73,6 +68,33 @@ namespace MARN_API.Controllers
             var result = await _profileService.RenterDashboardAsync(userId);
             return HandleServiceResult<RenterDashboardDto>(result);
         }
+
+        /// <summary>
+        /// Return the owner dashboard data for this user for the authenticated user.
+        /// </summary>
+        /// <returns>Owner dashboard data for this user</returns>
+        /// <response code="200">Returns the Owner dashboard data for this user</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpGet("owner-dashboard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> OenterDashboard()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized("User id not found in token");
+
+            if (!Guid.TryParse(userIdString, out var userId))
+                return Unauthorized("Invalid user id");
+
+            var result = await _profileService.RenterDashboardAsync(userId);
+            return HandleServiceResult<RenterDashboardDto>(result);
+        }
+        #endregion
 
         //public IActionResult ChangePassword()
         //{

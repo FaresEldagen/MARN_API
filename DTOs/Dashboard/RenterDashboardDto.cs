@@ -15,6 +15,6 @@ namespace MARN_API.DTOs.Dashboard
         public ICollection<RenterPendingBookingRequestDto>? PendingBookingRequests { get; set; }
         public ICollection<PropertyCardDto>? SavedProperties { get; set; }
         public ICollection<NotificationCardDto>? Notifications { get; set; }
-        public ICollection<PropertyCardDto>? Recomendations { get; set; }
+        public ICollection<PropertyCardDto>? Recommendations { get; set; }
     }
 }

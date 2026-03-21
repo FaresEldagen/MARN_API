@@ -72,7 +72,7 @@ namespace MARN_API.Services.Implementations
             var savedProperties = await _savedPropertyRepo.GetSavedProperties(userId);
             var savedPropertiesCount = savedProperties == null ? 0 : savedProperties.Count;
 
-            List<PropertyCardDto>? recomendations = null;
+            List<PropertyCardDto>? recommendations = null;
 
             var notifications = await _notificationRepo.GetNotifications(userId);
             var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
@@ -94,7 +94,7 @@ namespace MARN_API.Services.Implementations
                 SavedProperties = savedProperties,
                 SavedPropertiesCount = savedPropertiesCount,
 
-                Recomendations = recomendations,
+                Recommendations = recommendations,
 
                 AccountStatus = accountSatus,
             };

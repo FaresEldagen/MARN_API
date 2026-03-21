@@ -41,26 +41,27 @@ namespace MARN_API.Repositories.Implementations
 
                     // Next pending payment for this contract (if any)
                     NextPaymentAmount = c.Payments
-                        .Where(p => p.Status == PaymentStatus.Pending)
+                        .Where(p => p.DueDate >= DateTime.UtcNow)
                         .OrderBy(p => p.DueDate)
                         .Select(p => p.Amount)
                         .FirstOrDefault(),
 
                     PaymentId = c.Payments
-                        .Where(p => p.Status == PaymentStatus.Pending)
+                        .Where(p => p.DueDate >= DateTime.UtcNow)
                         .OrderBy(p => p.DueDate)
                         .Select(p => p.Id)
                         .FirstOrDefault(),
 
-                    // True if there is no overdue unpaid payment (all due payments are succeeded)
-                    // IsPaymentMade = !c.Payments
-                    //     .Where(p => p.DueDate <= DateTime.UtcNow)
-                    //     .Any(p => p.Status != PaymentStatus.Succeeded)
                     IsPaymentMade = c.Payments
                         .Where(p => p.DueDate >= DateTime.UtcNow)
                         .OrderBy(p => p.DueDate)
                         .Select(p => p.Status == PaymentStatus.Succeeded)
                         .FirstOrDefault()
+
+                    // True if there is no overdue unpaid payment (all due payments are succeeded)
+                    // IsPaymentMade = !c.Payments
+                    //     .Where(p => p.DueDate <= DateTime.UtcNow)
+                    //     .Any(p => p.Status != PaymentStatus.Succeeded)
                 })
                 .ToListAsync();
         }

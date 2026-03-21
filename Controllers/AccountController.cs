@@ -17,7 +17,7 @@ namespace MARN_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : BaseController
     {
         private readonly IAccountService _accountService;
         private readonly ITokenService _tokenService;
@@ -31,22 +31,6 @@ namespace MARN_API.Controllers
             _accountService = accountService;
             _tokenService = tokenService;
             _logger = logger;
-        }
-
-
-        protected ActionResult HandleServiceResult<T>(ServiceResult<T> result)
-        {
-            return result.ResultType switch
-            {
-                ServiceResultType.Success => Ok(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Created => StatusCode(201, new { message = result.Message, data = result.Data }),
-                ServiceResultType.RequiresTwoFactor => Accepted(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Unauthorized => Unauthorized(new { message = result.Message }),
-                ServiceResultType.NotFound => NotFound(new { message = result.Message }),
-                ServiceResultType.Forbidden => StatusCode(403, new { message = result.Message }),
-                ServiceResultType.Conflict => Conflict(new { message = result.Message, errors = result.Errors }),
-                _ => BadRequest(new { message = result.Message, errors = result.Errors })
-            };
         }
 
 
