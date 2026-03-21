@@ -16,6 +16,7 @@ using MARN_API.Repositories.Interfaces;
 using MARN_API.Repositories.Implementations;
 using MARN_API.Repositories;
 using MARN_API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace MARN_API
 {
@@ -179,7 +180,12 @@ namespace MARN_API
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
-                { policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); });
+                {
+                    policy.SetIsOriginAllowed(origin => true) // Allow any origin during development
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // Required for SignalR
+                });
             });
             // If you want to allow only a specific domain, you can use the following code instead:
             //builder.Services.AddCors(options =>
@@ -215,6 +221,22 @@ namespace MARN_API
                     ValidIssuer = issuer,
                     ValidAudience = audience,
                     ClockSkew = TimeSpan.Zero
+                };
+
+                // Add SignalR authentication handling for WebSocket connections
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        // Extract query string token if request is destined for the SignalR hub
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

@@ -79,7 +79,11 @@ namespace MARN_API.Repositories
 
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {
-            return await _context.Users.FindAsync(userId);
+            if (System.Guid.TryParse(userId, out var guidId))
+            {
+                return await _context.Users.FindAsync(guidId);
+            }
+            return null;
         }
 
         public async Task AddOrUpdateUserDeviceAsync(string userId, string fcmToken)
