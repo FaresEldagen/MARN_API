@@ -31,6 +31,8 @@ namespace MARN_API.Data
         public DbSet<Report> Reports => Set<Report>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
         public DbSet<Admin> Admins => Set<Admin>();
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<SavedProperty> SavedProperties => Set<SavedProperty>();
 
 
@@ -58,6 +60,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new UserActivityConfiguration());
             builder.ApplyConfiguration(new AdminConfiguration());
             builder.ApplyConfiguration(new SavedPropertyConfiguration());
+            builder.ApplyConfiguration(new MessageConfiguration());
 
 
             // Seed initial data

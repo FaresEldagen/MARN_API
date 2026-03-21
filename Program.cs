@@ -14,6 +14,9 @@ using MARN_API.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Repositories.Implementations;
+using MARN_API.Repositories;
+using MARN_API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace MARN_API
 {
@@ -102,6 +105,10 @@ namespace MARN_API
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+
+
+
             // Repos
             builder.Services.AddScoped<IBookingRequestRepo, BookingRequestRepo>();
             builder.Services.AddScoped<IContractRepo, ContractRepo>();
@@ -116,6 +123,17 @@ namespace MARN_API
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
 
+            builder.Services.AddSignalR();
+
+            builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, MARN_API.Hubs.CustomUserIdProvider>();
+            builder.Services.AddSingleton<MARN_API.Hubs.ConnectionTracker>();
+
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
+            builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
+            builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
+
+        
 
             // Health Checks
             builder.Services.AddHealthChecks()
@@ -162,7 +180,12 @@ namespace MARN_API
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
-                { policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); });
+                {
+                    policy.SetIsOriginAllowed(origin => true) // Allow any origin during development
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // Required for SignalR
+                });
             });
             // If you want to allow only a specific domain, you can use the following code instead:
             //builder.Services.AddCors(options =>
@@ -198,6 +221,22 @@ namespace MARN_API
                     ValidIssuer = issuer,
                     ValidAudience = audience,
                     ClockSkew = TimeSpan.Zero
+                };
+
+                // Add SignalR authentication handling for WebSocket connections
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        // Extract query string token if request is destined for the SignalR hub
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -310,6 +349,7 @@ namespace MARN_API
 
 
             app.MapControllers();
+            app.MapHub<MARN_API.Hubs.ChatHub>("/chatHub");
 
             await app.RunAsync();
         }

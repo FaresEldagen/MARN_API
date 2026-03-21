@@ -2,6 +2,7 @@
 using MARN_API.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MARN_API.Models
 {
@@ -40,6 +41,12 @@ namespace MARN_API.Models
         public virtual ICollection<Report> ReportsFiled { get; set; } = new HashSet<Report>();
         public virtual ICollection<UserActivity> Activities { get; set; } = new HashSet<UserActivity>();
         public virtual ICollection<SavedProperty> SavedProperty { get; set; } = new HashSet<SavedProperty>();
+
+        [InverseProperty(nameof(Message.Sender))]
+        public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
+
+        [InverseProperty(nameof(Message.Receiver))]
+        public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 
     }
 }
