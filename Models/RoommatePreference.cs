@@ -19,7 +19,6 @@ namespace MARN_API.Models
         public SharingLevel SharingLevel { get; set; } = SharingLevel.Unknown;
         public decimal? BudgetRangeMin { get; set; }
         public decimal? BudgetRangeMax { get; set; }
-        public string? Bio { get; set; }
 
         public virtual ApplicationUser User { get; set; } = null!;
     }

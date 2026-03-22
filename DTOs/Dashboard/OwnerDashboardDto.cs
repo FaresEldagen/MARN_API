@@ -6,7 +6,7 @@ namespace MARN_API.DTOs.Dashboard
     public class OwnerDashboardDto
     {
         public int PropertiesCount { get; set; }
-        public ICollection<OwnerPropertyCardDto>? Properties { get; set; }
+        public ICollection<OwnerDashboardPropertyCardDto>? Properties { get; set; }
 
         public int OccupiedPlaces { get; set; }
         public int VacantPlaces { get; set; }
@@ -16,6 +16,9 @@ namespace MARN_API.DTOs.Dashboard
         public ICollection<YearlyEarningDto>? YearlyEarning { get; set; }
         public decimal WithdrawableEarnings { get; set; }
         public decimal OnHoldEarnings { get; set; }
+
+        public float AverageRating { get; set; }
+        public int RatingsCount { get; set; }
 
         public ICollection<OwnerContractCardDto>? AllContracts { get; set; }
 

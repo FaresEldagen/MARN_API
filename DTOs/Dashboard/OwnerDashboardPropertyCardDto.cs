@@ -2,7 +2,7 @@
 
 namespace MARN_API.DTOs.Dashboard
 {
-    public class OwnerPropertyCardDto
+    public class OwnerDashboardPropertyCardDto
     {
         public long Id { get; set; }
         public string ImagePath { get; set; } = string.Empty;

@@ -1,4 +1,5 @@
 using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Profile;
 using MARN_API.Enums;
 using MARN_API.Models;
 using MARN_API.Services.Implementations;
@@ -90,11 +91,10 @@ namespace MARN_API.Controllers
         /// - Collections of notifications (notification card contains notification id, title, is read, created at) if there is any notifications.
         /// - Collections of pending booking requests (Booking request card contains request id, request status, start date, end date,property Id, property title, renter Id, renter name, renter profile image) if there is any pending booking requests.
         /// </returns>
-        /// <returns>Owner dashboard data for this user</returns>
         /// <response code="200">Returns the Owner dashboard data for this user</response>
         /// <response code="401">If the user is not authenticated</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
+        [Authorize("Owner")]
         [HttpGet("owner-dashboard")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -112,23 +112,64 @@ namespace MARN_API.Controllers
             var result = await _profileService.OwnerDashboardAsync(userId);
             return HandleServiceResult<OwnerDashboardDto>(result);
         }
+
+        /// <summary>
+        /// Return the personal profile data for the authenticated user.
+        /// </summary>
+        /// <returns>
+        /// Profile data for this user
+        /// - Basic Info ( Id, full name, email, profile image url, account status, date of birth, gender, country, member since, bio)
+        /// - Owner Data (is owner, average rating, ratings count, owned properties count, collections of owned properties which contains property id, title, address, primary image url, price, rental unit, type, average rating, ratings count) if the user is owner.
+        /// - Roommate Preferences (roommate preferences enabled, smoking, pets, sleep schedule, education level, field of study, noise tolerance, guests frequency, work schedule, sharing level, budget range min, budget range max) if the user is renter and roommate preferences enabled.
+        /// </returns>
+        /// <response code="200">Returns the personal profile data for this user</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpGet("profile")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetPersonalProfile()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized("User id not found in token");
+
+            if (!Guid.TryParse(userIdString, out var userId))
+                return Unauthorized("Invalid user id");
+
+            var result = await _profileService.GetProfileAsync(userId);
+            return HandleServiceResult<ProfileDto>(result);
+        }
+
+        /// <summary>
+        /// Return the personal profile data for the authenticated user.
+        /// </summary>
+        /// <param name="userId">Id for the person you want to view its profile</param>
+        /// <returns>
+        /// Profile data for this user
+        /// - Basic Info ( Id, full name, email, profile image url, account status, date of birth, gender, country, member since, bio)
+        /// - Owner Data (is owner, average rating, ratings count, owned properties count, collections of owned properties which contains property id, title, address, primary image url, price, rental unit, type, average rating, ratings count) if the user is owner.
+        /// - Roommate Preferences (roommate preferences enabled, smoking, pets, sleep schedule, education level, field of study, noise tolerance, guests frequency, work schedule, sharing level, budget range min, budget range max) if the user is renter and roommate preferences enabled.
+        /// </returns>
+        /// <response code="200">Returns the personal profile data for this user</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [HttpGet("profile/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetProfile(Guid userId)
+        {
+            var result = await _profileService.GetProfileAsync(userId);
+            return HandleServiceResult<ProfileDto>(result);
+        }
         #endregion
 
-        //public IActionResult ChangePassword()
-        //{
-        //    return Ok("Change Password endpoint is working!");
-        //}
 
-        //public IActionResult UpdateProfile()
-        //{
-        //    return Ok("Update Profile endpoint is working!");
-        //}
-
-        //public IActionResult DeleteProfile()
-        //{
-        //    return Ok("Delete Profile endpoint is working!");
-        //}
-
+        #region Profile Settings
         /// <summary>
         /// Toggle Two-Factor Authentication (2FA) for the authenticated user.
         /// </summary>
@@ -155,5 +196,8 @@ namespace MARN_API.Controllers
             var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
             return HandleServiceResult<bool>(result);
         }
+
+
+        #endregion
     }
 }

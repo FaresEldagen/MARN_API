@@ -16,6 +16,8 @@ namespace MARN_API.Models
         public string? ProfileImage { get; set; }
         public Gender Gender { get; set; } = Gender.Unknown;
         public Country Country { get; set; } = Country.Unknown;
+        public string? Bio { get; set; }
+
 
         // KYC / Identity
         public string? FrontIdPhoto { get; set; }

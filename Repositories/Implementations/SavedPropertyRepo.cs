@@ -35,7 +35,7 @@ namespace MARN_API.Repositories.Implementations
                     Bathrooms = s.Property.Bathrooms,
 
                     Type = s.Property.Type,
-                    AverageRating = s.Property.AverageRating,
+                    AverageRating = s.Property.Reviews.Any() ? s.Property.Reviews.Average(r => (float?)r.Rating) ?? 0f : 0f,
                     Ratings = s.Property.Reviews.Count,
 
                     Price = s.Property.Price,

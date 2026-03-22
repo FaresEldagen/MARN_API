@@ -17,7 +17,6 @@ namespace MARN_API.Models
         public int Beds { get; set; }
         public int Bathrooms { get; set; }
         public int Views { get; set; } = 0;
-        public float AverageRating { get; set; } = 0;
 
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }

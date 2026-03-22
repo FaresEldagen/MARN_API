@@ -105,17 +105,17 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<OwnerDashboardDto>> OwnerDashboardAsync(Guid userId)
         {
-            _logger.LogInformation("Get Renter Dashboard Data attempt for userId: {userId}", userId);
+            _logger.LogInformation("Get Owner Dashboard Data attempt for userId: {userId}", userId);
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
             if (user == null)
             {
-                _logger.LogWarning("Get Renter Dashboard Data failed: User not found for userId: {userId}", userId);
+                _logger.LogWarning("Get Owner Dashboard Data failed: User not found for userId: {userId}", userId);
                 return ServiceResult<OwnerDashboardDto>.Fail("User not found", resultType: ServiceResultType.Unauthorized);
             }
 
-            var properties = await _propertyRepo.GetOwnedProperties(userId);
+            var properties = await _propertyRepo.GetOwnerDashboardProperties(userId);
             var propertiesCount = properties == null ? 0 : properties.Count;
 
             var occupiedPlacesCount = await _contractRepo.GetOwnedPropertiesOccupiedPlacesCount(userId);
@@ -126,6 +126,9 @@ namespace MARN_API.Services.Implementations
             var yearlyEarnings = await _paymentRepo.GetEarningOverviewYearly(userId);
             var withdrawableEarnings = await _paymentRepo.GetWithdrawableEarnings(userId);
             var onHoldEarnings = await _paymentRepo.GetOnHoldEarnings(userId);
+
+            var averageRating = await _propertyRepo.GetOwnerAverageRating(userId);
+            var ratingsCount = await _propertyRepo.GetOwnerRatingsCount(userId);
 
             var allContracts = await _contractRepo.GetContracts(userId);
 
@@ -151,6 +154,9 @@ namespace MARN_API.Services.Implementations
                 WithdrawableEarnings = withdrawableEarnings,
                 OnHoldEarnings = onHoldEarnings,
 
+                AverageRating = averageRating,
+                RatingsCount = ratingsCount,
+
                 AllContracts = allContracts,
 
                 Notifications = notifications,
@@ -162,13 +168,67 @@ namespace MARN_API.Services.Implementations
                 AccountStatus = accountSatus,
             };
 
-            _logger.LogInformation("Get Renter Dashboard Data successful for userId: {userId}", userId);
+            _logger.LogInformation("Get Owner Dashboard Data successful for userId: {userId}", userId);
             return ServiceResult<OwnerDashboardDto>.Ok(dashboardData);
         }
 
         public async Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Get Personal Profile Data attempt for userId: {userId}", userId);
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+            {
+                _logger.LogWarning("Get Personal Profile Data failed: User not found for userId: {userId}", userId);
+                return ServiceResult<ProfileDto>.Fail("User not found", resultType: ServiceResultType.Unauthorized);
+            }
+
+            var isOwner = await _userManager.IsInRoleAsync(user, "Owner");
+
+            var averageRating = await _propertyRepo.GetOwnerAverageRating(userId);
+            var ratingsCount = await _propertyRepo.GetOwnerRatingsCount(userId);
+
+            var ownedProperties = await _propertyRepo.GetOwnerProfileProperties(userId);
+            var ownedPropertiesCount = ownedProperties == null ? 0 : ownedProperties.Count;
+
+            var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
+
+            var profileData = new ProfileDto
+            {
+                Id = user.Id,
+                FullName = $"{user.FirstName} {user.LastName}",
+                Email = user.Email!,
+                ProfileImageUrl = user.ProfileImage,
+                AccountStatus = user.AccountStatus,
+                DateOfBirth = user.DateOfBirth,
+                Gender = user.Gender,
+                Country = user.Country,
+                MemberSince = user.CreatedAt,
+                Bio = user.Bio,
+
+                IsOwner = isOwner,
+                AverageRating = averageRating,
+                RatingsCount = ratingsCount,
+                OwnedPropertiesCount = ownedPropertiesCount,
+                OwnedProperties = ownedProperties,
+
+                RoommatePrefrencesEnabled = roommatePrefrences != null,
+                Smoking = roommatePrefrences != null ? roommatePrefrences.Smoking : null,
+                Pets = roommatePrefrences != null ? roommatePrefrences.Pets : null,
+                SleepSchedule = roommatePrefrences != null ?  roommatePrefrences.SleepSchedule : null,
+                EducationLevel = roommatePrefrences != null ?  roommatePrefrences.EducationLevel : null,
+                FieldOfStudy = roommatePrefrences != null ?  roommatePrefrences.FieldOfStudy : null,
+                NoiseTolerance = roommatePrefrences != null ?  roommatePrefrences.NoiseTolerance : null,
+                GuestsFrequency = roommatePrefrences != null ?  roommatePrefrences.GuestsFrequency : null,
+                WorkSchedule = roommatePrefrences != null ?  roommatePrefrences.WorkSchedule : null,
+                SharingLevel = roommatePrefrences != null ?  roommatePrefrences.SharingLevel : null,
+                BudgetRangeMin = roommatePrefrences != null ?  roommatePrefrences.BudgetRangeMin : null,
+                BudgetRangeMax = roommatePrefrences != null ?  roommatePrefrences.BudgetRangeMax : null
+            };
+
+            _logger.LogInformation("Get Personal Profile Data successful for userId: {userId}", userId);
+            return ServiceResult<ProfileDto>.Ok(profileData);
         }
         #endregion
 
