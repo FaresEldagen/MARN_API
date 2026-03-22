@@ -78,7 +78,6 @@ namespace MARN_API.Controllers
         /// - Occupied Places Count
         /// - Vacant Places Count
         /// - Total Views Count
-        /// - Monthly Revenue
         /// - Monthly Earnings (month, year, amount)
         /// - Yearly Earnings (year, amount)
         /// - Withdrawable Earnings
@@ -86,7 +85,8 @@ namespace MARN_API.Controllers
         /// - Unread owner notifications count
         /// - Pending booking requests count
         /// - Account status (verified, suspended, etc.)
-        /// - Collections of contracts (Contract card contains contract id, contract status, start date, end date, property title, address, primary image url, rental period, next payment amount, due date, is paid (if there isn't these three will return null))
+        /// - Collections of owned properties (Property card contains property id, title, address, primary image url, price, rental unit, type, total views, average rating, ratings count, occupied places, total places, active contracts list which contains contract Id, renter Id, renter name, renter profile image) if there is any owned properties.
+        /// - Collections of contracts (Contract card contains contract id, contract status, expiry date, renter id, renter name, property id, property title)
         /// - Collections of notifications (notification card contains notification id, title, is read, created at) if there is any notifications.
         /// - Collections of pending booking requests (Booking request card contains request id, request status, start date, end date,property Id, property title, renter Id, renter name, renter profile image) if there is any pending booking requests.
         /// </returns>

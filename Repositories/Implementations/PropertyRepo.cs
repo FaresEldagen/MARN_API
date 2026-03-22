@@ -50,7 +50,9 @@ namespace MARN_API.Repositories.Implementations
                         .Select(c => new OwnerPropertyContractDto
                         {
                             ContractId = c.Id,
+                            RenterId = c.RenterId,
                             RenterName = $"{c.Renter.FirstName} {c.Renter.LastName}",
+                            RenterProfileImage = c.Renter.ProfileImage
                         })
                         .ToList()
                 })

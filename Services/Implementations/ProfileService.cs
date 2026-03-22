@@ -122,7 +122,6 @@ namespace MARN_API.Services.Implementations
             var vacantPlacesCount = await _propertyRepo.GetOwnedPropertiesPlacesCount(userId) - occupiedPlacesCount;
             var totalViews = await _propertyRepo.GetOwnedPropertiesViewsCount(userId);
 
-            var monthlyrevneue = 10;
             var monthlyEearnings = await _paymentRepo.GetEarningOverviewMonthly(userId);
             var yearlyEarnings = await _paymentRepo.GetEarningOverviewYearly(userId);
             var withdrawableEarnings = await _paymentRepo.GetWithdrawableEarnings(userId);
@@ -147,11 +146,12 @@ namespace MARN_API.Services.Implementations
                 VacantPlaces = vacantPlacesCount,
                 TotalViews = totalViews,
 
-                MonthlyRevenue = monthlyrevneue,
                 MonthlyEarning = monthlyEearnings,
                 YearlyEarning = yearlyEarnings,
                 WithdrawableEarnings = withdrawableEarnings,
                 OnHoldEarnings = onHoldEarnings,
+
+                AllContracts = allContracts,
 
                 Notifications = notifications,
                 UnreadNotificationsCount = unreadNotificationsCount,

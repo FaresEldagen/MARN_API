@@ -12,6 +12,7 @@ namespace MARN_API.Data.Seed
         {
             var ownerXId = Guid.Parse("44444444-4444-4444-4444-444444444444");
             var ownerYId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+            var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
 
             // Demo password for owners as well:
             // Password: Password123!
@@ -65,6 +66,31 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Active,
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
+                },
+                // Owner Z: dual-role account (Owner + Renter) with data for both dashboards
+                new Owner
+                {
+                    Id = ownerZId,
+                    UserName = "owner.z@example.com",
+                    NormalizedUserName = "OWNER.Z@EXAMPLE.COM",
+                    Email = "owner.z@example.com",
+                    NormalizedEmail = "OWNER.Z@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-OWNER-Z-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-OWNER-Z-CONCURRENCY-STAMP",
+
+                    FirstName = "Owner",
+                    LastName = "Z",
+                    Language = Language.English,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Active,
+                    CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

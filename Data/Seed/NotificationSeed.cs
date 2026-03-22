@@ -13,6 +13,7 @@ namespace MARN_API.Data.Seed
             var renterAId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var renterBId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var ownerXId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+            var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
 
             builder.HasData(
                 // Renter A notifications (2 unread, 1 read)
@@ -107,6 +108,65 @@ namespace MARN_API.Data.Seed
                     Body = "Complete your listing details to attract more renters.",
                     CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
                     ReadAt = new DateTime(2025, 2, 2, 0, 0, 0, DateTimeKind.Utc)
+                },
+
+                // Owner Z renter-type notifications (renter dashboard)
+                new Notification
+                {
+                    Id = 6009,
+                    UserId = ownerZId,
+                    UserType = NotificationUserTypeEnum.Renter,
+                    Type = default(NotificationType),
+                    Title = "Rent Payment Due Soon",
+                    Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
+                    CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, DateTimeKind.Utc),
+                    ReadAt = null
+                },
+                new Notification
+                {
+                    Id = 6010,
+                    UserId = ownerZId,
+                    UserType = NotificationUserTypeEnum.Renter,
+                    Type = default(NotificationType),
+                    Title = "Booking Submitted",
+                    Body = "Your booking request for Seed Studio Flat has been submitted.",
+                    CreatedAt = new DateTime(2025, 4, 11, 0, 0, 0, DateTimeKind.Utc),
+                    ReadAt = null
+                },
+                new Notification
+                {
+                    Id = 6011,
+                    UserId = ownerZId,
+                    UserType = NotificationUserTypeEnum.Renter,
+                    Type = default(NotificationType),
+                    Title = "Welcome to MARN",
+                    Body = "Thanks for joining MARN! Explore properties near you.",
+                    CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, DateTimeKind.Utc),
+                    ReadAt = new DateTime(2025, 2, 6, 0, 0, 0, DateTimeKind.Utc)
+                },
+
+                // Owner Z owner-type notifications (owner dashboard)
+                new Notification
+                {
+                    Id = 6012,
+                    UserId = ownerZId,
+                    UserType = NotificationUserTypeEnum.Owner,
+                    Type = default(NotificationType),
+                    Title = "Your property is live",
+                    Body = "Luxury Seed Villa is now visible to renters.",
+                    CreatedAt = new DateTime(2025, 4, 12, 0, 0, 0, DateTimeKind.Utc),
+                    ReadAt = null
+                },
+                new Notification
+                {
+                    Id = 6013,
+                    UserId = ownerZId,
+                    UserType = NotificationUserTypeEnum.Owner,
+                    Type = default(NotificationType),
+                    Title = "Welcome, property owner",
+                    Body = "Set up your payout details to start receiving rent payments.",
+                    CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, DateTimeKind.Utc),
+                    ReadAt = new DateTime(2025, 2, 7, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

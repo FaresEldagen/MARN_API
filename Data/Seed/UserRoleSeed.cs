@@ -20,13 +20,17 @@ namespace MARN_API.Data.Seed
             var renterCId = Guid.Parse("33333333-3333-3333-3333-333333333333");
             var ownerXId = Guid.Parse("44444444-4444-4444-4444-444444444444");
             var ownerYId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+            var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
 
             builder.HasData(
                 new IdentityUserRole<Guid> { UserId = renterAId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterBId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterCId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = ownerXId, RoleId = ownerRoleId },
-                new IdentityUserRole<Guid> { UserId = ownerYId, RoleId = ownerRoleId }
+                new IdentityUserRole<Guid> { UserId = ownerYId, RoleId = ownerRoleId },
+                // Owner Z gets both roles for dual-dashboard testing
+                new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = ownerRoleId },
+                new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = renterRoleId }
             );
         }
     }

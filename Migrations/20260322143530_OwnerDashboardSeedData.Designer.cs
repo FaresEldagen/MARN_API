@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260322001701_OwnerDashboardSeedUpdates")]
-    partial class OwnerDashboardSeedUpdates
+    [Migration("20260322143530_OwnerDashboardSeedData")]
+    partial class OwnerDashboardSeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -289,6 +289,16 @@ namespace MARN_API.Migrations
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
                             StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 0
+                        },
+                        new
+                        {
+                            Id = 5004L,
+                            CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EndDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1003L,
+                            RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
                         });
                 });
 
@@ -426,6 +436,24 @@ namespace MARN_API.Migrations
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
                             StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 3,
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = 3004L,
+                            CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DocumentHash = "SEED-CONTRACT-4-HASH",
+                            DocumentPath = "/contracts/seed/contract4.pdf",
+                            EndDate = new DateTime(2027, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsLocked = false,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            OwnerSignature = "OwnerX-Signature",
+                            PaymentFrequency = 1,
+                            PropertyId = 1001L,
+                            RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RenterSignature = "OwnerZ-AsRenter-Signature",
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
                             Version = 1
                         });
                 });
@@ -590,6 +618,58 @@ namespace MARN_API.Migrations
                             Type = 0,
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
                             UserType = 1
+                        },
+                        new
+                        {
+                            Id = 6009L,
+                            Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
+                            CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Rent Payment Due Soon",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6010L,
+                            Body = "Your booking request for Seed Studio Flat has been submitted.",
+                            CreatedAt = new DateTime(2025, 4, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Booking Submitted",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6011L,
+                            Body = "Thanks for joining MARN! Explore properties near you.",
+                            CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 2, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Welcome to MARN",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6012L,
+                            Body = "Luxury Seed Villa is now visible to renters.",
+                            CreatedAt = new DateTime(2025, 4, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Your property is live",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 1
+                        },
+                        new
+                        {
+                            Id = 6013L,
+                            Body = "Set up your payout details to start receiving rent payments.",
+                            CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 2, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Welcome, property owner",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 1
                         });
                 });
 
@@ -701,6 +781,32 @@ namespace MARN_API.Migrations
                             PlatformFee = 750m,
                             Status = 1,
                             TotalAmount = 7500m
+                        },
+                        new
+                        {
+                            Id = 4005L,
+                            AvailableAt = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ContractId = 3004L,
+                            CreatedAt = new DateTime(2025, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 4500m,
+                            PaidAt = new DateTime(2026, 3, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PlatformFee = 500m,
+                            Status = 1,
+                            TotalAmount = 5000m
+                        },
+                        new
+                        {
+                            Id = 4006L,
+                            ContractId = 3004L,
+                            CreatedAt = new DateTime(2025, 3, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 4500m,
+                            PlatformFee = 500m,
+                            Status = 0,
+                            TotalAmount = 5000m
                         });
                 });
 
@@ -865,6 +971,30 @@ namespace MARN_API.Migrations
                             Title = "Seed Studio Flat",
                             Type = 4,
                             Views = 1
+                        },
+                        new
+                        {
+                            Id = 1004L,
+                            Address = "321 Elite Boulevard, Cairo",
+                            Availability = 0,
+                            AverageRating = 4.8f,
+                            Bathrooms = 3,
+                            Bedrooms = 4,
+                            Beds = 5,
+                            CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "A luxury villa owned by the dual-role Owner Z for owner dashboard testing.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.07,
+                            Longitude = 31.25,
+                            MaxOccupants = 6,
+                            OwnerId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            Price = 15000m,
+                            RentalUnit = 1,
+                            Status = 1,
+                            Title = "Luxury Seed Villa",
+                            Type = 3,
+                            Views = 12
                         });
                 });
 
@@ -926,6 +1056,13 @@ namespace MARN_API.Migrations
                             IsPrimary = true,
                             Path = "/images/seed/property3-main.jpg",
                             PropertyId = 1003L
+                        },
+                        new
+                        {
+                            Id = 2004L,
+                            IsPrimary = true,
+                            Path = "/images/seed/property4-main.jpg",
+                            PropertyId = 1004L
                         });
                 });
 
@@ -1120,6 +1257,16 @@ namespace MARN_API.Migrations
                         {
                             PropertyId = 1002L,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            PropertyId = 1001L,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666")
+                        },
+                        new
+                        {
+                            PropertyId = 1002L,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666")
                         });
                 });
 
@@ -1336,6 +1483,16 @@ namespace MARN_API.Migrations
                         {
                             UserId = new Guid("55555555-5555-5555-5555-555555555555"),
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         });
                 });
 
@@ -1417,6 +1574,29 @@ namespace MARN_API.Migrations
                             SecurityStamp = "SEED-OWNER-Y-SECURITY-STAMP",
                             TwoFactorEnabled = false,
                             UserName = "owner.y@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("66666666-6666-6666-6666-666666666666"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SEED-OWNER-Z-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "owner.z@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Owner",
+                            Gender = 1,
+                            Language = 0,
+                            LastName = "Z",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "OWNER.Z@EXAMPLE.COM",
+                            NormalizedUserName = "OWNER.Z@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "SEED-OWNER-Z-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "owner.z@example.com"
                         });
                 });
 

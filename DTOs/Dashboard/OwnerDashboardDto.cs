@@ -12,7 +12,6 @@ namespace MARN_API.DTOs.Dashboard
         public int VacantPlaces { get; set; }
         public long TotalViews { get; set; }
 
-        public decimal MonthlyRevenue { get; set; }
         public ICollection<MonthlyEarningDto>? MonthlyEarning { get; set; }
         public ICollection<YearlyEarningDto>? YearlyEarning { get; set; }
         public decimal WithdrawableEarnings { get; set; }

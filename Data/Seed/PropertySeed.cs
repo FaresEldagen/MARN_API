@@ -11,6 +11,7 @@ namespace MARN_API.Data.Seed
         public void Configure(EntityTypeBuilder<Property> builder)
         {
             var ownerXId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+            var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
 
             builder.HasData(
                 new Property
@@ -84,6 +85,31 @@ namespace MARN_API.Data.Seed
                     Availability = PropertyAvailability.Available,
                     Status = PropertyStatus.Verified,
                     CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, DateTimeKind.Utc)
+                },
+                // Property owned by Owner Z (for owner dashboard)
+                new Property
+                {
+                    Id = 1004,
+                    OwnerId = ownerZId,
+                    Title = "Luxury Seed Villa",
+                    Description = "A luxury villa owned by the dual-role Owner Z for owner dashboard testing.",
+                    Type = PropertyType.Villa,
+                    IsShared = false,
+                    MaxOccupants = 6,
+                    Bedrooms = 4,
+                    Beds = 5,
+                    Bathrooms = 3,
+                    Views = 12,
+                    AverageRating = 4.8f,
+                    Price = 15000m,
+                    RentalUnit = RentalUnit.Monthly,
+                    Address = "321 Elite Boulevard, Cairo",
+                    Latitude = 30.0700,
+                    Longitude = 31.2500,
+                    IsActive = true,
+                    Availability = PropertyAvailability.Available,
+                    Status = PropertyStatus.Verified,
+                    CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

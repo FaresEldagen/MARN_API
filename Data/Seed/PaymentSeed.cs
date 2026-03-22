@@ -68,6 +68,35 @@ namespace MARN_API.Data.Seed
                     Currency = "EGP",
                     Status = PaymentStatus.Succeeded,
                     CreatedAt = new DateTime(2025, 7, 30, 0, 0, 0, DateTimeKind.Utc)
+                },
+
+                // Payments for Contract 3004 (Owner Z as renter)
+                new Payment
+                {
+                    Id = 4005,
+                    ContractId = 3004,
+                    TotalAmount = 5000m,
+                    OwnerAmount = 4500m,
+                    PlatformFee = 500m,
+                    DueDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    PaidAt = new DateTime(2026, 3, 3, 0, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2026, 3, 15, 0, 0, 0, DateTimeKind.Utc),
+                    Currency = "EGP",
+                    Status = PaymentStatus.Succeeded,
+                    CreatedAt = new DateTime(2025, 3, 6, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Payment
+                {
+                    Id = 4006,
+                    ContractId = 3004,
+                    TotalAmount = 5000m,
+                    OwnerAmount = 4500m,
+                    PlatformFee = 500m,
+                    DueDate = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+                    PaidAt = null,
+                    Currency = "EGP",
+                    Status = PaymentStatus.Pending,
+                    CreatedAt = new DateTime(2025, 3, 7, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

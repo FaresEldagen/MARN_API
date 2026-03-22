@@ -29,6 +29,13 @@ namespace MARN_API.Data.Seed
                     PropertyId = 1003,
                     Path = "/images/seed/property3-main.jpg",
                     IsPrimary = true
+                },
+                new PropertyMedia
+                {
+                    Id = 2004,
+                    PropertyId = 1004,
+                    Path = "/images/seed/property4-main.jpg",
+                    IsPrimary = true
                 }
             );
         }
