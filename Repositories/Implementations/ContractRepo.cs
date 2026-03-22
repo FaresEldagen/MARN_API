@@ -43,7 +43,7 @@ namespace MARN_API.Repositories.Implementations
                     NextPaymentAmount = c.Payments
                         .Where(p => p.DueDate >= DateTime.UtcNow)
                         .OrderBy(p => p.DueDate)
-                        .Select(p => p.Amount)
+                        .Select(p => p.TotalAmount)
                         .FirstOrDefault(),
 
                     PaymentId = c.Payments
@@ -69,19 +69,30 @@ namespace MARN_API.Repositories.Implementations
 
 
         #region Owner Dashboard
-        public Task<List<Contract>> GetContracts(Guid userId)
+        public Task<List<OwnerContractCardDto>> GetContracts(Guid userId)
         {
             return Context.Contracts
+                .AsNoTracking()
                 .Where(c => c.OwnerId == userId)
-                .Include(c => c.Property)
-                .Include(c => c.Renter)
+                .Select(c => new OwnerContractCardDto
+                {
+                    ContractId = c.Id,
+                    ContractStatus = c.Status,
+                    ExpiryDate = c.EndDate,
+
+                    PropertyId = c.PropertyId,
+                    PropertyTitle = c.Property.Title,
+
+                    RenterId = c.RenterId,
+                    RenterName = $"{c.Renter.FirstName} {c.Renter.LastName}"
+                })          
                 .ToListAsync();
         }
 
         public Task<int> GetOwnedPropertiesOccupiedPlacesCount(Guid userId)
         {
             return Context.Contracts
-                .Where(c => c.OwnerId == userId && c.Status == Enums.ContractStatus.Active)
+                .Where(c => c.OwnerId == userId && c.Status == ContractStatus.Active)
                 .Select(c => c.Property.IsShared ? 1 : c.Property.MaxOccupants)
                 .SumAsync();
         }

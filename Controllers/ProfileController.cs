@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
 using MARN_API.Models;
 using MARN_API.Services.Implementations;
@@ -30,7 +30,7 @@ namespace MARN_API.Controllers
             _logger = logger;
         }
 
-        #region Dasboards
+        #region Profile and Dashboards
         /// <summary>
         /// Return the renter dashboard data for this user for the authenticated user.
         /// </summary>
@@ -39,7 +39,7 @@ namespace MARN_API.Controllers
         /// - Active rentals count
         /// - Next payment info (amount, due date, is paid) for the next pending payment across all active rentals
         /// - Saved properties count
-        /// - Unread notifications count
+        /// - Unread renter notifications count
         /// - Account status (verified, suspended, etc.)
         /// - Collections of active rentals (Active rental card contains contract id, contract status, start date, end date, property title, address, primary image url, rental period, next payment amount, due date, is paid (if there isn't these three will return null)) if there is any active rentals.
         /// - Collections of pending booking requests (Booking request card contains request id, request status, start date, end date,property Id, property title, owner Id, owner name, owner profile image) if there is any pending booking requests.
@@ -72,6 +72,24 @@ namespace MARN_API.Controllers
         /// <summary>
         /// Return the owner dashboard data for this user for the authenticated user.
         /// </summary>
+        /// <returns>
+        /// Owner dashboard data for this user
+        /// - Properties Count
+        /// - Occupied Places Count
+        /// - Vacant Places Count
+        /// - Total Views Count
+        /// - Monthly Revenue
+        /// - Monthly Earnings (month, year, amount)
+        /// - Yearly Earnings (year, amount)
+        /// - Withdrawable Earnings
+        /// - On Hold Earnings
+        /// - Unread owner notifications count
+        /// - Pending booking requests count
+        /// - Account status (verified, suspended, etc.)
+        /// - Collections of contracts (Contract card contains contract id, contract status, start date, end date, property title, address, primary image url, rental period, next payment amount, due date, is paid (if there isn't these three will return null))
+        /// - Collections of notifications (notification card contains notification id, title, is read, created at) if there is any notifications.
+        /// - Collections of pending booking requests (Booking request card contains request id, request status, start date, end date,property Id, property title, renter Id, renter name, renter profile image) if there is any pending booking requests.
+        /// </returns>
         /// <returns>Owner dashboard data for this user</returns>
         /// <response code="200">Returns the Owner dashboard data for this user</response>
         /// <response code="401">If the user is not authenticated</response>
@@ -81,7 +99,7 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> OenterDashboard()
+        public async Task<IActionResult> OwnerDashboard()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -91,8 +109,8 @@ namespace MARN_API.Controllers
             if (!Guid.TryParse(userIdString, out var userId))
                 return Unauthorized("Invalid user id");
 
-            var result = await _profileService.RenterDashboardAsync(userId);
-            return HandleServiceResult<RenterDashboardDto>(result);
+            var result = await _profileService.OwnerDashboardAsync(userId);
+            return HandleServiceResult<OwnerDashboardDto>(result);
         }
         #endregion
 

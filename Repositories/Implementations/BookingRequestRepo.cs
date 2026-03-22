@@ -37,11 +37,23 @@ namespace MARN_API.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public Task<List<BookingRequest>> GetOwnerPendingRequests(Guid userId)
+        public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequests(Guid userId)
         {
             return Context.BookingRequests
                 .Where(r => r.Property.Owner.Id == userId && r.Status == Enums.BookingRequestStatus.Pending)
-                .Include(r => r.Property)
+                .Select(r => new OwnerPendingBookingRequestDto
+                {
+                    BookingRequestId = r.Id,
+                    StartDate = r.StartDate,
+                    EndDate = r.EndDate,
+
+                    PropertyId = r.PropertyId,
+                    PropertyTitle = r.Property.Title,
+
+                    RenterId = r.RenterId,
+                    RenterName = $"{r.Renter.FirstName} {r.Renter.LastName}",
+                    RenterProfileImage = r.Renter.ProfileImage
+                })
                 .ToListAsync();
         }
     }

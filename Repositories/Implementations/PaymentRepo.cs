@@ -1,6 +1,7 @@
 ﻿using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
+using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +26,7 @@ namespace MARN_API.Repositories.Implementations
                 .Select(p => new RenterNextPaymentDto
                 {
                     Date = p.DueDate,
-                    Amount = p.Amount,
+                    Amount = p.TotalAmount,
 
                     PropertyTitle = p.Contract.Property.Title,
                     PropertyId = p.Contract.PropertyId,
@@ -47,7 +48,7 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
-                    Total = g.Sum(p => p.Amount)
+                    Total = g.Sum(p => p.OwnerAmount)
                 })
                 .ToListAsync();
         }
@@ -61,9 +62,29 @@ namespace MARN_API.Repositories.Implementations
                 .Select(g => new YearlyEarningDto
                 {
                     Year = g.Key,
-                    Total = g.Sum(p => p.Amount)
+                    Total = g.Sum(p => p.OwnerAmount)
                 })
                 .ToListAsync();
+        }
+
+        public Task<decimal> GetWithdrawableEarnings(Guid userId)
+        {
+            return Context.Payments
+                .Where(p =>
+                    p.Contract.OwnerId == userId &&
+                    p.Status == PaymentStatus.Succeeded &&
+                    p.AvailableAt <= DateTime.UtcNow)
+                .SumAsync(p => p.OwnerAmount);
+        }
+
+        public Task<decimal> GetOnHoldEarnings(Guid userId)
+        {
+            return Context.Payments
+                .Where(p =>
+                    p.Contract.OwnerId == userId &&
+                    p.Status == PaymentStatus.Succeeded &&
+                    p.AvailableAt > DateTime.UtcNow)
+                .SumAsync(p => p.OwnerAmount);
         }
         #endregion
     }

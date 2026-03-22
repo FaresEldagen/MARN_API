@@ -11,7 +11,7 @@ namespace MARN_API.Repositories.Interfaces
 
 
         #region Owner Dashboard
-        public Task<List<Contract>> GetContracts(Guid userId);
+        public Task<List<OwnerContractCardDto>> GetContracts(Guid userId);
         public Task<int> GetOwnedPropertiesOccupiedPlacesCount(Guid userId);
         #endregion
     }

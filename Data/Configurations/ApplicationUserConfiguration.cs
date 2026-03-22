@@ -33,16 +33,6 @@ namespace MARN_API.Data.Configurations
                             .HasForeignKey(r => r.UserId)
                             .OnDelete(DeleteBehavior.Restrict);
 
-                     builder.HasMany(u => u.ChatMessages)
-                            .WithOne(m => m.Sender)
-                            .HasForeignKey(m => m.SenderId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
-                     builder.HasMany(u => u.ChatRoomParticipants)
-                            .WithOne(p => p.User)
-                            .HasForeignKey(p => p.UserId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
                      builder.HasMany(u => u.Notifications)
                             .WithOne(n => n.User)
                             .HasForeignKey(n => n.UserId)

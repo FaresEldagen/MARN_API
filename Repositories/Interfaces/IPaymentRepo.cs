@@ -14,6 +14,8 @@ namespace MARN_API.Repositories.Interfaces
         #region Owner Dashboard
         public Task<List<MonthlyEarningDto>> GetEarningOverviewMonthly(Guid userId);
         public Task<List<YearlyEarningDto>> GetEarningOverviewYearly(Guid userId);
+        public Task<decimal> GetWithdrawableEarnings(Guid userId);
+        public Task<decimal> GetOnHoldEarnings(Guid userId);
         #endregion
     }
 }

@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260321233828_Remove old chat-system and edit paymnt, notification, owner models")]
+    partial class Removeoldchatsystemandeditpaymntnotificationownermodels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -556,37 +559,6 @@ namespace MARN_API.Migrations
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             UserType = 0
-                        },
-                        new
-                        {
-                            Id = 6006L,
-                            Body = "A renter submitted a booking request for one of your properties.",
-                            CreatedAt = new DateTime(2025, 4, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "New booking request",
-                            Type = 0,
-                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            UserType = 1
-                        },
-                        new
-                        {
-                            Id = 6007L,
-                            Body = "A rent payment was successfully processed.",
-                            CreatedAt = new DateTime(2025, 4, 9, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Payment received",
-                            Type = 0,
-                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            UserType = 1
-                        },
-                        new
-                        {
-                            Id = 6008L,
-                            Body = "Complete your listing details to attract more renters.",
-                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ReadAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Welcome, property owner",
-                            Type = 0,
-                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            UserType = 1
                         });
                 });
 
@@ -660,7 +632,6 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 4002L,
-                            AvailableAt = new DateTime(2020, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             ContractId = 3001L,
                             CreatedAt = new DateTime(2025, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "EGP",
@@ -674,7 +645,6 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 4003L,
-                            AvailableAt = new DateTime(2020, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             ContractId = 3002L,
                             CreatedAt = new DateTime(2025, 6, 30, 0, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "EGP",
@@ -688,7 +658,6 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 4004L,
-                            AvailableAt = new DateTime(2035, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             ContractId = 3002L,
                             CreatedAt = new DateTime(2025, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
                             Currency = "EGP",
@@ -1307,33 +1276,6 @@ namespace MARN_API.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
-                        },
-                        new
-                        {
-                            UserId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>

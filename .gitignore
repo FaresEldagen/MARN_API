@@ -69,5 +69,4 @@ nunit-*.xml
 # ===============================
 appsettings.Development.json
 appsettings.Local.json
-appsettings.json
 .env

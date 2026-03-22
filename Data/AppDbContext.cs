@@ -21,9 +21,6 @@ namespace MARN_API.Data
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<RoommatePreference> RoommatePreferences => Set<RoommatePreference>();
         public DbSet<Review> Reviews => Set<Review>();
-        public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
-        public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
-        public DbSet<ChatRoomParticipant> ChatRoomParticipants => Set<ChatRoomParticipant>();
         public DbSet<PropertyAmenity> PropertyAmenities => Set<PropertyAmenity>();
         public DbSet<PropertyRule> PropertyRules => Set<PropertyRule>();
         public DbSet<PropertyMedia> PropertyMedia => Set<PropertyMedia>();
@@ -49,9 +46,6 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new PaymentConfiguration());
             builder.ApplyConfiguration(new RoommatePreferenceConfiguration());
             builder.ApplyConfiguration(new ReviewConfiguration());
-            builder.ApplyConfiguration(new ChatRoomConfiguration());
-            builder.ApplyConfiguration(new ChatMessageConfiguration());
-            builder.ApplyConfiguration(new ChatRoomParticipantConfiguration());
             builder.ApplyConfiguration(new PropertyAmenityConfiguration());
             builder.ApplyConfiguration(new PropertyRuleConfiguration());
             builder.ApplyConfiguration(new PropertyMediaConfiguration());
@@ -67,6 +61,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new RoleSeed());
             builder.ApplyConfiguration(new UserSeed());
             builder.ApplyConfiguration(new OwnerSeed());
+            builder.ApplyConfiguration(new UserRoleSeed());
             builder.ApplyConfiguration(new PropertySeed());
             builder.ApplyConfiguration(new PropertyMediaSeed());
             builder.ApplyConfiguration(new ContractSeed());

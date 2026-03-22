@@ -16,7 +16,6 @@ namespace MARN_API.Models
 
         public virtual Property Property { get; set; } = null!;
         public virtual ApplicationUser Renter { get; set; } = null!;
-        public virtual ChatRoom ChatRoom { get; set; } = null!;
     }
 }
 

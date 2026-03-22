@@ -40,9 +40,7 @@ namespace MARN_API.Data.Seed
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Active,
-                    CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc),
-
-                    WithdrawableEarnings = 10000m
+                    CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Owner
                 {
@@ -66,9 +64,7 @@ namespace MARN_API.Data.Seed
                     Gender = Gender.Female,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Active,
-                    CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc),
-
-                    WithdrawableEarnings = 0m
+                    CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

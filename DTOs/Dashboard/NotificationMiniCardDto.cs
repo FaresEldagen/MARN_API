@@ -2,7 +2,7 @@
 
 namespace MARN_API.DTOs.Dashboard
 {
-    public class NotificationCardDto
+    public class NotificationMiniCardDto
     {
         public long Id { get; set; }
         public string Title { get; set; } = string.Empty;

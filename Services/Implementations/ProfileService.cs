@@ -74,7 +74,7 @@ namespace MARN_API.Services.Implementations
 
             List<PropertyCardDto>? recommendations = null;
 
-            var notifications = await _notificationRepo.GetNotifications(userId);
+            var notifications = await _notificationRepo.GetRenterDashboardNotifications(userId);
             var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
             
             var accountSatus = user.AccountStatus;
@@ -105,7 +105,65 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<OwnerDashboardDto>> OwnerDashboardAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Get Renter Dashboard Data attempt for userId: {userId}", userId);
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+            {
+                _logger.LogWarning("Get Renter Dashboard Data failed: User not found for userId: {userId}", userId);
+                return ServiceResult<OwnerDashboardDto>.Fail("User not found", resultType: ServiceResultType.Unauthorized);
+            }
+
+            var properties = await _propertyRepo.GetOwnedProperties(userId);
+            var propertiesCount = properties == null ? 0 : properties.Count;
+
+            var occupiedPlacesCount = await _contractRepo.GetOwnedPropertiesOccupiedPlacesCount(userId);
+            var vacantPlacesCount = await _propertyRepo.GetOwnedPropertiesPlacesCount(userId) - occupiedPlacesCount;
+            var totalViews = await _propertyRepo.GetOwnedPropertiesViewsCount(userId);
+
+            var monthlyrevneue = 10;
+            var monthlyEearnings = await _paymentRepo.GetEarningOverviewMonthly(userId);
+            var yearlyEarnings = await _paymentRepo.GetEarningOverviewYearly(userId);
+            var withdrawableEarnings = await _paymentRepo.GetWithdrawableEarnings(userId);
+            var onHoldEarnings = await _paymentRepo.GetOnHoldEarnings(userId);
+
+            var allContracts = await _contractRepo.GetContracts(userId);
+
+            var notifications = await _notificationRepo.GetOwnerDashboardNotifications(userId);
+            var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
+
+            var pendingBookingRequests = await _bookingRequestRepo.GetOwnerPendingRequests(userId);
+            var pendingBookingRequestsCount = pendingBookingRequests == null ? 0 : pendingBookingRequests.Count;
+
+            var accountSatus = user.AccountStatus;
+
+            var dashboardData = new OwnerDashboardDto
+            {
+                Properties = properties,
+                PropertiesCount = propertiesCount,
+
+                OccupiedPlaces = occupiedPlacesCount,
+                VacantPlaces = vacantPlacesCount,
+                TotalViews = totalViews,
+
+                MonthlyRevenue = monthlyrevneue,
+                MonthlyEarning = monthlyEearnings,
+                YearlyEarning = yearlyEarnings,
+                WithdrawableEarnings = withdrawableEarnings,
+                OnHoldEarnings = onHoldEarnings,
+
+                Notifications = notifications,
+                UnreadNotificationsCount = unreadNotificationsCount,
+
+                PendingBookingRequests = pendingBookingRequests,
+                PendingBookingRequestsCount = pendingBookingRequestsCount,
+
+                AccountStatus = accountSatus,
+            };
+
+            _logger.LogInformation("Get Renter Dashboard Data successful for userId: {userId}", userId);
+            return ServiceResult<OwnerDashboardDto>.Ok(dashboardData);
         }
 
         public async Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId)

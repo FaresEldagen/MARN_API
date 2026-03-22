@@ -5,6 +5,7 @@ namespace MARN_API.Repositories.Interfaces
 {
     public interface INotificationRepo
     {
-        public Task<List<NotificationCardDto>> GetNotifications(Guid userId);
+        public Task<List<NotificationMiniCardDto>> GetRenterDashboardNotifications(Guid userId);
+        public Task<List<NotificationMiniCardDto>> GetOwnerDashboardNotifications(Guid userId);
     }
 }
