@@ -1,4 +1,4 @@
-﻿namespace MARN_API.Enums.RoommatePrefrences
+namespace MARN_API.Enums.RoommatePreferences
 {
     public enum WorkSchedule
     {

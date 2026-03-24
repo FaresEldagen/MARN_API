@@ -30,6 +30,7 @@ namespace MARN_API.Controllers
             _logger = logger;
         }
 
+
         #region Profile and Dashboards
         /// <summary>
         /// Return the renter dashboard data for this user for the authenticated user.
@@ -286,7 +287,7 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> UpdateProfileRoommatePreferencesData([FromBody] UpdateRoommatePrefrencesDto dto)
+        public async Task<IActionResult> UpdateProfileRoommatePreferencesData([FromBody] UpdateRoommatePreferencesDto dto)
         {
             if (!TryGetUserId(out var userId))
                 return Unauthorized("User id not found in token");

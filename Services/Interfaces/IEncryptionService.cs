@@ -1,4 +1,4 @@
-namespace MARN_API.Services
+namespace MARN_API.Services.Interfaces
 {
     public interface IEncryptionService
     {

@@ -1,5 +1,5 @@
 using System;
-using MARN_API.Enums.RoommatePrefrences;
+using MARN_API.Enums.RoommatePreferences;
 
 namespace MARN_API.Models
 {
@@ -8,7 +8,7 @@ namespace MARN_API.Models
         public long Id { get; set; }
         public Guid UserId { get; set; }
 
-        public bool RoommatePrefrencesEnabled { get; set; } = true;
+        public bool RoommatePreferencesEnabled { get; set; } = true;
 
         public bool? Smoking { get; set; }
         public bool? Pets { get; set; }

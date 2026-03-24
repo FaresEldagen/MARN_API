@@ -14,9 +14,8 @@ using MARN_API.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Repositories.Implementations;
-using MARN_API.Repositories;
-using MARN_API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text.Json.Serialization;
 
 namespace MARN_API
 {
@@ -72,7 +71,11 @@ namespace MARN_API
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -319,11 +322,19 @@ namespace MARN_API
             app.UseMiddleware<RequestLoggingMiddleware>();
 
 
-            if (app.Environment.IsDevelopment())
+            // if (app.Environment.IsDevelopment())
+            // {
+            //     app.UseSwagger();
+            //     app.UseSwaggerUI();
+            // }
+            // Enable Swagger in all environments during development phase 
+            // to support frontend and mobile teams.
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "MARN API V1");
+                options.RoutePrefix = "swagger"; // Access via {your-url}/swagger
+            });
 
 
             app.UseHttpsRedirection();

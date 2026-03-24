@@ -5,7 +5,9 @@ using MARN_API.Data;
 using MARN_API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MARN_API.Repositories
+using MARN_API.Repositories.Interfaces;
+
+namespace MARN_API.Repositories.Implementations
 {
     public class ChatRepository : IChatRepository
     {

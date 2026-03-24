@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MARN_API.DTOs.Auth;
 using MARN_API.DTOs.Profile;
 using MARN_API.Models;
@@ -33,7 +33,7 @@ namespace MARN_API.Mapping
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.FrontIdPhoto, opt => opt.Ignore())
                 .ForMember(dest => dest.BackIdPhoto, opt => opt.Ignore());
-            CreateMap<UpdateRoommatePrefrencesDto, RoommatePreference>();
+            CreateMap<UpdateRoommatePreferencesDto, RoommatePreference>();
 
             // 
 

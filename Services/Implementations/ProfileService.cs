@@ -199,7 +199,7 @@ namespace MARN_API.Services.Implementations
             var ownedProperties = await _propertyRepo.GetOwnerProfileProperties(userId);
             var ownedPropertiesCount = ownedProperties == null ? 0 : ownedProperties.Count;
 
-            var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
+            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
 
             var profileData = _mapper.Map<ProfileDto>(user);
 
@@ -209,10 +209,10 @@ namespace MARN_API.Services.Implementations
             profileData.OwnedProperties = ownedProperties;
             profileData.OwnedPropertiesCount = ownedProperties?.Count ?? 0;
 
-            if (roommatePrefrences != null)
+            if (RoommatePreferences != null)
             {
-                _mapper.Map(roommatePrefrences, profileData);
-                profileData.RoommatePrefrencesEnabled = true;
+                _mapper.Map(RoommatePreferences, profileData);
+                profileData.RoommatePreferencesEnabled = true;
             }
 
             _logger.LogInformation("Get Profile Data successful for userId: {userId}", userId);
@@ -234,14 +234,14 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<ProfileSettingsDto>.Fail("User not found", resultType: ServiceResultType.BadRequest);
             }
 
-            var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
+            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
 
             var profileData = _mapper.Map<ProfileSettingsDto>(user);
 
-            if (roommatePrefrences != null)
+            if (RoommatePreferences != null)
             {
-                _mapper.Map(roommatePrefrences, profileData);
-                profileData.RoommatePrefrencesEnabled = true;
+                _mapper.Map(RoommatePreferences, profileData);
+                profileData.RoommatePreferencesEnabled = true;
             }
 
             _logger.LogInformation("Get Profile Settings Data successful for userId: {userId}", userId);
@@ -276,8 +276,27 @@ namespace MARN_API.Services.Implementations
                 user.ProfileImage = newImageUrl;
             }
 
+            // Store original values before mapping to check if critical identity fields changed
+            var originalFirstName = user.FirstName;
+            var originalLastName = user.LastName;
+            var originalDateOfBirth = user.DateOfBirth;
+            var originalPhoneNumber = user.PhoneNumber;
+            var originalGender = user.Gender;
+            var originalCountry = user.Country;
+
+
             user = _mapper.Map(dto, user);
-            user.AccountStatus = AccountStatus.Pending;
+
+            // Only reset verification if critical identity fields changed
+            if (user.FirstName != originalFirstName || 
+                user.LastName != originalLastName || 
+                user.DateOfBirth != originalDateOfBirth ||
+                user.PhoneNumber != originalPhoneNumber ||
+                user.Gender != originalGender ||
+                user.Country != originalCountry)
+            {
+                user.AccountStatus = AccountStatus.Pending;
+            }
 
             var result = await _userManager.UpdateAsync(user);
 
@@ -366,7 +385,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
         }
 
-        public async Task<ServiceResult<bool>> UpdateProfileRoommatePreferencesDataAsync(UpdateRoommatePrefrencesDto dto)
+        public async Task<ServiceResult<bool>> UpdateProfileRoommatePreferencesDataAsync(UpdateRoommatePreferencesDto dto)
         {
             _logger.LogInformation("Update Roommate Preferences Data attempt for userId: {userId}", dto.UserId);
 
@@ -378,28 +397,28 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.BadRequest);
             }
 
-            var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(dto.UserId);
+            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(dto.UserId);
 
-            if (dto.RoommatePrefrencesEnabled)
+            if (dto.RoommatePreferencesEnabled)
             {
                 try
                 {
-                    if (roommatePrefrences != null)
+                    if (RoommatePreferences != null)
                     {
-                        roommatePrefrences = _mapper.Map(dto, roommatePrefrences);
-                        var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(roommatePrefrences);
+                        RoommatePreferences = _mapper.Map(dto, RoommatePreferences);
+                        var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(RoommatePreferences);
                     }
                     else
                     {
-                        roommatePrefrences = _mapper.Map<RoommatePreference>(dto);
-                        roommatePrefrences.UserId = dto.UserId;
-                        var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(roommatePrefrences);
+                        RoommatePreferences = _mapper.Map<RoommatePreference>(dto);
+                        RoommatePreferences.UserId = dto.UserId;
+                        var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(RoommatePreferences);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(
-                        "Update Profile Data failed for userId: {userId}و Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
+                        "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
                         dto.UserId,
                         ex
                     );
@@ -409,17 +428,17 @@ namespace MARN_API.Services.Implementations
                     );
                 }
             }
-            else if (roommatePrefrences != null)
+            else if (RoommatePreferences != null)
             {
                 try
                 {
-                    roommatePrefrences.RoommatePrefrencesEnabled = false;
-                    var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(roommatePrefrences);
+                    RoommatePreferences.RoommatePreferencesEnabled = false;
+                    var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(RoommatePreferences);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(
-                        "Update Profile Data failed for userId: {userId}و Errors: Exception occurred while disabling roommate preferences. Exception: {Exception}",
+                        "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while disabling roommate preferences. Exception: {Exception}",
                         dto.UserId,
                         ex
                     );

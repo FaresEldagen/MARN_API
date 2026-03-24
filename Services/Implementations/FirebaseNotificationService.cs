@@ -5,8 +5,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MARN_API.Services.Interfaces;
 
-namespace MARN_API.Services
+namespace MARN_API.Services.Implementations
 {
     public class FirebaseNotificationService : IFirebaseNotificationService
     {

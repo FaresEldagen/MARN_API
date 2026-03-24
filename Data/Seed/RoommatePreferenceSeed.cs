@@ -2,7 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MARN_API.Models;
-using MARN_API.Enums.RoommatePrefrences;
+using MARN_API.Enums.RoommatePreferences;
 
 namespace MARN_API.Data.Seed
 {
@@ -15,7 +15,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 1,
                     UserId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    RoommatePrefrencesEnabled = true,
+                    RoommatePreferencesEnabled = true,
                     Smoking = false,
                     Pets = true,
                     SleepSchedule = SleepSchedule.EarlyBird,
@@ -32,7 +32,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 2,
                     UserId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                    RoommatePrefrencesEnabled = true,
+                    RoommatePreferencesEnabled = true,
                     Smoking = true,
                     Pets = false,
                     SleepSchedule = SleepSchedule.NightOwl,

@@ -1,15 +1,15 @@
-﻿using MARN_API.Enums.RoommatePrefrences;
+using MARN_API.Enums.RoommatePreferences;
 using System.ComponentModel.DataAnnotations;
 
 namespace MARN_API.DTOs.Profile
 {
-    public class UpdateRoommatePrefrencesDto
+    public class UpdateRoommatePreferencesDto
     {
         [Required]
         public Guid UserId { get; set; }
 
         [Required]
-        public bool RoommatePrefrencesEnabled { get; set; } = true;
+        public bool RoommatePreferencesEnabled { get; set; } = true;
 
         public bool? Smoking { get; set; }
         public bool? Pets { get; set; }

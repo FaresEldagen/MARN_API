@@ -1,4 +1,4 @@
-using MARN_API.Services;
+using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -25,7 +25,14 @@ namespace MARN_API.Hubs
                 throw new HubException("Invalid receiver or message content.");
             
             // 1. Save message to Database via Service abstraction
-            var payload = await _chatService.SendMessageAsync(senderId, receiverId, content);
+            var result = await _chatService.SendMessageAsync(senderId, receiverId, content);
+
+            if (!result.Success)
+            {
+                throw new HubException(result.Message ?? "Failed to send message.");
+            }
+
+            var payload = result.Data;
 
             // 2. Deliver message in real-time to the Receiver (if they are online)
             await Clients.User(receiverId).SendAsync("ReceiveMessage", payload);

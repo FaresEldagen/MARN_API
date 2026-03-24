@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-
 using Microsoft.Extensions.Configuration;
+using MARN_API.Services.Interfaces;
 
-namespace MARN_API.Services
+namespace MARN_API.Services.Implementations
 {
     public class EncryptionService : IEncryptionService
     {

@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace MARN_API.Services
+namespace MARN_API.Services.Interfaces
 {
     public interface IFirebaseNotificationService
     {

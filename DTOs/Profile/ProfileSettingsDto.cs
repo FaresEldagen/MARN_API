@@ -1,6 +1,6 @@
-﻿using MARN_API.DTOs.Property;
+using MARN_API.DTOs.Property;
 using MARN_API.Enums.Account;
-using MARN_API.Enums.RoommatePrefrences;
+using MARN_API.Enums.RoommatePreferences;
 
 namespace MARN_API.DTOs.Profile
 {
@@ -29,7 +29,7 @@ namespace MARN_API.DTOs.Profile
 
 
         // Roommate Preferences
-        public bool RoommatePrefrencesEnabled { get; set; } = false;
+        public bool RoommatePreferencesEnabled { get; set; } = false;
         public bool? Smoking { get; set; } = null;
         public bool? Pets { get; set; } = null;
         public string? SleepSchedule { get; set; } = null;
