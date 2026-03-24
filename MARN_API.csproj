@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Seed\" />
+    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
 </Project>

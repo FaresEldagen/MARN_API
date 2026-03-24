@@ -18,5 +18,33 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.RoommatePreferences.FirstOrDefaultAsync(r => r.UserId == userId);
         }
+
+        public async Task<RoommatePreference> UpdateRoommatePreferences(RoommatePreference updatedPreferences)
+        {
+            try
+            {
+                Context.RoommatePreferences.Update(updatedPreferences);
+                await Context.SaveChangesAsync();
+                return updatedPreferences;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to update roommate preferences", ex);
+            }
+        }
+
+        public async Task<RoommatePreference> CreateRoommatePreferences(RoommatePreference newPreferences)
+        {
+            try
+            {
+                Context.RoommatePreferences.Add(newPreferences);
+                await Context.SaveChangesAsync();
+                return newPreferences;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to update roommate preferences", ex);
+            }
+        }
     }
 }

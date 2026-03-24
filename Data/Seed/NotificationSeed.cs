@@ -21,7 +21,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6001,
                     UserId = renterAId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Upcoming Payment Due",
                     Body = "Your next rent payment is due soon.",
@@ -32,7 +32,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6002,
                     UserId = renterAId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Booking Request Update",
                     Body = "Your booking request has been accepted.",
@@ -43,7 +43,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6003,
                     UserId = renterAId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Welcome to the platform",
                     Body = "Thanks for signing up!",
@@ -56,7 +56,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6004,
                     UserId = renterBId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Booking Pending",
                     Body = "Your booking request is pending owner approval.",
@@ -67,7 +67,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6005,
                     UserId = renterBId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Complete Your Profile",
                     Body = "Add more details to your profile to get better recommendations.",
@@ -80,7 +80,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6006,
                     UserId = ownerXId,
-                    UserType = NotificationUserTypeEnum.Owner,
+                    UserType = NotificationUserType.Owner,
                     Type = default(NotificationType),
                     Title = "New booking request",
                     Body = "A renter submitted a booking request for one of your properties.",
@@ -91,7 +91,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6007,
                     UserId = ownerXId,
-                    UserType = NotificationUserTypeEnum.Owner,
+                    UserType = NotificationUserType.Owner,
                     Type = default(NotificationType),
                     Title = "Payment received",
                     Body = "A rent payment was successfully processed.",
@@ -102,7 +102,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6008,
                     UserId = ownerXId,
-                    UserType = NotificationUserTypeEnum.Owner,
+                    UserType = NotificationUserType.Owner,
                     Type = default(NotificationType),
                     Title = "Welcome, property owner",
                     Body = "Complete your listing details to attract more renters.",
@@ -115,7 +115,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6009,
                     UserId = ownerZId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Rent Payment Due Soon",
                     Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
@@ -126,7 +126,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6010,
                     UserId = ownerZId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Booking Submitted",
                     Body = "Your booking request for Seed Studio Flat has been submitted.",
@@ -137,7 +137,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6011,
                     UserId = ownerZId,
-                    UserType = NotificationUserTypeEnum.Renter,
+                    UserType = NotificationUserType.Renter,
                     Type = default(NotificationType),
                     Title = "Welcome to MARN",
                     Body = "Thanks for joining MARN! Explore properties near you.",
@@ -150,7 +150,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6012,
                     UserId = ownerZId,
-                    UserType = NotificationUserTypeEnum.Owner,
+                    UserType = NotificationUserType.Owner,
                     Type = default(NotificationType),
                     Title = "Your property is live",
                     Body = "Luxury Seed Villa is now visible to renters.",
@@ -161,7 +161,7 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 6013,
                     UserId = ownerZId,
-                    UserType = NotificationUserTypeEnum.Owner,
+                    UserType = NotificationUserType.Owner,
                     Type = default(NotificationType),
                     Title = "Welcome, property owner",
                     Body = "Set up your payout details to start receiving rent payments.",

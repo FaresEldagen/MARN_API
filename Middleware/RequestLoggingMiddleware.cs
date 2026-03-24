@@ -40,25 +40,49 @@ namespace MARN_API.Middleware
             // Log request
             await LogRequestAsync(context);
 
-            // Capture original response body stream
-            var originalBodyStream = context.Response.Body;
+            // Skip response body capture for multipart/form-data requests (file uploads)
+            // The MemoryStream swap causes crashes with multipart uploads
+            var isMultipart = context.Request.ContentType?.Contains("multipart/form-data") == true;
 
-            using var responseBody = new MemoryStream();
-            context.Response.Body = responseBody;
-
-            try
+            if (isMultipart)
             {
-                await _next(context);
+                try
+                {
+                    await _next(context);
+                }
+                finally
+                {
+                    stopwatch.Stop();
+                    _logger.LogInformation(
+                        "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
+                        requestMethod,
+                        requestPath,
+                        context.Response.StatusCode,
+                        stopwatch.ElapsedMilliseconds);
+                }
             }
-            finally
+            else
             {
-                stopwatch.Stop();
+                // Capture original response body stream
+                var originalBodyStream = context.Response.Body;
 
-                // Log response
-                await LogResponseAsync(context, stopwatch.ElapsedMilliseconds);
+                using var responseBody = new MemoryStream();
+                context.Response.Body = responseBody;
 
-                // Copy response back to original stream
-                await responseBody.CopyToAsync(originalBodyStream);
+                try
+                {
+                    await _next(context);
+                }
+                finally
+                {
+                    stopwatch.Stop();
+
+                    // Log response
+                    await LogResponseAsync(context, stopwatch.ElapsedMilliseconds);
+
+                    // Copy response back to original stream
+                    await responseBody.CopyToAsync(originalBodyStream);
+                }
             }
         }
 

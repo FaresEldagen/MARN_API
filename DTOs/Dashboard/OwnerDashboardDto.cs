@@ -1,5 +1,5 @@
 ﻿using MARN_API.DTOs.Property;
-using MARN_API.Enums;
+using MARN_API.Enums.Account;
 
 namespace MARN_API.DTOs.Dashboard
 {

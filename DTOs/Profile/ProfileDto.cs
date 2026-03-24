@@ -1,5 +1,6 @@
 ﻿using MARN_API.DTOs.Property;
-using MARN_API.Enums;
+using MARN_API.Enums.Account;
+using MARN_API.Enums.RoommatePrefrences;
 
 namespace MARN_API.DTOs.Profile
 {
@@ -9,7 +10,7 @@ namespace MARN_API.DTOs.Profile
         public Guid Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string? ProfileImageUrl { get; set; }
+        public string? ProfileImage { get; set; }
         public AccountStatus AccountStatus { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public Gender Gender { get; set; }
@@ -27,7 +28,7 @@ namespace MARN_API.DTOs.Profile
 
 
         // Roommate Preferences
-        public bool RoommatePrefrencesEnabled { get; set; }
+        public bool RoommatePrefrencesEnabled { get; set; } = false;
         public bool? Smoking { get; set; } = null;
         public bool? Pets { get; set; } = null;
         public string? SleepSchedule { get; set; } = null;

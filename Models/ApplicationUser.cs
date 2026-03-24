@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using MARN_API.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using MARN_API.Enums.Account;
 
 namespace MARN_API.Models
 {

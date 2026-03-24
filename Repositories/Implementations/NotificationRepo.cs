@@ -21,7 +21,7 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Notifications
                 .AsNoTracking()
-                .Where(n => n.UserId == userId && n.UserType == NotificationUserTypeEnum.Renter)
+                .Where(n => n.UserId == userId && n.UserType == NotificationUserType.Renter)
                 .OrderByDescending(n => n.CreatedAt)
                 .Select(n => new NotificationMiniCardDto
                 {
@@ -37,7 +37,7 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Notifications
                 .AsNoTracking()
-                .Where(n => n.UserId == userId && n.UserType == NotificationUserTypeEnum.Owner)
+                .Where(n => n.UserId == userId && n.UserType == NotificationUserType.Owner)
                 .OrderByDescending(n => n.CreatedAt)
                 .Select(n => new NotificationMiniCardDto
                 {

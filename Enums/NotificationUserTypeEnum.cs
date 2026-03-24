@@ -1,6 +1,6 @@
 ﻿namespace MARN_API.Enums
 {
-    public enum NotificationUserTypeEnum
+    public enum NotificationUserType
     {
         Renter,
         Owner

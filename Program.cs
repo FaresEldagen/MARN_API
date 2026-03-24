@@ -27,6 +27,7 @@ namespace MARN_API
             var builder = WebApplication.CreateBuilder(args);
 
 
+
             // Add User Secrets in Development environment
             if (builder.Environment.IsDevelopment())
             {
@@ -54,6 +55,18 @@ namespace MARN_API
 
                     return new BadRequestObjectResult(context.ModelState);
                 };
+            });
+
+
+            // Configure file upload size limits
+            builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+            });
+
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
             });
 
 
@@ -105,10 +118,6 @@ namespace MARN_API
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
-
-
-
-
             // Repos
             builder.Services.AddScoped<IBookingRequestRepo, BookingRequestRepo>();
             builder.Services.AddScoped<IContractRepo, ContractRepo>();
@@ -122,6 +131,7 @@ namespace MARN_API
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IFileService, FileService>();
 
             builder.Services.AddSignalR();
 
@@ -300,12 +310,13 @@ namespace MARN_API
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            // Request logging should be early in the pipeline
-            app.UseMiddleware<RequestLoggingMiddleware>();
-
-
-            // Global exception handling should be registered early
+            // Global exception handling should be registered BEFORE request logging
+            // so exceptions are caught before the logging middleware tries to process the response
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
+
+            // Request logging
+            app.UseMiddleware<RequestLoggingMiddleware>();
 
 
             if (app.Environment.IsDevelopment())
@@ -317,6 +328,7 @@ namespace MARN_API
 
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
 
             // Rate limiting should be applied before authentication
             app.UseRateLimiter();
@@ -329,6 +341,8 @@ namespace MARN_API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+
 
 
             // Health Check endpoints

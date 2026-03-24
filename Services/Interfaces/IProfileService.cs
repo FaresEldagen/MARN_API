@@ -15,9 +15,9 @@ namespace MARN_API.Services.Interfaces
 
         #region Profile Settings
         public Task<ServiceResult<ProfileSettingsDto>> GetProfileSettingsAsync(Guid userId);
-        public Task<ServiceResult<bool>> UpdateProfileDataAsync(UpdateProfileDto updateProfileDto);
-        public Task<ServiceResult<bool>> UpdateLegalDataAsync(UpdateLegalDto updateLegalDto);
-        public Task<ServiceResult<bool>> UpdateRoommatePrefrencesAsync(UpdateRoommatePrefrencesDto updateRoommatePrefrencesDto);
+        public Task<ServiceResult<bool>> UpdateProfileBasicDataAsync(UpdateProfileDto updateProfileDto);
+        public Task<ServiceResult<bool>> UpdateProfileLegalDataAsync(UpdateLegalDto updateLegalDto);
+        public Task<ServiceResult<bool>> UpdateProfileRoommatePreferencesDataAsync(UpdateRoommatePrefrencesDto updateRoommatePrefrencesDto);
         public Task<ServiceResult<bool>> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
         public Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null);
         public Task<ServiceResult<bool>> DeleteUserAsync(Guid userId);

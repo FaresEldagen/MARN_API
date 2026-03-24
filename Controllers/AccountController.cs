@@ -241,7 +241,7 @@ namespace MARN_API.Controllers
         /// <response code="429">
         /// If the rate limit is exceeded.
         /// </response>
-        [HttpPost("reset-password")]
+        [HttpPut("reset-password")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -250,22 +250,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ResetPasswordAsync(dto);
             return HandleServiceResult<bool>(result);
-        }
-        #endregion
-
-
-        #region For Testing
-        [Authorize]
-        [HttpGet("auth")]
-        public IActionResult testRequireAuthEndPoint()
-        {
-            return Ok("works");
-        }
-
-        [HttpGet("notAuth")]
-        public IActionResult testNotRequireAuthEndPoint()
-        {
-            return Ok("works");
         }
         #endregion
     }

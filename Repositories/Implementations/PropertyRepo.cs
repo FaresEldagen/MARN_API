@@ -104,7 +104,7 @@ namespace MARN_API.Repositories.Implementations
                 .SumAsync(p => p.MaxOccupants);
         }
 
-        public Task<float> GetOwnerAverageRating(Guid userid)
+        public async Task<float> GetOwnerAverageRating(Guid userid)
         {
             var avg = await Context.Properties
                 .Where(p => p.OwnerId == userid)
@@ -121,10 +121,6 @@ namespace MARN_API.Repositories.Implementations
                 .SelectMany(p => p.Reviews)
                 .CountAsync();
         }
-        #endregion
-
-
-        #region Owner Profile
         #endregion
     }
 }

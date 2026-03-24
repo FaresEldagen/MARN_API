@@ -12,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MARN_API.Controllers
 {
@@ -70,6 +69,7 @@ namespace MARN_API.Controllers
             return HandleServiceResult<RenterDashboardDto>(result);
         }
 
+
         /// <summary>
         /// Return the owner dashboard data for this user for the authenticated user.
         /// </summary>
@@ -113,6 +113,7 @@ namespace MARN_API.Controllers
             return HandleServiceResult<OwnerDashboardDto>(result);
         }
 
+
         /// <summary>
         /// Return the personal profile data for the authenticated user.
         /// </summary>
@@ -144,8 +145,9 @@ namespace MARN_API.Controllers
             return HandleServiceResult<ProfileDto>(result);
         }
 
+
         /// <summary>
-        /// Return the personal profile data for the authenticated user.
+        /// Return the profile data for the specific user.
         /// </summary>
         /// <param name="userId">Id for the person you want to view its profile</param>
         /// <returns>
@@ -154,12 +156,12 @@ namespace MARN_API.Controllers
         /// - Owner Data (is owner, average rating, ratings count, owned properties count, collections of owned properties which contains property id, title, address, primary image url, price, rental unit, type, average rating, ratings count) if the user is owner.
         /// - Roommate Preferences (roommate preferences enabled, smoking, pets, sleep schedule, education level, field of study, noise tolerance, guests frequency, work schedule, sharing level, budget range min, budget range max) if the user is renter and roommate preferences enabled.
         /// </returns>
-        /// <response code="200">Returns the personal profile data for this user</response>
-        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="200">Returns the profile data for this user</response>
+        /// <response code="400">If the user is not found</response>
         /// <response code="429">If rate limit is exceeded</response>
         [HttpGet("profile/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetProfile(Guid userId)
         {
@@ -171,6 +173,133 @@ namespace MARN_API.Controllers
 
         #region Profile Settings
         /// <summary>
+        /// Return the Profile Settings data for the authenticated user.
+        /// </summary>
+        /// <returns>
+        /// Profile Settings data for this user
+        /// - Basic Info ( Id, full name, email, phone number, profile image url, account status, date of birth, gender, country, bio)
+        /// - Verification Info (front ID photo, back ID photo, Arabic full name, Arabic address, national ID number)
+        /// - Roommate Preferences (roommate preferences enabled, smoking, pets, sleep schedule, education level, field of study, noise tolerance, guests frequency, work schedule, sharing level, budget range min, budget range max) if the user is renter and roommate preferences enabled.
+        /// </returns>
+        /// <response code="200">Returns the Profile Settings data for this user</response>
+        /// <response code="400">If the user is not found</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpGet("edit-profile")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetProfileSettingsData()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized("User id not found in token");
+
+            if (!Guid.TryParse(userIdString, out var userId))
+                return Unauthorized("Invalid user id");
+
+            var result = await _profileService.GetProfileSettingsAsync(userId);
+            return HandleServiceResult<ProfileSettingsDto>(result);
+        }
+
+
+        /// <summary>
+        /// Update the basic profile data for the authenticated user.
+        /// </summary>
+        /// <param name="dto">
+        /// Basic profile data to update:
+        /// - First name, last name, phone number, date of birth, gender, language, country, bio, profile image
+        /// </param>
+        /// <returns>Success message</returns>
+        /// <response code="200">Profile updated successfully</response>
+        /// <response code="400">If validation fails or user not found</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPut("edit-profile-basic")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> UpdateProfileBasicData([FromForm] UpdateProfileDto dto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User id not found in token");
+
+            if (userId != dto.Id)
+                return Unauthorized("User id mismatch");
+
+            var result = await _profileService.UpdateProfileBasicDataAsync(dto);
+            return HandleServiceResult<bool>(result);
+        }
+
+
+        /// <summary>
+        /// Update the legal/KYC data for the authenticated user.
+        /// </summary>
+        /// <param name="dto">
+        /// Legal verification data to update:
+        /// - Front ID photo, back ID photo, Arabic full name, Arabic address, national ID number
+        /// </param>
+        /// <returns>Success message</returns>
+        /// <response code="200">Legal data updated successfully</response>
+        /// <response code="400">If validation fails or user not found</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPut("edit-profile-legal")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> UpdateProfileLegalData([FromForm] UpdateLegalDto dto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User id not found in token");
+
+            if (userId != dto.Id)
+                return Unauthorized("User id mismatch");
+
+            var result = await _profileService.UpdateProfileLegalDataAsync(dto);
+            return HandleServiceResult<bool>(result);
+        }
+
+
+        /// <summary>
+        /// Update roommate preferences for the authenticated user.
+        /// </summary>
+        /// <param name="dto">
+        /// Roommate preferences data to update:
+        /// - Enabled flag, smoking, pets, sleep schedule, education level, field of study, noise tolerance, guests frequency, work schedule, sharing level, budget range min/max
+        /// </param>
+        /// <returns>Success message</returns>
+        /// <response code="200">Roommate preferences updated successfully</response>
+        /// <response code="400">If validation fails or user not found</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPut("edit-profile-roommate-preferences")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> UpdateProfileRoommatePreferencesData([FromBody] UpdateRoommatePrefrencesDto dto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User id not found in token");
+
+            if (userId != dto.UserId)
+                return Unauthorized("User id mismatch");
+
+            var result = await _profileService.UpdateProfileRoommatePreferencesDataAsync(dto);
+            return HandleServiceResult<bool>(result);
+        }
+
+
+        /// <summary>
         /// Toggle Two-Factor Authentication (2FA) for the authenticated user.
         /// </summary>
         /// <param name="dto">Optional password for verification</param>
@@ -180,7 +309,7 @@ namespace MARN_API.Controllers
         /// <response code="401">If the user is not authenticated</response>
         /// <response code="429">If rate limit is exceeded</response>
         [Authorize]
-        [HttpPost("toggle-2fa")]
+        [HttpPut("toggle-2fa")]
         [EnableRateLimiting("StrictAuth")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -196,8 +325,6 @@ namespace MARN_API.Controllers
             var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
             return HandleServiceResult<bool>(result);
         }
-
-
         #endregion
     }
 }

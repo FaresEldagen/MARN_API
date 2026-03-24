@@ -3,10 +3,13 @@ using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Profile;
 using MARN_API.DTOs.Property;
 using MARN_API.Enums;
+using MARN_API.Enums.Account;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Stripe;
+using System.Globalization;
 
 namespace MARN_API.Services.Implementations
 {
@@ -22,6 +25,7 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyRepo _propertyRepo;
         private readonly IRoommatePreferenceRepo _roommatePreferenceRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
+        private readonly IFileService _fileService;
 
         public ProfileService(
             UserManager<ApplicationUser> userManager,
@@ -33,7 +37,8 @@ namespace MARN_API.Services.Implementations
             IPaymentRepo paymentRepo,
             IPropertyRepo propertyRepo,
             IRoommatePreferenceRepo roommatePreferenceRepo,
-            ISavedPropertyRepo savedPropertyRepo
+            ISavedPropertyRepo savedPropertyRepo,
+            IFileService fileService
         )
         {
             _userManager = userManager;
@@ -46,6 +51,7 @@ namespace MARN_API.Services.Implementations
             _propertyRepo = propertyRepo;
             _roommatePreferenceRepo = roommatePreferenceRepo;
             _savedPropertyRepo = savedPropertyRepo;
+            _fileService = fileService;
         }
 
 
@@ -174,14 +180,14 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId)
         {
-            _logger.LogInformation("Get Personal Profile Data attempt for userId: {userId}", userId);
+            _logger.LogInformation("Get Profile Data attempt for userId: {userId}", userId);
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
             if (user == null)
             {
-                _logger.LogWarning("Get Personal Profile Data failed: User not found for userId: {userId}", userId);
-                return ServiceResult<ProfileDto>.Fail("User not found", resultType: ServiceResultType.Unauthorized);
+                _logger.LogWarning("Get Profile Data failed: User not found for userId: {userId}", userId);
+                return ServiceResult<ProfileDto>.Fail("User not found", resultType: ServiceResultType.BadRequest);
             }
 
             var isOwner = await _userManager.IsInRoleAsync(user, "Owner");
@@ -194,40 +200,21 @@ namespace MARN_API.Services.Implementations
 
             var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
 
-            var profileData = new ProfileDto
+            var profileData = _mapper.Map<ProfileDto>(user);
+
+            profileData.IsOwner = isOwner;
+            profileData.AverageRating = averageRating;
+            profileData.RatingsCount = ratingsCount;
+            profileData.OwnedProperties = ownedProperties;
+            profileData.OwnedPropertiesCount = ownedProperties?.Count ?? 0;
+
+            if (roommatePrefrences != null)
             {
-                Id = user.Id,
-                FullName = $"{user.FirstName} {user.LastName}",
-                Email = user.Email!,
-                ProfileImageUrl = user.ProfileImage,
-                AccountStatus = user.AccountStatus,
-                DateOfBirth = user.DateOfBirth,
-                Gender = user.Gender,
-                Country = user.Country,
-                MemberSince = user.CreatedAt,
-                Bio = user.Bio,
+                _mapper.Map(roommatePrefrences, profileData);
+                profileData.RoommatePrefrencesEnabled = true;
+            }
 
-                IsOwner = isOwner,
-                AverageRating = averageRating,
-                RatingsCount = ratingsCount,
-                OwnedPropertiesCount = ownedPropertiesCount,
-                OwnedProperties = ownedProperties,
-
-                RoommatePrefrencesEnabled = roommatePrefrences != null,
-                Smoking = roommatePrefrences != null ? roommatePrefrences.Smoking : null,
-                Pets = roommatePrefrences != null ? roommatePrefrences.Pets : null,
-                SleepSchedule = roommatePrefrences != null ?  roommatePrefrences.SleepSchedule : null,
-                EducationLevel = roommatePrefrences != null ?  roommatePrefrences.EducationLevel : null,
-                FieldOfStudy = roommatePrefrences != null ?  roommatePrefrences.FieldOfStudy : null,
-                NoiseTolerance = roommatePrefrences != null ?  roommatePrefrences.NoiseTolerance : null,
-                GuestsFrequency = roommatePrefrences != null ?  roommatePrefrences.GuestsFrequency : null,
-                WorkSchedule = roommatePrefrences != null ?  roommatePrefrences.WorkSchedule : null,
-                SharingLevel = roommatePrefrences != null ?  roommatePrefrences.SharingLevel : null,
-                BudgetRangeMin = roommatePrefrences != null ?  roommatePrefrences.BudgetRangeMin : null,
-                BudgetRangeMax = roommatePrefrences != null ?  roommatePrefrences.BudgetRangeMax : null
-            };
-
-            _logger.LogInformation("Get Personal Profile Data successful for userId: {userId}", userId);
+            _logger.LogInformation("Get Profile Data successful for userId: {userId}", userId);
             return ServiceResult<ProfileDto>.Ok(profileData);
         }
         #endregion
@@ -236,29 +223,214 @@ namespace MARN_API.Services.Implementations
         #region Profile Settings
         public async Task<ServiceResult<ProfileSettingsDto>> GetProfileSettingsAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Get Profile Settings Data attempt for userId: {userId}", userId);
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+            {
+                _logger.LogWarning("Get Profile Settings Data failed: User not found for userId: {userId}", userId);
+                return ServiceResult<ProfileSettingsDto>.Fail("User not found", resultType: ServiceResultType.BadRequest);
+            }
+
+            var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
+
+            var profileData = _mapper.Map<ProfileSettingsDto>(user);
+
+            if (roommatePrefrences != null)
+            {
+                _mapper.Map(roommatePrefrences, profileData);
+                profileData.RoommatePrefrencesEnabled = true;
+            }
+
+            _logger.LogInformation("Get Profile Settings Data successful for userId: {userId}", userId);
+            return ServiceResult<ProfileSettingsDto>.Ok(profileData);
         }
 
-        public async Task<ServiceResult<bool>> UpdateProfileDataAsync(UpdateProfileDto updateProfileDto)
+        public async Task<ServiceResult<bool>> UpdateProfileBasicDataAsync(UpdateProfileDto dto)
         {
-            //    var user = await _userManager.FindByIdAsync(updateUserDto.id.ToString());
-            //    if (user == null)
-            //        return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+            _logger.LogInformation("Update Profile Data attempt for userId: {userId}", dto.Id);
 
-            //    user = _mapper.Map(updateUserDto, user);
+            var user = await _userManager.FindByIdAsync(dto.Id.ToString());
 
-            //    return await _userManager.UpdateAsync(user);
-            throw new NotImplementedException();
+            if (user == null)
+            {
+                _logger.LogWarning("Update Profile Data failed: User not found for userId: {userId}", dto.Id);
+                return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.BadRequest);
+            }
+
+            if (dto.ProfileImage != null)
+            {
+                var validationError = ValidateImage(dto.ProfileImage);
+                if (validationError != null)
+                    return validationError;
+
+                var newImageUrl = await _fileService.SaveImageAsync(dto.ProfileImage, "profiles");
+
+                if (newImageUrl == null)
+                    return ServiceResult<bool>.Fail("Failed to upload image");
+
+                _fileService.DeleteImage(user.ProfileImage);
+
+                user.ProfileImage = newImageUrl;
+            }
+
+            user = _mapper.Map(dto, user);
+            user.AccountStatus = AccountStatus.Pending;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                _logger.LogError(
+                    "Update Profile Data failed for userId: {userId}, Errors: {@Errors}",
+                    dto.Id,
+                    result.Errors.Select(e => e.Description)
+                );
+                return ServiceResult<bool>.Fail(
+                    "Update Profile Data failed.",
+                    result.Errors.Select(e => e.Description).ToList(),
+                    resultType: ServiceResultType.BadRequest
+                );
+            }
+
+            _logger.LogInformation("Update Profile Data successful for user: {UserId}", user.Id);
+            return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
         }
 
-        public async Task<ServiceResult<bool>> UpdateLegalDataAsync(UpdateLegalDto updateLegalDto)
+        public async Task<ServiceResult<bool>> UpdateProfileLegalDataAsync(UpdateLegalDto dto) 
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Update Profile Legal Data attempt for userId: {userId}", dto.Id);
+
+            var user = await _userManager.FindByIdAsync(dto.Id.ToString());
+
+            if (user == null)
+            {
+                _logger.LogWarning("Update Legal Profile Data failed: User not found for userId: {userId}", dto.Id);
+                return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.BadRequest);
+            }
+
+            if (dto.FrontIdPhoto != null)
+            {
+                var frontValidationError = ValidateImage(dto.FrontIdPhoto);
+                if (frontValidationError != null)
+                    return frontValidationError;
+
+                var newImageUrl = await _fileService.SaveImageAsync(dto.FrontIdPhoto, "profiles");
+
+                if (newImageUrl == null)
+                    return ServiceResult<bool>.Fail("Failed to upload image");
+
+                _fileService.DeleteImage(user.FrontIdPhoto);
+
+                user.FrontIdPhoto = newImageUrl;
+            }
+
+            if (dto.BackIdPhoto != null)
+            {
+                var backValidationError = ValidateImage(dto.BackIdPhoto);
+                if (backValidationError != null)
+                    return backValidationError;
+
+                var newImageUrl = await _fileService.SaveImageAsync(dto.BackIdPhoto, "profiles");
+
+                if (newImageUrl == null)
+                    return ServiceResult<bool>.Fail("Failed to upload image");
+
+                _fileService.DeleteImage(user.BackIdPhoto);
+
+                user.BackIdPhoto = newImageUrl;
+            }
+
+            user = _mapper.Map(dto, user);
+            user.AccountStatus = AccountStatus.Pending;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                _logger.LogError(
+                    "Update Profile Legal Data failed for userId: {userId}, Errors: {@Errors}",
+                    dto.Id,
+                    result.Errors.Select(e => e.Description)
+                );
+                return ServiceResult<bool>.Fail(
+                    "Update Profile Data failed.",
+                    result.Errors.Select(e => e.Description).ToList(),
+                    resultType: ServiceResultType.BadRequest
+                );
+            }
+
+            _logger.LogInformation("Update Profile Legal Data successful for user: {UserId}", user.Id);
+            return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
         }
 
-        public async Task<ServiceResult<bool>> UpdateRoommatePrefrencesAsync(UpdateRoommatePrefrencesDto updateRoommatePrefrencesDto)
+        public async Task<ServiceResult<bool>> UpdateProfileRoommatePreferencesDataAsync(UpdateRoommatePrefrencesDto dto)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Update Roommate Preferences Data attempt for userId: {userId}", dto.UserId);
+
+            var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
+
+            if (user == null)
+            {
+                _logger.LogWarning("Update Roommate Preferences Data failed: User not found for userId: {userId}", dto.UserId);
+                return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.BadRequest);
+            }
+
+            var roommatePrefrences = await _roommatePreferenceRepo.GetRoommatePreferences(dto.UserId);
+
+            if (dto.RoommatePrefrencesEnabled)
+            {
+                try
+                {
+                    if (roommatePrefrences != null)
+                    {
+                        roommatePrefrences = _mapper.Map(dto, roommatePrefrences);
+                        var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(roommatePrefrences);
+                    }
+                    else
+                    {
+                        roommatePrefrences = _mapper.Map<RoommatePreference>(dto);
+                        roommatePrefrences.UserId = dto.UserId;
+                        var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(roommatePrefrences);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        "Update Profile Data failed for userId: {userId}و Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
+                        dto.UserId,
+                        ex
+                    );
+                    return ServiceResult<bool>.Fail(
+                        "Update Profile Data failed. An error occurred while saving roommate preferences.",
+                        resultType: ServiceResultType.BadRequest
+                    );
+                }
+            }
+            else if (roommatePrefrences != null)
+            {
+                try
+                {
+                    roommatePrefrences.RoommatePrefrencesEnabled = false;
+                    var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(roommatePrefrences);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        "Update Profile Data failed for userId: {userId}و Errors: Exception occurred while disabling roommate preferences. Exception: {Exception}",
+                        dto.UserId,
+                        ex
+                    );
+                    return ServiceResult<bool>.Fail(
+                        "Update Profile Data failed. An error occurred while disabling roommate preferences.",
+                        resultType: ServiceResultType.BadRequest
+                    );
+                }
+            }
+
+            _logger.LogInformation("Update Roommate Preferences Data successful for user: {UserId}", user.Id);
+            return ServiceResult<bool>.Ok(true, "Update Roommate Preferences Data successful.");
         }
 
         public async Task<ServiceResult<bool>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
@@ -353,6 +525,23 @@ namespace MARN_API.Services.Implementations
 
             _logger.LogInformation("User {UserId} marked as deleted.", userId);
             return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
+        }
+        #endregion
+
+
+        #region Private Helpers
+        private static ServiceResult<bool>? ValidateImage(IFormFile image)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var extension = Path.GetExtension(image.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(extension))
+                return ServiceResult<bool>.Fail("Invalid image format");
+
+            if (image.Length > 2 * 1024 * 1024)
+                return ServiceResult<bool>.Fail("Image size exceeds 2MB");
+
+            return null;
         }
         #endregion
     }

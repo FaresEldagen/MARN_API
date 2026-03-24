@@ -8,7 +8,7 @@ namespace MARN_API.Models
         public long Id { get; set; }
         public Guid ReporterId { get; set; }
         public Guid? ReviewerId { get; set; }
-        public ReportableTypeEnum ReportableType { get; set; }
+        public ReportableType ReportableType { get; set; }
         public long ReportableId { get; set; }
 
         public string Reason { get; set; } = string.Empty;

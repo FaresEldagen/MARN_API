@@ -1,6 +1,6 @@
 ﻿namespace MARN_API.Enums
 {
-    public enum ReportableTypeEnum
+    public enum ReportableType
     {
         ChatRoom = 0,
         Property = 1,
