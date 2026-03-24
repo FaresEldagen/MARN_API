@@ -10,6 +10,7 @@ using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Stripe;
 using System.Globalization;
+using System.Threading.Channels;
 
 namespace MARN_API.Services.Implementations
 {
@@ -433,22 +434,6 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "Update Roommate Preferences Data successful.");
         }
 
-        public async Task<ServiceResult<bool>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
-        {
-            //    var user = await _userManager.FindByIdAsync(changePasswordDto.id.ToString());
-            //    if (user == null)
-            //        return IdentityResult.Failed(new IdentityError { Description = "User not found." });
-
-            //    if (!await _userManager.CheckPasswordAsync(user, changePasswordDto.CurrentPassword))
-            //        return IdentityResult.Failed(new IdentityError { Description = "Current password is incorrect." });
-
-            //    return await _userManager.ChangePasswordAsync(
-            //        user,
-            //        changePasswordDto.CurrentPassword,
-            //        changePasswordDto.NewPassword);
-            throw new NotImplementedException();
-        }
-
         public async Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null)
         {
             _logger.LogInformation("Toggle2FA attempt for userId: {userId}", userId);
@@ -491,6 +476,43 @@ namespace MARN_API.Services.Implementations
 
             _logger.LogInformation("User {UserId} toggled 2FA. Enabled={Enabled}", user.Id, newState);
             return ServiceResult<bool>.Ok(newState, $"Two-Factor Authentication is now {(newState ? "enabled" : "disabled")}");
+        }
+
+        public async Task<ServiceResult<bool>> ChangePasswordAsync(ChangePasswordDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(dto.id.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("Change Password failed: User not found for userId: {userId}", dto.id);
+                return ServiceResult<bool>.Fail("User not found");
+            }
+
+            if (!await _userManager.CheckPasswordAsync(user, dto.CurrentPassword))
+            {
+                _logger.LogWarning("Change Password failed: Current password is incorrect for userId: {userId}", dto.id);
+                return ServiceResult<bool>.Fail("Current password is incorrect");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(
+                user,
+                dto.CurrentPassword,
+                dto.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                _logger.LogError(
+                    "Change Password failed for userId: {userId}, Errors: {@Errors}",
+                    dto.id,
+                    result.Errors.Select(e => e.Description)
+                );
+                return ServiceResult<bool>.Fail(
+                    "Change Password failed. An error occurred while Changing the password.",
+                    resultType: ServiceResultType.BadRequest
+                );
+            }
+
+            _logger.LogInformation("Password Changed successfully for user: {UserId}", dto.id);
+            return ServiceResult<bool>.Ok(true, "Password Changed successfully.");
         }
 
         public async Task<ServiceResult<bool>> DeleteUserAsync(Guid userId)

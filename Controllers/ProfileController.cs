@@ -325,6 +325,37 @@ namespace MARN_API.Controllers
             var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
             return HandleServiceResult<bool>(result);
         }
+
+        /// <summary>
+        /// Change password for the authenticated user.
+        /// </summary>
+        /// <param name="dto">
+        /// Change password data:
+        /// - user id, current password, new password, confirm new password.
+        /// </param>
+        /// <returns>Success message</returns>
+        /// <response code="200">Password changed successfully</response>
+        /// <response code="400">If validation fails or user not found</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPut("change-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User id not found in token");
+
+            if (userId != dto.id)
+                return Unauthorized("User id mismatch");
+
+            var result = await _profileService.ChangePasswordAsync(dto);
+            return HandleServiceResult<bool>(result);
+        }
+
         #endregion
     }
 }

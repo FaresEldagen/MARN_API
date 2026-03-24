@@ -5,7 +5,7 @@ namespace MARN_API.DTOs.Profile
     public class ChangePasswordDto
     {
         [Required]
-        public long id { get; set; }
+        public Guid id { get; set; }
 
         [Required(ErrorMessage = "Current Password is Required")]
         public string CurrentPassword { get; set; } = null!;
@@ -17,8 +17,7 @@ namespace MARN_API.DTOs.Profile
 
         [Required(ErrorMessage = "Confirming The Password is Required")]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
-        [Display(Name = "Confirm Password")]
+        [Compare("NewPassword", ErrorMessage = "Password and confirmation password do not match.")]
         public string ConfirmNewPassword { get; set; } = null!;
     }
 }
