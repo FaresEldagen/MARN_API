@@ -317,7 +317,7 @@ namespace MARN_API.Services.Implementations
                 if (frontValidationError != null)
                     return frontValidationError;
 
-                var newImageUrl = await _fileService.SaveImageAsync(dto.FrontIdPhoto, "profiles");
+                var newImageUrl = await _fileService.SaveImageAsync(dto.FrontIdPhoto, "idCards");
 
                 if (newImageUrl == null)
                     return ServiceResult<bool>.Fail("Failed to upload image");
@@ -333,7 +333,7 @@ namespace MARN_API.Services.Implementations
                 if (backValidationError != null)
                     return backValidationError;
 
-                var newImageUrl = await _fileService.SaveImageAsync(dto.BackIdPhoto, "profiles");
+                var newImageUrl = await _fileService.SaveImageAsync(dto.BackIdPhoto, "idCards");
 
                 if (newImageUrl == null)
                     return ServiceResult<bool>.Fail("Failed to upload image");

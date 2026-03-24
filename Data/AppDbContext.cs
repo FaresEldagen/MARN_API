@@ -69,6 +69,15 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new BookingRequestSeed());
             builder.ApplyConfiguration(new SavedPropertySeed());
             builder.ApplyConfiguration(new NotificationSeed());
+            builder.ApplyConfiguration(new AdminSeed());
+            builder.ApplyConfiguration(new RoommatePreferenceSeed());
+            builder.ApplyConfiguration(new PropertyAmenitySeed());
+            builder.ApplyConfiguration(new PropertyRuleSeed());
+            builder.ApplyConfiguration(new ReviewSeed());
+            builder.ApplyConfiguration(new MessageSeed());
+            builder.ApplyConfiguration(new ReportSeed());
+            builder.ApplyConfiguration(new UserActivitySeed());
+            builder.ApplyConfiguration(new UserDeviceSeed());
         }
     }
 }

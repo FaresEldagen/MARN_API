@@ -38,10 +38,16 @@ namespace MARN_API.Data.Seed
 
                     FirstName = "Renter",
                     LastName = "Alpha",
-                    Language = Language.English,
+                    ArabicFullName = "رينتر ألفا",
+                    ArabicAddress = "123 شارع النيل، القاهرة",
+                    NationalIDNumber = "12345678901234",
+                    FrontIdPhoto = "/images/idCards/95c1567c-357c-4c0a-b711-e0ba27c1a96f.jpg",
+                    BackIdPhoto = "/images/idCards/b8ee0c84-7a46-457d-a6d5-9696166b3c87.jpg",
+                    Language = Language.Arabic,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Active,
+                    ProfileImage = "/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png",
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -62,6 +68,11 @@ namespace MARN_API.Data.Seed
 
                     FirstName = "Renter",
                     LastName = "Beta",
+                    ArabicFullName = "رينتر بيتا",
+                    ArabicAddress = "456 شارع المعادي، القاهرة",
+                    NationalIDNumber = "23456789012345",
+                    FrontIdPhoto = "/images/idCards/f9797aa8-46ce-4dbb-ad14-2a521ed962fc.jpg",
+                    BackIdPhoto = "/images/idCards/0b2b1890-82ff-4459-be9a-6dc65971849a.jpg",
                     Language = Language.English,
                     Gender = Gender.Female,
                     Country = Country.Egypt,
