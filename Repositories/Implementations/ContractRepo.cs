@@ -97,5 +97,18 @@ namespace MARN_API.Repositories.Implementations
                 .SumAsync();
         }
         #endregion
+
+
+        public async Task<bool> CheackActiveContractsByUserId(Guid userId)
+        {
+            bool isRenterWithActiveContract = await Context.Contracts
+                .AsNoTracking()
+                .AnyAsync(c => c.RenterId == userId && c.Status == ContractStatus.Active);
+            bool isOwnerWithActiveContract = await Context.Contracts
+                .AsNoTracking()
+                .AnyAsync(c => c.OwnerId == userId && c.Status == ContractStatus.Active);
+
+            return isRenterWithActiveContract || isOwnerWithActiveContract;
+        }
     }
 }

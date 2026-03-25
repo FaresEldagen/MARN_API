@@ -32,7 +32,39 @@ namespace MARN_API.Data.Seed
                     PaymentFrequency = PaymentFrequency.Monthly,
                     IsLocked = false,
                     Version = 1,
-                    CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Snapshot = new ContractSnapshot
+                    {
+                        RenterSnapshot = new UserSnapshot
+                        {
+                            Id = renterAId,
+                            FullName = "Renter Alpha",
+                            Email = "renter.a@example.com",
+                            ArabicFullName = "رينتر ألفا",
+                            ArabicAddress = "123 شارع النيل، القاهرة",
+                            NationalIDNumber = "12345678901234",
+                            ProfileImage = "/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png"
+                        },
+                        OwnerSnapshot = new UserSnapshot
+                        {
+                            Id = ownerXId,
+                            FullName = "Owner X",
+                            Email = "owner.x@example.com"
+                        },
+                        PropertySnapshot = new PropertySnapshot
+                        {
+                            Id = 1001,
+                            Title = "Cozy Seed Apartment",
+                            Description = "A cozy seeded apartment suitable for testing active rentals.",
+                            Address = "123 Seed Street, Cairo",
+                            Price = 5000m,
+                            RentalUnit = "Monthly",
+                            PropertyType = "Apartment",
+                            Bedrooms = 2,
+                            Bathrooms = 1,
+                            Beds = 3
+                        }
+                    }
                 },
                 new Contract
                 {
@@ -50,7 +82,35 @@ namespace MARN_API.Data.Seed
                     PaymentFrequency = PaymentFrequency.Monthly,
                     IsLocked = false,
                     Version = 1,
-                    CreatedAt = new DateTime(2025, 3, 2, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 3, 2, 0, 0, 0, DateTimeKind.Utc),
+                    Snapshot = new ContractSnapshot
+                    {
+                        RenterSnapshot = new UserSnapshot
+                        {
+                            Id = renterCId,
+                            FullName = "Renter Gamma",
+                            Email = "renter.c@example.com"
+                        },
+                        OwnerSnapshot = new UserSnapshot
+                        {
+                            Id = ownerXId,
+                            FullName = "Owner X",
+                            Email = "owner.x@example.com"
+                        },
+                        PropertySnapshot = new PropertySnapshot
+                        {
+                            Id = 1002,
+                            Title = "Modern Seed Loft",
+                            Description = "A modern loft used for pending booking and payments tests.",
+                            Address = "456 Integration Avenue, Cairo",
+                            Price = 7500m,
+                            RentalUnit = "Monthly",
+                            PropertyType = "Apartment",
+                            Bedrooms = 1,
+                            Bathrooms = 1,
+                            Beds = 1
+                        }
+                    }
                 },
                 new Contract
                 {
@@ -66,7 +126,39 @@ namespace MARN_API.Data.Seed
                     PaymentFrequency = PaymentFrequency.Monthly,
                     IsLocked = false,
                     Version = 1,
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Snapshot = new ContractSnapshot
+                    {
+                        RenterSnapshot = new UserSnapshot
+                        {
+                            Id = renterAId,
+                            FullName = "Renter Alpha",
+                            Email = "renter.a@example.com",
+                            ArabicFullName = "رينتر ألفا",
+                            ArabicAddress = "123 شارع النيل، القاهرة",
+                            NationalIDNumber = "12345678901234",
+                            ProfileImage = "/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png"
+                        },
+                        OwnerSnapshot = new UserSnapshot
+                        {
+                            Id = ownerXId,
+                            FullName = "Owner X",
+                            Email = "owner.x@example.com"
+                        },
+                        PropertySnapshot = new PropertySnapshot
+                        {
+                            Id = 1003,
+                            Title = "Seed Studio Flat",
+                            Description = "A small studio property used for saved properties and pending bookings.",
+                            Address = "789 Scenario Road, Cairo",
+                            Price = 3500m,
+                            RentalUnit = "Monthly",
+                            PropertyType = "Studio",
+                            Bedrooms = 1,
+                            Bathrooms = 1,
+                            Beds = 1
+                        }
+                    }
                 },
                 // Active contract where Owner Z is the renter (for renter dashboard)
                 new Contract
@@ -85,7 +177,35 @@ namespace MARN_API.Data.Seed
                     PaymentFrequency = PaymentFrequency.Monthly,
                     IsLocked = false,
                     Version = 1,
-                    CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, DateTimeKind.Utc),
+                    Snapshot = new ContractSnapshot
+                    {
+                        RenterSnapshot = new UserSnapshot
+                        {
+                            Id = ownerZId,
+                            FullName = "Owner Z",
+                            Email = "owner.z@example.com"
+                        },
+                        OwnerSnapshot = new UserSnapshot
+                        {
+                            Id = ownerXId,
+                            FullName = "Owner X",
+                            Email = "owner.x@example.com"
+                        },
+                        PropertySnapshot = new PropertySnapshot
+                        {
+                            Id = 1001,
+                            Title = "Cozy Seed Apartment",
+                            Description = "A cozy seeded apartment suitable for testing active rentals.",
+                            Address = "123 Seed Street, Cairo",
+                            Price = 5000m,
+                            RentalUnit = "Monthly",
+                            PropertyType = "Apartment",
+                            Bedrooms = 2,
+                            Bathrooms = 1,
+                            Beds = 3
+                        }
+                    }
                 }
             );
         }

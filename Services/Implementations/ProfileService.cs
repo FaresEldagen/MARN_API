@@ -286,12 +286,11 @@ namespace MARN_API.Services.Implementations
             var originalGender = user.Gender;
             var originalCountry = user.Country;
 
-
             user = _mapper.Map(dto, user);
 
             // Only reset verification if critical identity fields changed
-            if (user.FirstName != originalFirstName || 
-                user.LastName != originalLastName || 
+            if (user.FirstName != originalFirstName ||
+                user.LastName != originalLastName ||
                 user.DateOfBirth != originalDateOfBirth ||
                 user.PhoneNumber != originalPhoneNumber ||
                 user.Gender != originalGender ||
@@ -331,6 +330,12 @@ namespace MARN_API.Services.Implementations
                 _logger.LogWarning("Update Legal Profile Data failed: User not found for userId: {userId}", dto.Id);
                 return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.BadRequest);
             }
+
+            //if (user.AccountStatus == AccountStatus.Verified)
+            //{
+            //    _logger.LogWarning("Update Legal Profile Data failed: User is already verified for userId: {userId}", dto.Id);
+            //    return ServiceResult<bool>.Fail("User is already verified", resultType: ServiceResultType.BadRequest);
+            //}
 
             if (dto.FrontIdPhoto != null)
             {
@@ -551,10 +556,20 @@ namespace MARN_API.Services.Implementations
                 );
             }
 
+            var hasActiveContracts = await _contractRepo.CheackActiveContractsByUserId(userId);
+
+            if (hasActiveContracts)
+            {
+                _logger.LogWarning("Delete User failed: User has active contracts and cannot be deleted for userId: {userId}", userId);
+                return ServiceResult<bool>.Fail(
+                    "User has active contracts and cannot be deleted",
+                    resultType: ServiceResultType.BadRequest
+                );
+            }
+
             user.DeletedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(user);
-            // Need to handle potential cascading deletes or orphaned data in related tables (e.g., Bookings, Reviews, etc.) if necessary
 
             if (!result.Succeeded)
             {

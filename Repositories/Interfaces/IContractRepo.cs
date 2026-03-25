@@ -14,5 +14,8 @@ namespace MARN_API.Repositories.Interfaces
         public Task<List<OwnerContractCardDto>> GetContracts(Guid userId);
         public Task<int> GetOwnedPropertiesOccupiedPlacesCount(Guid userId);
         #endregion
+
+
+        public Task<bool> CheackActiveContractsByUserId(Guid userId);
     }
 }

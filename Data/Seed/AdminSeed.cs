@@ -37,7 +37,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.English,
                     Gender = Gender.Unknown,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

@@ -46,7 +46,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.Arabic,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png",
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
@@ -76,7 +76,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.English,
                     Gender = Gender.Female,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 2, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -100,7 +100,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.English,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 3, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

@@ -362,7 +362,7 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
-        /// (NOT FINISHED) Delete the Account for the authenticated user.
+        /// Delete the Account for the authenticated user.
         /// </summary>
         /// <returns>Success message</returns>
         /// <response code="200">Password changed successfully</response>

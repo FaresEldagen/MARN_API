@@ -40,7 +40,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.English,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Owner
@@ -64,7 +64,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.English,
                     Gender = Gender.Female,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 },
                 // Owner Z: dual-role account (Owner + Renter) with data for both dashboards
@@ -89,7 +89,7 @@ namespace MARN_API.Data.Seed
                     Language = Language.English,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
-                    AccountStatus = AccountStatus.Active,
+                    AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

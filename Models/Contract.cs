@@ -30,6 +30,8 @@ namespace MARN_API.Models
         public DateTime? CancelledAt { get; set; }
         public string? CancellationReason { get; set; }
 
+        public ContractSnapshot? Snapshot { get; set; }
+
         public virtual Property Property { get; set; } = null!;
         public virtual ApplicationUser Renter { get; set; } = null!;
         public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
