@@ -27,11 +27,13 @@ namespace MARN_API
 
 
 
-            // Add User Secrets in Development environment
+            // Use appsettings.json instead of User Secrets
+            /*
             if (builder.Environment.IsDevelopment())
             {
                 builder.Configuration.AddUserSecrets<Program>();
             }
+            */
 
 
             // Configure logging
