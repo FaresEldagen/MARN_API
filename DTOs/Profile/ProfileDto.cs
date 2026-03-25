@@ -21,10 +21,10 @@ namespace MARN_API.DTOs.Profile
 
         // Owner Data
         public bool IsOwner { get; set; }
-        public float AverageRating { get; set; }
-        public int RatingsCount { get; set; }
-        public int OwnedPropertiesCount { get; set; }
-        public ICollection<PropertyCardDto>? OwnedProperties { get; set; }
+        public float? AverageRating { get; set; } = null;
+        public int? RatingsCount { get; set; } = null;
+        public int? OwnedPropertiesCount { get; set; } = null;
+        public ICollection<PropertyCardDto>? OwnedProperties { get; set; } = null;
 
 
         // Roommate Preferences

@@ -14,16 +14,18 @@ namespace MARN_API.Mapping
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email));
 
             // Get Profile Data
-            CreateMap<RoommatePreference, ProfileDto>();
             CreateMap<ApplicationUser, ProfileDto>()
                 .ForMember(dest => dest.FullName,
                     opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
                 .ForMember(dest => dest.MemberSince,
                     opt => opt.MapFrom(src => src.CreatedAt));
+            CreateMap<RoommatePreference, ProfileDto>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             // Get Profile Settings Data
-            CreateMap<RoommatePreference, ProfileSettingsDto>();
             CreateMap<ApplicationUser, ProfileSettingsDto>();
+            CreateMap<RoommatePreference, ProfileSettingsDto>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             // Update Profile Settings
             CreateMap<UpdateProfileDto, ApplicationUser>()

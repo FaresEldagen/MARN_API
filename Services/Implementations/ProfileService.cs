@@ -191,23 +191,25 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<ProfileDto>.Fail("User not found", resultType: ServiceResultType.BadRequest);
             }
 
-            var isOwner = await _userManager.IsInRoleAsync(user, "Owner");
-
-            var averageRating = await _propertyRepo.GetOwnerAverageRating(userId);
-            var ratingsCount = await _propertyRepo.GetOwnerRatingsCount(userId);
-
-            var ownedProperties = await _propertyRepo.GetOwnerProfileProperties(userId);
-            var ownedPropertiesCount = ownedProperties == null ? 0 : ownedProperties.Count;
-
-            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
-
             var profileData = _mapper.Map<ProfileDto>(user);
 
+            var isOwner = await _userManager.IsInRoleAsync(user, "Owner");
             profileData.IsOwner = isOwner;
-            profileData.AverageRating = averageRating;
-            profileData.RatingsCount = ratingsCount;
-            profileData.OwnedProperties = ownedProperties;
-            profileData.OwnedPropertiesCount = ownedProperties?.Count ?? 0;
+
+            if (isOwner)
+            {
+                var averageRating = await _propertyRepo.GetOwnerAverageRating(userId);
+                var ratingsCount = await _propertyRepo.GetOwnerRatingsCount(userId);
+                var ownedProperties = await _propertyRepo.GetOwnerProfileProperties(userId);
+                var ownedPropertiesCount = ownedProperties == null ? 0 : ownedProperties.Count;
+
+                profileData.AverageRating = averageRating;
+                profileData.RatingsCount = ratingsCount;
+                profileData.OwnedProperties = ownedProperties;
+                profileData.OwnedPropertiesCount = ownedProperties?.Count ?? 0;
+            }
+
+            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
 
             if (RoommatePreferences != null)
             {
@@ -234,9 +236,9 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<ProfileSettingsDto>.Fail("User not found", resultType: ServiceResultType.BadRequest);
             }
 
-            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
-
             var profileData = _mapper.Map<ProfileSettingsDto>(user);
+
+            var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(userId);
 
             if (RoommatePreferences != null)
             {

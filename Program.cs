@@ -252,8 +252,6 @@ namespace MARN_API
                     }
                 };
             });
-
-            builder.Services.AddAuthorization();
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
 
