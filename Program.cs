@@ -1,21 +1,21 @@
-
+using MARN_API.Configurations;
 using MARN_API.Data;
-using MARN_API.Data.Seed;
+using MARN_API.Middleware;
+using MARN_API.Models;
+using MARN_API.Repositories.Implementations;
+using MARN_API.Repositories.Interfaces;
+using MARN_API.Services.Implementations;
+using MARN_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using MARN_API.Models;
-using MARN_API.Services.Interfaces;
-using MARN_API.Services.Implementations;
-using MARN_API.Configurations;
-using MARN_API.Mapping;
-using MARN_API.Middleware;
-using Microsoft.AspNetCore.Mvc;
-using MARN_API.Repositories.Interfaces;
-using MARN_API.Repositories.Implementations;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text.Json.Serialization;
+using System.Text;
+using System.Threading.RateLimiting;
 
 namespace MARN_API
 {
@@ -26,25 +26,17 @@ namespace MARN_API
             var builder = WebApplication.CreateBuilder(args);
 
 
-
-            // Use appsettings.json instead of User Secrets
-            /*
-            if (builder.Environment.IsDevelopment())
-            {
-                builder.Configuration.AddUserSecrets<Program>();
-            }
-            */
-
-
-            // Configure logging
+            #region Logging Configuration
+            // Configure application logging (Console, Debug, File)
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
             builder.Logging.AddFile("Logs/app-{Date}.txt");
+
             if (builder.Environment.IsDevelopment())
-            {
                 builder.Logging.AddEventSourceLogger();
-            }
+
+            // Custom model validation response
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
@@ -53,52 +45,57 @@ namespace MARN_API
                         .GetRequiredService<ILogger<Program>>();
 
                     logger.LogWarning("Model validation failed");
-
                     return new BadRequestObjectResult(context.ModelState);
                 };
             });
+            #endregion
 
 
-            // Configure file upload size limits
-            builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+            #region Request & Upload Limits
+            // Limit file upload size (10MB)
+            builder.Services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+                options.MultipartBodyLengthLimit = 10 * 1024 * 1024;
             });
 
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
             });
+            #endregion
 
 
-            // Add services to the container.
-
+            #region Controllers & JSON
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    // Convert Enums to string instead of int
+                    options.JsonSerializerOptions.Converters
+                        .Add(new JsonStringEnumConverter());
                 });
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
+            #endregion
+
+
+            #region Swagger Configuration
             builder.Services.AddSwaggerGen(options =>
             {
-                // Include XML comments
+                // XML Documentation
                 var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
-                {
-                    options.IncludeXmlComments(xmlPath);
-                }
 
-                // Add JWT Bearer authentication to Swagger
+                if (File.Exists(xmlPath))
+                    options.IncludeXmlComments(xmlPath);
+
+                // JWT Support
                 options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: \"Bearer 12345abcdef\"",
+                    Description = "Enter: Bearer {your token}",
                     Name = "Authorization",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
                     Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT"
+                    Scheme = "Bearer"
                 });
 
                 options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -116,14 +113,19 @@ namespace MARN_API
                     }
                 });
             });
+            #endregion
 
 
-            // Dependency Injection
+            #region Database Configuration
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
-            // Repos
+            #endregion
+
+
+            #region Dependency Injection
+            // Repositories
             builder.Services.AddScoped<IBookingRequestRepo, BookingRequestRepo>();
             builder.Services.AddScoped<IContractRepo, ContractRepo>();
             builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
@@ -131,32 +133,37 @@ namespace MARN_API
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
+
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IFileService, FileService>();
-
-            builder.Services.AddSignalR();
-
-            builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, MARN_API.Hubs.CustomUserIdProvider>();
-            builder.Services.AddSingleton<MARN_API.Hubs.ConnectionTracker>();
-
             builder.Services.AddScoped<IChatRepository, ChatRepository>();
             builder.Services.AddScoped<IChatService, ChatService>();
+
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
+            #endregion
 
-        
 
-            // Health Checks
+            #region SignalR Configuration
+            builder.Services.AddSignalR();
+
+            builder.Services.AddSingleton<IUserIdProvider, MARN_API.Hubs.CustomUserIdProvider>();
+            builder.Services.AddSingleton<MARN_API.Hubs.ConnectionTracker>();
+            #endregion
+
+
+            #region Health Checks
             builder.Services.AddHealthChecks()
                 .AddDbContextCheck<AppDbContext>("database")
-                .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "self" });
+                .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+            #endregion
 
 
-            // Identity Services
+            #region Identity Configuration
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(option =>
             {
                 option.User.RequireUniqueEmail = true;
@@ -170,18 +177,20 @@ namespace MARN_API
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Token Lifetimes
             builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
             {
                 // Default provider (used for email confirmation & password reset)
                 opt.TokenLifespan = TimeSpan.FromHours(1);
             });
 
-            // Configure the email token provider specifically
             builder.Services.Configure<DataProtectionTokenProviderOptions>(TokenOptions.DefaultEmailProvider, opt =>
             {
                 // 2FA codes expire quickly
                 opt.TokenLifespan = TimeSpan.FromMinutes(5);
             });
+
+            // MFA Policy
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("RequireMfa", policy =>
@@ -189,30 +198,33 @@ namespace MARN_API
                     policy.RequireClaim("amr", "mfa");
                 });
             });
+            #endregion
 
 
-            // CORS Policy
+            #region CORS
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.SetIsOriginAllowed(origin => true) // Allow any origin during development
+                    policy.SetIsOriginAllowed(_ => true)
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials(); // Required for SignalR
+                          .AllowCredentials();
                 });
             });
-            // If you want to allow only a specific domain, you can use the following code instead:
+
             //builder.Services.AddCors(options =>
             //{
             //    options.AddPolicy("AllowCustomDomain",
             //        builder => builder.WithOrigins("http://127.0.0.1:5500")
-            //        .AllowAnyMethod()
-            //        .AllowAnyHeader());
+            //            .AllowAnyHeader()
+            //            .AllowAnyMethod()
+            //            .AllowCredentials());
             //});
+            #endregion
 
 
-            // Authentication and Authorization
+            #region Authentication (JWT)
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "CoolAuthentication";
@@ -254,127 +266,99 @@ namespace MARN_API
                     }
                 };
             });
-            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+            builder.Services.Configure<JwtOptions>(
+                builder.Configuration.GetSection("Jwt"));
+            #endregion
 
 
-            // Add AutoMapper
+            #region AutoMapper
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            #endregion
 
 
-            // Rate Limiting
+            #region Rate Limiting
             builder.Services.AddRateLimiter(options =>
             {
-                // Global rate limiting policy
-                options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                    System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                        factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = 100,
-                            Window = TimeSpan.FromMinutes(1),
-                            QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
-                            QueueLimit = 10
-                        }));
+                string GetKey(HttpContext context) =>
+                    context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-                // Strict policy for authentication endpoints
+                FixedWindowRateLimiterOptions CreateOptions(int permit, int queue = 0) =>
+                    new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = permit,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = queue
+                    };
+
+                // Global
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        GetKey(context),
+                        _ => CreateOptions(100, 10)));
+
+                // Strict (Auth)
                 options.AddPolicy("StrictAuth", context =>
-                    System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                        factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = 5,
-                            Window = TimeSpan.FromMinutes(1),
-                            QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
-                            QueueLimit = 0
-                        }));
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        GetKey(context),
+                        _ => CreateOptions(5)));
 
-                // Moderate policy for general API endpoints
+                // Moderate
                 options.AddPolicy("Moderate", context =>
-                    System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                        factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = 30,
-                            Window = TimeSpan.FromMinutes(1),
-                            QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
-                            QueueLimit = 5
-                        }));
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        GetKey(context),
+                        _ => CreateOptions(30, 5)));
 
-                options.OnRejected = async (context, cancellationToken) =>
+                // On Rejected
+                options.OnRejected = async (context, token) =>
                 {
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                     await context.HttpContext.Response.WriteAsync(
-                        "Rate limit exceeded. Please try again later.", cancellationToken);
+                        "Rate limit exceeded. Please try again later.", token);
                 };
             });
-
+            #endregion
 
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            // Global exception handling should be registered BEFORE request logging
-            // so exceptions are caught before the logging middleware tries to process the response
+
+            #region Middleware Pipeline
+            // Global Exception Handling
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
-
-            // Request logging
+            // Logging Requests
             app.UseMiddleware<RequestLoggingMiddleware>();
 
-
-            // if (app.Environment.IsDevelopment())
-            // {
-            //     app.UseSwagger();
-            //     app.UseSwaggerUI();
-            // }
-            // Enable Swagger in all environments during development phase 
-            // to support frontend and mobile teams.
+            // Swagger
             app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "MARN API V1");
-                options.RoutePrefix = "swagger"; // Access via {your-url}/swagger
-            });
-
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
-
             app.UseStaticFiles();
 
-            // Rate limiting should be applied before authentication
             app.UseRateLimiter();
-
-
             app.UseCors();
-            // If you want to allow only a specific domain, you can use the following code instead:
             //app.UseCors("AllowCustomDomain");
-
 
             app.UseAuthentication();
             app.UseAuthorization();
+            #endregion
 
 
-
-
-            // Health Check endpoints
-            app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-            {
-                Predicate = _ => true
-            });
-
-            app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-            {
-                Predicate = check => check.Tags.Contains("database") || check.Tags.Contains("self")
-            });
-
-            app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-            {
-                Predicate = check => check.Tags.Contains("self")
-            });
-
-
+            #region Endpoints
             app.MapControllers();
+
+            // SignalR Hub
             app.MapHub<MARN_API.Hubs.ChatHub>("/chatHub");
+
+            // Health Checks
+            app.MapHealthChecks("/health");
+            app.MapHealthChecks("/health/ready");
+            app.MapHealthChecks("/health/live");
+            #endregion
+
 
             await app.RunAsync();
         }
