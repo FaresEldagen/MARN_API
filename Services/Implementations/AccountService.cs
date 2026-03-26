@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Google.Apis.Auth;
-using MARN_API.DTOs;
+using MARN_API.DTOs.Auth;
 using MARN_API.Enums;
+using MARN_API.Enums.Account;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Text;
 using System.Web.Http.ModelBinding;
@@ -83,6 +85,24 @@ namespace MARN_API.Services.Implementations
                 _logger.LogWarning("Login failed: Invalid password for user: {UserId}", user.Id);
                 return ServiceResult<LoginResponseDto>.Fail(
                     "Invalid email or password", 
+                    resultType: ServiceResultType.Unauthorized
+                );
+            }
+
+            bool isDeleted = user.DeletedAt != null;
+            if (isDeleted)
+            {
+                if (user.AccountStatus == AccountStatus.Banned)
+                {
+                    _logger.LogWarning("Login failed: Account banned for user: {UserId}", user.Id);
+                    return ServiceResult<LoginResponseDto>.Fail(
+                        "Account has been banned. Contact support for assistance.",
+                        resultType: ServiceResultType.Unauthorized
+                    );
+                }
+                _logger.LogWarning("Login failed: Account deleted for user: {UserId}", user.Id);
+                return ServiceResult<LoginResponseDto>.Fail(
+                    "Account has been deleted. Contact support for assistance.",
                     resultType: ServiceResultType.Unauthorized
                 );
             }
@@ -218,11 +238,30 @@ namespace MARN_API.Services.Implementations
                 _logger.LogInformation("Google account linked successfully to user {UserId}", user.Id);
             }
 
-            if (await _userManager.IsLockedOutAsync(user))
+            bool isLocked = await _userManager.IsLockedOutAsync(user);
+            if (isLocked)
             {
                 _logger.LogWarning("Google login failed: User locked out: {UserId}", user.Id);
                 return ServiceResult<LoginResponseDto>
                     .Fail("Account is locked. Try again later.", resultType: ServiceResultType.Unauthorized);
+            }
+
+            bool isDeleted = user.DeletedAt != null;
+            if (isDeleted)
+            {
+                if (user.AccountStatus == AccountStatus.Banned)
+                {
+                    _logger.LogWarning("Login failed: Account banned for user: {UserId}", user.Id);
+                    return ServiceResult<LoginResponseDto>.Fail(
+                        "Account has been banned. Contact support for assistance.",
+                        resultType: ServiceResultType.Unauthorized
+                    );
+                }
+                _logger.LogWarning("Login failed: Account deleted for user: {UserId}", user.Id);
+                return ServiceResult<LoginResponseDto>.Fail(
+                    "Account has been deleted. Contact support for assistance.",
+                    resultType: ServiceResultType.Unauthorized
+                );
             }
 
             var response = await CreateJwtForUserAsync(user, dto.RememberMe, "Google");
@@ -525,90 +564,6 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Password reset successful for user: {UserId}", user.Id);
             return ServiceResult<bool>.Ok(true, "Password reset successful.");
         }
-        #endregion
-
-
-        #region Others
-        public async Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null)
-        {
-            _logger.LogInformation("Toggle2FA attempt for userId: {userId}", userId);
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("Toggle2FA failed: User not found for userId: {userId}", userId);
-                return ServiceResult<bool>.Fail("User not found");
-            }
-
-            // Optional: verify password before allowing toggle
-            if (!user.TwoFactorEnabled)
-            {
-                if (string.IsNullOrEmpty(password))
-                {
-                    _logger.LogWarning("Toggle2FA failed: Invalid password for user: {UserId}", user.Id);
-                    return ServiceResult<bool>.Fail("Invalid password");
-                }
-                else
-                {
-                    bool CheckPassword = await _userManager.CheckPasswordAsync(user, password);
-                    if (!CheckPassword)
-                    {
-                        _logger.LogWarning("Toggle2FA failed: Invalid password for user: {UserId}", user.Id);
-                        return ServiceResult<bool>.Fail("Invalid password");
-                    }
-                }
-
-            }
-
-            bool newState = !user.TwoFactorEnabled;
-
-            var result = await _userManager.SetTwoFactorEnabledAsync(user, newState);
-            if (!result.Succeeded)
-            {
-                _logger.LogWarning("Toggle2FA failed: Failed to Update the database for user: {UserId}", user.Id);
-                return ServiceResult<bool>.Fail("Failed to toggle 2FA", result.Errors.Select(e => e.Description).ToList());
-            }
-
-            _logger.LogInformation("User {UserId} toggled 2FA. Enabled={Enabled}", user.Id, newState);
-            return ServiceResult<bool>.Ok(newState, $"Two-Factor Authentication is now {(newState ? "enabled" : "disabled")}");
-        }
-
-        //public async Task<IdentityResult> UpdateUserAsync(UpdateUserDto updateUserDto)
-        //{
-        //    var user = await _userManager.FindByIdAsync(updateUserDto.id.ToString());
-        //    if (user == null)
-        //        return IdentityResult.Failed(new IdentityError { Description = "User not found." });
-
-        //    user = _mapper.Map(updateUserDto, user);
-
-        //    return await _userManager.UpdateAsync(user);
-        //}
-
-        //public async Task<IdentityResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
-        //{
-        //    var user = await _userManager.FindByIdAsync(changePasswordDto.id.ToString());
-        //    if (user == null)
-        //        return IdentityResult.Failed(new IdentityError { Description = "User not found." });
-
-        //    if (!await _userManager.CheckPasswordAsync(user, changePasswordDto.CurrentPassword))
-        //        return IdentityResult.Failed(new IdentityError { Description = "Current password is incorrect." });
-
-        //    return await _userManager.ChangePasswordAsync(
-        //        user,
-        //        changePasswordDto.CurrentPassword,
-        //        changePasswordDto.NewPassword);
-        //}
-
-        //public async Task<IdentityResult> DeleteUserAsync(long id)
-        //{
-        //    var user = await _userManager.FindByIdAsync(id.ToString());
-        //    if (user == null)
-        //        return IdentityResult.Failed(new IdentityError { Description = "User not found." });
-
-        //    user.DeletedAt = DateTime.UtcNow;
-
-        //    return await _userManager.UpdateAsync(user);
-        //}
         #endregion
     }
 }

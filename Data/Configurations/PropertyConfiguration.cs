@@ -17,10 +17,10 @@ namespace MARN_API.Data.Configurations
             builder.Property(p => p.OwnerId).IsRequired();
             builder.Property(p => p.Type).IsRequired();
             builder.Property(p => p.Price).IsRequired();
-            builder.Property(p => p.RentalDuration).IsRequired();
             builder.Property(p => p.MaxOccupants).IsRequired();
             builder.Property(p => p.Latitude).IsRequired();
             builder.Property(p => p.Longitude).IsRequired();
+            builder.Property(p => p.IsShared).IsRequired();
 
             builder.Property(p => p.Type).HasConversion<int>();
             builder.Property(p => p.Availability).HasConversion<int>();

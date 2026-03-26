@@ -3,7 +3,7 @@
     public enum ContractStatus
     {
         Pending = 0,
-        Signed = 1,
+        Active = 1,
         Cancelled = 2,
         Expired = 3
     }

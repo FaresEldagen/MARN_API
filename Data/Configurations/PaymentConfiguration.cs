@@ -9,25 +9,23 @@ namespace MARN_API.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Payment> builder)
         {
-            builder.Property(p => p.StripePaymentIntentId).IsRequired();
-            builder.Property(p => p.StripeCustomerId).IsRequired();
-            builder.Property(p => p.PaymentMethod).IsRequired();
             builder.Property(p => p.Currency).IsRequired();
-            builder.Property(p => p.Amount).IsRequired();
-            builder.Property(p => p.Type).IsRequired();
-            builder.Property(p => p.UserId).IsRequired();
+            builder.Property(p => p.TotalAmount).IsRequired();
+            builder.Property(p => p.OwnerAmount).IsRequired();
+            builder.Property(p => p.PlatformFee).IsRequired();
             builder.Property(p => p.ContractId).IsRequired();
 
-
-            builder.Property(p => p.Amount).HasColumnType("decimal(18,2)");
-            builder.Property(p => p.Type).HasConversion<int>();
+            builder.Property(p => p.TotalAmount).HasColumnType("decimal(18,2)");
+            builder.Property(p => p.OwnerAmount).HasColumnType("decimal(18,2)");
+            builder.Property(p => p.PlatformFee).HasColumnType("decimal(18,2)");
             builder.Property(p => p.Status).HasConversion<int>();
 
             builder.Property(p => p.CreatedAt)
                    .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasIndex(p => p.UserId);
+            builder.HasIndex(p => p.DueDate);
             builder.HasIndex(p => p.ContractId);
+            builder.HasIndex(p => new { p.Status, p.AvailableAt });
         }
     }
 }

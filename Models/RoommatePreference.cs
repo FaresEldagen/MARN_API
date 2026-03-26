@@ -1,5 +1,5 @@
 using System;
-using MARN_API.Enums;
+using MARN_API.Enums.RoommatePreferences;
 
 namespace MARN_API.Models
 {
@@ -8,9 +8,11 @@ namespace MARN_API.Models
         public long Id { get; set; }
         public Guid UserId { get; set; }
 
+        public bool RoommatePreferencesEnabled { get; set; } = true;
+
         public bool? Smoking { get; set; }
         public bool? Pets { get; set; }
-        public string? SleepSchedule { get; set; }
+        public SleepSchedule SleepSchedule { get; set; } = SleepSchedule.Unknown;
         public EducationLevel EducationLevel { get; set; } = EducationLevel.Unknown;
         public FieldOfStudy FieldOfStudy { get; set; } = FieldOfStudy.Unknown;
         public int? NoiseTolerance { get; set; }
@@ -19,7 +21,7 @@ namespace MARN_API.Models
         public SharingLevel SharingLevel { get; set; } = SharingLevel.Unknown;
         public decimal? BudgetRangeMin { get; set; }
         public decimal? BudgetRangeMax { get; set; }
-        public string? Bio { get; set; }
+
 
         public virtual ApplicationUser User { get; set; } = null!;
     }

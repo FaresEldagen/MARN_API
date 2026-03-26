@@ -5,6 +5,7 @@ namespace MARN_API.Models
         public long Id { get; set; }
         public long PropertyId { get; set; }
         public string Path { get; set; } = string.Empty;
+        public bool IsPrimary { get; set; } = false;
 
         public virtual Property Property { get; set; } = null!;
     }

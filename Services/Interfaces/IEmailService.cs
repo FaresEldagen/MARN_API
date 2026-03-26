@@ -12,6 +12,5 @@ namespace MARN_API.Services.Interfaces
         Task SendResendConfirmationEmailAsync(string toEmail, string firstName, string confirmationLink);
         Task SendResetPasswordEmailAsync(string toEmail, string firstName, string resetLink);
         Task Send2FAEmailAsync(string toEmail, string subject, string code);
-
     }
 }

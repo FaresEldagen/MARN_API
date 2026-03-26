@@ -69,4 +69,13 @@ nunit-*.xml
 # ===============================
 appsettings.Development.json
 appsettings.Local.json
+appsettings.json
 .env
+
+# ===============================
+# User Uploads & Static Assets
+# ===============================
+wwwroot/
+/appsettings.json
+/appsettings.json
+/appsettings.json

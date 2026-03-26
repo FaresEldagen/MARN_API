@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MARN_API.Models;
@@ -21,9 +21,6 @@ namespace MARN_API.Data
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<RoommatePreference> RoommatePreferences => Set<RoommatePreference>();
         public DbSet<Review> Reviews => Set<Review>();
-        public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
-        public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
-        public DbSet<ChatRoomParticipant> ChatRoomParticipants => Set<ChatRoomParticipant>();
         public DbSet<PropertyAmenity> PropertyAmenities => Set<PropertyAmenity>();
         public DbSet<PropertyRule> PropertyRules => Set<PropertyRule>();
         public DbSet<PropertyMedia> PropertyMedia => Set<PropertyMedia>();
@@ -31,6 +28,8 @@ namespace MARN_API.Data
         public DbSet<Report> Reports => Set<Report>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
         public DbSet<Admin> Admins => Set<Admin>();
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<SavedProperty> SavedProperties => Set<SavedProperty>();
 
 
@@ -47,9 +46,6 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new PaymentConfiguration());
             builder.ApplyConfiguration(new RoommatePreferenceConfiguration());
             builder.ApplyConfiguration(new ReviewConfiguration());
-            builder.ApplyConfiguration(new ChatRoomConfiguration());
-            builder.ApplyConfiguration(new ChatMessageConfiguration());
-            builder.ApplyConfiguration(new ChatRoomParticipantConfiguration());
             builder.ApplyConfiguration(new PropertyAmenityConfiguration());
             builder.ApplyConfiguration(new PropertyRuleConfiguration());
             builder.ApplyConfiguration(new PropertyMediaConfiguration());
@@ -58,10 +54,30 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new UserActivityConfiguration());
             builder.ApplyConfiguration(new AdminConfiguration());
             builder.ApplyConfiguration(new SavedPropertyConfiguration());
+            builder.ApplyConfiguration(new MessageConfiguration());
 
 
             // Seed initial data
             builder.ApplyConfiguration(new RoleSeed());
+            builder.ApplyConfiguration(new UserSeed());
+            builder.ApplyConfiguration(new OwnerSeed());
+            builder.ApplyConfiguration(new UserRoleSeed());
+            builder.ApplyConfiguration(new PropertySeed());
+            builder.ApplyConfiguration(new PropertyMediaSeed());
+            builder.ApplyConfiguration(new ContractSeed());
+            builder.ApplyConfiguration(new PaymentSeed());
+            builder.ApplyConfiguration(new BookingRequestSeed());
+            builder.ApplyConfiguration(new SavedPropertySeed());
+            builder.ApplyConfiguration(new NotificationSeed());
+            builder.ApplyConfiguration(new AdminSeed());
+            builder.ApplyConfiguration(new RoommatePreferenceSeed());
+            builder.ApplyConfiguration(new PropertyAmenitySeed());
+            builder.ApplyConfiguration(new PropertyRuleSeed());
+            builder.ApplyConfiguration(new ReviewSeed());
+            builder.ApplyConfiguration(new MessageSeed());
+            builder.ApplyConfiguration(new ReportSeed());
+            builder.ApplyConfiguration(new UserActivitySeed());
+            builder.ApplyConfiguration(new UserDeviceSeed());
         }
     }
 }

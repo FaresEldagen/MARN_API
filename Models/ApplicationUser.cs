@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using MARN_API.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using MARN_API.Enums.Account;
 
 namespace MARN_API.Models
 {
@@ -15,6 +16,8 @@ namespace MARN_API.Models
         public string? ProfileImage { get; set; }
         public Gender Gender { get; set; } = Gender.Unknown;
         public Country Country { get; set; } = Country.Unknown;
+        public string? Bio { get; set; }
+
 
         // KYC / Identity
         public string? FrontIdPhoto { get; set; }
@@ -33,14 +36,17 @@ namespace MARN_API.Models
         public virtual RoommatePreference? RoommatePreference { get; set; }
         public virtual ICollection<BookingRequest> BookingRequestsAsRenter { get; set; } = new HashSet<BookingRequest>();
         public virtual ICollection<Contract> ContractsAsRenter { get; set; } = new HashSet<Contract>();
-        public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
-        public virtual ICollection<ChatMessage> ChatMessages { get; set; } = new HashSet<ChatMessage>();
-        public virtual ICollection<ChatRoomParticipant> ChatRoomParticipants { get; set; } = new HashSet<ChatRoomParticipant>();
         public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
         public virtual ICollection<Report> ReportsFiled { get; set; } = new HashSet<Report>();
         public virtual ICollection<UserActivity> Activities { get; set; } = new HashSet<UserActivity>();
         public virtual ICollection<SavedProperty> SavedProperty { get; set; } = new HashSet<SavedProperty>();
+
+        [InverseProperty(nameof(Message.Sender))]
+        public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
+
+        [InverseProperty(nameof(Message.Receiver))]
+        public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 
     }
 }

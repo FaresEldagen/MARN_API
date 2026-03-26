@@ -39,6 +39,12 @@ namespace MARN_API.Data.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(c => new { c.PropertyId, c.RenterId, c.OwnerId });
+
+            builder.Property(c => c.Snapshot)
+                   .HasConversion(
+                       v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null!),
+                       v => System.Text.Json.JsonSerializer.Deserialize<ContractSnapshot>(v, (System.Text.Json.JsonSerializerOptions)null!))
+                   .HasColumnType("nvarchar(max)");
         }
     }
 }

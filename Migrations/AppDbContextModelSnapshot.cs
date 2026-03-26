@@ -43,6 +43,9 @@ namespace MARN_API.Migrations
                     b.Property<string>("BackIdPhoto")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -144,6 +147,88 @@ namespace MARN_API.Migrations
                     b.HasDiscriminator().HasValue("Renter");
 
                     b.UseTphMappingStrategy();
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ArabicAddress = "123 شارع النيل، القاهرة",
+                            ArabicFullName = "رينتر ألفا",
+                            BackIdPhoto = "/images/idCards/b8ee0c84-7a46-457d-a6d5-9696166b3c87.jpg",
+                            ConcurrencyStamp = "SEED-RENTER-A-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "renter.a@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Renter",
+                            FrontIdPhoto = "/images/idCards/95c1567c-357c-4c0a-b711-e0ba27c1a96f.jpg",
+                            Gender = 1,
+                            Language = 1,
+                            LastName = "Alpha",
+                            LockoutEnabled = false,
+                            NationalIDNumber = "12345678901234",
+                            NormalizedEmail = "RENTER.A@EXAMPLE.COM",
+                            NormalizedUserName = "RENTER.A@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            ProfileImage = "/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png",
+                            SecurityStamp = "SEED-RENTER-A-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "renter.a@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ArabicAddress = "456 شارع المعادي، القاهرة",
+                            ArabicFullName = "رينتر بيتا",
+                            BackIdPhoto = "/images/idCards/0b2b1890-82ff-4459-be9a-6dc65971849a.jpg",
+                            ConcurrencyStamp = "SEED-RENTER-B-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "renter.b@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Renter",
+                            FrontIdPhoto = "/images/idCards/f9797aa8-46ce-4dbb-ad14-2a521ed962fc.jpg",
+                            Gender = 2,
+                            Language = 0,
+                            LastName = "Beta",
+                            LockoutEnabled = false,
+                            NationalIDNumber = "23456789012345",
+                            NormalizedEmail = "RENTER.B@EXAMPLE.COM",
+                            NormalizedUserName = "RENTER.B@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "SEED-RENTER-B-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "renter.b@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SEED-RENTER-C-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "renter.c@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Renter",
+                            Gender = 1,
+                            Language = 0,
+                            LastName = "Gamma",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "RENTER.C@EXAMPLE.COM",
+                            NormalizedUserName = "RENTER.C@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "SEED-RENTER-C-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "renter.c@example.com"
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.BookingRequest", b =>
@@ -162,9 +247,6 @@ namespace MARN_API.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<long>("PropertyId")
                         .HasColumnType("bigint");
 
@@ -179,108 +261,56 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
-
                     b.HasIndex("RenterId");
 
-                    b.HasIndex("PropertyId", "OwnerId", "RenterId");
+                    b.HasIndex("PropertyId", "RenterId");
 
                     b.ToTable("BookingRequests", t =>
                         {
                             t.HasCheckConstraint("CK_BookingRequest_Dates", "[EndDate] > [StartDate]");
                         });
-                });
 
-            modelBuilder.Entity("MARN_API.Models.ChatMessage", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ChatRoomId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<DateTime?>("EditedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsEdited")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatRoomId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("ChatMessages");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ChatRoom", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long?>("RequestId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequestId")
-                        .IsUnique()
-                        .HasFilter("[RequestId] IS NOT NULL");
-
-                    b.ToTable("ChatRooms");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ChatRoomParticipant", b =>
-                {
-                    b.Property<long>("ChatRoomId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<DateTime?>("LastReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ChatRoomId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatRoomParticipants");
+                    b.HasData(
+                        new
+                        {
+                            Id = 5001L,
+                            CreatedAt = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EndDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1002L,
+                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 5002L,
+                            CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EndDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1002L,
+                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 5003L,
+                            CreatedAt = new DateTime(2025, 4, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1003L,
+                            RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 5004L,
+                            CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EndDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1003L,
+                            RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
@@ -325,6 +355,9 @@ namespace MARN_API.Migrations
                     b.Property<string>("OwnerSignature")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PaymentFrequency")
+                        .HasColumnType("int");
+
                     b.Property<long>("PropertyId")
                         .HasColumnType("bigint");
 
@@ -340,6 +373,9 @@ namespace MARN_API.Migrations
                     b.Property<DateTime?>("SignedByRenterAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Snapshot")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -354,8 +390,6 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
-
                     b.HasIndex("RenterId");
 
                     b.HasIndex("PropertyId", "RenterId", "OwnerId");
@@ -363,6 +397,138 @@ namespace MARN_API.Migrations
                     b.ToTable("Contracts", t =>
                         {
                             t.HasCheckConstraint("CK_Contract_Dates", "[EndDate] > [StartDate]");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 3001L,
+                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DocumentHash = "SEED-CONTRACT-1-HASH",
+                            DocumentPath = "/contracts/seed/contract1.pdf",
+                            EndDate = new DateTime(2027, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsLocked = false,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            OwnerSignature = "OwnerX-Signature",
+                            PaymentFrequency = 1,
+                            PropertyId = 1001L,
+                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            RenterSignature = "RenterA-Signature",
+                            Snapshot = "{\"RenterSnapshot\":{\"Id\":\"11111111-1111-1111-1111-111111111111\",\"FullName\":\"Renter Alpha\",\"Email\":\"renter.a@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":\"12345678901234\",\"ArabicFullName\":\"\\u0631\\u064A\\u0646\\u062A\\u0631 \\u0623\\u0644\\u0641\\u0627\",\"ArabicAddress\":\"123 \\u0634\\u0627\\u0631\\u0639 \\u0627\\u0644\\u0646\\u064A\\u0644\\u060C \\u0627\\u0644\\u0642\\u0627\\u0647\\u0631\\u0629\",\"ProfileImage\":\"/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png\"},\"OwnerSnapshot\":{\"Id\":\"44444444-4444-4444-4444-444444444444\",\"FullName\":\"Owner X\",\"Email\":\"owner.x@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":null,\"ArabicFullName\":null,\"ArabicAddress\":null,\"ProfileImage\":null},\"PropertySnapshot\":{\"Id\":1001,\"Title\":\"Cozy Seed Apartment\",\"Description\":\"A cozy seeded apartment suitable for testing active rentals.\",\"Address\":\"123 Seed Street, Cairo\",\"Price\":5000,\"RentalUnit\":\"Monthly\",\"PropertyType\":\"Apartment\",\"Bedrooms\":2,\"Bathrooms\":1,\"Beds\":3}}",
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = 3002L,
+                            CreatedAt = new DateTime(2025, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DocumentHash = "SEED-CONTRACT-2-HASH",
+                            DocumentPath = "/contracts/seed/contract2.pdf",
+                            EndDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsLocked = false,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            OwnerSignature = "OwnerX-Signature",
+                            PaymentFrequency = 1,
+                            PropertyId = 1002L,
+                            RenterId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            RenterSignature = "RenterC-Signature",
+                            Snapshot = "{\"RenterSnapshot\":{\"Id\":\"33333333-3333-3333-3333-333333333333\",\"FullName\":\"Renter Gamma\",\"Email\":\"renter.c@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":null,\"ArabicFullName\":null,\"ArabicAddress\":null,\"ProfileImage\":null},\"OwnerSnapshot\":{\"Id\":\"44444444-4444-4444-4444-444444444444\",\"FullName\":\"Owner X\",\"Email\":\"owner.x@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":null,\"ArabicFullName\":null,\"ArabicAddress\":null,\"ProfileImage\":null},\"PropertySnapshot\":{\"Id\":1002,\"Title\":\"Modern Seed Loft\",\"Description\":\"A modern loft used for pending booking and payments tests.\",\"Address\":\"456 Integration Avenue, Cairo\",\"Price\":7500,\"RentalUnit\":\"Monthly\",\"PropertyType\":\"Apartment\",\"Bedrooms\":1,\"Bathrooms\":1,\"Beds\":1}}",
+                            StartDate = new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = 3003L,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DocumentHash = "SEED-CONTRACT-3-HASH",
+                            DocumentPath = "/contracts/seed/contract3.pdf",
+                            EndDate = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsLocked = false,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            PaymentFrequency = 1,
+                            PropertyId = 1003L,
+                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Snapshot = "{\"RenterSnapshot\":{\"Id\":\"11111111-1111-1111-1111-111111111111\",\"FullName\":\"Renter Alpha\",\"Email\":\"renter.a@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":\"12345678901234\",\"ArabicFullName\":\"\\u0631\\u064A\\u0646\\u062A\\u0631 \\u0623\\u0644\\u0641\\u0627\",\"ArabicAddress\":\"123 \\u0634\\u0627\\u0631\\u0639 \\u0627\\u0644\\u0646\\u064A\\u0644\\u060C \\u0627\\u0644\\u0642\\u0627\\u0647\\u0631\\u0629\",\"ProfileImage\":\"/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png\"},\"OwnerSnapshot\":{\"Id\":\"44444444-4444-4444-4444-444444444444\",\"FullName\":\"Owner X\",\"Email\":\"owner.x@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":null,\"ArabicFullName\":null,\"ArabicAddress\":null,\"ProfileImage\":null},\"PropertySnapshot\":{\"Id\":1003,\"Title\":\"Seed Studio Flat\",\"Description\":\"A small studio property used for saved properties and pending bookings.\",\"Address\":\"789 Scenario Road, Cairo\",\"Price\":3500,\"RentalUnit\":\"Monthly\",\"PropertyType\":\"Studio\",\"Bedrooms\":1,\"Bathrooms\":1,\"Beds\":1}}",
+                            StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 3,
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = 3004L,
+                            CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DocumentHash = "SEED-CONTRACT-4-HASH",
+                            DocumentPath = "/contracts/seed/contract4.pdf",
+                            EndDate = new DateTime(2027, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsLocked = false,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            OwnerSignature = "OwnerX-Signature",
+                            PaymentFrequency = 1,
+                            PropertyId = 1001L,
+                            RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RenterSignature = "OwnerZ-AsRenter-Signature",
+                            Snapshot = "{\"RenterSnapshot\":{\"Id\":\"66666666-6666-6666-6666-666666666666\",\"FullName\":\"Owner Z\",\"Email\":\"owner.z@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":null,\"ArabicFullName\":null,\"ArabicAddress\":null,\"ProfileImage\":null},\"OwnerSnapshot\":{\"Id\":\"44444444-4444-4444-4444-444444444444\",\"FullName\":\"Owner X\",\"Email\":\"owner.x@example.com\",\"PhoneNumber\":null,\"NationalIDNumber\":null,\"ArabicFullName\":null,\"ArabicAddress\":null,\"ProfileImage\":null},\"PropertySnapshot\":{\"Id\":1001,\"Title\":\"Cozy Seed Apartment\",\"Description\":\"A cozy seeded apartment suitable for testing active rentals.\",\"Address\":\"123 Seed Street, Cairo\",\"Price\":5000,\"RentalUnit\":\"Monthly\",\"PropertyType\":\"Apartment\",\"Bedrooms\":2,\"Bathrooms\":1,\"Beds\":3}}",
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            Version = 1
+                        });
+                });
+
+            modelBuilder.Entity("MARN_API.Models.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            Content = "Hi, is the apartment still available for next month?",
+                            IsRead = true,
+                            ReadAt = new DateTime(2025, 3, 20, 10, 30, 0, 0, DateTimeKind.Utc),
+                            ReceiverId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            SenderId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            SentAt = new DateTime(2025, 3, 20, 10, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            Content = "Yes, it is! Would you like to schedule a visit?",
+                            IsRead = false,
+                            ReceiverId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            SenderId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            SentAt = new DateTime(2025, 3, 20, 11, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -386,9 +552,6 @@ namespace MARN_API.Migrations
                     b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
 
@@ -402,11 +565,151 @@ namespace MARN_API.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("UserType")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "IsRead");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 6001L,
+                            Body = "Your next rent payment is due soon.",
+                            CreatedAt = new DateTime(2025, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Upcoming Payment Due",
+                            Type = 0,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6002L,
+                            Body = "Your booking request has been accepted.",
+                            CreatedAt = new DateTime(2025, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Booking Request Update",
+                            Type = 0,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6003L,
+                            Body = "Thanks for signing up!",
+                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Welcome to the platform",
+                            Type = 0,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6004L,
+                            Body = "Your booking request is pending owner approval.",
+                            CreatedAt = new DateTime(2025, 4, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Booking Pending",
+                            Type = 0,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6005L,
+                            Body = "Add more details to your profile to get better recommendations.",
+                            CreatedAt = new DateTime(2025, 3, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Complete Your Profile",
+                            Type = 0,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6006L,
+                            Body = "A renter submitted a booking request for one of your properties.",
+                            CreatedAt = new DateTime(2025, 4, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "New booking request",
+                            Type = 0,
+                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            UserType = 1
+                        },
+                        new
+                        {
+                            Id = 6007L,
+                            Body = "A rent payment was successfully processed.",
+                            CreatedAt = new DateTime(2025, 4, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Payment received",
+                            Type = 0,
+                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            UserType = 1
+                        },
+                        new
+                        {
+                            Id = 6008L,
+                            Body = "Complete your listing details to attract more renters.",
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Welcome, property owner",
+                            Type = 0,
+                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            UserType = 1
+                        },
+                        new
+                        {
+                            Id = 6009L,
+                            Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
+                            CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Rent Payment Due Soon",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6010L,
+                            Body = "Your booking request for Seed Studio Flat has been submitted.",
+                            CreatedAt = new DateTime(2025, 4, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Booking Submitted",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6011L,
+                            Body = "Thanks for joining MARN! Explore properties near you.",
+                            CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 2, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Welcome to MARN",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 0
+                        },
+                        new
+                        {
+                            Id = 6012L,
+                            Body = "Luxury Seed Villa is now visible to renters.",
+                            CreatedAt = new DateTime(2025, 4, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Your property is live",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 1
+                        },
+                        new
+                        {
+                            Id = 6013L,
+                            Body = "Set up your payout details to start receiving rent payments.",
+                            CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReadAt = new DateTime(2025, 2, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Welcome, property owner",
+                            Type = 0,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            UserType = 1
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Payment", b =>
@@ -417,8 +720,8 @@ namespace MARN_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<DateTime?>("AvailableAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("ContractId")
                         .HasColumnType("bigint");
@@ -432,40 +735,118 @@ namespace MARN_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("OwnerAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("PlatformFee")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<string>("StripeCustomerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("StripePaymentIntentId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StripeSubscriptionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ContractId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("DueDate");
+
+                    b.HasIndex("Status", "AvailableAt");
 
                     b.ToTable("Payments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 4001L,
+                            ContractId = 3001L,
+                            CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 4500m,
+                            PlatformFee = 500m,
+                            Status = 0,
+                            TotalAmount = 5000m
+                        },
+                        new
+                        {
+                            Id = 4002L,
+                            AvailableAt = new DateTime(2020, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ContractId = 3001L,
+                            CreatedAt = new DateTime(2025, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 4500m,
+                            PaidAt = new DateTime(2026, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PlatformFee = 500m,
+                            Status = 1,
+                            TotalAmount = 5000m
+                        },
+                        new
+                        {
+                            Id = 4003L,
+                            AvailableAt = new DateTime(2020, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ContractId = 3002L,
+                            CreatedAt = new DateTime(2025, 6, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 6750m,
+                            PaidAt = new DateTime(2025, 7, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PlatformFee = 750m,
+                            Status = 1,
+                            TotalAmount = 7500m
+                        },
+                        new
+                        {
+                            Id = 4004L,
+                            AvailableAt = new DateTime(2035, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ContractId = 3002L,
+                            CreatedAt = new DateTime(2025, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 6750m,
+                            PaidAt = new DateTime(2025, 8, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PlatformFee = 750m,
+                            Status = 1,
+                            TotalAmount = 7500m
+                        },
+                        new
+                        {
+                            Id = 4005L,
+                            AvailableAt = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ContractId = 3004L,
+                            CreatedAt = new DateTime(2025, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 4500m,
+                            PaidAt = new DateTime(2026, 3, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PlatformFee = 500m,
+                            Status = 1,
+                            TotalAmount = 5000m
+                        },
+                        new
+                        {
+                            Id = 4006L,
+                            ContractId = 3004L,
+                            CreatedAt = new DateTime(2025, 3, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "EGP",
+                            DueDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OwnerAmount = 4500m,
+                            PlatformFee = 500m,
+                            Status = 0,
+                            TotalAmount = 5000m
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Property", b =>
@@ -484,6 +865,15 @@ namespace MARN_API.Migrations
                     b.Property<int>("Availability")
                         .HasColumnType("int");
 
+                    b.Property<int>("Bathrooms")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Bedrooms")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Beds")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -498,6 +888,9 @@ namespace MARN_API.Migrations
                         .HasColumnType("nvarchar(2000)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsShared")
                         .HasColumnType("bit");
 
                     b.Property<double>("Latitude")
@@ -515,7 +908,7 @@ namespace MARN_API.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("RentalDuration")
+                    b.Property<int>("RentalUnit")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -529,6 +922,9 @@ namespace MARN_API.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<int>("Views")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Availability");
@@ -538,6 +934,100 @@ namespace MARN_API.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("Properties");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1001L,
+                            Address = "123 Seed Street, Cairo",
+                            Availability = 0,
+                            Bathrooms = 1,
+                            Bedrooms = 2,
+                            Beds = 3,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "A cozy seeded apartment suitable for testing active rentals.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.0444,
+                            Longitude = 31.235700000000001,
+                            MaxOccupants = 3,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            Price = 5000m,
+                            RentalUnit = 1,
+                            Status = 1,
+                            Title = "Cozy Seed Apartment",
+                            Type = 0,
+                            Views = 5
+                        },
+                        new
+                        {
+                            Id = 1002L,
+                            Address = "456 Integration Avenue, Cairo",
+                            Availability = 0,
+                            Bathrooms = 1,
+                            Bedrooms = 1,
+                            Beds = 1,
+                            CreatedAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "A modern loft used for pending booking and payments tests.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.050000000000001,
+                            Longitude = 31.239999999999998,
+                            MaxOccupants = 2,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            Price = 7500m,
+                            RentalUnit = 1,
+                            Status = 1,
+                            Title = "Modern Seed Loft",
+                            Type = 0,
+                            Views = 3
+                        },
+                        new
+                        {
+                            Id = 1003L,
+                            Address = "789 Scenario Road, Cairo",
+                            Availability = 0,
+                            Bathrooms = 1,
+                            Bedrooms = 1,
+                            Beds = 1,
+                            CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "A small studio property used for saved properties and pending bookings.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.059999999999999,
+                            Longitude = 31.245000000000001,
+                            MaxOccupants = 1,
+                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            Price = 3500m,
+                            RentalUnit = 1,
+                            Status = 1,
+                            Title = "Seed Studio Flat",
+                            Type = 4,
+                            Views = 1
+                        },
+                        new
+                        {
+                            Id = 1004L,
+                            Address = "321 Elite Boulevard, Cairo",
+                            Availability = 0,
+                            Bathrooms = 3,
+                            Bedrooms = 4,
+                            Beds = 5,
+                            CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "A luxury villa owned by the dual-role Owner Z for owner dashboard testing.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.07,
+                            Longitude = 31.25,
+                            MaxOccupants = 6,
+                            OwnerId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            Price = 15000m,
+                            RentalUnit = 1,
+                            Status = 1,
+                            Title = "Luxury Seed Villa",
+                            Type = 3,
+                            Views = 12
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyAmenity", b =>
@@ -551,6 +1041,73 @@ namespace MARN_API.Migrations
                     b.HasKey("PropertyId", "Amenity");
 
                     b.ToTable("PropertyAmenities");
+
+                    b.HasData(
+                        new
+                        {
+                            PropertyId = 1001L,
+                            Amenity = 0
+                        },
+                        new
+                        {
+                            PropertyId = 1001L,
+                            Amenity = 2
+                        },
+                        new
+                        {
+                            PropertyId = 1001L,
+                            Amenity = 4
+                        },
+                        new
+                        {
+                            PropertyId = 1002L,
+                            Amenity = 0
+                        },
+                        new
+                        {
+                            PropertyId = 1002L,
+                            Amenity = 7
+                        },
+                        new
+                        {
+                            PropertyId = 1002L,
+                            Amenity = 8
+                        },
+                        new
+                        {
+                            PropertyId = 1003L,
+                            Amenity = 0
+                        },
+                        new
+                        {
+                            PropertyId = 1003L,
+                            Amenity = 5
+                        },
+                        new
+                        {
+                            PropertyId = 1004L,
+                            Amenity = 0
+                        },
+                        new
+                        {
+                            PropertyId = 1004L,
+                            Amenity = 2
+                        },
+                        new
+                        {
+                            PropertyId = 1004L,
+                            Amenity = 9
+                        },
+                        new
+                        {
+                            PropertyId = 1004L,
+                            Amenity = 10
+                        },
+                        new
+                        {
+                            PropertyId = 1004L,
+                            Amenity = 1
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyMedia", b =>
@@ -560,6 +1117,9 @@ namespace MARN_API.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Path")
                         .IsRequired()
@@ -573,6 +1133,36 @@ namespace MARN_API.Migrations
                     b.HasIndex("PropertyId");
 
                     b.ToTable("PropertyMedia");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 2001L,
+                            IsPrimary = true,
+                            Path = "/images/seed/property1-main.jpg",
+                            PropertyId = 1001L
+                        },
+                        new
+                        {
+                            Id = 2002L,
+                            IsPrimary = true,
+                            Path = "/images/seed/property2-main.jpg",
+                            PropertyId = 1002L
+                        },
+                        new
+                        {
+                            Id = 2003L,
+                            IsPrimary = true,
+                            Path = "/images/seed/property3-main.jpg",
+                            PropertyId = 1003L
+                        },
+                        new
+                        {
+                            Id = 2004L,
+                            IsPrimary = true,
+                            Path = "/images/seed/property4-main.jpg",
+                            PropertyId = 1004L
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyRule", b =>
@@ -595,6 +1185,44 @@ namespace MARN_API.Migrations
                     b.HasIndex("PropertyId");
 
                     b.ToTable("PropertyRules");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            PropertyId = 1001L,
+                            Rule = "No Smoking inside the apartment."
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            PropertyId = 1001L,
+                            Rule = "No parties or loud music after 11 PM."
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            PropertyId = 1002L,
+                            Rule = "Pets are not allowed."
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            PropertyId = 1003L,
+                            Rule = "Single occupancy only."
+                        },
+                        new
+                        {
+                            Id = 5L,
+                            PropertyId = 1004L,
+                            Rule = "Respect the neighbors."
+                        },
+                        new
+                        {
+                            Id = 6L,
+                            PropertyId = 1004L,
+                            Rule = "Smoking allowed only in the balcony."
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Report", b =>
@@ -639,6 +1267,19 @@ namespace MARN_API.Migrations
                     b.HasIndex("ReviewerId");
 
                     b.ToTable("Reports");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            CreatedAt = new DateTime(2025, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Misleading information about the property.",
+                            ReportableId = 1001L,
+                            ReportableType = 1,
+                            ReporterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            ReviewerId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            Status = 0
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Review", b =>
@@ -677,6 +1318,35 @@ namespace MARN_API.Migrations
                         {
                             t.HasCheckConstraint("CK_Review_Rating", "[Rating] >= 1 AND [Rating] <= 5");
                         });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Comment = "Great place! Very clean and quiet.",
+                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1001L,
+                            Rating = 5,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Comment = "Awesome location, but the neighbors were a bit noisy.",
+                            CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1001L,
+                            Rating = 4,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Comment = "Superb luxury villa. Highly recommend!",
+                            CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PropertyId = 1004L,
+                            Rating = 5,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.RoommatePreference", b =>
@@ -686,9 +1356,6 @@ namespace MARN_API.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("BudgetRangeMax")
                         .HasColumnType("decimal(18,2)");
@@ -711,11 +1378,14 @@ namespace MARN_API.Migrations
                     b.Property<bool?>("Pets")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("RoommatePreferencesEnabled")
+                        .HasColumnType("bit");
+
                     b.Property<int>("SharingLevel")
                         .HasColumnType("int");
 
-                    b.Property<string>("SleepSchedule")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SleepSchedule")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("Smoking")
                         .HasColumnType("bit");
@@ -735,6 +1405,42 @@ namespace MARN_API.Migrations
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
                         });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            BudgetRangeMax = 6000m,
+                            BudgetRangeMin = 3000m,
+                            EducationLevel = 2,
+                            FieldOfStudy = 1,
+                            GuestsFrequency = 2,
+                            NoiseTolerance = 3,
+                            Pets = true,
+                            RoommatePreferencesEnabled = true,
+                            SharingLevel = 3,
+                            SleepSchedule = 1,
+                            Smoking = false,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            WorkSchedule = 2
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            BudgetRangeMax = 4500m,
+                            BudgetRangeMin = 2000m,
+                            EducationLevel = 2,
+                            FieldOfStudy = 5,
+                            GuestsFrequency = 4,
+                            NoiseTolerance = 5,
+                            Pets = false,
+                            RoommatePreferencesEnabled = true,
+                            SharingLevel = 3,
+                            SleepSchedule = 2,
+                            Smoking = true,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            WorkSchedule = 5
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.SavedProperty", b =>
@@ -750,6 +1456,33 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("SavedProperties");
+
+                    b.HasData(
+                        new
+                        {
+                            PropertyId = 1001L,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            PropertyId = 1003L,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            PropertyId = 1002L,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            PropertyId = 1001L,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666")
+                        },
+                        new
+                        {
+                            PropertyId = 1002L,
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666")
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.UserActivity", b =>
@@ -785,6 +1518,57 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId", "Type", "CreatedAt");
 
                     b.ToTable("UserActivities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            CreatedAt = new DateTime(2025, 3, 24, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "User logged in.",
+                            IPAddress = "127.0.0.1",
+                            Type = 0,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            CreatedAt = new DateTime(2025, 3, 24, 10, 5, 0, 0, DateTimeKind.Utc),
+                            Description = "User viewed property 1001.",
+                            Metadata = "{\"PropertyId\": 1001}",
+                            Type = 9,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        });
+                });
+
+            modelBuilder.Entity("MARN_API.Models.UserDevice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FcmToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserDevices");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddd01"),
+                            FcmToken = "fcm-token-renter-a-device-1",
+                            LastUpdated = new DateTime(2025, 3, 24, 0, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = "11111111-1111-1111-1111-111111111111"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -817,19 +1601,19 @@ namespace MARN_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b8f8a2de-05b2-4853-a6cb-d72dad79f259"),
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Name = "Renter",
                             NormalizedName = "RENTER"
                         },
                         new
                         {
-                            Id = new Guid("6a176a86-8fdc-4a49-9a49-3fe393ec965e"),
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Name = "Owner",
                             NormalizedName = "OWNER"
                         },
                         new
                         {
-                            Id = new Guid("0b5ac964-270b-4bb4-b532-f68f73a205ba"),
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -917,6 +1701,43 @@ namespace MARN_API.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            UserId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -943,26 +1764,113 @@ namespace MARN_API.Migrations
                     b.HasBaseType("MARN_API.Models.ApplicationUser");
 
                     b.HasDiscriminator().HasValue("Admin");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("99999999-9999-9999-9999-999999999999"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SEED-ADMIN-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "admin@marn.com",
+                            EmailConfirmed = true,
+                            FirstName = "System",
+                            Gender = 0,
+                            Language = 0,
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@MARN.COM",
+                            NormalizedUserName = "ADMIN@MARN.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SEED-ADMIN-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@marn.com"
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Owner", b =>
                 {
                     b.HasBaseType("MARN_API.Models.ApplicationUser");
 
-                    b.Property<decimal>("WithdrawableEarnings")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasDiscriminator().HasValue("Owner");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SEED-OWNER-X-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "owner.x@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Owner",
+                            Gender = 1,
+                            Language = 0,
+                            LastName = "X",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "OWNER.X@EXAMPLE.COM",
+                            NormalizedUserName = "OWNER.X@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "SEED-OWNER-X-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "owner.x@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("55555555-5555-5555-5555-555555555555"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SEED-OWNER-Y-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "owner.y@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Owner",
+                            Gender = 2,
+                            Language = 0,
+                            LastName = "Y",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "OWNER.Y@EXAMPLE.COM",
+                            NormalizedUserName = "OWNER.Y@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "SEED-OWNER-Y-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "owner.y@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("66666666-6666-6666-6666-666666666666"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SEED-OWNER-Z-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "owner.z@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Owner",
+                            Gender = 1,
+                            Language = 0,
+                            LastName = "Z",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "OWNER.Z@EXAMPLE.COM",
+                            NormalizedUserName = "OWNER.Z@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "SEED-OWNER-Z-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "owner.z@example.com"
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.BookingRequest", b =>
                 {
-                    b.HasOne("MARN_API.Models.Owner", "Owner")
-                        .WithMany("BookingRequestsAsOwner")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("MARN_API.Models.Property", "Property")
                         .WithMany("BookingRequests")
                         .HasForeignKey("PropertyId")
@@ -975,69 +1883,13 @@ namespace MARN_API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Owner");
-
                     b.Navigation("Property");
 
                     b.Navigation("Renter");
                 });
 
-            modelBuilder.Entity("MARN_API.Models.ChatMessage", b =>
-                {
-                    b.HasOne("MARN_API.Models.ChatRoom", "ChatRoom")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MARN_API.Models.ApplicationUser", "Sender")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ChatRoom");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ChatRoom", b =>
-                {
-                    b.HasOne("MARN_API.Models.BookingRequest", "Request")
-                        .WithOne("ChatRoom")
-                        .HasForeignKey("MARN_API.Models.ChatRoom", "RequestId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Request");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ChatRoomParticipant", b =>
-                {
-                    b.HasOne("MARN_API.Models.ChatRoom", "ChatRoom")
-                        .WithMany("Participants")
-                        .HasForeignKey("ChatRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
-                        .WithMany("ChatRoomParticipants")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ChatRoom");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
                 {
-                    b.HasOne("MARN_API.Models.Owner", "Owner")
-                        .WithMany("ContractsAsOwner")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("MARN_API.Models.Property", "Property")
                         .WithMany("Contracts")
                         .HasForeignKey("PropertyId")
@@ -1050,11 +1902,28 @@ namespace MARN_API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Owner");
-
                     b.Navigation("Property");
 
                     b.Navigation("Renter");
+                });
+
+            modelBuilder.Entity("MARN_API.Models.Message", b =>
+                {
+                    b.HasOne("MARN_API.Models.ApplicationUser", "Receiver")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MARN_API.Models.ApplicationUser", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("MARN_API.Models.Notification", b =>
@@ -1076,15 +1945,7 @@ namespace MARN_API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
-                        .WithMany("Payments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Contract");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MARN_API.Models.Property", b =>
@@ -1266,15 +2127,11 @@ namespace MARN_API.Migrations
 
                     b.Navigation("BookingRequestsAsRenter");
 
-                    b.Navigation("ChatMessages");
-
-                    b.Navigation("ChatRoomParticipants");
-
                     b.Navigation("ContractsAsRenter");
 
                     b.Navigation("Notifications");
 
-                    b.Navigation("Payments");
+                    b.Navigation("ReceivedMessages");
 
                     b.Navigation("ReportsFiled");
 
@@ -1283,19 +2140,8 @@ namespace MARN_API.Migrations
                     b.Navigation("RoommatePreference");
 
                     b.Navigation("SavedProperty");
-                });
 
-            modelBuilder.Entity("MARN_API.Models.BookingRequest", b =>
-                {
-                    b.Navigation("ChatRoom")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ChatRoom", b =>
-                {
-                    b.Navigation("Messages");
-
-                    b.Navigation("Participants");
+                    b.Navigation("SentMessages");
                 });
 
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
@@ -1327,10 +2173,6 @@ namespace MARN_API.Migrations
 
             modelBuilder.Entity("MARN_API.Models.Owner", b =>
                 {
-                    b.Navigation("BookingRequestsAsOwner");
-
-                    b.Navigation("ContractsAsOwner");
-
                     b.Navigation("Properties");
                 });
 #pragma warning restore 612, 618

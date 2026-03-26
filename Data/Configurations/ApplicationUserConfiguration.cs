@@ -28,24 +28,9 @@ namespace MARN_API.Data.Configurations
                      builder.Property(u => u.CreatedAt)
                             .HasDefaultValueSql("GETUTCDATE()");
 
-                     builder.HasMany(u => u.Payments)
-                            .WithOne(p => p.User)
-                            .HasForeignKey(p => p.UserId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
                      builder.HasMany(u => u.Reviews)
                             .WithOne(r => r.User)
                             .HasForeignKey(r => r.UserId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
-                     builder.HasMany(u => u.ChatMessages)
-                            .WithOne(m => m.Sender)
-                            .HasForeignKey(m => m.SenderId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
-                     builder.HasMany(u => u.ChatRoomParticipants)
-                            .WithOne(p => p.User)
-                            .HasForeignKey(p => p.UserId)
                             .OnDelete(DeleteBehavior.Restrict);
 
                      builder.HasMany(u => u.Notifications)

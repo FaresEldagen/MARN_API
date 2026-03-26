@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs;
+﻿using MARN_API.DTOs.Auth;
 using MARN_API.Enums;
 using MARN_API.Models;
 using MARN_API.Services.Implementations;
@@ -17,7 +17,7 @@ namespace MARN_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : BaseController
     {
         private readonly IAccountService _accountService;
         private readonly ITokenService _tokenService;
@@ -31,22 +31,6 @@ namespace MARN_API.Controllers
             _accountService = accountService;
             _tokenService = tokenService;
             _logger = logger;
-        }
-
-
-        protected ActionResult HandleServiceResult<T>(ServiceResult<T> result)
-        {
-            return result.ResultType switch
-            {
-                ServiceResultType.Success => Ok(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Created => StatusCode(201, new { message = result.Message, data = result.Data }),
-                ServiceResultType.RequiresTwoFactor => Accepted(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Unauthorized => Unauthorized(new { message = result.Message }),
-                ServiceResultType.NotFound => NotFound(new { message = result.Message }),
-                ServiceResultType.Forbidden => StatusCode(403, new { message = result.Message }),
-                ServiceResultType.Conflict => Conflict(new { message = result.Message, errors = result.Errors }),
-                _ => BadRequest(new { message = result.Message, errors = result.Errors })
-            };
         }
 
 
@@ -72,14 +56,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.LoginAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
-
-            //if (!result.Success)
-            //    return Unauthorized(new { message = result.Message });
-
-            //if (result.ResultType == ServiceResultType.RequiresTwoFactor)
-            //    return Accepted(result.Data);
-
-            //return Ok(new { message = result.Message, data = result.Data });
         }
 
         /// <summary>
@@ -101,10 +77,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.VerifyTwoFactorAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
-
-            //return result.Success
-            //    ? Ok(new { message = result.Message, data = result.Data })
-            //    : Unauthorized(new { message = result.Message });
         }
 
         /// <summary>
@@ -121,15 +93,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.GoogleLoginAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
-
-            //if (!result.Success)
-            //{
-            //    return result.ResultType == ServiceResultType.Unauthorized
-            //        ? Unauthorized(new { message = result.Message })
-            //        : BadRequest(new { message = result.Message, errors = result.Errors });
-            //}
-
-            //return Ok(new { message = result.Message, data = result.Data });
         }
         #endregion
 
@@ -152,10 +115,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.RegisterUserAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //return result.Success
-            //    ? Created()
-            //    : BadRequest(new { message = result.Message, errors = result.Errors });
         }
 
         /// <summary>
@@ -183,10 +142,6 @@ namespace MARN_API.Controllers
 
             var result = await _accountService.ConfirmEmailAsync(userId, token);
             return HandleServiceResult<bool>(result);
-
-            //return result.Success
-            //    ? Ok(new { message = result.Message })
-            //    : BadRequest(new { message = result.Message, errors = result.Errors });
         }
 
         /// <summary>
@@ -205,8 +160,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ResendEmailConfirmationAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //return Ok(new { message = result.Message });
         }
         #endregion
 
@@ -234,8 +187,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ForgotPasswordAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //return Ok(new { message = result.Message });
         }
 
         /// <summary>
@@ -267,10 +218,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ValidateResetTokenAsync(request);
             return HandleServiceResult<bool>(result);
-
-            //return result.Success
-            //    ? Ok(new { message = result.Message })
-            //    : Unauthorized(new { message = result.Message });
         }
 
         /// <summary>
@@ -294,7 +241,7 @@ namespace MARN_API.Controllers
         /// <response code="429">
         /// If the rate limit is exceeded.
         /// </response>
-        [HttpPost("reset-password")]
+        [HttpPut("reset-password")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -303,31 +250,6 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.ResetPasswordAsync(dto);
             return HandleServiceResult<bool>(result);
-
-            //if (!result.Success)
-            //{
-            //    return result.ResultType == ServiceResultType.Unauthorized
-            //        ? Unauthorized(new { message = result.Message })
-            //        : BadRequest(new { message = result.Message, errors = result.Errors });
-            //}
-
-            //return Ok(new { message = result.Message });
-        }
-        #endregion
-
-
-        #region For Testing
-        [Authorize]
-        [HttpGet("auth")]
-        public IActionResult testRequireAuthEndPoint()
-        {
-            return Ok("works");
-        }
-
-        [HttpGet("notAuth")]
-        public IActionResult testNotRequireAuthEndPoint()
-        {
-            return Ok("works");
         }
         #endregion
     }
