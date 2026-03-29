@@ -360,8 +360,9 @@ namespace MARN_API.Services.Implementations
 
             var token = await GenerateEmailConfirmationTokenAsync(user);
 
-            var baseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-            var confirmationLink = $"{baseUrl}/api/Account/confirm-email?userId={user.Id}&token={token}";
+            var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+            var confirmationLink = $"{frontBaseUrl}/Account/confirm-email?userId={user.Id}&token={token}";
+
             await _emailService.SendRegistrationConfirmationEmailAsync(user.Email!, user.FirstName, confirmationLink);
 
             _logger.LogInformation("Registration successful for email: {Email}", user.Email);
@@ -397,8 +398,9 @@ namespace MARN_API.Services.Implementations
 
             if (result.Succeeded)
             {
-                var baseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-                var loginLink = $"{baseUrl}/Account/Login";
+                var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+                var loginLink = $"{frontBaseUrl}/Account/Login";
+
                 await _emailService.SendAccountCreatedEmailAsync(user.Email!, user.FirstName!, loginLink);
 
                 _logger.LogInformation("Email confirmed successfully for user: {UserId}", userId);
@@ -407,7 +409,7 @@ namespace MARN_API.Services.Implementations
             else
             {
                 _logger.LogWarning(
-                    "Confirm Email for {Email}. Errors: {@Errors}",
+                    "Confirm Email for {Email} failed. Errors: {@Errors}",
                     user.Email,
                     result.Errors.Select(e => e.Description)
                 );
@@ -427,8 +429,9 @@ namespace MARN_API.Services.Implementations
                 if (!isConfirmed) 
                 {
                     var token = await GenerateEmailConfirmationTokenAsync(user);
-                    var baseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-                    var confirmationLink = $"{baseUrl}/api/Account/confirm-email?userId={user.Id}&token={token}";
+                    var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+                    var confirmationLink = $"{frontBaseUrl}/Account/confirm-email?userId={user.Id}&token={token}";
+
                     await _emailService.SendResendConfirmationEmailAsync(user.Email!, user.FirstName!, confirmationLink);
                     _logger.LogInformation("Confirmation email resent for user {UserId}", user.Id);
                 }
@@ -456,7 +459,8 @@ namespace MARN_API.Services.Implementations
                     Encoding.UTF8.GetBytes(token)
                 );
 
-                var resetLink = $"https://yourfrontend.com/reset-password?email={user.Email}&token={encodedToken}";
+                var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+                var resetLink = $"{frontBaseUrl}/reset-password?email={user.Email}&token={encodedToken}";
 
                 await _emailService.SendResetPasswordEmailAsync(user.Email!, user.FirstName, resetLink);
 
