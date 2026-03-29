@@ -27,8 +27,7 @@ namespace MARN_API.Controllers
         /// <summary>
         /// Retrieves a list of active users that the current user has chatted with, along with their online status and unread message count.
         /// </summary>
-        /// <returns>A list of chat-active users.</returns>
-        /// <response code="200">Returns the list of users.</response>
+        /// <response code="200">Returns a list of chat-active users.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet("users")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -47,8 +46,7 @@ namespace MARN_API.Controllers
         /// Searches for users by username or email.
         /// </summary>
         /// <param name="q">The search query string.</param>
-        /// <returns>A list of matching users.</returns>
-        /// <response code="200">Returns matching users.</response>
+        /// <response code="200">Returns a list of matching users.</response>
         /// <response code="400">If the query is empty.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet("search")]
@@ -72,8 +70,7 @@ namespace MARN_API.Controllers
         /// Retrieves the chat history between the current user and another specified user.
         /// </summary>
         /// <param name="otherUserId">The ID of the other user.</param>
-        /// <returns>A list of messages exchanged between the two users.</returns>
-        /// <response code="200">Returns the chat history.</response>
+        /// <response code="200">Returns the chat history (list of messages) exchanged between the two users.</response>
         /// <response code="400">If the other user ID is invalid.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet("history/{otherUserId}")]
@@ -102,7 +99,6 @@ namespace MARN_API.Controllers
         /// Saves or updates the Firebase Cloud Messaging (FCM) token for the current user's device.
         /// </summary>
         /// <param name="request">The request containing the FCM token.</param>
-        /// <returns>A success message if the token was saved.</returns>
         /// <response code="200">FCM token saved successfully.</response>
         /// <response code="400">If the token is missing.</response>
         /// <response code="401">If the user is not authenticated.</response>

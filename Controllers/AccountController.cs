@@ -39,8 +39,7 @@ namespace MARN_API.Controllers
         /// login the user and return the token
         /// </summary>
         /// <param name="dto">User login information</param>
-        /// <returns>JWT token if login is successful</returns>
-        /// <response code="200">Returns success message if login is successful</response>
+        /// <response code="200">Returns JWT token if login is successful</response>
         /// <response code="202">If require 2FA</response>
         /// <response code="400">If the request is invalid or login fails</response>
         /// <response code="401">If the user is not found</response>
@@ -62,7 +61,6 @@ namespace MARN_API.Controllers
         /// Verify the Two-Factor Authentication (2FA) code sent to the user's email.
         /// </summary>
         /// <param name="dto">User email and 2FA code</param>
-        /// <returns>JWT token if verification is successful</returns>
         /// <response code="200">Returns JWT token if 2FA verification is successful</response>
         /// <response code="400">If the request is invalid (bad model)</response>
         /// <response code="401">If verification code is invalid or user not found</response>
@@ -83,8 +81,7 @@ namespace MARN_API.Controllers
         /// Login with Google provider, if the user is logging in with google for the first time, a new account will be created for him and the email will be confirmed by default
         /// </summary>
         /// <param name="dto"></param>
-        /// <returns>JWT token if login is successful</returns>
-        /// <response code="200">Returns success message if login is successful</response>
+        /// <response code="200">Returns JWT token if login is successful</response>
         /// <response code="202">If require 2FA</response>
         /// <response code="400">If the request is invalid or login fails</response>
         /// <response code="429">If rate limit is exceeded</response>
@@ -102,12 +99,11 @@ namespace MARN_API.Controllers
         /// Registers a new user account
         /// </summary>
         /// <param name="dto">User registration information</param>
-        /// <returns>
-        /// Success or error message
-        /// And it will send an email to the user email to confirm his email with a front end link: 
-        /// {frontBaseUrl}/Account/confirm-email?userId={user.Id}&token={confirmationtoken}
-        /// </returns>
-        /// <response code="201">Returns success message if registration is successful</response>
+        /// <response code="201">
+        /// Returns success message if registration is successful.
+        /// It will send an email to the user email to confirm his email with a front end link: 
+        /// {frontBaseUrl}/Account/confirm-email?userId={user.Id}&amp;token={confirmationtoken}
+        /// </response>
         /// <response code="400">If the request is invalid or registration fails</response>
         /// <response code="429">If rate limit is exceeded</response>
         [HttpPost("register")]
@@ -126,12 +122,11 @@ namespace MARN_API.Controllers
         /// </summary>
         /// <param name="userId">The unique identifier of the user</param>
         /// <param name="token">The email confirmation token</param>
-        /// <returns>
-        /// Success or error message
-        /// And it will send an email to the user email to notify him the success creation of his email with a front end login link: 
+        /// <response code="200">
+        /// Returns success message if email is confirmed.
+        /// It will send an email to the user email to notify him the success creation of his email with a front end login link: 
         /// {frontBaseUrl}/Account/Login
-        /// </returns>    
-        /// <response code="200">Returns success message if email is confirmed</response>
+        /// </response>
         /// <response code="400">If the userId or token is invalid or confirmation fails</response>
         /// <response code="429">If rate limit is exceeded</response>
         [HttpGet("confirm-email")]
@@ -156,12 +151,11 @@ namespace MARN_API.Controllers
         /// Resend Confirmation Email to the user
         /// </summary>
         /// <param name="dto">User registration email</param>
-        /// <returns>
-        /// Success or error message
-        /// And it will resend an email to the user email to confirm his email with a front end link: 
-        /// {frontBaseUrl}/Account/confirm-email?userId={user.Id}&token={confirmationtoken}
-        /// </returns>  
-        /// <response code="200">Returns success message if the user email was valid wither Confirmaiton Email Resended successful or not</response>
+        /// <response code="200">
+        /// Returns success message if the user email was valid whether Confirmation Email Resended successful or not.
+        /// It will resend an email to the user email to confirm his email with a front end link: 
+        /// {frontBaseUrl}/Account/confirm-email?userId={user.Id}&amp;token={confirmationtoken}
+        /// </response>
         /// <response code="400">If the user email is in Invalid format</response>
         /// <response code="429">If rate limit is exceeded</response>
         [HttpPost("resend-confirmation-email")]
@@ -181,13 +175,10 @@ namespace MARN_API.Controllers
         /// Initiates the password reset process by sending a reset link to the user's email address.
         /// </summary>
         /// <param name="dto">Contains the user's email address.</param>
-        /// <returns>
-        /// Success message regardless of whether the email exists (for security reasons).
-        /// And it will send an email to the user email to reset his password with a front end link: 
-        /// {frontBaseUrl}/reset-password?email={user.Email}&token={resetPasswordToken}
-        /// </returns>
         /// <response code="200">
-        /// Returns a success message indicating that if the email exists, a reset link has been sent.
+        /// Returns a success message regardless of whether the email exists (for security reasons).
+        /// It will send an email to the user email to reset his password with a front end link: 
+        /// {frontBaseUrl}/reset-password?email={user.Email}&amp;token={resetPasswordToken}
         /// </response>
         /// <response code="400">
         /// If the request model is invalid (e.g., malformed email).
@@ -211,12 +202,7 @@ namespace MARN_API.Controllers
         /// <param name="request">
         /// Contains the user's email address and the reset token received via email.
         /// </param>
-        /// <returns>
-        /// Returns validation result indicating whether the token is valid or expired.
-        /// </returns>
-        /// <response code="200">
-        /// If the reset token is valid.
-        /// </response>
+        /// <response code="200">Returns validation result indicating whether the token is valid or expired.</response>
         /// <response code="400">
         /// If the request model is invalid (e.g., malformed email).
         /// </response>
@@ -242,12 +228,7 @@ namespace MARN_API.Controllers
         /// <param name="dto">
         /// Contains the user's email address, reset token, new password, and confirmation password.
         /// </param>
-        /// <returns>
-        /// Success message if the password is successfully reset.
-        /// </returns>
-        /// <response code="200">
-        /// Returns success message if the password was reset successfully.
-        /// </response>
+        /// <response code="200">Returns success message if the password was reset successfully.</response>
         /// <response code="400">
         /// If the request model is invalid (e.g., malformed email), or If the password reset fails to update in the database.
         /// </response>
