@@ -10,7 +10,7 @@ namespace MARN_API.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        [MaxLength(2000)]
+        [MaxLength(4000)]
         public string Content { get; set; } = string.Empty;
 
         public DateTime SentAt { get; set; } = DateTime.UtcNow;

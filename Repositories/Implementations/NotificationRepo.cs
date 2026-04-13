@@ -49,5 +49,50 @@ namespace MARN_API.Repositories.Implementations
                 .ToListAsync();
         }
         #endregion
+
+
+        #region FCM Device Tokens
+        public async Task<List<string>> GetUserDeviceTokensAsync(string userId)
+        {
+            return await Context.UserDevices
+                .Where(d => d.UserId == userId)
+                .Select(d => d.FcmToken)
+                .ToListAsync();
+        }
+
+        public async Task AddOrUpdateUserDeviceAsync(string userId, string fcmToken)
+        {
+            var device = await Context.UserDevices
+                .FirstOrDefaultAsync(d => d.FcmToken == fcmToken);
+            if (device == null)
+            {
+                Context.UserDevices.Add(new UserDevice
+                {
+                    Id = System.Guid.NewGuid(),
+                    UserId = userId,
+                    FcmToken = fcmToken,
+                    LastUpdated = System.DateTime.UtcNow
+                });
+            }
+            else
+            {
+                // In case a device changes hands (logout and new user logs in on same phone)
+                device.UserId = userId;
+                device.LastUpdated = System.DateTime.UtcNow;
+            }
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task RemoveUserDeviceAsync(string userId, string fcmToken)
+        {
+            var device = await Context.UserDevices
+                .FirstOrDefaultAsync(d => d.FcmToken == fcmToken && d.UserId == userId);
+            if (device != null)
+            {
+                Context.UserDevices.Remove(device);
+                await Context.SaveChangesAsync();
+            }
+        }
+        #endregion
     }
 }
