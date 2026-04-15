@@ -1,4 +1,4 @@
-using MARN_API.Enums;
+using MARN_API.Enums.Notification;
 using System;
 
 namespace MARN_API.Models

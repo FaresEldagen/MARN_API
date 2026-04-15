@@ -49,6 +49,25 @@ namespace MARN_API.Hubs
         }
 
 
+        public void InActiveChatWith(string userId)
+        {
+            var currentUserId = Context.UserIdentifier;
+            if (!string.IsNullOrEmpty(currentUserId) && !string.IsNullOrEmpty(userId))
+            {
+                _tracker.SetActiveChat(currentUserId, userId);
+            }
+        }
+
+        public void LeaveActiveChat(string userId)
+        {
+            var currentUserId = Context.UserIdentifier;
+            if (!string.IsNullOrEmpty(currentUserId))
+            {
+                _tracker.RemoveActiveChat(currentUserId, userId);
+            }
+        }
+
+
         public async Task SendMessage(string receiverId, string content)
         {
             var senderId = Context.UserIdentifier;
@@ -60,7 +79,6 @@ namespace MARN_API.Hubs
             
             // 1. Save message to Database via Service abstraction
             var result = await _chatService.SendMessageAsync(senderId, receiverId, content);
-
             if (!result.Success)
             {
                 throw new HubException(result.Message ?? "Failed to send message.");

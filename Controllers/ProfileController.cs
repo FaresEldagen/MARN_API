@@ -57,13 +57,8 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> RenterDashboard()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User id not found in token");
-
-            if (!Guid.TryParse(userIdString, out var userId))
-                return Unauthorized("Invalid user id");
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
             var result = await _profileService.RenterDashboardAsync(userId);
             return HandleServiceResult<RenterDashboardDto>(result);
@@ -102,13 +97,8 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> OwnerDashboard()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User id not found in token");
-
-            if (!Guid.TryParse(userIdString, out var userId))
-                return Unauthorized("Invalid user id");
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
             var result = await _profileService.OwnerDashboardAsync(userId);
             return HandleServiceResult<OwnerDashboardDto>(result);
@@ -133,13 +123,8 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetPersonalProfile()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User id not found in token");
-
-            if (!Guid.TryParse(userIdString, out var userId))
-                return Unauthorized("Invalid user id");
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
             var result = await _profileService.GetProfileAsync(userId);
             return HandleServiceResult<ProfileDto>(result);
@@ -191,13 +176,8 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetProfileSettingsData()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User id not found in token");
-
-            if (!Guid.TryParse(userIdString, out var userId))
-                return Unauthorized("Invalid user id");
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
             var result = await _profileService.GetProfileSettingsAsync(userId);
             return HandleServiceResult<ProfileSettingsDto>(result);
@@ -311,10 +291,8 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> ToggleTwoFactor(ToggleTwoFactorDto dto)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("User not found in token");
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
             var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
             return HandleServiceResult<bool>(result);

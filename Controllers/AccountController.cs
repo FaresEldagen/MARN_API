@@ -57,6 +57,7 @@ namespace MARN_API.Controllers
             return HandleServiceResult<LoginResponseDto>(result);
         }
 
+
         /// <summary>
         /// Verify the Two-Factor Authentication (2FA) code sent to the user's email.
         /// </summary>
@@ -76,6 +77,7 @@ namespace MARN_API.Controllers
             var result = await _accountService.VerifyTwoFactorAsync(dto);
             return HandleServiceResult<LoginResponseDto>(result);
         }
+
 
         /// <summary>
         /// Login with Google provider, if the user is logging in with google for the first time, a new account will be created for him and the email will be confirmed by default
@@ -117,6 +119,7 @@ namespace MARN_API.Controllers
             return HandleServiceResult<bool>(result);
         }
 
+
         /// <summary>
         /// Confirms a user's email address using the confirmation token
         /// </summary>
@@ -135,7 +138,7 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token)
         {
-            _logger.LogInformation("Email confirmation attempt for user: {UserId}", userId);
+            _logger.LogInformation("Email confirmation attempt for user: {ReceiverId}", userId);
 
             if (userId == Guid.Empty || string.IsNullOrWhiteSpace(token))
             {
@@ -146,6 +149,7 @@ namespace MARN_API.Controllers
             var result = await _accountService.ConfirmEmailAsync(userId, token);
             return HandleServiceResult<bool>(result);
         }
+
 
         /// <summary>
         /// Resend Confirmation Email to the user
@@ -196,6 +200,7 @@ namespace MARN_API.Controllers
             return HandleServiceResult<bool>(result);
         }
 
+
         /// <summary>
         /// (OPTIONAL) Validates the password reset token before allowing the user to set a new password.
         /// </summary>
@@ -221,6 +226,7 @@ namespace MARN_API.Controllers
             var result = await _accountService.ValidateResetTokenAsync(request);
             return HandleServiceResult<bool>(result);
         }
+
 
         /// <summary>
         /// Resets the user's password using a valid password reset token.

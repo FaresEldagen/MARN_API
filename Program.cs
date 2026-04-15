@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json.Serialization;
 using System.Text;
 using System.Threading.RateLimiting;
+using MARN_API.Hubs;
 
 namespace MARN_API
 {
@@ -352,7 +353,8 @@ namespace MARN_API
             app.MapControllers();
 
             // SignalR Hub
-            app.MapHub<MARN_API.Hubs.ChatHub>("/chatHub");
+            app.MapHub<ChatHub>("/hubs/chat");
+            app.MapHub<NotificationHub>("/hubs/notification");
 
             // Health Checks
             app.MapHealthChecks("/health");

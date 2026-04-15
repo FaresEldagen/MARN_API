@@ -1,4 +1,5 @@
-﻿using MARN_API.Models;
+﻿using MARN_API.DTOs.Notification;
+using MARN_API.Models;
 
 namespace MARN_API.Services.Interfaces
 {
@@ -6,7 +7,6 @@ namespace MARN_API.Services.Interfaces
     {
         Task<ServiceResult<bool>> SaveDeviceTokenAsync(string userId, string fcmToken);
         Task<ServiceResult<bool>> RemoveDeviceTokenAsync(string userId, string fcmToken);
-        Task SendMessageNotificationAsync(string receiverId, string senderName, string content);
-
+        Task SendNotificationAsync(NotificationRequestDto request);
     }
 }

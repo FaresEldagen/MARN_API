@@ -63,7 +63,8 @@ namespace MARN_API.Services.Implementations
                 _logger.LogWarning("Login failed: Email not confirmed for user: {UserId}", user.Id);
                 return ServiceResult<LoginResponseDto>.Fail(
                     "Email not confirmed. Please check your email for confirmation instructions.",
-                    resultType: ServiceResultType.Unauthorized
+                    resultType: ServiceResultType.Unauthorized,
+                    action: "ResendEmailConfirmation"
                 );
             }
 
@@ -208,7 +209,7 @@ namespace MARN_API.Services.Implementations
                         return ServiceResult<LoginResponseDto>.Fail(
                             "User creation failed", 
                             createResult.Errors.Select(e => e.Description).ToList(),
-                            ServiceResultType.Conflict
+                            resultType: ServiceResultType.Conflict
                         );
                     }
                 }
@@ -230,7 +231,7 @@ namespace MARN_API.Services.Implementations
                         return ServiceResult<LoginResponseDto>.Fail(
                             "External login failed.",
                             addLoginResult.Errors.Select(e => e.Description).ToList(),
-                            ServiceResultType.Conflict
+                            resultType: ServiceResultType.Conflict
                         );
                     }
                 }

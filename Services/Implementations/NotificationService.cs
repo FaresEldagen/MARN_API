@@ -1,7 +1,11 @@
-﻿using MARN_API.Hubs;
+﻿using MARN_API.DTOs.Notification;
+using MARN_API.Enums.Notification;
+using MARN_API.Hubs;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
 namespace MARN_API.Services.Implementations
 {
@@ -11,6 +15,7 @@ namespace MARN_API.Services.Implementations
         private readonly ConnectionTracker _tracker;
         private readonly IEncryptionService _encryptionService;
         private readonly IFirebaseNotificationService _fcmService;
+        private readonly IHubContext<NotificationHub> _notificationHub;
         private readonly ILogger<NotificationService> _logger;
 
         public NotificationService(
@@ -18,12 +23,14 @@ namespace MARN_API.Services.Implementations
             INotificationRepo notificationRepo,
             IEncryptionService encryptionService,
             IFirebaseNotificationService fcmService,
+            IHubContext<NotificationHub> notificationHub,
             ILogger<NotificationService> logger)
         {
             _notificationRepo = notificationRepo;
             _tracker = tracker;
             _encryptionService = encryptionService;
             _fcmService = fcmService;
+            _notificationHub = notificationHub;
             _logger = logger;
         }
 
@@ -44,21 +51,51 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true);
         }
 
-        public async Task SendMessageNotificationAsync(string receiverId, string senderName, string content)
+
+        public async Task SendNotificationAsync(NotificationRequestDto request)
         {
-            if (!_tracker.IsOnline(receiverId))
+            // Special Conditions
+            if (request.Type == NotificationType.NewMessage && 
+                _tracker.IsUserInChatWith(request.ReceiverId, request.SenderId!))
+            { return; }
+
+
+            // Save in DB
+            if (request.SaveInDB)
             {
-                var receiverTokens = await _notificationRepo.GetUserDeviceTokensAsync(receiverId);
-
-                if (receiverTokens != null && receiverTokens.Any())
+                await _notificationRepo.AddAsync(new Notification
                 {
-                    _logger.LogInformation("Receiver {ReceiverId} is offline, sending FCM notification", receiverId);
+                    UserId = Guid.Parse(request.ReceiverId),
+                    Type = request.Type,
+                    Title = request.Title,
+                    Body = request.Body,
+                    Data = request.Data != null ? JsonSerializer.Serialize(request.Data) : null
+                });
+            }
 
-                    await _fcmService.SendNotificationAsync(
-                        receiverTokens,
-                        $"New Message from {senderName}",
-                        content
-                    );
+
+            if (_tracker.IsOnline(request.ReceiverId))
+            {
+                // Send real-time notification via SignalR
+                await _notificationHub.Clients.User(request.ReceiverId)
+                    .SendAsync("ReceiveNotification", request);
+            }
+            else
+            {
+                // Send FCM
+                var tokens = await _notificationRepo.GetUserDeviceTokensAsync(request.ReceiverId);
+
+                if (tokens.Any())
+                {
+                    _logger.LogInformation("Receiver {ReceiverId} is offline, sending FCM notification", request.ReceiverId);
+
+                    var invalidTokens = await _fcmService.SendNotificationAsync(tokens, request.Title, request.Body);
+
+                    foreach (var invalidToken in invalidTokens)
+                    {
+                        _logger.LogWarning("Removing invalid FCM token for user {ReceiverId}: {Token}", request.ReceiverId, invalidToken);
+                        await _notificationRepo.RemoveUserDeviceAsync(request.ReceiverId, invalidToken);
+                    }
                 }
             }
         }

@@ -460,7 +460,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "Update Roommate Preferences Data successful.");
         }
 
-        public async Task<ServiceResult<bool>> ToggleTwoFactorAsync(string userId, string? password = null)
+        public async Task<ServiceResult<bool>> ToggleTwoFactorAsync(Guid userId, string? password = null)
         {
             _logger.LogInformation("Toggle2FA attempt for userId: {userId}", userId);
 

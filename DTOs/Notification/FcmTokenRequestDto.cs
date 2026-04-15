@@ -1,6 +1,6 @@
 ﻿namespace MARN_API.DTOs.Notification
 {
-    public class FcmTokenRequest
+    public class FcmTokenRequestDto
     {
         public string token { get; set; } = string.Empty;
     }

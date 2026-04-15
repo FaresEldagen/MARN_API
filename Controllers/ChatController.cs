@@ -51,6 +51,7 @@ namespace MARN_API.Controllers
                 return Unauthorized("User ID not found in token");
 
             _logger.LogInformation("User {UserId} requested active chat users", userId);
+
             var result = await _chatService.GetActiveUsersWithStatusAsync(userId.ToString());
             return HandleServiceResult(result);
         }
@@ -61,7 +62,15 @@ namespace MARN_API.Controllers
         /// </summary>
         /// <param name="q">The search query string.</param>
         /// <param name="limit">The maximum number of results to return.</param>
-        /// <response code="200">Returns a list of matching users.</response>
+        /// <response code="200">
+        /// Returns a list of matching users with their online status and unread message count. Each user object includes:
+        /// - Id: The unique identifier of the user.
+        /// - UserName: The full name of the user.
+        /// - ProfileImage: The URL of the user's profile image.
+        /// - UnreadCount: The number of unread messages from that user.
+        /// - IsOnline: A boolean indicating whether the user is currently online.
+        /// - LastMessage: An object containing the content and timestamp of the last message exchanged with that user.
+        /// </response>
         /// <response code="400">If the query is empty.</response>
         /// <response code="401">If the user is not authenticated.</response>
         /// <response code="429">If rate limit is exceeded</response>
@@ -89,7 +98,10 @@ namespace MARN_API.Controllers
         /// Retrieves the chat history between the current user and another specified user.
         /// </summary>
         /// <param name="otherUserId">The ID of the other user.</param>
-        /// <response code="200">Returns the chat history (list of messages) exchanged between the two users.</response>
+        /// <response code="200">
+        /// Returns the chat history (list of messages) exchanged between the two users, each message with:
+        /// - Id, SenderId, ReceiverId, Content, SentAt, IsRead
+        /// </response>
         /// <response code="400">If the other user ID is invalid.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet("history/{otherUserId}")]

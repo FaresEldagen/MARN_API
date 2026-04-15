@@ -37,9 +37,12 @@ namespace MARN_API.Services.Implementations
             }
         }
 
-        public async Task SendNotificationAsync(List<string> deviceTokens, string title, string body)
+        public async Task<List<string>> SendNotificationAsync(List<string> deviceTokens, string title, string body)
         {
-            if (!_isFirebaseInitialized || deviceTokens == null || deviceTokens.Count == 0) return;
+            var invalidTokens = new List<string>();
+
+            if (!_isFirebaseInitialized || deviceTokens == null || deviceTokens.Count == 0) 
+                return invalidTokens;
 
             var message = new MulticastMessage()
             {
@@ -55,11 +58,29 @@ namespace MARN_API.Services.Implementations
             {
                 var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
                 _logger.LogInformation($"Successfully dispatched FCM Push Notifications to {response.SuccessCount} devices.");
+
+                for (int i = 0; i < response.Responses.Count; i++)
+                {
+                    var resp = response.Responses[i];
+
+                    if (!resp.IsSuccess)
+                    {
+                        var errorCode = resp.Exception?.MessagingErrorCode;
+
+                        if (errorCode == MessagingErrorCode.Unregistered ||
+                            errorCode == MessagingErrorCode.InvalidArgument)
+                        {
+                            invalidTokens.Add(deviceTokens[i]);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError("Failed to send FCM Push Notification: " + ex.Message);
             }
+
+            return invalidTokens;
         }
     }
 }

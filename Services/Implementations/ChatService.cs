@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MARN_API.DTOs.Chat;
+using MARN_API.DTOs.Notification;
+using MARN_API.Enums.Notification;
 using MARN_API.Hubs;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
@@ -101,6 +103,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Sending message from {SenderId} to {ReceiverId}", senderId, receiverId);
 
+            // 1. Check the input
             if (!Guid.TryParse(senderId, out var senderGuid) ||
                 !Guid.TryParse(receiverId, out var receiverGuid))
             {
@@ -126,6 +129,8 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<MessageDto>.Fail("Receiver user not found");
             }
 
+
+            // 2. Save The Message
             var message = new Message
             {
                 Id = Guid.NewGuid(),
@@ -138,18 +143,25 @@ namespace MARN_API.Services.Implementations
 
             await _chatRepo.AddMessageAsync(message);
 
-            try
-            {
-                await _notificationService.SendMessageNotificationAsync(
-                    receiverId,
-                    $"{senderUser.FirstName} {senderUser.LastName}",
-                    content);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to send push notification for message to {ReceiverId}", receiverId);
-            }
 
+            // 3. Send Notification
+            await _notificationService.SendNotificationAsync( new NotificationRequestDto
+            {
+                ReceiverId = receiverId,
+                SenderId = senderId,
+                Type = NotificationType.NewMessage,
+                Title = "New Message",
+                Body = $"You have a new message from {senderUser.FirstName} {senderUser.LastName}",
+                Data = new Dictionary<string, string>
+                {
+                    { "SenderId", senderId },
+                    { "SenderName", $"{senderUser.FirstName} {senderUser.LastName}" },
+                    { "Content", content }
+                }
+            });
+
+
+            // 4. Return The Message
             var dto = new MessageDto
             {
                 Id = message.Id,

@@ -1,6 +1,6 @@
 ﻿using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
-using MARN_API.Enums;
+using MARN_API.Enums.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,13 @@ namespace MARN_API.Repositories.Implementations
         }
 
 
-        #region Dashboards
+        #region Notification
+        public async Task AddAsync(Notification notification)
+        {
+            Context.Notifications.Add(notification);
+            await Context.SaveChangesAsync();
+        }
+
         public Task<List<NotificationMiniCardDto>> GetRenterDashboardNotifications(Guid userId)
         {
             return Context.Notifications

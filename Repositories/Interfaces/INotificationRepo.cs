@@ -5,7 +5,8 @@ namespace MARN_API.Repositories.Interfaces
 {
     public interface INotificationRepo
     {
-        #region Dashboards
+        #region Notification
+        Task AddAsync(Notification notification);
         public Task<List<NotificationMiniCardDto>> GetRenterDashboardNotifications(Guid userId);
         public Task<List<NotificationMiniCardDto>> GetOwnerDashboardNotifications(Guid userId);
         #endregion

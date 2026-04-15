@@ -4,6 +4,8 @@ using MARN_API.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using MARN_API.DTOs.Notification;
+using Microsoft.AspNetCore.Http.HttpResults;
+using MARN_API.Enums.Notification;
 
 namespace MARN_API.Controllers
 {
@@ -35,7 +37,7 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> SaveFcmToken([FromBody] FcmTokenRequest request)
+        public async Task<IActionResult> SaveFcmToken([FromBody] FcmTokenRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.token))
                 return BadRequest("Token is required.");
@@ -61,7 +63,7 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> RemoveFcmToken([FromBody] FcmTokenRequest request)
+        public async Task<IActionResult> RemoveFcmToken([FromBody] FcmTokenRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.token))
                 return BadRequest("Token is required.");
@@ -73,6 +75,25 @@ namespace MARN_API.Controllers
 
             var result = await _notificationService.RemoveDeviceTokenAsync(userId.ToString(), request.token);
             return HandleServiceResult(result);
+        }
+
+
+        [HttpGet("test-notification")]
+        public async Task<IActionResult> TestNotification()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                ReceiverId = userId.ToString(),
+                Type = NotificationType.None,
+                Title = "Test Notificaiton",
+                Body = $"This is a test notification",
+                SaveInDB = false
+            });
+
+            return Ok();
         }
     }
 }
