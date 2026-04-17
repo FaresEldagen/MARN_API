@@ -90,7 +90,7 @@ namespace MARN_API.Services.Implementations
                 ReceiverId = m.ReceiverId.ToString(),
                 Content = _encryptionService.Decrypt(m.Content), // Decrypt for the UI
                 SentAt = m.SentAt,
-                IsRead = m.IsRead 
+                IsRead = m.ReadAt.HasValue
             }).ToList();
 
             return ServiceResult<List<MessageDto>>.Ok(result);
@@ -138,7 +138,6 @@ namespace MARN_API.Services.Implementations
                 ReceiverId = receiverGuid,
                 Content = _encryptionService.Encrypt(content),
                 SentAt = DateTime.UtcNow,
-                IsRead = false
             };
 
             await _chatRepo.AddMessageAsync(message);
@@ -171,7 +170,7 @@ namespace MARN_API.Services.Implementations
                 ReceiverName = $"{receiverUser.FirstName} {receiverUser.LastName}",
                 Content = content, // Return plaintext to the sender's UI
                 SentAt = message.SentAt,
-                IsRead = message.IsRead
+                IsRead = message.ReadAt.HasValue
             };
 
             return ServiceResult<MessageDto>.Ok(dto);

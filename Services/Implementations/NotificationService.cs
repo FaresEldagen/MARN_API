@@ -35,23 +35,7 @@ namespace MARN_API.Services.Implementations
         }
 
 
-        public async Task<ServiceResult<bool>> SaveDeviceTokenAsync(string userId, string fcmToken)
-        {
-            _logger.LogInformation("Saving FCM token for user {UserId}", userId);
-
-            await _notificationRepo.AddOrUpdateUserDeviceAsync(userId, fcmToken);
-            return ServiceResult<bool>.Ok(true);
-        }
-
-        public async Task<ServiceResult<bool>> RemoveDeviceTokenAsync(string userId, string fcmToken)
-        {
-            _logger.LogInformation("Removing FCM token for user {UserId}", userId);
-
-            await _notificationRepo.RemoveUserDeviceAsync(userId, fcmToken);
-            return ServiceResult<bool>.Ok(true);
-        }
-
-
+        #region Notification
         public async Task SendNotificationAsync(NotificationRequestDto request)
         {
             // Special Conditions
@@ -99,5 +83,56 @@ namespace MARN_API.Services.Implementations
                 }
             }
         }
+
+
+        public async Task<ServiceResult<List<NotificationCardDto>>> GetUserNotificationsAsync(Guid userId)
+        {
+            _logger.LogInformation("Fetching notifications for user {UserId}", userId);
+            var notifications = await _notificationRepo.GetAllNotificationsAsync(userId.ToString());
+            var result = notifications.Select(n => new NotificationCardDto
+            {
+                Id = n.Id,
+                Type = n.Type,
+                Title = n.Title,
+                Body = n.Body,
+                Data = n.Data != null ? JsonSerializer.Deserialize<Dictionary<string, string>>(n.Data) : null,
+                IsRead = n.ReadAt.HasValue,
+                CreatedAt = n.CreatedAt
+            }).ToList();
+            return ServiceResult<List<NotificationCardDto>>.Ok(result);
+        }
+
+
+        public async Task MarkAllNotificationsAsReadAsync(string currentUserId)
+        {
+            _logger.LogInformation("Marking notifications as read for user {UserId}", currentUserId);
+            await _notificationRepo.MarkAllAsReadAsync(currentUserId);
+        }
+
+        public async Task MarkNotificationAsReadAsync(string currentUserId, long notificationId)
+        {
+            _logger.LogInformation("Marking notification {NotificationId} as read for user {UserId}", notificationId, currentUserId);
+            await _notificationRepo.MarkAsReadAsync(currentUserId, notificationId);
+        }
+        #endregion
+
+
+        #region FCM Device Tokens
+        public async Task<ServiceResult<bool>> SaveDeviceTokenAsync(string userId, string fcmToken)
+        {
+            _logger.LogInformation("Saving FCM token for user {UserId}", userId);
+
+            await _notificationRepo.AddOrUpdateUserDeviceAsync(userId, fcmToken);
+            return ServiceResult<bool>.Ok(true);
+        }
+
+        public async Task<ServiceResult<bool>> RemoveDeviceTokenAsync(string userId, string fcmToken)
+        {
+            _logger.LogInformation("Removing FCM token for user {UserId}", userId);
+
+            await _notificationRepo.RemoveUserDeviceAsync(userId, fcmToken);
+            return ServiceResult<bool>.Ok(true);
+        }
+        #endregion
     }
 }

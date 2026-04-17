@@ -341,6 +341,7 @@ namespace MARN_API
             app.UseStaticFiles();
 
             app.UseRateLimiter();
+
             app.UseCors();
             //app.UseCors("AllowCustomDomain");
 

@@ -38,7 +38,7 @@ namespace MARN_API.Repositories.Implementations
                     UserName = $"{u.FirstName} {u.LastName}",
                     ProfileImage = u.ProfileImage,
 
-                    UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.IsRead),
+                    UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.ReadAt.HasValue),
 
                     LastMessage = Context.Messages
                         .Where(m =>
@@ -69,16 +69,20 @@ namespace MARN_API.Repositories.Implementations
 
             var usersWithCounts = await Context.Users
                 .Where(u => 
-                    u.Id != currentUserGuid &&
                     //userIdsWithChats.Contains(u.Id) &&
-                    ($"{u.FirstName} {u.LastName}"!.Contains(query) || u.Email!.Contains(query)))
+                    u.Id != currentUserGuid &&
+                    (
+                        u.FirstName.Contains(query) ||
+                        u.LastName.Contains(query) ||
+                        u.Email!.Contains(query)
+                    ))
                 .Select(u => new ChatUserDto
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
                     ProfileImage = u.ProfileImage,
 
-                    UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.IsRead),
+                    UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.ReadAt.HasValue),
 
                     LastMessage = Context.Messages
                         .Where(m =>
@@ -128,9 +132,8 @@ namespace MARN_API.Repositories.Implementations
             var receiverGuid = Guid.Parse(receiverId);
 
             await Context.Messages
-                .Where(m => m.SenderId == senderGuid && m.ReceiverId == receiverGuid && !m.IsRead)
+                .Where(m => m.SenderId == senderGuid && m.ReceiverId == receiverGuid && !m.ReadAt.HasValue)
                 .ExecuteUpdateAsync(s => s
-                    .SetProperty(m => m.IsRead, true)
                     .SetProperty(m => m.ReadAt, DateTime.UtcNow));
         }
         #endregion

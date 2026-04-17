@@ -15,7 +15,6 @@ namespace MARN_API.Models
 
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
-        public bool IsRead { get; set; } = false;
         public DateTime? ReadAt { get; set; }
 
         // Foreign Key for the Sender

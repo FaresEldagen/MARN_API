@@ -23,6 +23,15 @@ namespace MARN_API.Repositories.Implementations
             await Context.SaveChangesAsync();
         }
 
+
+        public async Task<List<Notification>> GetAllNotificationsAsync(string userId)
+        {
+            return await Context.Notifications
+                .Where(n => n.UserId.ToString() == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
+
         public Task<List<NotificationMiniCardDto>> GetRenterDashboardNotifications(Guid userId)
         {
             return Context.Notifications
@@ -53,6 +62,26 @@ namespace MARN_API.Repositories.Implementations
                     CreatedAt = n.CreatedAt
                 })
                 .ToListAsync();
+        }
+
+
+        public async Task MarkAllAsReadAsync(string userId)
+        {
+            await Context.Notifications
+                .Where(n => n.UserId.ToString() == userId && n.ReadAt == null)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(m => m.ReadAt, DateTime.UtcNow));
+        }
+
+        public async Task MarkAsReadAsync(string userId, long notificationId)
+        {
+            var notification = await Context.Notifications
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId.ToString() == userId);
+            if (notification != null && !notification.ReadAt.HasValue)
+            {
+                notification.ReadAt = DateTime.UtcNow;
+                await Context.SaveChangesAsync();
+            }
         }
         #endregion
 

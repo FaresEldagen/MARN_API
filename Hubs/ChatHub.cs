@@ -26,8 +26,12 @@ namespace MARN_API.Hubs
                 var isNewOnline = _tracker.UserConnected(userId);
                 if (isNewOnline)
                 {
-                    // Broadcast to everyone that this user is now online
-                    await Clients.All.SendAsync("UserOnline", userId);
+                    // Only broadcast online status to users who have an active chat history with the connected user
+                    var ChatUsers = await _chatService.GetActiveUsersWithStatusAsync(userId);
+                    await Clients.Groups(ChatUsers.Data!
+                        .Where(u => u.IsOnline)
+                        .Select(u => u.Id))
+                        .SendAsync("UserOnline", userId);
                 }
             }
             await base.OnConnectedAsync();
@@ -41,8 +45,12 @@ namespace MARN_API.Hubs
                 var isOffline = _tracker.UserDisconnected(userId);
                 if (isOffline)
                 {
-                    // Broadcast to everyone that this user is now offline
-                    await Clients.All.SendAsync("UserOffline", userId);
+                    // Only broadcast online status to users who have an active chat history with the connected user
+                    var ChatUsers = await _chatService.GetActiveUsersWithStatusAsync(userId);
+                    await Clients.Groups(ChatUsers.Data!
+                        .Where(u => u.IsOnline)
+                        .Select(u => u.Id))
+                        .SendAsync("UserOffline", userId);
                 }
             }
             await base.OnDisconnectedAsync(exception);
@@ -76,7 +84,10 @@ namespace MARN_API.Hubs
 
             if (senderId == receiverId)
                 throw new HubException("Cannot send messages to yourself.");
-            
+
+            if (content.Length > 1000) // Arbitrary max length for a message
+                throw new HubException("Message content is too long.");
+
             // 1. Save message to Database via Service abstraction
             var result = await _chatService.SendMessageAsync(senderId, receiverId, content);
             if (!result.Success)

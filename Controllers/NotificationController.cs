@@ -33,10 +33,12 @@ namespace MARN_API.Controllers
         /// <response code="200">FCM token saved successfully.</response>
         /// <response code="400">If the token is missing.</response>
         /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="429">If rate limit is exceeded</response>
         [HttpPost("save-fcm-token")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> SaveFcmToken([FromBody] FcmTokenRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.token))
@@ -59,10 +61,12 @@ namespace MARN_API.Controllers
         /// <response code="200">FCM token removed successfully.</response>
         /// <response code="400">If the token is missing.</response>
         /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="429">If rate limit is exceeded</response>
         [HttpDelete("remove-fcm-token")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> RemoveFcmToken([FromBody] FcmTokenRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.token))
@@ -74,6 +78,28 @@ namespace MARN_API.Controllers
             _logger.LogInformation("User {UserId} removing FCM token", userId);
 
             var result = await _notificationService.RemoveDeviceTokenAsync(userId.ToString(), request.token);
+            return HandleServiceResult(result);
+        }
+
+
+        /// <summary>
+        /// Return all the notifications of the current user, ordered by created date (newest first).
+        /// </summary>
+        /// <response code="200">
+        /// Return all the notifications of the current user contains id, type, title, body, data (optional), isRead and createdAt.
+        /// </response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [HttpGet("notifications-get")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetNotifications()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _notificationService.GetUserNotificationsAsync(userId);
             return HandleServiceResult(result);
         }
 

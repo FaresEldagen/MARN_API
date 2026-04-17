@@ -21,7 +21,6 @@ namespace MARN_API.Data.Seed
                     // Hi, is the apartment still available for next month?
                     Content = "XB+UQj6hKk23omCXxH8uwFxZpOCQjhe1tRbMbKMHUIKitggz1H61tTuCsIyQwnDRBEWtEIP3n24n1DyxJMAPTuWIvOprIjOmfp48oVxQa6M=",
                     SentAt = new DateTime(2025, 3, 20, 10, 0, 0, DateTimeKind.Utc),
-                    IsRead = true,
                     ReadAt = new DateTime(2025, 3, 20, 10, 30, 0, DateTimeKind.Utc)
                 },
                 new Message
@@ -32,7 +31,6 @@ namespace MARN_API.Data.Seed
                     // Yes, it is! Would you like to schedule a visit?
                     Content = "E8jOydWqRhQPRv/E1P+cXgNPhEczTZ62c8OsZm62YoKZnffb6X6KXosOMw92CvheYLt5FO58PHhnweOYeJRQ6A==",
                     SentAt = new DateTime(2025, 3, 20, 11, 0, 0, DateTimeKind.Utc),
-                    IsRead = false
                 }
             );
         }

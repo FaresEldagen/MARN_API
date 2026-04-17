@@ -16,7 +16,7 @@ namespace MARN_API.DTOs.Profile
         public IFormFile BackIdPhoto { get; set; } = null!;
 
         [Required(ErrorMessage = "Arabic address is required.")]
-        [StringLength(200, MinimumLength = 20, ErrorMessage = "Arabic address must be between 20 and 200 characters.")]
+        [StringLength(200, MinimumLength = 10, ErrorMessage = "Arabic address must be between 10 and 200 characters.")]
         public string ArabicAddress { get; set; } = null!;
 
         [Required(ErrorMessage = "Arabic Full Name is required.")]
