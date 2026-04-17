@@ -40,7 +40,9 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = $"{BaseUrl}{u.ProfileImage}",
+                    ProfileImage = u.ProfileImage == null
+                        ? null
+                        : $"{BaseUrl}{u.ProfileImage}",
 
                     UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.ReadAt.HasValue),
 
@@ -86,7 +88,9 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = $"{BaseUrl}{u.ProfileImage}",
+                    ProfileImage = u.ProfileImage == null
+                        ? null
+                        : $"{BaseUrl}{u.ProfileImage}",
 
                     UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.ReadAt.HasValue),
 
