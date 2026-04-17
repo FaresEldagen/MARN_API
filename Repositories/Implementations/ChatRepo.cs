@@ -13,9 +13,11 @@ namespace MARN_API.Repositories.Implementations
     public class ChatRepo : IChatRepo
     {
         private readonly AppDbContext Context;
-        public ChatRepo(AppDbContext context)
+        private readonly IConfiguration _configuration;
+        public ChatRepo(AppDbContext context, IConfiguration configuration)
         {
             Context = context;
+            _configuration = configuration;
         }
 
 
@@ -30,13 +32,15 @@ namespace MARN_API.Repositories.Implementations
                 .Distinct()
                 .ToListAsync();
 
+            var BaseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+
             var usersWithCounts = await Context.Users
                 .Where(u => userIdsWithChats.Contains(u.Id))
                 .Select(u => new ChatUserDto
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = u.ProfileImage,
+                    ProfileImage = $"{BaseUrl}{u.ProfileImage}",
 
                     UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.ReadAt.HasValue),
 
@@ -67,6 +71,8 @@ namespace MARN_API.Repositories.Implementations
             //    .ToListAsync();
             var currentUserGuid = Guid.Parse(currentUserId);
 
+            var BaseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+
             var usersWithCounts = await Context.Users
                 .Where(u => 
                     //userIdsWithChats.Contains(u.Id) &&
@@ -80,7 +86,7 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = u.ProfileImage,
+                    ProfileImage = $"{BaseUrl}{u.ProfileImage}",
 
                     UnreadCount = Context.Messages.Count(m => m.SenderId == u.Id && m.ReceiverId == currentUserGuid && !m.ReadAt.HasValue),
 
