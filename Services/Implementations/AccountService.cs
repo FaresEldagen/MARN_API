@@ -195,6 +195,10 @@ namespace MARN_API.Services.Implementations
                     {
                         Email = payload.Email,
                         UserName = payload.Email,
+
+                        FirstName = payload.GivenName,
+                        LastName = payload.FamilyName,
+
                         EmailConfirmed = true
                     };
 

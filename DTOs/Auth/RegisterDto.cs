@@ -24,11 +24,12 @@ namespace MARN_API.DTOs.Auth
         [EmailAddress(ErrorMessage = "Invalid email address.")]
         [StringLength(256, ErrorMessage = "Email address cannot exceed 256 characters.")]
         public string Email { get; set; } = null!;
-        
+
+        [Required(ErrorMessage = "Date of birth is required.")]
         [DataType(DataType.Date)]
         [Display(Name = "Date of Birth")]
         [PastDate(13, 120)]
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)]
