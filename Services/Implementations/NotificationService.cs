@@ -1,4 +1,5 @@
-﻿using MARN_API.DTOs.Notification;
+﻿using AutoMapper;
+using MARN_API.DTOs.Notification;
 using MARN_API.Enums.Notification;
 using MARN_API.Hubs;
 using MARN_API.Models;
@@ -12,25 +13,25 @@ namespace MARN_API.Services.Implementations
     public class NotificationService : INotificationService
     {
         private readonly INotificationRepo _notificationRepo;
-        private readonly ConnectionTracker _tracker;
-        private readonly IEncryptionService _encryptionService;
         private readonly IFirebaseNotificationService _fcmService;
+        private readonly ConnectionTracker _tracker;
         private readonly IHubContext<NotificationHub> _notificationHub;
+        private readonly IMapper _mapper;
         private readonly ILogger<NotificationService> _logger;
 
         public NotificationService(
-            ConnectionTracker tracker,
             INotificationRepo notificationRepo,
-            IEncryptionService encryptionService,
             IFirebaseNotificationService fcmService,
+            ConnectionTracker tracker,
             IHubContext<NotificationHub> notificationHub,
+            IMapper mapper,
             ILogger<NotificationService> logger)
         {
             _notificationRepo = notificationRepo;
             _tracker = tracker;
-            _encryptionService = encryptionService;
             _fcmService = fcmService;
             _notificationHub = notificationHub;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -38,12 +39,6 @@ namespace MARN_API.Services.Implementations
         #region Notification
         public async Task SendNotificationAsync(NotificationRequestDto request)
         {
-            // Special Conditions
-            if (request.Type == NotificationType.NewMessage && 
-                _tracker.IsUserInChatWith(request.ReceiverId, request.SenderId!))
-            { return; }
-
-
             // Save in DB
             if (request.SaveInDB)
             {
@@ -88,17 +83,10 @@ namespace MARN_API.Services.Implementations
         public async Task<ServiceResult<List<NotificationCardDto>>> GetUserNotificationsAsync(Guid userId)
         {
             _logger.LogInformation("Fetching notifications for user {UserId}", userId);
+
             var notifications = await _notificationRepo.GetAllNotificationsAsync(userId.ToString());
-            var result = notifications.Select(n => new NotificationCardDto
-            {
-                Id = n.Id,
-                Type = n.Type,
-                Title = n.Title,
-                Body = n.Body,
-                Data = n.Data != null ? JsonSerializer.Deserialize<Dictionary<string, string>>(n.Data) : null,
-                IsRead = n.ReadAt.HasValue,
-                CreatedAt = n.CreatedAt
-            }).ToList();
+            var result = _mapper.Map<List<NotificationCardDto>>(notifications);
+
             return ServiceResult<List<NotificationCardDto>>.Ok(result);
         }
 

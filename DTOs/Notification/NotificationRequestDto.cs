@@ -4,14 +4,14 @@ namespace MARN_API.DTOs.Notification
 {
     public class NotificationRequestDto
     {
-        public string ReceiverId { get; set; } = null!;
-        public string? SenderId { get; set; } = null!;
+        public string ReceiverId { get; set; } = string.Empty;
+        public string? SenderId { get; set; } = null;
         public NotificationType Type { get; set; }
 
         public string Title { get; set; } = null!;
         public string Body { get; set; } = null!;
 
-        public object? Data { get; set; } 
+        public object? Data { get; set; } = null;
         public bool SaveInDB { get; set; } = true;
     }
 }

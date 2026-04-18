@@ -144,20 +144,23 @@ namespace MARN_API.Services.Implementations
 
 
             // 3. Send Notification
-            await _notificationService.SendNotificationAsync( new NotificationRequestDto
+            if (!_tracker.IsUserInChatWith(receiverId, senderId))
             {
-                ReceiverId = receiverId,
-                SenderId = senderId,
-                Type = NotificationType.NewMessage,
-                Title = "New Message",
-                Body = $"You have a new message from {senderUser.FirstName} {senderUser.LastName}",
-                Data = new Dictionary<string, string>
+                await _notificationService.SendNotificationAsync( new NotificationRequestDto
                 {
-                    { "SenderId", senderId },
-                    { "SenderName", $"{senderUser.FirstName} {senderUser.LastName}" },
-                    { "Content", content }
-                }
-            });
+                    ReceiverId = receiverId,
+                    SenderId = senderId,
+                    Type = NotificationType.NewMessage,
+                    Title = "New Message",
+                    Body = $"You have a new message from {senderUser.FirstName} {senderUser.LastName}",
+                    Data = new Dictionary<string, string>
+                    {
+                        { "SenderId", senderId },
+                        { "SenderName", $"{senderUser.FirstName} {senderUser.LastName}" },
+                        { "Content", content }
+                    }
+                });
+            }
 
 
             // 4. Return The Message

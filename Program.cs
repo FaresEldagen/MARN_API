@@ -214,11 +214,10 @@ namespace MARN_API
                           .AllowCredentials();
                 });
             });
-
             //builder.Services.AddCors(options =>
             //{
             //    options.AddPolicy("AllowCustomDomain",
-            //        builder => builder.WithOrigins("http://127.0.0.1:5500")
+            //        policy => policy.WithOrigins(builder.Configuration["AppSettings:FrontBaseUrl"]!)
             //            .AllowAnyHeader()
             //            .AllowAnyMethod()
             //            .AllowCredentials());
@@ -343,7 +342,7 @@ namespace MARN_API
             app.UseRateLimiter();
 
             app.UseCors();
-            //app.UseCors("AllowCustomDomain");
+            //app.UseCors(builder.Configuration["AppSettings:FrontBaseUrl"]!);
 
             app.UseAuthentication();
             app.UseAuthorization();

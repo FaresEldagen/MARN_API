@@ -41,7 +41,9 @@ namespace MARN_API.Repositories.Implementations
                 .Select(n => new NotificationMiniCardDto
                 {
                     Id = n.Id,
+
                     Title = n.Title,
+
                     IsRead = n.ReadAt.HasValue,
                     CreatedAt = n.CreatedAt
                 })
@@ -57,7 +59,9 @@ namespace MARN_API.Repositories.Implementations
                 .Select(n => new NotificationMiniCardDto
                 {
                     Id = n.Id,
+
                     Title = n.Title,
+
                     IsRead = n.ReadAt.HasValue,
                     CreatedAt = n.CreatedAt
                 })

@@ -10,11 +10,13 @@ namespace MARN_API.Mapping
     {
         public UserProfile()
         {
-            // To Register
+            #region To Register
             CreateMap<RegisterDto, ApplicationUser>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email));
+            #endregion
 
-            // Get Profile Data
+
+            #region Get Profile Data
             CreateMap<ApplicationUser, ProfileDto>()
                 .ForMember(dest => dest.FullName,
                     opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
@@ -25,8 +27,10 @@ namespace MARN_API.Mapping
 
             CreateMap<RoommatePreference, ProfileDto>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
+            #endregion
 
-            // Get Profile Settings Data
+
+            #region Get Profile Settings Data
             CreateMap<ApplicationUser, ProfileSettingsDto>()
                 .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<ProfileSettingsImageResolver>())
                 .ForMember(dest => dest.FrontIdPhoto, opt => opt.MapFrom<FrontIdPhotoResolver>())
@@ -34,16 +38,21 @@ namespace MARN_API.Mapping
 
             CreateMap<RoommatePreference, ProfileSettingsDto>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
+            #endregion
 
-            // Update Profile Settings
+
+            #region Update Profile Settings
             CreateMap<UpdateProfileDto, ApplicationUser>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.ProfileImage, opt => opt.Ignore());
+
             CreateMap<UpdateLegalDto, ApplicationUser>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.FrontIdPhoto, opt => opt.Ignore())
                 .ForMember(dest => dest.BackIdPhoto, opt => opt.Ignore());
+
             CreateMap<UpdateRoommatePreferencesDto, RoommatePreference>();
+            #endregion
         }
     }
 

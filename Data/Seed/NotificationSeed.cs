@@ -26,7 +26,8 @@ namespace MARN_API.Data.Seed
                     Title = "Upcoming Payment Due",
                     Body = "Your next rent payment is due soon.",
                     CreatedAt = new DateTime(2025, 4, 5, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.RenterDashboard,
+                    Data = "{\"propertyName\":\"Cozy Seed Apartment\"}"
                 },
                 new Notification
                 {
@@ -37,7 +38,7 @@ namespace MARN_API.Data.Seed
                     Title = "Booking Request Update",
                     Body = "Your booking request has been accepted.",
                     CreatedAt = new DateTime(2025, 4, 6, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.RenterDashboard
                 },
                 new Notification
                 {
@@ -50,19 +51,20 @@ namespace MARN_API.Data.Seed
                     CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
                     ReadAt = new DateTime(2025, 3, 2, 0, 0, 0, DateTimeKind.Utc)
                 },
-
-                // Renter B notifications
                 new Notification
                 {
                     Id = 6004,
-                    UserId = renterBId,
+                    UserId = renterAId,
                     UserType = NotificationUserType.Renter,
-                    Type = NotificationType.None,
-                    Title = "Booking Pending",
-                    Body = "Your booking request is pending owner approval.",
+                    Type = NotificationType.NewMessage,
+                    Title = "New Message",
+                    Body = "You have a new message from the owner.",
                     CreatedAt = new DateTime(2025, 4, 7, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.ChatUser,
+                    ActionId = ownerXId.ToString() // Assuming a chat room ID
                 },
+
+                // Renter B notifications
                 new Notification
                 {
                     Id = 6005,
@@ -72,7 +74,8 @@ namespace MARN_API.Data.Seed
                     Title = "Complete Your Profile",
                     Body = "Add more details to your profile to get better recommendations.",
                     CreatedAt = new DateTime(2025, 3, 3, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = new DateTime(2025, 3, 4, 0, 0, 0, DateTimeKind.Utc)
+                    ReadAt = new DateTime(2025, 3, 4, 0, 0, 0, DateTimeKind.Utc),
+                    ActionType = NotificationActionType.EditProfile
                 },
 
                 // Owner X notifications (owner dashboard)
@@ -85,7 +88,8 @@ namespace MARN_API.Data.Seed
                     Title = "New booking request",
                     Body = "A renter submitted a booking request for one of your properties.",
                     CreatedAt = new DateTime(2025, 4, 8, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.Property,
+                    ActionId = "1002"
                 },
                 new Notification
                 {
@@ -96,7 +100,8 @@ namespace MARN_API.Data.Seed
                     Title = "Payment received",
                     Body = "A rent payment was successfully processed.",
                     CreatedAt = new DateTime(2025, 4, 9, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.OwnerDashboard,
+                    Data = "{\"amount\":\"1200\", \"currency\":\"USD\"}"
                 },
                 new Notification
                 {
@@ -107,7 +112,8 @@ namespace MARN_API.Data.Seed
                     Title = "Welcome, property owner",
                     Body = "Complete your listing details to attract more renters.",
                     CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = new DateTime(2025, 2, 2, 0, 0, 0, DateTimeKind.Utc)
+                    ReadAt = new DateTime(2025, 2, 2, 0, 0, 0, DateTimeKind.Utc),
+                    ActionType = NotificationActionType.EditProfile
                 },
 
                 // Owner Z renter-type notifications (renter dashboard)
@@ -120,7 +126,7 @@ namespace MARN_API.Data.Seed
                     Title = "Rent Payment Due Soon",
                     Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
                     CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.RenterDashboard
                 },
                 new Notification
                 {
@@ -131,7 +137,7 @@ namespace MARN_API.Data.Seed
                     Title = "Booking Submitted",
                     Body = "Your booking request for Seed Studio Flat has been submitted.",
                     CreatedAt = new DateTime(2025, 4, 11, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.RenterDashboard
                 },
                 new Notification
                 {
@@ -155,7 +161,7 @@ namespace MARN_API.Data.Seed
                     Title = "Your property is live",
                     Body = "Luxury Seed Villa is now visible to renters.",
                     CreatedAt = new DateTime(2025, 4, 12, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = null
+                    ActionType = NotificationActionType.OwnerDashboard,
                 },
                 new Notification
                 {
@@ -166,7 +172,8 @@ namespace MARN_API.Data.Seed
                     Title = "Welcome, property owner",
                     Body = "Set up your payout details to start receiving rent payments.",
                     CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, DateTimeKind.Utc),
-                    ReadAt = new DateTime(2025, 2, 7, 0, 0, 0, DateTimeKind.Utc)
+                    ReadAt = new DateTime(2025, 2, 7, 0, 0, 0, DateTimeKind.Utc),
+                    ActionType = NotificationActionType.EditProfile
                 }
             );
         }
