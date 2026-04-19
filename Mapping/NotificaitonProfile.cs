@@ -14,6 +14,12 @@ namespace MARN_API.Mapping
                     opt => opt.MapFrom(src => src.ReadAt.HasValue))
                 .ForMember(dest => dest.Data,
                     opt => opt.ConvertUsing(new JsonToDictionaryConverter(), src => src.Data));
+
+            CreateMap<NotificationRequestDto, Notification>()
+                .ForMember(dest => dest.UserId,
+                    opt => opt.MapFrom(src => Guid.Parse(src.UserId)))
+                .ForMember(dest => dest.Data,
+                    opt => opt.MapFrom<JsonSerializerResolver>());
         }
     }
 
@@ -33,6 +39,17 @@ namespace MARN_API.Mapping
             {
                 return null;
             }
+        }
+    }
+
+    public class JsonSerializerResolver : IValueResolver<NotificationRequestDto, Notification, string?>
+    {
+        public string? Resolve(NotificationRequestDto src, Notification dest, string? destMember, ResolutionContext context)
+        {
+            if (src.Data == null)
+                return null;
+
+            return JsonSerializer.Serialize(src.Data);
         }
     }
     #endregion

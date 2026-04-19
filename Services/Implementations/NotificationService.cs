@@ -42,38 +42,32 @@ namespace MARN_API.Services.Implementations
             // Save in DB
             if (request.SaveInDB)
             {
-                await _notificationRepo.AddAsync(new Notification
-                {
-                    UserId = Guid.Parse(request.ReceiverId),
-                    Type = request.Type,
-                    Title = request.Title,
-                    Body = request.Body,
-                    Data = request.Data != null ? JsonSerializer.Serialize(request.Data) : null
-                });
+                var notification = _mapper.Map<Notification>(request);
+                await _notificationRepo.AddAsync(notification);
             }
 
 
-            if (_tracker.IsOnline(request.ReceiverId))
+            if (_tracker.IsOnline(request.UserId))
             {
                 // Send real-time notification via SignalR
-                await _notificationHub.Clients.User(request.ReceiverId)
+                await _notificationHub.Clients.User(request.UserId)
                     .SendAsync("ReceiveNotification", request);
             }
             else
             {
                 // Send FCM
-                var tokens = await _notificationRepo.GetUserDeviceTokensAsync(request.ReceiverId);
+                var tokens = await _notificationRepo.GetUserDeviceTokensAsync(request.UserId);
 
                 if (tokens.Any())
                 {
-                    _logger.LogInformation("Receiver {ReceiverId} is offline, sending FCM notification", request.ReceiverId);
+                    _logger.LogInformation("Receiver {ReceiverId} is offline, sending FCM notification", request.UserId);
 
                     var invalidTokens = await _fcmService.SendNotificationAsync(tokens, request.Title, request.Body);
 
                     foreach (var invalidToken in invalidTokens)
                     {
-                        _logger.LogWarning("Removing invalid FCM token for user {ReceiverId}: {Token}", request.ReceiverId, invalidToken);
-                        await _notificationRepo.RemoveUserDeviceAsync(request.ReceiverId, invalidToken);
+                        _logger.LogWarning("Removing invalid FCM token for user {ReceiverId}: {Token}", request.UserId, invalidToken);
+                        await _notificationRepo.RemoveUserDeviceAsync(request.UserId, invalidToken);
                     }
                 }
             }

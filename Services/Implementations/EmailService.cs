@@ -33,6 +33,7 @@ namespace MARN_API.Services.Implementations
                     </body>
                 </html>
             ";
+
             await SendEmailAsync(toEmail, "Email Confirmation - MARN", htmlContent, true);
         }
 
@@ -52,6 +53,7 @@ namespace MARN_API.Services.Implementations
                     </body>
                 </html>
             ";
+
             await SendEmailAsync(toEmail, "Account Created - MARN", htmlContent, true);
         }
 
@@ -71,6 +73,7 @@ namespace MARN_API.Services.Implementations
                     </body>
                 </html>
             ";
+
             await SendEmailAsync(toEmail, "Email Confirmation - MARN", htmlContent, true);
         }
 
@@ -91,8 +94,47 @@ namespace MARN_API.Services.Implementations
                     </body>
                 </html>
             ";
-            await SendEmailAsync(toEmail, "Reset Password - MARN", body, true);
 
+            await SendEmailAsync(toEmail, "Reset Password - MARN", body, true);
+        }
+
+        public async Task SendAccountDeletionEmailAsync(string toEmail, string firstName)
+        {
+            string supportEmail = "support@marn.com";
+
+            string htmlContent = $@"
+                    <html>
+                        <body style='font-family: Arial, sans-serif; background-color: #f4f6f8; margin:0; padding:20px;'>
+                            <div style='max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:8px;'>
+                                <h2 style='color:#333;'>Goodbye, {firstName}</h2>
+                    
+                                <p style='font-size:16px; color:#555;'>
+                                    Your account has been successfully deleted from our platform.
+                                </p>
+
+                                <p style='font-size:16px; color:#555;'>
+                                    If this action was not intended or you would like to restore your account or create a new one using the same email address, please contact our support team.
+                                </p>
+
+                                <p style='text-align:center;'>
+                                    <a href='mailto:{supportEmail}' style='background:#dc3545; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold;'>
+                                        Contact Support
+                                    </a>
+                                </p>
+
+                                <p style='font-size:14px; color:#555; margin-top:20px;'>
+                                    Support Email: {supportEmail}
+                                </p>
+
+                                <p style='font-size:12px; color:#999; margin-top:30px;'>
+                                    &copy; {DateTime.UtcNow.Year} MARN. All rights reserved.
+                                </p>
+                            </div>
+                        </body>
+                    </html>
+                ";
+
+            await SendEmailAsync(toEmail, "Account Deletion Confirmation - MARN", htmlContent, true);
         }
 
         public async Task Send2FAEmailAsync(string toEmail, string subject, string code)
@@ -162,6 +204,7 @@ namespace MARN_API.Services.Implementations
                     </table>
                 </body>
                 </html>";
+
             await SendEmailAsync(toEmail, subject, body, isBodyHtml: true);
         }
 

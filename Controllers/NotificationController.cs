@@ -112,10 +112,10 @@ namespace MARN_API.Controllers
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {
-                ReceiverId = userId.ToString(),
-                Type = NotificationType.None,
+                UserId = userId.ToString(),
+                Type = NotificationType.General,
                 Title = "Test Notificaiton",
-                Body = $"This is a test notification",
+                Body = "This is a test notification",
                 SaveInDB = false
             });
 

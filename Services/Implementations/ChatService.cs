@@ -148,9 +148,10 @@ namespace MARN_API.Services.Implementations
             {
                 await _notificationService.SendNotificationAsync( new NotificationRequestDto
                 {
-                    ReceiverId = receiverId,
-                    SenderId = senderId,
+                    UserId = receiverId,
+                    UserType = NotificationUserType.General,
                     Type = NotificationType.NewMessage,
+
                     Title = "New Message",
                     Body = $"You have a new message from {senderUser.FirstName} {senderUser.LastName}",
                     Data = new Dictionary<string, string>
@@ -158,7 +159,10 @@ namespace MARN_API.Services.Implementations
                         { "SenderId", senderId },
                         { "SenderName", $"{senderUser.FirstName} {senderUser.LastName}" },
                         { "Content", content }
-                    }
+                    },
+
+                    ActionType = NotificationActionType.ChatUser,
+                    ActionId = senderId,
                 });
             }
 

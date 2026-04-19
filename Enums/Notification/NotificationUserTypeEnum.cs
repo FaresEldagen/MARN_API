@@ -2,6 +2,7 @@
 {
     public enum NotificationUserType
     {
+        General,
         Renter,
         Owner
     }

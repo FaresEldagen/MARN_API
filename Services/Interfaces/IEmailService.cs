@@ -11,6 +11,7 @@ namespace MARN_API.Services.Interfaces
         Task SendAccountCreatedEmailAsync(string toEmail, string firstName, string loginLink);
         Task SendResendConfirmationEmailAsync(string toEmail, string firstName, string confirmationLink);
         Task SendResetPasswordEmailAsync(string toEmail, string firstName, string resetLink);
+        Task SendAccountDeletionEmailAsync(string toEmail, string firstName);
         Task Send2FAEmailAsync(string toEmail, string subject, string code);
     }
 }

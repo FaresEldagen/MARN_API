@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Google.Apis.Auth;
 using MARN_API.DTOs.Auth;
+using MARN_API.DTOs.Notification;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Notification;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +23,7 @@ namespace MARN_API.Services.Implementations
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
+        private readonly INotificationService _notificationService;
         private readonly ILogger<AccountService> _logger;
         private readonly IMapper _mapper;
         public AccountService(
@@ -28,16 +31,18 @@ namespace MARN_API.Services.Implementations
             SignInManager<ApplicationUser> signInManager,
             IEmailService emailService,
             IConfiguration configuration,
-            IMapper mapper,
             ITokenService tokenService,
+            INotificationService notificationService,
+            IMapper mapper,
             ILogger<AccountService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
             _configuration = configuration;
-            _mapper = mapper;
             _tokenService = tokenService;
+            _notificationService = notificationService;
+            _mapper = mapper; 
             _logger = logger;
         }
 
@@ -216,6 +221,19 @@ namespace MARN_API.Services.Implementations
                             resultType: ServiceResultType.Conflict
                         );
                     }
+
+                    await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                    {
+                        UserId = user.Id.ToString(),
+                        UserType = NotificationUserType.General,
+                        Type = NotificationType.General,
+
+                        Title = $"Welcome to Your New Home Journey {user.FirstName}!",
+                        Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
+                            "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
+
+                        ActionType = NotificationActionType.EditProfile,
+                    });
                 }
 
                 var logins = await _userManager.GetLoginsAsync(user);
@@ -401,17 +419,7 @@ namespace MARN_API.Services.Implementations
 
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-            if (result.Succeeded)
-            {
-                var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-                var loginLink = $"{frontBaseUrl}/Account/Login";
-
-                await _emailService.SendAccountCreatedEmailAsync(user.Email!, user.FirstName!, loginLink);
-
-                _logger.LogInformation("Email confirmed successfully for user: {UserId}", userId);
-                return ServiceResult<bool>.Ok(true, "The Email Confirmed Successfully");
-            }
-            else
+            if (!result.Succeeded)
             {
                 _logger.LogWarning(
                     "Confirm Email for {Email} failed. Errors: {@Errors}",
@@ -420,6 +428,27 @@ namespace MARN_API.Services.Implementations
                 );
                 return ServiceResult<bool>.Fail("Failed to Confirm Email", result.Errors.Select(e => e.Description).ToList());
             }
+
+            var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+            var loginLink = $"{frontBaseUrl}/Account/Login";
+
+            await _emailService.SendAccountCreatedEmailAsync(user.Email!, user.FirstName!, loginLink);
+
+            _logger.LogInformation("Email confirmed successfully for user: {UserId}", userId);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = user.Id.ToString(),
+                UserType = NotificationUserType.General,
+                Type = NotificationType.General,
+
+                Title = $"Welcome to Your New Home Journey {user.FirstName}!",
+                Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
+                    "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
+
+                ActionType = NotificationActionType.EditProfile,
+            });
+            return ServiceResult<bool>.Ok(true, "The Email Confirmed Successfully");
         }
 
         public async Task<ServiceResult<bool>> ResendEmailConfirmationAsync(ResendConfirmationEmailDto dto)

@@ -2,7 +2,7 @@
 {
     public enum NotificationType
     {
-        None = 0,
+        General = 0,
 
         NewMessage,
         NewBookingRequest,

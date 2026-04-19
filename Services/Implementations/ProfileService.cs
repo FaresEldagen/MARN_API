@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Notification;
 using MARN_API.DTOs.Profile;
 using MARN_API.DTOs.Property;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
@@ -16,9 +18,6 @@ namespace MARN_API.Services.Implementations
 {
     public class ProfileService : IProfileService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<AccountService> _logger;
-        private readonly IMapper _mapper;
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly IContractRepo _contractRepo;   
         private readonly INotificationRepo _notificationRepo;
@@ -26,12 +25,14 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyRepo _propertyRepo;
         private readonly IRoommatePreferenceRepo _roommatePreferenceRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFileService _fileService;
+        private readonly IEmailService _emailService;
+        private readonly INotificationService _notificationService;
+        private readonly IMapper _mapper;
+        private readonly ILogger<AccountService> _logger;
 
         public ProfileService(
-            UserManager<ApplicationUser> userManager,
-            IMapper mapper,
-            ILogger<AccountService> logger,
             IBookingRequestRepo bookingRequestRepo,
             IContractRepo contractRepo,
             INotificationRepo notificationRepo,
@@ -39,12 +40,14 @@ namespace MARN_API.Services.Implementations
             IPropertyRepo propertyRepo,
             IRoommatePreferenceRepo roommatePreferenceRepo,
             ISavedPropertyRepo savedPropertyRepo,
-            IFileService fileService
+            UserManager<ApplicationUser> userManager,
+            INotificationService notificationService,
+            IFileService fileService,
+            IEmailService emailService,
+            IMapper mapper,
+            ILogger<AccountService> logger
         )
         {
-            _userManager = userManager;
-            _mapper = mapper;
-            _logger = logger;
             _bookingRequestRepo = bookingRequestRepo;
             _contractRepo = contractRepo;
             _notificationRepo = notificationRepo;
@@ -52,7 +55,12 @@ namespace MARN_API.Services.Implementations
             _propertyRepo = propertyRepo;
             _roommatePreferenceRepo = roommatePreferenceRepo;
             _savedPropertyRepo = savedPropertyRepo;
+            _userManager = userManager;
+            _notificationService = notificationService;
             _fileService = fileService;
+            _emailService = emailService;
+            _mapper = mapper;
+            _logger = logger;
         }
 
 
@@ -316,6 +324,20 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Update Profile Data successful for user: {UserId}", user.Id);
+
+            if(user.AccountStatus == AccountStatus.Pending)
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = user.Id.ToString(),
+                    UserType = NotificationUserType.General,
+                    Type = NotificationType.General,
+
+                    Title = "Profile Updated Successfully!",
+                    Body = "Your profile has been updated successfully. Our team will review your information, and your account is expected to be verified within approximately 24 hours.\n\n" +
+                        "Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.",
+                });
+            }
             return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
         }
 
@@ -389,6 +411,17 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Update Profile Legal Data successful for user: {UserId}", user.Id);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = user.Id.ToString(),
+                UserType = NotificationUserType.General,
+                Type = NotificationType.General,
+
+                Title = "Profile Updated Successfully!",
+                Body = "Your profile has been updated successfully. Our team will review your information, and your account is expected to be verified within approximately 24 hours.\n\n" +
+                    "Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.",
+            });
             return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
         }
 
@@ -582,6 +615,8 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("User {UserId} marked as deleted.", userId);
+
+            await _emailService.SendAccountDeletionEmailAsync(user.Email!, user.FirstName);
             return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
         }
         #endregion
