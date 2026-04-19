@@ -1,6 +1,7 @@
 using MARN_API.DTOs.Lookup;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Notification;
 using MARN_API.Enums.Property;
 using MARN_API.Enums.RoommatePreferences;
 using MARN_API.Models;
@@ -56,7 +57,14 @@ namespace MARN_API.Controllers
                 PaymentStatuses = GetEnumValues<PaymentStatus>(),
                 PaymentFrequencies = GetEnumValues<PaymentFrequency>(),
                 ReportStatuses = GetEnumValues<ReportStatus>(),
-                ReportableTypes = GetEnumValues<ReportableType>()
+                ReportableTypes = GetEnumValues<ReportableType>(),
+                AccountStatuses = GetEnumValues<AccountStatus>(),
+                PropertyAvailabilities = GetEnumValues<PropertyAvailability>(),
+                NotificationUserTypes = GetEnumValues<NotificationUserType>(),
+                NotificationTypes = GetEnumValues<NotificationType>(),
+                NotificationActionTypes = GetEnumValues<NotificationActionType>(),
+                ServiceResultTypes = GetEnumValues<ServiceResultType>(),
+                UserActivityTypes = GetEnumValues<UserActivityType>()
             };
 
             return HandleServiceResult(ServiceResult<object>.Ok(data));
@@ -118,5 +126,26 @@ namespace MARN_API.Controllers
 
         [HttpGet("reportable-types")]
         public IActionResult GetReportableTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ReportableType>()));
+
+        [HttpGet("account-statuses")]
+        public IActionResult GetAccountStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<AccountStatus>()));
+
+        [HttpGet("property-availabilities")]
+        public IActionResult GetPropertyAvailabilities() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PropertyAvailability>()));
+
+        [HttpGet("notification-user-types")]
+        public IActionResult GetNotificationUserTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<NotificationUserType>()));
+
+        [HttpGet("notification-types")]
+        public IActionResult GetNotificationTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<NotificationType>()));
+
+        [HttpGet("notification-action-types")]
+        public IActionResult GetNotificationActionTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<NotificationActionType>()));
+
+        [HttpGet("service-result-types")]
+        public IActionResult GetServiceResultTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ServiceResultType>()));
+
+        [HttpGet("user-activity-types")]
+        public IActionResult GetUserActivityTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<UserActivityType>()));
     }
 }

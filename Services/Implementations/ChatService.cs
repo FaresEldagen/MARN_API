@@ -3,96 +3,90 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MARN_API.DTOs.Chat;
+using MARN_API.DTOs.Notification;
+using MARN_API.Enums.Notification;
 using MARN_API.Hubs;
+using MARN_API.Data;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MARN_API.Services.Implementations
 {
     public class ChatService : IChatService
     {
-        private readonly IChatRepository _repository;
+        private readonly IChatRepo _chatRepo;
+        private readonly INotificationRepo _notificationRepo;
         private readonly ConnectionTracker _tracker;
         private readonly IEncryptionService _encryptionService;
         private readonly IFirebaseNotificationService _fcmService;
+        private readonly INotificationService _notificationService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _dbContext;
         private readonly ILogger<ChatService> _logger;
 
         public ChatService(
-            IChatRepository repository, 
+            IChatRepo chatRepo, 
+            INotificationRepo notificationRepo,
             ConnectionTracker tracker, 
             IEncryptionService encryptionService, 
             IFirebaseNotificationService fcmService,
+            INotificationService notificationService,
+            UserManager<ApplicationUser> userManager,
+            AppDbContext dbContext,
             ILogger<ChatService> logger)
         {
-            _repository = repository;
+            _chatRepo = chatRepo;
+            _notificationRepo = notificationRepo;
             _tracker = tracker;
             _encryptionService = encryptionService;
             _fcmService = fcmService;
+            _notificationService = notificationService;
+            _userManager = userManager;
+            _dbContext = dbContext;
             _logger = logger;
         }
 
-        public async Task<ServiceResult<MessageDto>> SendMessageAsync(string senderId, string receiverId, string content)
+
+        #region Chats Page
+        public async Task<ServiceResult<List<ChatUserDto>>> GetActiveUsersWithStatusAsync(string currentUserId)
         {
-            _logger.LogInformation("Sending message from {SenderId} to {ReceiverId}", senderId, receiverId);
-            
-            var senderUser = await _repository.GetUserByIdAsync(senderId);
-            var receiverUser = await _repository.GetUserByIdAsync(receiverId);
+            _logger.LogInformation("Fetching active chat users for {UserId}", currentUserId);
+            var result = await _chatRepo.GetActiveChatUsersWithUnreadCountAsync(currentUserId);
 
-            if (receiverUser == null)
-            {
-                _logger.LogWarning("Receiver user {ReceiverId} not found", receiverId);
-                return ServiceResult<MessageDto>.Fail("Receiver user not found");
+            foreach (var user in result)
+            { 
+                user.IsOnline = _tracker.IsOnline(user.Id);
+                if (user.LastMessage != null)
+                    user.LastMessage.Content = _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
-            var message = new Message
-            {
-                Id = Guid.NewGuid(),
-                SenderId = Guid.Parse(senderId),
-                ReceiverId = Guid.Parse(receiverId),
-                Content = _encryptionService.Encrypt(content), // Encrypt before saving to DB
-                SentAt = DateTime.UtcNow,
-                IsRead = false
-            };
+            return ServiceResult<List<ChatUserDto>>.Ok(result);
+        }
 
-            await _repository.AddMessageAsync(message);
+        public async Task<ServiceResult<List<ChatUserDto>>> SearchUsersWithStatusAsync(string currentUserId, string query, int limit)
+        {
+            _logger.LogInformation("Searching for users with query '{Query}' for {UserId}", query, currentUserId);
+            var result = await _chatRepo.SearchUsersAsync(currentUserId, query, limit);
 
-            // Trigger FCM Notification if the receiver is Offline (meaning their SignalR WebSocket is dead)
-            if (!_tracker.IsOnline(receiverId))
+            foreach (var user in result)
             {
-                var receiverTokens = await _repository.GetUserDeviceTokensAsync(receiverId);
-                if (receiverTokens != null && receiverTokens.Any())
-                {
-                    var senderNameStr = senderUser?.UserName ?? "Someone";
-                    _logger.LogInformation("Receiver {ReceiverId} is offline, sending FCM notification", receiverId);
-                    await _fcmService.SendNotificationAsync(receiverTokens, $"New Message from {senderNameStr}", content);
-                }
+                user.IsOnline = _tracker.IsOnline(user.Id);
+                if (user.LastMessage != null)
+                    user.LastMessage.Content = _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
-            var dto = new MessageDto
-            {
-                Id = message.Id,
-                SenderId = message.SenderId.ToString(),
-                SenderName = senderUser?.UserName,
-                ReceiverId = message.ReceiverId.ToString(),
-                ReceiverName = receiverUser?.UserName,
-                Content = content, // Return plaintext to the sender's UI
-                SentAt = message.SentAt,
-                IsRead = message.IsRead
-            };
-
-            return ServiceResult<MessageDto>.Ok(dto);
+            return ServiceResult<List<ChatUserDto>>.Ok(result);
         }
 
         public async Task<ServiceResult<List<MessageDto>>> GetChatHistoryAsync(string currentUserId, string otherUserId)
         {
             _logger.LogInformation("Fetching chat history between {UserId} and {OtherUserId}", currentUserId, otherUserId);
             
-            var messages = await _repository.GetMessagesBetweenUsersAsync(currentUserId, otherUserId);
-            
-            // Mark any unread messages from this user to me as read
-            await _repository.MarkMessagesAsReadAsync(senderId: otherUserId, receiverId: currentUserId);
+            var messages = await _chatRepo.GetMessagesBetweenUsersAsync(currentUserId, otherUserId);
 
             var result = messages.Select(m => new MessageDto
             {
@@ -101,58 +95,115 @@ namespace MARN_API.Services.Implementations
                 ReceiverId = m.ReceiverId.ToString(),
                 Content = _encryptionService.Decrypt(m.Content), // Decrypt for the UI
                 SentAt = m.SentAt,
-                IsRead = m.IsRead 
+                IsRead = m.ReadAt.HasValue
             }).ToList();
 
             return ServiceResult<List<MessageDto>>.Ok(result);
+        }
+        #endregion
+
+        
+        #region Messages Page
+        public async Task<ServiceResult<MessageDto>> SendMessageAsync(string senderId, string receiverId, string content)
+        {
+            _logger.LogInformation("Sending message from {SenderId} to {ReceiverId}", senderId, receiverId);
+
+            // 1. Check the input
+            if (!Guid.TryParse(senderId, out var senderGuid) ||
+                !Guid.TryParse(receiverId, out var receiverGuid))
+            {
+                return ServiceResult<MessageDto>.Fail("Invalid userId format");
+            }
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return ServiceResult<MessageDto>.Fail("Message content cannot be empty");
+            }
+
+            var senderUser = await _userManager.FindByIdAsync(senderId);
+            if (senderUser == null)
+            {
+                _logger.LogWarning("Sender user {SenderId} not found", senderId);
+                return ServiceResult<MessageDto>.Fail("Sender user not found");
+            }
+
+            var receiverUser = await _dbContext.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == receiverGuid);
+            if (receiverUser == null)
+            {
+                _logger.LogWarning("Receiver user {ReceiverId} not found", receiverId);
+                return ServiceResult<MessageDto>.Fail("Receiver user not found");
+            }
+
+            // Prevent sending messages to soft-deleted users
+            if (receiverUser.DeletedAt != null)
+            {
+                _logger.LogWarning("Cannot send message to deleted user {ReceiverId}", receiverId);
+                return ServiceResult<MessageDto>.Fail("Cannot send message to a deleted user");
+            }
+
+
+            // 2. Save The Message
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                SenderId = senderGuid,
+                ReceiverId = receiverGuid,
+                Content = _encryptionService.Encrypt(content),
+                SentAt = DateTime.UtcNow,
+            };
+
+            await _chatRepo.AddMessageAsync(message);
+
+
+            // 3. Send Notification
+            if (!_tracker.IsUserInChatWith(receiverId, senderId))
+            {
+                await _notificationService.SendNotificationAsync( new NotificationRequestDto
+                {
+                    UserId = receiverId,
+                    UserType = NotificationUserType.General,
+                    Type = NotificationType.NewMessage,
+
+                    Title = "New Message",
+                    Body = $"You have a new message from {senderUser.FirstName} {senderUser.LastName}",
+                    Data = new Dictionary<string, string>
+                    {
+                        { "SenderId", senderId },
+                        { "SenderName", $"{senderUser.FirstName} {senderUser.LastName}" },
+                        { "Content", content }
+                    },
+
+                    ActionType = NotificationActionType.ChatUser,
+                    ActionId = senderId,
+                });
+            }
+
+
+            // 4. Return The Message
+            var dto = new MessageDto
+            {
+                Id = message.Id,
+                SenderId = message.SenderId.ToString(),
+                SenderName = $"{senderUser.FirstName} {senderUser.LastName}",
+                ReceiverId = message.ReceiverId.ToString(),
+                ReceiverName = $"{receiverUser.FirstName} {receiverUser.LastName}",
+                Content = content, // Return plaintext to the sender's UI
+                SentAt = message.SentAt,
+                IsRead = message.ReadAt.HasValue
+            };
+
+            return ServiceResult<MessageDto>.Ok(dto);
         }
 
         public async Task<ServiceResult<bool>> MarkChatAsReadAsync(string currentUserId, string senderId)
         {
             _logger.LogInformation("Marking messages from {SenderId} to {ReceiverId} as read", senderId, currentUserId);
-            await _repository.MarkMessagesAsReadAsync(senderId: senderId, receiverId: currentUserId);
+
+            await _chatRepo.MarkMessagesAsReadAsync(senderId: senderId, receiverId: currentUserId);
             return ServiceResult<bool>.Ok(true);
         }
-
-        public async Task<ServiceResult<List<UserDto>>> GetActiveUsersWithStatusAsync(string currentUserId)
-        {
-            _logger.LogInformation("Fetching active chat users for {UserId}", currentUserId);
-            var usersData = await _repository.GetActiveChatUsersWithUnreadCountAsync(currentUserId);
-            
-            var result = usersData.Select(data => new UserDto
-            {
-                Id = data.User.Id.ToString(),
-                UserName = data.User.UserName,
-                Email = data.User.Email,
-                UnreadCount = data.UnreadCount,
-                IsOnline = _tracker.IsOnline(data.User.Id.ToString())
-            }).ToList();
-
-            return ServiceResult<List<UserDto>>.Ok(result);
-        }
-
-        public async Task<ServiceResult<List<UserDto>>> SearchUsersWithStatusAsync(string currentUserId, string query)
-        {
-            _logger.LogInformation("Searching for users with query '{Query}' for {UserId}", query, currentUserId);
-            var users = await _repository.SearchUsersAsync(currentUserId, query, 20);
-            
-            var result = users.Select(u => new UserDto
-            {
-                Id = u.Id.ToString(),
-                UserName = u.UserName,
-                Email = u.Email,
-                UnreadCount = 0, // Assume 0 for search results 
-                IsOnline = _tracker.IsOnline(u.Id.ToString())
-            }).ToList();
-
-            return ServiceResult<List<UserDto>>.Ok(result);
-        }
-
-        public async Task<ServiceResult<bool>> SaveDeviceTokenAsync(string userId, string fcmToken)
-        {
-            _logger.LogInformation("Saving FCM token for user {UserId}", userId);
-            await _repository.AddOrUpdateUserDeviceAsync(userId, fcmToken);
-            return ServiceResult<bool>.Ok(true);
-        }
+        #endregion
     }
 }

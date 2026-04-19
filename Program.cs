@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json.Serialization;
 using System.Text;
 using System.Threading.RateLimiting;
+using MARN_API.Hubs;
 
 namespace MARN_API
 {
@@ -133,6 +134,8 @@ namespace MARN_API
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
+            builder.Services.AddScoped<IReportRepo, ReportRepo>();
+            builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
@@ -140,8 +143,9 @@ namespace MARN_API
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IFileService, FileService>();
-            builder.Services.AddScoped<IChatRepository, ChatRepository>();
+            builder.Services.AddScoped<IChatRepo, ChatRepo>();
             builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
@@ -212,11 +216,10 @@ namespace MARN_API
                           .AllowCredentials();
                 });
             });
-
             //builder.Services.AddCors(options =>
             //{
             //    options.AddPolicy("AllowCustomDomain",
-            //        builder => builder.WithOrigins("http://127.0.0.1:5500")
+            //        policy => policy.WithOrigins(builder.Configuration["AppSettings:FrontBaseUrl"]!)
             //            .AllowAnyHeader()
             //            .AllowAnyMethod()
             //            .AllowCredentials());
@@ -339,8 +342,9 @@ namespace MARN_API
             app.UseStaticFiles();
 
             app.UseRateLimiter();
+
             app.UseCors();
-            //app.UseCors("AllowCustomDomain");
+            //app.UseCors(builder.Configuration["AppSettings:FrontBaseUrl"]!);
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -351,7 +355,8 @@ namespace MARN_API
             app.MapControllers();
 
             // SignalR Hub
-            app.MapHub<MARN_API.Hubs.ChatHub>("/chatHub");
+            app.MapHub<ChatHub>("/hubs/chat");
+            app.MapHub<NotificationHub>("/hubs/notification");
 
             // Health Checks
             app.MapHealthChecks("/health");

@@ -484,11 +484,8 @@ namespace MARN_API.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
@@ -514,8 +511,7 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            Content = "Hi, is the apartment still available for next month?",
-                            IsRead = true,
+                            Content = "XB+UQj6hKk23omCXxH8uwFxZpOCQjhe1tRbMbKMHUIKitggz1H61tTuCsIyQwnDRBEWtEIP3n24n1DyxJMAPTuWIvOprIjOmfp48oVxQa6M=",
                             ReadAt = new DateTime(2025, 3, 20, 10, 30, 0, 0, DateTimeKind.Utc),
                             ReceiverId = new Guid("44444444-4444-4444-4444-444444444444"),
                             SenderId = new Guid("11111111-1111-1111-1111-111111111111"),
@@ -524,8 +520,7 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            Content = "Yes, it is! Would you like to schedule a visit?",
-                            IsRead = false,
+                            Content = "E8jOydWqRhQPRv/E1P+cXgNPhEczTZ62c8OsZm62YoKZnffb6X6KXosOMw92CvheYLt5FO58PHhnweOYeJRQ6A==",
                             ReceiverId = new Guid("11111111-1111-1111-1111-111111111111"),
                             SenderId = new Guid("44444444-4444-4444-4444-444444444444"),
                             SentAt = new DateTime(2025, 3, 20, 11, 0, 0, 0, DateTimeKind.Utc)
@@ -539,6 +534,12 @@ namespace MARN_API.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ActionType")
+                        .HasColumnType("int");
 
                     b.Property<string>("Body")
                         .IsRequired()
@@ -578,22 +579,25 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 6001L,
+                            ActionType = 4,
                             Body = "Your next rent payment is due soon.",
                             CreatedAt = new DateTime(2025, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Data = "{\"propertyName\":\"Cozy Seed Apartment\"}",
                             Title = "Upcoming Payment Due",
-                            Type = 0,
+                            Type = 8,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
                             Id = 6002L,
+                            ActionType = 4,
                             Body = "Your booking request has been accepted.",
                             CreatedAt = new DateTime(2025, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Booking Request Update",
-                            Type = 0,
+                            Type = 4,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
@@ -604,79 +608,89 @@ namespace MARN_API.Migrations
                             Title = "Welcome to the platform",
                             Type = 0,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
                             Id = 6004L,
-                            Body = "Your booking request is pending owner approval.",
+                            ActionId = "44444444-4444-4444-4444-444444444444",
+                            ActionType = 2,
+                            Body = "You have a new message from the owner.",
                             CreatedAt = new DateTime(2025, 4, 7, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Booking Pending",
-                            Type = 0,
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            UserType = 0
+                            Title = "New Message",
+                            Type = 1,
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UserType = 1
                         },
                         new
                         {
                             Id = 6005L,
+                            ActionType = 3,
                             Body = "Add more details to your profile to get better recommendations.",
                             CreatedAt = new DateTime(2025, 3, 3, 0, 0, 0, 0, DateTimeKind.Utc),
                             ReadAt = new DateTime(2025, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Complete Your Profile",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
                             Id = 6006L,
+                            ActionId = "1002",
+                            ActionType = 1,
                             Body = "A renter submitted a booking request for one of your properties.",
                             CreatedAt = new DateTime(2025, 4, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "New booking request",
-                            Type = 0,
+                            Type = 2,
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            UserType = 1
+                            UserType = 2
                         },
                         new
                         {
                             Id = 6007L,
+                            ActionType = 5,
                             Body = "A rent payment was successfully processed.",
                             CreatedAt = new DateTime(2025, 4, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Data = "{\"amount\":\"1200\", \"currency\":\"USD\"}",
                             Title = "Payment received",
-                            Type = 0,
+                            Type = 12,
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            UserType = 1
+                            UserType = 2
                         },
                         new
                         {
                             Id = 6008L,
+                            ActionType = 3,
                             Body = "Complete your listing details to attract more renters.",
                             CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             ReadAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Welcome, property owner",
                             Type = 0,
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            UserType = 1
+                            UserType = 2
                         },
                         new
                         {
                             Id = 6009L,
+                            ActionType = 4,
                             Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
                             CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Rent Payment Due Soon",
-                            Type = 0,
+                            Type = 8,
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
                             Id = 6010L,
+                            ActionType = 4,
                             Body = "Your booking request for Seed Studio Flat has been submitted.",
                             CreatedAt = new DateTime(2025, 4, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Booking Submitted",
-                            Type = 0,
+                            Type = 4,
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
@@ -687,28 +701,30 @@ namespace MARN_API.Migrations
                             Title = "Welcome to MARN",
                             Type = 0,
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            UserType = 0
+                            UserType = 1
                         },
                         new
                         {
                             Id = 6012L,
+                            ActionType = 5,
                             Body = "Luxury Seed Villa is now visible to renters.",
                             CreatedAt = new DateTime(2025, 4, 12, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Your property is live",
                             Type = 0,
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            UserType = 1
+                            UserType = 2
                         },
                         new
                         {
                             Id = 6013L,
+                            ActionType = 3,
                             Body = "Set up your payout details to start receiving rent payments.",
                             CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
                             ReadAt = new DateTime(2025, 2, 7, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Welcome, property owner",
                             Type = 0,
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            UserType = 1
+                            UserType = 2
                         });
                 });
 
@@ -1737,6 +1753,11 @@ namespace MARN_API.Migrations
                         {
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         });
                 });
 

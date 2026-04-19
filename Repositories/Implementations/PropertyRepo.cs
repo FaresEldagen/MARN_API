@@ -11,25 +11,29 @@ namespace MARN_API.Repositories.Implementations
     public class PropertyRepo : IPropertyRepo
     {
         private readonly AppDbContext Context;
-        public PropertyRepo(AppDbContext context)
+        private readonly IConfiguration _configuration;
+        public PropertyRepo(AppDbContext context, IConfiguration configuration)
         {
             Context = context;
+            _configuration = configuration;
         }
 
 
         #region Owner Dashboard and Profile
         public Task<List<OwnerDashboardPropertyCardDto>> GetOwnerDashboardProperties(Guid userId)
         {
+            var BaseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+
             return Context.Properties
                 .AsNoTracking()
                 .Where(p => p.OwnerId == userId)
                 .Select(p => new OwnerDashboardPropertyCardDto
                 {
                     Id = p.Id,
-                    ImagePath = p.Media
+                    ImagePath = $"{BaseUrl}{p.Media
                         .Where(m => m.IsPrimary)
                         .Select(m => m.Path)
-                        .FirstOrDefault() ?? string.Empty,
+                        .FirstOrDefault() ?? string.Empty}",
                     Title = p.Title,
                     Address = p.Address,
                     Type = p.Type,
@@ -63,16 +67,18 @@ namespace MARN_API.Repositories.Implementations
 
         public Task<List<PropertyCardDto>> GetOwnerProfileProperties(Guid userId)
         {
+            var BaseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+
             return Context.Properties
                 .AsNoTracking()
                 .Where(p => p.OwnerId == userId)
                 .Select(p => new PropertyCardDto
                 {
                     Id = p.Id,
-                    ImagePath = p.Media
+                    ImagePath = $"{BaseUrl}{p.Media
                         .Where(m => m.IsPrimary)
                         .Select(m => m.Path)
-                        .FirstOrDefault() ?? string.Empty,
+                        .FirstOrDefault() ?? string.Empty}",
                     Title = p.Title,
                     Address = p.Address,
 
@@ -120,6 +126,42 @@ namespace MARN_API.Repositories.Implementations
                 .Where(p => p.OwnerId == userId)
                 .SelectMany(p => p.Reviews)
                 .CountAsync();
+        }
+        #endregion
+
+
+        #region User Deletion
+        public async Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId)
+        {
+            return await Context.Properties
+                .IgnoreQueryFilters()
+                .Where(p => p.OwnerId == ownerId)
+                .Select(p => p.Id)
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds)
+        {
+            return await Context.PropertyMedia
+                .Where(m => propertyIds.Contains(m.PropertyId))
+                .Select(m => m.Path)
+                .ToListAsync();
+        }
+
+        public async Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds)
+        {
+            await Context.PropertyMedia
+                .Where(m => propertyIds.Contains(m.PropertyId))
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task SoftDeleteByOwnerIdAsync(Guid ownerId)
+        {
+            await Context.Properties
+                .IgnoreQueryFilters()
+                .Where(p => p.OwnerId == ownerId && p.DeletedAt == null)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.DeletedAt, DateTime.UtcNow));
         }
         #endregion
     }

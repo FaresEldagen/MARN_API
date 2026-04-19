@@ -7,5 +7,7 @@ namespace MARN_API.Repositories.Interfaces
     {
         public Task<List<RenterPendingBookingRequestDto>> GetRenterPendingRequests(Guid userId);
         public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequests(Guid userId);
+
+        public Task DeleteByUserIdAsync(Guid userId);
     }
 }

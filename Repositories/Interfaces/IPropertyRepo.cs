@@ -14,5 +14,13 @@ namespace MARN_API.Repositories.Interfaces
         public Task<float> GetOwnerAverageRating(Guid userid);
         public Task<int> GetOwnerRatingsCount(Guid userId);
         #endregion
+
+
+        #region User Deletion
+        Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId);
+        Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds);
+        Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds);
+        Task SoftDeleteByOwnerIdAsync(Guid ownerId);
+        #endregion
     }
 }

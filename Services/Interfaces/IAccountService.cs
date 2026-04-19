@@ -10,7 +10,7 @@ namespace MARN_API.Services.Interfaces
     {
         #region Login And 2FA
         public Task<ServiceResult<LoginResponseDto>> LoginAsync(LogInDto dto);
-        public  Task<ServiceResult<LoginResponseDto>> GoogleLoginAsync(GoogleLoginDto dto);
+        public Task<ServiceResult<LoginResponseDto>> GoogleLoginAsync(GoogleLoginDto dto);
         public Task<ServiceResult<LoginResponseDto>> VerifyTwoFactorAsync(VerifyTwoFactorDto dto);
         #endregion
 

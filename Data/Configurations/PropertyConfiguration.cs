@@ -9,6 +9,9 @@ namespace MARN_API.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Property> builder)
         {
+            // Global Query Filter: exclude soft-deleted properties from all queries
+            builder.HasQueryFilter(p => p.DeletedAt == null);
+
             builder.Property(p => p.Price).HasColumnType("decimal(18,2)");
 
             builder.Property(p => p.Title).IsRequired().HasMaxLength(200);

@@ -15,7 +15,7 @@ namespace MARN_API.Controllers
                 ServiceResultType.Success => Ok(new { message = result.Message, data = result.Data }),
                 ServiceResultType.Created => StatusCode(201, new { message = result.Message, data = result.Data }),
                 ServiceResultType.RequiresTwoFactor => Accepted(new { message = result.Message, data = result.Data }),
-                ServiceResultType.Unauthorized => Unauthorized(new { message = result.Message }),
+                ServiceResultType.Unauthorized => Unauthorized(new { message = result.Message, action = result.Action }),
                 ServiceResultType.NotFound => NotFound(new { message = result.Message }),
                 ServiceResultType.Forbidden => StatusCode(403, new { message = result.Message }),
                 ServiceResultType.Conflict => Conflict(new { message = result.Message, errors = result.Errors }),

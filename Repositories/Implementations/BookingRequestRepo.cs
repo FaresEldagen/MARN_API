@@ -56,5 +56,13 @@ namespace MARN_API.Repositories.Implementations
                 })
                 .ToListAsync();
         }
+
+
+        public async Task DeleteByUserIdAsync(Guid userId)
+        {
+            await Context.BookingRequests
+                .Where(b => b.RenterId == userId)
+                .ExecuteDeleteAsync();
+        }
     }
 }
