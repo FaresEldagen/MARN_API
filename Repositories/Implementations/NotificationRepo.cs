@@ -91,6 +91,14 @@ namespace MARN_API.Repositories.Implementations
                 await Context.SaveChangesAsync();
             }
         }
+
+
+        public async Task DeleteNotificationsByUserIdAsync(Guid userId)
+        {
+            await Context.Notifications
+                .Where(n => n.UserId == userId)
+                .ExecuteDeleteAsync();
+        }
         #endregion
 
 
@@ -135,6 +143,13 @@ namespace MARN_API.Repositories.Implementations
                 Context.UserDevices.Remove(device);
                 await Context.SaveChangesAsync();
             }
+        }
+
+        public async Task DeleteDevicesByUserIdAsync(string userId)
+        {
+            await Context.UserDevices
+                .Where(d => d.UserId == userId)
+                .ExecuteDeleteAsync();
         }
         #endregion
     }

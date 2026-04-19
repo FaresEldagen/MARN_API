@@ -134,6 +134,8 @@ namespace MARN_API
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
+            builder.Services.AddScoped<IReportRepo, ReportRepo>();
+            builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();

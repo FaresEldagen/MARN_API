@@ -9,6 +9,9 @@ namespace MARN_API.Data.Configurations
        {
               public void Configure(EntityTypeBuilder<ApplicationUser> builder)
               {
+                     // Global Query Filter: exclude soft-deleted users from all queries
+                     builder.HasQueryFilter(u => u.DeletedAt == null);
+
                      // TPH for User / Owner
                      builder
                          .HasDiscriminator<string>("Discriminator")

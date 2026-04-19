@@ -128,5 +128,41 @@ namespace MARN_API.Repositories.Implementations
                 .CountAsync();
         }
         #endregion
+
+
+        #region User Deletion
+        public async Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId)
+        {
+            return await Context.Properties
+                .IgnoreQueryFilters()
+                .Where(p => p.OwnerId == ownerId)
+                .Select(p => p.Id)
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds)
+        {
+            return await Context.PropertyMedia
+                .Where(m => propertyIds.Contains(m.PropertyId))
+                .Select(m => m.Path)
+                .ToListAsync();
+        }
+
+        public async Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds)
+        {
+            await Context.PropertyMedia
+                .Where(m => propertyIds.Contains(m.PropertyId))
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task SoftDeleteByOwnerIdAsync(Guid ownerId)
+        {
+            await Context.Properties
+                .IgnoreQueryFilters()
+                .Where(p => p.OwnerId == ownerId && p.DeletedAt == null)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.DeletedAt, DateTime.UtcNow));
+        }
+        #endregion
     }
 }

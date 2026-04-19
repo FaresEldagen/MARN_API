@@ -9,6 +9,7 @@ namespace MARN_API.DTOs.Chat
         public string? ProfileImage { get; set; }
 
         public bool IsOnline { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
         public int UnreadCount { get; set; }
         public LastMessageDto? LastMessage { get; set; }
     }

@@ -6,10 +6,12 @@ using MARN_API.DTOs.Chat;
 using MARN_API.DTOs.Notification;
 using MARN_API.Enums.Notification;
 using MARN_API.Hubs;
+using MARN_API.Data;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MARN_API.Services.Implementations
@@ -23,6 +25,7 @@ namespace MARN_API.Services.Implementations
         private readonly IFirebaseNotificationService _fcmService;
         private readonly INotificationService _notificationService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _dbContext;
         private readonly ILogger<ChatService> _logger;
 
         public ChatService(
@@ -33,6 +36,7 @@ namespace MARN_API.Services.Implementations
             IFirebaseNotificationService fcmService,
             INotificationService notificationService,
             UserManager<ApplicationUser> userManager,
+            AppDbContext dbContext,
             ILogger<ChatService> logger)
         {
             _chatRepo = chatRepo;
@@ -42,6 +46,7 @@ namespace MARN_API.Services.Implementations
             _fcmService = fcmService;
             _notificationService = notificationService;
             _userManager = userManager;
+            _dbContext = dbContext;
             _logger = logger;
         }
 
@@ -122,11 +127,20 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<MessageDto>.Fail("Sender user not found");
             }
 
-            var receiverUser = await _userManager.FindByIdAsync(receiverId);
+            var receiverUser = await _dbContext.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == receiverGuid);
             if (receiverUser == null)
             {
                 _logger.LogWarning("Receiver user {ReceiverId} not found", receiverId);
                 return ServiceResult<MessageDto>.Fail("Receiver user not found");
+            }
+
+            // Prevent sending messages to soft-deleted users
+            if (receiverUser.DeletedAt != null)
+            {
+                _logger.LogWarning("Cannot send message to deleted user {ReceiverId}", receiverId);
+                return ServiceResult<MessageDto>.Fail("Cannot send message to a deleted user");
             }
 
 

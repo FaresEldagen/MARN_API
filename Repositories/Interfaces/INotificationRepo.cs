@@ -14,6 +14,8 @@ namespace MARN_API.Repositories.Interfaces
 
         public Task MarkAllAsReadAsync(string userId);
         public Task MarkAsReadAsync(string userId, long notificationId);
+
+        Task DeleteNotificationsByUserIdAsync(Guid userId);
         #endregion
 
 
@@ -21,6 +23,7 @@ namespace MARN_API.Repositories.Interfaces
         Task<List<string>> GetUserDeviceTokensAsync(string userId);
         Task AddOrUpdateUserDeviceAsync(string userId, string fcmToken);
         Task RemoveUserDeviceAsync(string userId, string fcmToken);
+        Task DeleteDevicesByUserIdAsync(string userId);
         #endregion
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Notification;
 using MARN_API.DTOs.Profile;
@@ -10,6 +11,7 @@ using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 using System.Globalization;
 using System.Threading.Channels;
@@ -25,7 +27,10 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyRepo _propertyRepo;
         private readonly IRoommatePreferenceRepo _roommatePreferenceRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
+        private readonly IReportRepo _reportRepo;
+        private readonly IReviewRepo _reviewRepo;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _dbContext;
         private readonly IFileService _fileService;
         private readonly IEmailService _emailService;
         private readonly INotificationService _notificationService;
@@ -40,7 +45,10 @@ namespace MARN_API.Services.Implementations
             IPropertyRepo propertyRepo,
             IRoommatePreferenceRepo roommatePreferenceRepo,
             ISavedPropertyRepo savedPropertyRepo,
+            IReportRepo reportRepo,
+            IReviewRepo reviewRepo,
             UserManager<ApplicationUser> userManager,
+            AppDbContext dbContext,
             INotificationService notificationService,
             IFileService fileService,
             IEmailService emailService,
@@ -55,7 +63,10 @@ namespace MARN_API.Services.Implementations
             _propertyRepo = propertyRepo;
             _roommatePreferenceRepo = roommatePreferenceRepo;
             _savedPropertyRepo = savedPropertyRepo;
+            _reportRepo = reportRepo;
+            _reviewRepo = reviewRepo;
             _userManager = userManager;
+            _dbContext = dbContext;
             _notificationService = notificationService;
             _fileService = fileService;
             _emailService = emailService;
@@ -582,13 +593,14 @@ namespace MARN_API.Services.Implementations
 
             if (user == null)
             {
-                _logger.LogWarning("Delete User  failed: User not found for userId: {userId}", userId);
+                _logger.LogWarning("Delete User failed: User not found for userId: {userId}", userId);
                 return ServiceResult<bool>.Fail(
                     "User not found",
                     resultType: ServiceResultType.Unauthorized
                 );
             }
 
+            // Check for active contracts before proceeding
             var hasActiveContracts = await _contractRepo.CheackActiveContractsByUserId(userId);
 
             if (hasActiveContracts)
@@ -600,23 +612,103 @@ namespace MARN_API.Services.Implementations
                 );
             }
 
-            user.DeletedAt = DateTime.UtcNow;
+            // Collect file paths to delete BEFORE the transaction
+            var filesToDelete = new List<string>();
 
-            var result = await _userManager.UpdateAsync(user);
+            // Collect user photos for deletion
+            if (!string.IsNullOrEmpty(user.ProfileImage))
+                filesToDelete.Add(user.ProfileImage);
+            if (!string.IsNullOrEmpty(user.FrontIdPhoto))
+                filesToDelete.Add(user.FrontIdPhoto);
+            if (!string.IsNullOrEmpty(user.BackIdPhoto))
+                filesToDelete.Add(user.BackIdPhoto);
 
-            if (!result.Succeeded)
+            // Collect property media paths for owned properties
+            var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
+            if (ownedPropertyIds.Count > 0)
             {
-                _logger.LogWarning(
-                    "Delete User failed: Failed to Update the database for userId: {userId}. Errors: {@Errors}", 
-                    userId,
-                    result.Errors.Select(e => e.Description)
-                );
-                return ServiceResult<bool>.Fail("Failed to delete user", result.Errors.Select(e => e.Description).ToList());
+                var mediaPaths = await _propertyRepo.GetMediaPathsByPropertyIdsAsync(ownedPropertyIds);
+                filesToDelete.AddRange(mediaPaths);
             }
 
-            _logger.LogInformation("User {UserId} marked as deleted.", userId);
+            // Begin transactional deletion
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. Hard delete booking requests created by this user
+                _logger.LogInformation("Deleting booking requests for userId: {userId}", userId);
+                await _bookingRequestRepo.DeleteByUserIdAsync(userId);
 
+                // 2. Hard delete all user device tokens
+                _logger.LogInformation("Deleting user devices for userId: {userId}", userId);
+                await _notificationRepo.DeleteDevicesByUserIdAsync(userId.ToString());
+
+                // 3. Hard delete all notifications
+                _logger.LogInformation("Deleting notifications for userId: {userId}", userId);
+                await _notificationRepo.DeleteNotificationsByUserIdAsync(userId);
+
+                // 4. Hard delete all reports filed by this user
+                _logger.LogInformation("Deleting reports for userId: {userId}", userId);
+                await _reportRepo.DeleteByReporterIdAsync(userId);
+
+                // 5. Hard delete all reviews written by this user
+                _logger.LogInformation("Deleting reviews for userId: {userId}", userId);
+                await _reviewRepo.DeleteByUserIdAsync(userId);
+
+                // 6. Handle owned properties (soft delete + media cleanup)
+                if (ownedPropertyIds.Count > 0)
+                {
+                    // Hard delete property media records
+                    _logger.LogInformation("Deleting property media records for {Count} properties owned by userId: {userId}", ownedPropertyIds.Count, userId);
+                    await _propertyRepo.DeleteMediaByPropertyIdsAsync(ownedPropertyIds);
+
+                    // Soft delete the properties themselves
+                    _logger.LogInformation("Soft deleting properties for userId: {userId}", userId);
+                    await _propertyRepo.SoftDeleteByOwnerIdAsync(userId);
+                }
+
+                // 7. Soft delete the user
+                user.DeletedAt = DateTime.UtcNow;
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogError(
+                        "Delete User failed: Failed to update user record for userId: {userId}. Errors: {@Errors}",
+                        userId,
+                        result.Errors.Select(e => e.Description)
+                    );
+                    await transaction.RollbackAsync();
+                    return ServiceResult<bool>.Fail("Failed to delete user", result.Errors.Select(e => e.Description).ToList());
+                }
+
+                await transaction.CommitAsync();
+                _logger.LogInformation("User {UserId} soft-deleted successfully. Transaction committed.", userId);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Delete User failed: Transaction rolled back for userId: {userId}", userId);
+                return ServiceResult<bool>.Fail("An error occurred while deleting the user. All changes have been rolled back.");
+            }
+
+            // Delete files from storage AFTER successful transaction commit
+            foreach (var filePath in filesToDelete)
+            {
+                try
+                {
+                    _fileService.DeleteImage(filePath);
+                }
+                catch (Exception ex)
+                {
+                    // Log but do not fail — DB is already committed
+                    _logger.LogWarning(ex, "Failed to delete file from storage: {FilePath}", filePath);
+                }
+            }
+
+            // Send deletion email (outside transaction)
             await _emailService.SendAccountDeletionEmailAsync(user.Email!, user.FirstName);
+
             return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
         }
         #endregion
