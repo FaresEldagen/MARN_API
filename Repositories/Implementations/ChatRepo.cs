@@ -63,6 +63,7 @@ namespace MARN_API.Repositories.Implementations
                         })
                         .FirstOrDefault()!,
                 })
+                .OrderByDescending(u => u.LastMessage!.SentAt)
                 .ToListAsync();
 
             return usersWithCounts;
@@ -115,7 +116,6 @@ namespace MARN_API.Repositories.Implementations
                         })
                         .FirstOrDefault(),
                 })
-                .Take(limit)
                 .ToListAsync();
 
             // Also include deleted users who have chat history with the current user and match the query
@@ -155,11 +155,13 @@ namespace MARN_API.Repositories.Implementations
                         })
                         .FirstOrDefault(),
                 })
-                .Take(limit)
                 .ToListAsync();
 
             // Merge results: active users first, then deleted with chat history
-            var combined = activeUsers.Concat(deletedUsersWithChat).Take(limit).ToList();
+            var combined = activeUsers.Concat(deletedUsersWithChat)
+                .OrderByDescending(u => u.LastMessage == null ? DateTime.MinValue : u.LastMessage.SentAt)
+                .Take(limit)
+                .ToList();
             return combined;
         }
 
