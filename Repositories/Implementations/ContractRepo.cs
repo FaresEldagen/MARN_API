@@ -10,6 +10,7 @@ namespace MARN_API.Repositories.Implementations
     public class ContractRepo : IContractRepo
     {
         private readonly AppDbContext Context;
+
         public ContractRepo(AppDbContext context)
         {
             Context = context;
@@ -19,6 +20,8 @@ namespace MARN_API.Repositories.Implementations
         #region User Dashboard
         public Task<List<ActiveRentalCardDto>> GetActiveRentals(Guid userId)
         {
+            var now = DateTime.UtcNow;
+
             return Context.Contracts
                 .AsNoTracking()
                 .Where(c => c.RenterId == userId && c.Status == ContractStatus.Active)
@@ -26,8 +29,12 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
-                    StartDate = c.StartDate,
-                    EndDate = c.EndDate,
+                    StartDate = c.LeaseStartDate.HasValue
+                        ? c.LeaseStartDate.Value.ToDateTime(TimeOnly.MinValue)
+                        : c.SubmittedAt,
+                    EndDate = c.LeaseEndDate.HasValue
+                        ? c.LeaseEndDate.Value.ToDateTime(TimeOnly.MinValue)
+                        : c.SubmittedAt,
 
                     PropertyTitle = c.Property.Title,
                     PropertyAddress = c.Property.Address,
@@ -39,29 +46,41 @@ namespace MARN_API.Repositories.Implementations
 
                     PaymentFrequency = c.PaymentFrequency,
 
-                    // Next pending payment for this contract (if any)
-                    NextPaymentAmount = c.Payments
-                        .Where(p => p.DueDate >= DateTime.UtcNow)
+                    NextPaymentAmount = Context.Payments
+                        .Where(p => p.ContractId == c.Id && p.DueDate >= now)
                         .OrderBy(p => p.DueDate)
-                        .Select(p => p.TotalAmount)
-                        .FirstOrDefault(),
-
-                    PaymentId = c.Payments
-                        .Where(p => p.DueDate >= DateTime.UtcNow)
-                        .OrderBy(p => p.DueDate)
-                        .Select(p => p.Id)
-                        .FirstOrDefault(),
-
-                    IsPaymentMade = c.Payments
-                        .Where(p => p.DueDate >= DateTime.UtcNow)
-                        .OrderBy(p => p.DueDate)
-                        .Select(p => p.Status == PaymentStatus.Succeeded)
+                        .Select(p => (decimal?)p.AmountTotal)
                         .FirstOrDefault()
+                        ?? Context.Payments
+                            .Where(p => p.ContractId == c.Id)
+                            .OrderByDescending(p => p.DueDate)
+                            .Select(p => (decimal?)p.AmountTotal)
+                            .FirstOrDefault()
+                        ?? 0m,
 
-                    // True if there is no overdue unpaid payment (all due payments are succeeded)
-                    // IsPaymentMade = !c.Payments
-                    //     .Where(p => p.DueDate <= DateTime.UtcNow)
-                    //     .Any(p => p.Status != PaymentStatus.Succeeded)
+                    PaymentId = Context.Payments
+                        .Where(p => p.ContractId == c.Id && p.DueDate >= now)
+                        .OrderBy(p => p.DueDate)
+                        .Select(p => (long?)p.Id)
+                        .FirstOrDefault()
+                        ?? Context.Payments
+                            .Where(p => p.ContractId == c.Id)
+                            .OrderByDescending(p => p.DueDate)
+                            .Select(p => (long?)p.Id)
+                            .FirstOrDefault()
+                        ?? 0L,
+
+                    IsPaymentMade = Context.Payments
+                        .Where(p => p.ContractId == c.Id && p.DueDate >= now)
+                        .OrderBy(p => p.DueDate)
+                        .Select(p => (bool?)(p.Status == PaymentStatus.Succeeded))
+                        .FirstOrDefault()
+                        ?? Context.Payments
+                            .Where(p => p.ContractId == c.Id)
+                            .OrderByDescending(p => p.DueDate)
+                            .Select(p => (bool?)(p.Status == PaymentStatus.Succeeded))
+                            .FirstOrDefault()
+                        ?? false
                 })
                 .ToListAsync();
         }
@@ -78,7 +97,9 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
-                    ExpiryDate = c.EndDate,
+                    ExpiryDate = c.LeaseEndDate.HasValue
+                        ? c.LeaseEndDate.Value.ToDateTime(TimeOnly.MinValue)
+                        : c.SubmittedAt,
 
                     PropertyId = c.PropertyId,
                     PropertyTitle = c.Property.Title,

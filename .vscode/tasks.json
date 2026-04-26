@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "stop-marn-api",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$workspace = (Resolve-Path '${workspaceFolder}').Path; Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'dotnet.exe' -and $_.CommandLine -like '*MARN_API.dll*' -and $_.CommandLine -like \"*$workspace*\" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "build",
+      "type": "process",
+      "dependsOn": [
+        "stop-marn-api"
+      ],
+      "dependsOrder": "sequence",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/MARN_API.csproj"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

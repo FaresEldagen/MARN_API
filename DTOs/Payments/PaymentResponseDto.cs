@@ -1,9 +1,8 @@
-using System;
 using MARN_API.Enums;
 
-namespace MARN_API.Models
+namespace MARN_API.DTOs.Payments
 {
-    public class Payment
+    public class PaymentResponseDto
     {
         public long Id { get; set; }
         public long? ContractId { get; set; }
@@ -22,11 +21,11 @@ namespace MARN_API.Models
         public string? PaymentIntentId { get; set; }
         public string? ReceiptUrl { get; set; }
         public string Currency { get; set; } = "EGP";
-        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public virtual Contract? Contract { get; set; }
-        public virtual Property Property { get; set; } = null!;
-        public virtual ApplicationUser Renter { get; set; } = null!;
+        public PaymentStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? PropertyTitle { get; set; }
+        public string? PropertyAddress { get; set; }
+        public string? RenterFirstName { get; set; }
+        public string? RenterLastName { get; set; }
     }
 }

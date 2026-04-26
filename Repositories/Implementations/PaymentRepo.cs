@@ -21,15 +21,15 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Payments
                 .AsNoTracking()
-                .Where(p => p.Contract.RenterId == userId && p.Status == PaymentStatus.Pending)
+                .Where(p => p.RenterId == userId && p.Status == PaymentStatus.Pending)
                 .OrderBy(p => p.DueDate)
                 .Select(p => new RenterNextPaymentDto
                 {
                     Date = p.DueDate,
-                    Amount = p.TotalAmount,
+                    Amount = p.AmountTotal,
 
-                    PropertyTitle = p.Contract.Property.Title,
-                    PropertyId = p.Contract.PropertyId,
+                    PropertyTitle = p.Property.Title,
+                    PropertyId = p.PropertyId,
                 })
                 .FirstOrDefaultAsync();
         }
@@ -40,7 +40,7 @@ namespace MARN_API.Repositories.Implementations
         public Task<List<MonthlyEarningDto>> GetEarningOverviewMonthly(Guid userId)
         {
             return Context.Payments
-                .Where(p => p.Contract.OwnerId == userId && p.Status == PaymentStatus.Succeeded)
+                .Where(p => p.OwnerId == userId && p.Status == PaymentStatus.Succeeded)
                 .GroupBy(p => new { p.PaidAt!.Value.Year, p.PaidAt.Value.Month })
                 .OrderBy(g => g.Key.Year)
                 .ThenBy(g => g.Key.Month)
@@ -56,7 +56,7 @@ namespace MARN_API.Repositories.Implementations
         public Task<List<YearlyEarningDto>> GetEarningOverviewYearly(Guid userId)
         {
             return Context.Payments
-                .Where(p => p.Contract.OwnerId == userId && p.Status == PaymentStatus.Succeeded)
+                .Where(p => p.OwnerId == userId && p.Status == PaymentStatus.Succeeded)
                 .GroupBy(p => p.PaidAt!.Value.Year)
                 .OrderBy(g => g.Key)
                 .Select(g => new YearlyEarningDto
@@ -71,7 +71,7 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Payments
                 .Where(p =>
-                    p.Contract.OwnerId == userId &&
+                    p.OwnerId == userId &&
                     p.Status == PaymentStatus.Succeeded &&
                     p.AvailableAt <= DateTime.UtcNow)
                 .SumAsync(p => p.OwnerAmount);
@@ -81,7 +81,7 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Payments
                 .Where(p =>
-                    p.Contract.OwnerId == userId &&
+                    p.OwnerId == userId &&
                     p.Status == PaymentStatus.Succeeded &&
                     p.AvailableAt > DateTime.UtcNow)
                 .SumAsync(p => p.OwnerAmount);

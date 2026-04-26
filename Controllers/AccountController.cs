@@ -20,15 +20,18 @@ namespace MARN_API.Controllers
     public class AccountController : BaseController
     {
         private readonly IAccountService _accountService;
+        private readonly IOwnerService _ownerService;
         private readonly ITokenService _tokenService;
         private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             IAccountService accountService,
+            IOwnerService ownerService,
             ITokenService tokenService,
             ILogger<AccountController> logger)
         {
             _accountService = accountService;
+            _ownerService = ownerService;
             _tokenService = tokenService;
             _logger = logger;
         }
@@ -117,6 +120,38 @@ namespace MARN_API.Controllers
         {
             var result = await _accountService.RegisterUserAsync(dto);
             return HandleServiceResult<bool>(result);
+        }
+
+        /// <summary>
+        /// Adds the Owner role to the currently authenticated user.
+        /// Re-login after success so the new role is included in the JWT claims.
+        /// </summary>
+        [Authorize]
+        [HttpPost("become-owner")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> BecomeOwner()
+        {
+            if (!TryGetUserId(out var userId))
+            {
+                return Unauthorized("User ID not found in token");
+            }
+
+            var result = await _ownerService.AddOwnerRole(userId);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    message = "Failed to add Owner role.",
+                    errors = result.Errors.Select(e => e.Description)
+                });
+            }
+
+            return Ok(new
+            {
+                message = "Owner role added successfully. Please log in again to refresh your token claims."
+            });
         }
 
 

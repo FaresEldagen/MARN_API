@@ -128,24 +128,38 @@ namespace MARN_API
             #region Dependency Injection
             // Repositories
             builder.Services.AddScoped<IBookingRequestRepo, BookingRequestRepo>();
+            builder.Services.AddScoped<IConnectedAccountRepo, ConnectedAccountRepo>();
             builder.Services.AddScoped<IContractRepo, ContractRepo>();
             builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
             builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
+            builder.Services.AddScoped<IRentalTransactionRepo, RentalTransactionRepo>();
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
             builder.Services.AddScoped<IReportRepo, ReportRepo>();
             builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
+            builder.Services.AddScoped<IWorkflowContractRepo, WorkflowContractRepo>();
+            builder.Services.AddScoped<IWorkflowPaymentRepo, WorkflowPaymentRepo>();
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IConnectedAccountService, ConnectedAccountService>();
+            builder.Services.AddScoped<IContractService, ContractService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IOwnerService, OwnerService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IRentalWorkflowService, RentalWorkflowService>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IChatRepo, ChatRepo>();
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<ContractPdfGenerator>();
+            builder.Services.AddScoped<HashingService>();
+            builder.Services.AddScoped<OpenTimestampsProofReader>();
+            builder.Services.AddHttpClient<OpenTimestampsService>();
+            builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();

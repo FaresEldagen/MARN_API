@@ -36,11 +36,13 @@ namespace MARN_API.Models
         public virtual RoommatePreference? RoommatePreference { get; set; }
         public virtual ICollection<BookingRequest> BookingRequestsAsRenter { get; set; } = new HashSet<BookingRequest>();
         public virtual ICollection<Contract> ContractsAsRenter { get; set; } = new HashSet<Contract>();
+        public virtual ICollection<Payment> PaymentsAsRenter { get; set; } = new HashSet<Payment>();
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
         public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
         public virtual ICollection<Report> ReportsFiled { get; set; } = new HashSet<Report>();
         public virtual ICollection<UserActivity> Activities { get; set; } = new HashSet<UserActivity>();
         public virtual ICollection<SavedProperty> SavedProperty { get; set; } = new HashSet<SavedProperty>();
+        public virtual ConnectedAccount? ConnectedAccount { get; set; }
 
         [InverseProperty(nameof(Message.Sender))]
         public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
