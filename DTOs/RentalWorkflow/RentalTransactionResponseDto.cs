@@ -15,7 +15,5 @@ namespace MARN_API.DTOs.RentalWorkflow
         public RentalPaymentStatus PaymentStatus { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
-        public string? PropertyTitle { get; set; }
-        public string? PropertyAddress { get; set; }
     }
 }

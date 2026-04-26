@@ -60,24 +60,6 @@ namespace MARN_API.Services.Implementations
 
         public async Task<string> StartCheckoutAsync(long propertyId, Guid renterId, string successUrl, string cancelUrl)
         {
-            var activeSession = await _rentalTransactionRepo.GetActiveInitiatedSessionAsync(renterId, propertyId);
-            if (activeSession is not null && !string.IsNullOrWhiteSpace(activeSession.StripeSessionId))
-            {
-                try
-                {
-                    var sessionService = new SessionService();
-                    var session = await sessionService.GetAsync(activeSession.StripeSessionId);
-                    if (session.Status == "open" && !string.IsNullOrWhiteSpace(session.Url))
-                    {
-                        return session.Url;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to retrieve the previous Stripe session. A new session will be created.");
-                }
-            }
-
             var property = await _dbContext.Properties
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == propertyId && p.DeletedAt == null && p.IsActive);
@@ -104,6 +86,31 @@ namespace MARN_API.Services.Implementations
             if (!connectedAccount.IsOnboardingComplete)
             {
                 throw new InvalidOperationException("The owner has not completed Stripe onboarding yet.");
+            }
+
+            var (leaseStartDate, leaseEndDate) = GetDefaultLeaseWindow();
+            var isPropertyAvailable = await IsPropertyAvailableForLeaseWindowAsync(property.Id, leaseStartDate, leaseEndDate);
+            if (!isPropertyAvailable)
+            {
+                throw new InvalidOperationException("This property is already rented for the requested period.");
+            }
+
+            var activeSession = await _rentalTransactionRepo.GetActiveInitiatedSessionAsync(renterId, propertyId);
+            if (activeSession is not null && !string.IsNullOrWhiteSpace(activeSession.StripeSessionId))
+            {
+                try
+                {
+                    var sessionService = new SessionService();
+                    var session = await sessionService.GetAsync(activeSession.StripeSessionId);
+                    if (session.Status == "open" && !string.IsNullOrWhiteSpace(session.Url))
+                    {
+                        return session.Url;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to retrieve the previous Stripe session. A new session will be created.");
+                }
             }
 
             var dueDate = DateTime.UtcNow;
@@ -170,6 +177,24 @@ namespace MARN_API.Services.Implementations
             trackingRecord.PaymentId = payment.Id;
             await _rentalTransactionRepo.UpdateAsync(trackingRecord);
 
+            var (leaseStartDate, leaseEndDate) = GetDefaultLeaseWindow();
+            var isPropertyAvailable = await IsPropertyAvailableForLeaseWindowAsync(property.Id, leaseStartDate, leaseEndDate);
+            if (!isPropertyAvailable)
+            {
+                trackingRecord.Status = RentalTransactionStatus.Failed;
+                trackingRecord.CompletedAt = DateTime.UtcNow;
+                await _rentalTransactionRepo.UpdateAsync(trackingRecord);
+
+                _logger.LogWarning(
+                    "Payment succeeded for session {SessionId}, but property {PropertyId} is no longer available for lease window {LeaseStartDate} - {LeaseEndDate}. Manual review may be required.",
+                    stripeSessionId,
+                    property.Id,
+                    leaseStartDate,
+                    leaseEndDate);
+
+                return false;
+            }
+
             trackingRecord.Status = RentalTransactionStatus.ContractGenerated;
             await _rentalTransactionRepo.UpdateAsync(trackingRecord);
 
@@ -179,8 +204,8 @@ namespace MARN_API.Services.Implementations
                 property.OwnerId,
                 renter.Id,
                 property.Id,
-                contractRequest.RentalTerms?.LeaseStartDate,
-                contractRequest.RentalTerms?.LeaseEndDate,
+                leaseStartDate,
+                leaseEndDate,
                 PaymentFrequency.Monthly);
 
             contract.SignedByRenterAt = payment.PaidAt;
@@ -217,10 +242,26 @@ namespace MARN_API.Services.Implementations
             return true;
         }
 
-        private static ContractPdfRequest BuildContractRequest(Property property, ApplicationUser owner, ApplicationUser renter, Payment payment, string? paymentIntentId, string? receiptUrl)
+        private async Task<bool> IsPropertyAvailableForLeaseWindowAsync(long propertyId, DateOnly leaseStartDate, DateOnly leaseEndDate)
+        {
+            return !await _dbContext.Contracts.AnyAsync(contract =>
+                contract.PropertyId == propertyId &&
+                (contract.Status == ContractStatus.Active || contract.Status == ContractStatus.Pending) &&
+                contract.LeaseStartDate != null &&
+                contract.LeaseEndDate != null &&
+                !(leaseEndDate < contract.LeaseStartDate.Value || leaseStartDate > contract.LeaseEndDate.Value));
+        }
+
+        private static (DateOnly LeaseStartDate, DateOnly LeaseEndDate) GetDefaultLeaseWindow()
         {
             var leaseStartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
             var leaseEndDate = leaseStartDate.AddYears(1);
+            return (leaseStartDate, leaseEndDate);
+        }
+
+        private static ContractPdfRequest BuildContractRequest(Property property, ApplicationUser owner, ApplicationUser renter, Payment payment, string? paymentIntentId, string? receiptUrl)
+        {
+            var (leaseStartDate, leaseEndDate) = GetDefaultLeaseWindow();
 
             return new ContractPdfRequest
             {

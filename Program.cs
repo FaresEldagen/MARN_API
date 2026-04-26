@@ -45,8 +45,25 @@ namespace MARN_API
                     var logger = context.HttpContext.RequestServices
                         .GetRequiredService<ILogger<Program>>();
 
-                    logger.LogWarning("Model validation failed");
-                    return new BadRequestObjectResult(context.ModelState);
+                    logger.LogWarning("Model validation failed for path {Path}", context.HttpContext.Request.Path);
+
+                    var errors = context.ModelState
+                        .Where(entry => entry.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            entry => entry.Key,
+                            entry => entry.Value!.Errors
+                                .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "The provided value is invalid." : error.ErrorMessage)
+                                .ToArray());
+
+                    return new BadRequestObjectResult(new ErrorResponse
+                    {
+                        Message = "The request payload is invalid.",
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Path = context.HttpContext.Request.Path,
+                        TraceId = context.HttpContext.TraceIdentifier,
+                        Timestamp = DateTime.UtcNow,
+                        Errors = errors
+                    });
                 };
             });
             #endregion

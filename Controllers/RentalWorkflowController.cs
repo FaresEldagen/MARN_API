@@ -21,15 +21,27 @@ namespace MARN_API.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Returns all rental workflow records for testing and operational inspection.
+        /// </summary>
+        /// <response code="200">Returns a paged list of rental workflow records.</response>
         [HttpGet]
+        [ProducesResponseType(typeof(PagedResult<RentalTransactionResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
             var transactions = await _rentalWorkflowService.GetAllTransactionsAsync(pageNumber, pageSize);
             return Ok(MapPagedResult(transactions));
         }
 
+        /// <summary>
+        /// Returns rental workflow records for the currently authenticated user.
+        /// </summary>
+        /// <response code="200">Returns a paged list of the current user's rental workflow records.</response>
+        /// <response code="401">If the user is not authenticated.</response>
         [Authorize]
         [HttpGet("my")]
+        [ProducesResponseType(typeof(PagedResult<RentalTransactionResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetMyTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
             if (!TryGetUserId(out var userId))
@@ -41,84 +53,86 @@ namespace MARN_API.Controllers
             return Ok(MapPagedResult(transactions));
         }
 
+        /// <summary>
+        /// Returns rental workflow records associated with a specific property.
+        /// </summary>
+        /// <response code="200">Returns a paged list of rental workflow records for the property.</response>
         [HttpGet("by-property/{propertyId:long}")]
+        [ProducesResponseType(typeof(PagedResult<RentalTransactionResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTransactionsByPropertyId(long propertyId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
             var transactions = await _rentalWorkflowService.GetTransactionsByPropertyIdAsync(propertyId, pageNumber, pageSize);
             return Ok(MapPagedResult(transactions));
         }
 
-        [Authorize]
+        /// <summary>
+        /// Returns a single rental workflow record by its identifier.
+        /// </summary>
+        /// <response code="200">Returns the requested rental workflow record.</response>
+        /// <response code="404">If the rental workflow record is not found.</response>
         [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(RentalTransactionResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTransactionById(Guid id)
         {
-            if (!TryGetUserId(out var userId))
-            {
-                return Unauthorized("User ID not found in token");
-            }
-
             var transaction = await _rentalWorkflowService.GetTransactionByIdAsync(id);
             if (transaction is null)
             {
                 return NotFound(new ProblemDetails { Title = "Rental workflow record not found", Status = 404 });
             }
 
-            if (transaction.OwnerId != userId && transaction.RenterId != userId)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You do not have access to this rental workflow record." });
-            }
-
             return Ok(MapTransaction(transaction));
         }
 
-        [Authorize]
+        /// <summary>
+        /// Returns the rental workflow record linked to a payment record.
+        /// </summary>
+        /// <response code="200">Returns the rental workflow record linked to the payment.</response>
+        /// <response code="404">If the rental workflow record is not found.</response>
         [HttpGet("by-payment/{paymentRecordId:long}")]
+        [ProducesResponseType(typeof(RentalTransactionResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTransactionByPaymentId(long paymentRecordId)
         {
-            if (!TryGetUserId(out var userId))
-            {
-                return Unauthorized("User ID not found in token");
-            }
-
             var transaction = await _rentalWorkflowService.GetTransactionByPaymentRecordIdAsync(paymentRecordId);
             if (transaction is null)
             {
                 return NotFound(new ProblemDetails { Title = "Rental workflow record not found", Status = 404 });
             }
 
-            if (transaction.OwnerId != userId && transaction.RenterId != userId)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You do not have access to this rental workflow record." });
-            }
-
             return Ok(MapTransaction(transaction));
         }
 
-        [Authorize]
+        /// <summary>
+        /// Returns the rental workflow record linked to a contract.
+        /// </summary>
+        /// <response code="200">Returns the rental workflow record linked to the contract.</response>
+        /// <response code="404">If the rental workflow record is not found.</response>
         [HttpGet("by-contract/{contractId:long}")]
+        [ProducesResponseType(typeof(RentalTransactionResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTransactionByContractId(long contractId)
         {
-            if (!TryGetUserId(out var userId))
-            {
-                return Unauthorized("User ID not found in token");
-            }
-
             var transaction = await _rentalWorkflowService.GetTransactionByContractIdAsync(contractId);
             if (transaction is null)
             {
                 return NotFound(new ProblemDetails { Title = "Rental workflow record not found", Status = 404 });
             }
 
-            if (transaction.OwnerId != userId && transaction.RenterId != userId)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You do not have access to this rental workflow record." });
-            }
-
             return Ok(MapTransaction(transaction));
         }
 
+        /// <summary>
+        /// Starts the rental checkout workflow for the authenticated renter using a property ID.
+        /// </summary>
+        /// <response code="200">Returns the hosted Stripe checkout URL.</response>
+        /// <response code="400">If the property or payout workflow preconditions are not met.</response>
+        /// <response code="401">If the user is not authenticated.</response>
         [Authorize]
         [HttpPost("checkout")]
+        [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Checkout([FromBody] CheckoutRequestDto request)
         {
             if (!TryGetUserId(out var userId))
@@ -130,15 +144,8 @@ namespace MARN_API.Controllers
             var successUrl = domain + (_configuration["Stripe:CheckoutSuccessPath"] ?? "/api/payments/success");
             var cancelUrl = domain + (_configuration["Stripe:CheckoutCancelPath"] ?? "/api/payments/cancel");
 
-            try
-            {
-                var checkoutUrl = await _rentalWorkflowService.StartCheckoutAsync(request.PropertyId, userId, successUrl, cancelUrl);
-                return Ok(new { url = checkoutUrl });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Failed to start workflow", error = ex.Message });
-            }
+            var checkoutUrl = await _rentalWorkflowService.StartCheckoutAsync(request.PropertyId, userId, successUrl, cancelUrl);
+            return Ok(new UrlResponseDto { Url = checkoutUrl });
         }
 
         private static PagedResult<RentalTransactionResponseDto> MapPagedResult(PagedResult<RentalTransaction> pagedResult)
@@ -167,9 +174,7 @@ namespace MARN_API.Controllers
                 Status = transaction.Status,
                 PaymentStatus = transaction.PaymentStatus,
                 CreatedAt = transaction.CreatedAt,
-                CompletedAt = transaction.CompletedAt,
-                PropertyTitle = transaction.Property?.Title,
-                PropertyAddress = transaction.Property?.Address
+                CompletedAt = transaction.CompletedAt
             };
         }
     }

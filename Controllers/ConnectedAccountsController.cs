@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MARN_API.DTOs.Common;
 using MARN_API.DTOs.ConnectedAccounts;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
@@ -23,15 +24,29 @@ namespace MARN_API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Returns all connected Stripe accounts for testing and inspection.
+        /// </summary>
+        /// <response code="200">Returns all connected account mappings.</response>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<ConnectedAccountResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllConnectedAccounts()
         {
             var connectedAccounts = await _connectedAccountService.GetAllConnectedAccountsAsync();
             return Ok(connectedAccounts.Select(MapResponse));
         }
 
+        /// <summary>
+        /// Returns the connected Stripe account that belongs to the current owner.
+        /// </summary>
+        /// <response code="200">Returns the current owner's connected account.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="404">If no connected account exists for the current owner.</response>
         [Authorize(Roles = "Owner")]
         [HttpGet("me")]
+        [ProducesResponseType(typeof(ConnectedAccountResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMyConnectedAccount()
         {
             if (!TryGetUserId(out var userId))
@@ -48,8 +63,17 @@ namespace MARN_API.Controllers
             return Ok(MapResponse(connectedAccount));
         }
 
+        /// <summary>
+        /// Returns whether Stripe onboarding is complete for the current owner.
+        /// </summary>
+        /// <response code="200">Returns the current onboarding completion state.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="404">If no connected account exists for the current owner.</response>
         [Authorize(Roles = "Owner")]
         [HttpGet("me/onboarding-status")]
+        [ProducesResponseType(typeof(ConnectedAccountOnboardingStatusResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMyOnboardingStatus()
         {
             if (!TryGetUserId(out var userId))
@@ -64,17 +88,26 @@ namespace MARN_API.Controllers
             }
 
             var isComplete = await _connectedAccountService.VerifyOnboardingCompletionAsync(connectedAccount.Id);
-            return Ok(new
+            return Ok(new ConnectedAccountOnboardingStatusResponseDto
             {
-                connectedAccountId = connectedAccount.Id,
-                applicationUserId = connectedAccount.ApplicationUserId,
-                stripeAccountId = connectedAccount.StripeAccountId,
-                isOnboardingComplete = isComplete
+                ConnectedAccountId = connectedAccount.Id,
+                ApplicationUserId = connectedAccount.ApplicationUserId,
+                StripeAccountId = connectedAccount.StripeAccountId,
+                IsOnboardingComplete = isComplete
             });
         }
 
+        /// <summary>
+        /// Creates a connected Stripe account for the authenticated owner and returns an onboarding link.
+        /// </summary>
+        /// <response code="200">Returns the created connected account and Stripe onboarding URL.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="500">If account creation fails unexpectedly.</response>
         [Authorize(Roles = "Owner")]
         [HttpPost]
+        [ProducesResponseType(typeof(ConnectedAccountOnboardingLinkResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateConnectedAccount()
         {
             if (!TryGetUserId(out var userId))
@@ -90,12 +123,12 @@ namespace MARN_API.Controllers
                     BuildOnboardingReturnUrl(connectedAccount),
                     BuildOnboardingRefreshUrl(connectedAccount));
 
-                return Ok(new
+                return Ok(new ConnectedAccountOnboardingLinkResponseDto
                 {
-                    connectedAccountId = connectedAccount.Id,
-                    applicationUserId = connectedAccount.ApplicationUserId,
-                    stripeAccountId = connectedAccount.StripeAccountId,
-                    onboardingUrl
+                    ConnectedAccountId = connectedAccount.Id,
+                    ApplicationUserId = connectedAccount.ApplicationUserId,
+                    StripeAccountId = connectedAccount.StripeAccountId,
+                    OnboardingUrl = onboardingUrl
                 });
             }
             catch (Exception ex)
@@ -105,8 +138,17 @@ namespace MARN_API.Controllers
             }
         }
 
+        /// <summary>
+        /// Generates a new Stripe onboarding link for the current owner.
+        /// </summary>
+        /// <response code="200">Returns a fresh Stripe onboarding link.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="404">If no connected account exists for the current owner.</response>
         [Authorize(Roles = "Owner")]
         [HttpPost("me/onboarding-link")]
+        [ProducesResponseType(typeof(ConnectedAccountOnboardingLinkResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CreateMyOnboardingLink()
         {
             if (!TryGetUserId(out var userId))
@@ -125,16 +167,23 @@ namespace MARN_API.Controllers
                 BuildOnboardingReturnUrl(connectedAccount),
                 BuildOnboardingRefreshUrl(connectedAccount));
 
-            return Ok(new
+            return Ok(new ConnectedAccountOnboardingLinkResponseDto
             {
-                connectedAccountId = connectedAccount.Id,
-                applicationUserId = connectedAccount.ApplicationUserId,
-                stripeAccountId = connectedAccount.StripeAccountId,
-                onboardingUrl
+                ConnectedAccountId = connectedAccount.Id,
+                ApplicationUserId = connectedAccount.ApplicationUserId,
+                StripeAccountId = connectedAccount.StripeAccountId,
+                OnboardingUrl = onboardingUrl
             });
         }
 
+        /// <summary>
+        /// Handles the Stripe onboarding return callback for a connected account.
+        /// </summary>
+        /// <response code="200">Returns whether onboarding was completed successfully.</response>
+        /// <response code="403">If the onboarding callback token is invalid.</response>
         [HttpGet("{id:guid}/onboarding/return")]
+        [ProducesResponseType(typeof(MessageResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> HandleOnboardingReturn(Guid id, [FromQuery] string token)
         {
             var isAuthorized = await ValidateOnboardingCallbackAsync(id, token);
@@ -146,13 +195,22 @@ namespace MARN_API.Controllers
             var isComplete = await _connectedAccountService.VerifyOnboardingCompletionAsync(id);
             if (isComplete)
             {
-                return Ok("Onboarding successfully completed! You are now ready to receive payouts.");
+                return Ok(new MessageResponseDto { Message = "Onboarding successfully completed! You are now ready to receive payouts." });
             }
 
-            return Ok("Onboarding was not completed fully. You may need to provide more information later.");
+            return Ok(new MessageResponseDto { Message = "Onboarding was not completed fully. You may need to provide more information later." });
         }
 
+        /// <summary>
+        /// Refreshes the Stripe onboarding link for a connected account callback flow.
+        /// </summary>
+        /// <response code="302">Redirects to a fresh Stripe onboarding link.</response>
+        /// <response code="403">If the onboarding callback token is invalid.</response>
+        /// <response code="404">If the connected account is not found.</response>
         [HttpGet("{id:guid}/onboarding/refresh")]
+        [ProducesResponseType(StatusCodes.Status302Found)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RefreshOnboardingLink(Guid id, [FromQuery] string token)
         {
             var isAuthorized = await ValidateOnboardingCallbackAsync(id, token);
