@@ -29,6 +29,8 @@ namespace MARN_API.Services.Implementations
         private readonly ISavedPropertyRepo _savedPropertyRepo;
         private readonly IReportRepo _reportRepo;
         private readonly IReviewRepo _reviewRepo;
+        private readonly IPropertyRatingRepo _propertyRatingRepo;
+        private readonly IPropertyCommentRepo _propertyCommentRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _dbContext;
         private readonly IFileService _fileService;
@@ -47,6 +49,8 @@ namespace MARN_API.Services.Implementations
             ISavedPropertyRepo savedPropertyRepo,
             IReportRepo reportRepo,
             IReviewRepo reviewRepo,
+            IPropertyRatingRepo propertyRatingRepo,
+            IPropertyCommentRepo propertyCommentRepo,
             UserManager<ApplicationUser> userManager,
             AppDbContext dbContext,
             INotificationService notificationService,
@@ -65,6 +69,8 @@ namespace MARN_API.Services.Implementations
             _savedPropertyRepo = savedPropertyRepo;
             _reportRepo = reportRepo;
             _reviewRepo = reviewRepo;
+            _propertyRatingRepo = propertyRatingRepo;
+            _propertyCommentRepo = propertyCommentRepo;
             _userManager = userManager;
             _dbContext = dbContext;
             _notificationService = notificationService;
@@ -667,7 +673,14 @@ namespace MARN_API.Services.Implementations
                     await _propertyRepo.SoftDeleteByOwnerIdAsync(userId);
                 }
 
-                // 7. Soft delete the user
+                // 7. Hard delete all property ratings and comments written by this user
+                _logger.LogInformation("Deleting property ratings for userId: {userId}", userId);
+                await _propertyRatingRepo.DeleteByUserIdAsync(userId);
+
+                _logger.LogInformation("Deleting property comments for userId: {userId}", userId);
+                await _propertyCommentRepo.DeleteByUserIdAsync(userId);
+
+                // 8. Soft delete the user
                 user.DeletedAt = DateTime.UtcNow;
                 var result = await _userManager.UpdateAsync(user);
 

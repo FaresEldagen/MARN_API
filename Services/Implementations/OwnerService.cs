@@ -2,6 +2,7 @@ using MARN_API.Data;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace MARN_API.Services.Implementations
 {
@@ -33,8 +34,8 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
-            _dbContext.Entry(user).Property("Discriminator").CurrentValue = "Owner";
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE AspNetUsers SET Discriminator = {"Owner"} WHERE Id = {id}");
 
             return IdentityResult.Success;
         }

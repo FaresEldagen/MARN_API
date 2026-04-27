@@ -17,5 +17,6 @@ namespace MARN_API.Repositories.Interfaces
 
 
         public Task<bool> CheackActiveContractsByUserId(Guid userId);
+        public Task<bool> HasEligiblePropertyContractAsync(Guid userId, long propertyId);
     }
 }

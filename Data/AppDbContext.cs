@@ -23,6 +23,8 @@ namespace MARN_API.Data
         public DbSet<RentalTransaction> RentalTransactions => Set<RentalTransaction>();
         public DbSet<RoommatePreference> RoommatePreferences => Set<RoommatePreference>();
         public DbSet<Review> Reviews => Set<Review>();
+        public DbSet<PropertyRating> PropertyRatings => Set<PropertyRating>();
+        public DbSet<PropertyComment> PropertyComments => Set<PropertyComment>();
         public DbSet<PropertyAmenity> PropertyAmenities => Set<PropertyAmenity>();
         public DbSet<PropertyRule> PropertyRules => Set<PropertyRule>();
         public DbSet<PropertyMedia> PropertyMedia => Set<PropertyMedia>();
@@ -50,6 +52,8 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new RentalTransactionConfiguration());
             builder.ApplyConfiguration(new RoommatePreferenceConfiguration());
             builder.ApplyConfiguration(new ReviewConfiguration());
+            builder.ApplyConfiguration(new PropertyRatingConfiguration());
+            builder.ApplyConfiguration(new PropertyCommentConfiguration());
             builder.ApplyConfiguration(new PropertyAmenityConfiguration());
             builder.ApplyConfiguration(new PropertyRuleConfiguration());
             builder.ApplyConfiguration(new PropertyMediaConfiguration());

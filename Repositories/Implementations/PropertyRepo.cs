@@ -127,6 +127,13 @@ namespace MARN_API.Repositories.Implementations
                 .SelectMany(p => p.Reviews)
                 .CountAsync();
         }
+
+        public Task<bool> ExistsAsync(long propertyId)
+        {
+            return Context.Properties
+                .AsNoTracking()
+                .AnyAsync(p => p.Id == propertyId);
+        }
         #endregion
 
 
