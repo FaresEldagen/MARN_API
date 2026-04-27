@@ -76,12 +76,20 @@ namespace MARN_API.Middleware
                 finally
                 {
                     stopwatch.Stop();
+                    try
+                    {
+                        // Log response
+                        await LogResponseAsync(context, stopwatch.ElapsedMilliseconds);
 
-                    // Log response
-                    await LogResponseAsync(context, stopwatch.ElapsedMilliseconds);
-
-                    // Copy response back to original stream
-                    await responseBody.CopyToAsync(originalBodyStream);
+                        // Copy response back to original stream
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        context.Response.Body = originalBodyStream;
+                        await responseBody.CopyToAsync(originalBodyStream);
+                    }
+                    finally
+                    {
+                        context.Response.Body = originalBodyStream;
+                    }
                 }
             }
         }

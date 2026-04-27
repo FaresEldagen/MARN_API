@@ -17,8 +17,10 @@ namespace MARN_API.Data
         public DbSet<Owner> Owners => Set<Owner>();
         public DbSet<Property> Properties => Set<Property>();
         public DbSet<Contract> Contracts => Set<Contract>();
+        public DbSet<ConnectedAccount> ConnectedAccounts => Set<ConnectedAccount>();
         public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
         public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<RentalTransaction> RentalTransactions => Set<RentalTransaction>();
         public DbSet<RoommatePreference> RoommatePreferences => Set<RoommatePreference>();
         public DbSet<Review> Reviews => Set<Review>();
         public DbSet<PropertyAmenity> PropertyAmenities => Set<PropertyAmenity>();
@@ -42,8 +44,10 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new OwnerConfiguration());
             builder.ApplyConfiguration(new PropertyConfiguration());
             builder.ApplyConfiguration(new ContractConfiguration());
+            builder.ApplyConfiguration(new ConnectedAccountConfiguration());
             builder.ApplyConfiguration(new BookingRequestConfiguration());
             builder.ApplyConfiguration(new PaymentConfiguration());
+            builder.ApplyConfiguration(new RentalTransactionConfiguration());
             builder.ApplyConfiguration(new RoommatePreferenceConfiguration());
             builder.ApplyConfiguration(new ReviewConfiguration());
             builder.ApplyConfiguration(new PropertyAmenityConfiguration());
@@ -64,8 +68,6 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new UserRoleSeed());
             builder.ApplyConfiguration(new PropertySeed());
             builder.ApplyConfiguration(new PropertyMediaSeed());
-            builder.ApplyConfiguration(new ContractSeed());
-            builder.ApplyConfiguration(new PaymentSeed());
             builder.ApplyConfiguration(new BookingRequestSeed());
             builder.ApplyConfiguration(new SavedPropertySeed());
             builder.ApplyConfiguration(new NotificationSeed());

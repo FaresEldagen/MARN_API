@@ -26,6 +26,12 @@ namespace MARN_API.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unhandled exception occurred. Request Path: {Path}", context.Request.Path);
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogWarning("The response has already started for path {Path}. The global exception handler cannot rewrite the response body.", context.Request.Path);
+                    throw;
+                }
+
                 await HandleExceptionAsync(context, ex);
             }
         }
@@ -79,9 +85,12 @@ namespace MARN_API.Middleware
                 Message = message,
                 Details = details,
                 StatusCode = (int)statusCode,
+                Path = context.Request.Path,
+                TraceId = context.TraceIdentifier,
                 Timestamp = DateTime.UtcNow
             };
 
+            context.Response.Clear();
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
 
