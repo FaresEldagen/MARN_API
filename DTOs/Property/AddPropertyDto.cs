@@ -46,13 +46,30 @@ namespace MARN_API.DTOs.Property
         public string Address { get; set; } = string.Empty;
 
         [Required]
+        public string City { get; set; } = string.Empty;
+
+        [Required]
+        public string State { get; set; } = string.Empty;
+
+        [Required]
+        public string ZipCode { get; set; } = string.Empty;
+
+        [Required]
+        public double SquareMeters { get; set; }
+
+        [Required]
+        public Microsoft.AspNetCore.Http.IFormFile ProofOfOwnership { get; set; } = null!;
+
+        [Required]
         public double Latitude { get; set; }
 
         [Required]
         public double Longitude { get; set; }
 
+        [Required]
+        public Microsoft.AspNetCore.Http.IFormFile PrimaryImage { get; set; } = null!;
+        public List<Microsoft.AspNetCore.Http.IFormFile> MediaFiles { get; set; } = new List<Microsoft.AspNetCore.Http.IFormFile>();
         public List<AmenityType> Amenities { get; set; } = new List<AmenityType>();
         public List<string> Rules { get; set; } = new List<string>();
-        public List<Microsoft.AspNetCore.Http.IFormFile> MediaFiles { get; set; } = new List<Microsoft.AspNetCore.Http.IFormFile>();
     }
 }

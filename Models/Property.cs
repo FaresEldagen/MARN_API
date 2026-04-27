@@ -10,18 +10,24 @@ namespace MARN_API.Models
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
-        public bool IsShared { get; set; }
+        public string ProofOfOwnership { get; set; } = string.Empty;
 
         public int MaxOccupants { get; set; }
+        public bool IsShared { get; set; }
+
         public int Bedrooms { get; set; }
         public int Beds { get; set; }
         public int Bathrooms { get; set; }
+        public double SquareMeters { get; set; }
         public int Views { get; set; } = 0;
 
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
 
         public string Address { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+        public string ZipCode { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
 

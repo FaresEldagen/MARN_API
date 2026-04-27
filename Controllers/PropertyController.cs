@@ -25,7 +25,7 @@ namespace MARN_API.Controllers
         /// </summary>
         /// <param name="dto">
         /// Property details to create:
-        /// - Title, Description, Type, IsShared, MaxOccupants, Bedrooms, Beds, Bathrooms, Price, RentalUnit, Address, Latitude, Longitude, Amenities, Rules, MediaFiles
+        /// - Title, Description, Type, IsShared, MaxOccupants, Bedrooms, Beds, Bathrooms, Price, RentalUnit, Address, City, State, ZipCode, SquareMeters, ProofOfOwnership, Latitude, Longitude, Amenities, Rules, PrimaryImage, MediaFiles
         /// </param>
         /// <response code="200">Property added successfully</response>
         /// <response code="400">If validation fails, user not found, or account is not verified</response>

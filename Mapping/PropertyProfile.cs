@@ -11,7 +11,8 @@ namespace MARN_API.Mapping
             CreateMap<AddPropertyDto, Property>()
                 .ForMember(dest => dest.Amenities, opt => opt.Ignore())
                 .ForMember(dest => dest.Rules, opt => opt.Ignore())
-                .ForMember(dest => dest.Media, opt => opt.Ignore());
+                .ForMember(dest => dest.Media, opt => opt.Ignore())
+                .ForMember(dest => dest.ProofOfOwnership, opt => opt.Ignore());
         }
     }
 }

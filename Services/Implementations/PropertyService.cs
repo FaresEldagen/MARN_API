@@ -48,6 +48,12 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("AddProperty attempt for userId: {UserId}", userId);
 
+            if (dto.MediaFiles != null && dto.MediaFiles.Count > 9)
+            {
+                _logger.LogWarning("AddProperty failed: Exceeded maximum images count for user {UserId}", userId);
+                return ServiceResult<bool>.Fail("You can only upload a maximum of 10 images including the primary image.", resultType: ServiceResultType.BadRequest);
+            }
+
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
@@ -63,6 +69,15 @@ namespace MARN_API.Services.Implementations
 
             var property = _mapper.Map<Property>(dto);
             property.OwnerId = userId;
+
+            if (dto.ProofOfOwnership != null)
+            {
+                var proofPath = await _fileService.SaveImageAsync(dto.ProofOfOwnership, "documents");
+                if (proofPath != null)
+                {
+                    property.ProofOfOwnership = proofPath;
+                }
+            }
 
             if (!await _userManager.IsInRoleAsync(user, "Owner"))
             {
@@ -89,16 +104,23 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
+            if (dto.PrimaryImage != null)
+            {
+                var primaryPath = await _fileService.SaveImageAsync(dto.PrimaryImage, "properties");
+                if (primaryPath != null)
+                {
+                    await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = primaryPath, IsPrimary = true });
+                }
+            }
+
             if (dto.MediaFiles != null)
             {
-                bool isPrimarySet = false;
                 foreach (var file in dto.MediaFiles)
                 {
                     var path = await _fileService.SaveImageAsync(file, "properties");
                     if (path != null)
                     {
-                        await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = path, IsPrimary = !isPrimarySet });
-                        isPrimarySet = true;
+                        await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = path, IsPrimary = false });
                     }
                 }
             }
