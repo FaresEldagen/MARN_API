@@ -28,10 +28,14 @@ namespace MARN_API.Hubs
                 {
                     // Only broadcast online status to users who have an active chat history with the connected user
                     var ChatUsers = await _chatService.GetActiveUsersWithStatusAsync(userId);
-                    await Clients.Groups(ChatUsers.Data!
-                        .Where(u => u.IsOnline)
-                        .Select(u => u.Id))
-                        .SendAsync("UserOnline", userId);
+
+                    foreach (var ChatUser in ChatUsers.Data!)
+                    {
+                        if (ChatUser.IsOnline)
+                        {
+                            await Clients.User(ChatUser.Id.ToLower()).SendAsync("UserOnline", userId);
+                        }
+                    }
                 }
             }
             await base.OnConnectedAsync();
@@ -47,10 +51,14 @@ namespace MARN_API.Hubs
                 {
                     // Only broadcast online status to users who have an active chat history with the connected user
                     var ChatUsers = await _chatService.GetActiveUsersWithStatusAsync(userId);
-                    await Clients.Groups(ChatUsers.Data!
-                        .Where(u => u.IsOnline)
-                        .Select(u => u.Id))
-                        .SendAsync("UserOffline", userId);
+
+                    foreach (var ChatUser in ChatUsers.Data!)
+                    {
+                        if (ChatUser.IsOnline)
+                        {
+                            await Clients.User(ChatUser.Id.ToLower()).SendAsync("UserOffline", userId);
+                        }
+                    }
                 }
             }
             await base.OnDisconnectedAsync(exception);

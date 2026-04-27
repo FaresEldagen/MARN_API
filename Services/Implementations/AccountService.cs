@@ -6,6 +6,7 @@ using MARN_API.Enums;
 using MARN_API.Enums.Account;
 using MARN_API.Enums.Notification;
 using MARN_API.Models;
+using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -20,6 +21,7 @@ namespace MARN_API.Services.Implementations
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IAccountRepo _accountRepo;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
@@ -29,6 +31,7 @@ namespace MARN_API.Services.Implementations
         public AccountService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            IAccountRepo accountRepo,
             IEmailService emailService,
             IConfiguration configuration,
             ITokenService tokenService,
@@ -38,6 +41,7 @@ namespace MARN_API.Services.Implementations
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _accountRepo = accountRepo;
             _emailService = emailService;
             _configuration = configuration;
             _tokenService = tokenService;
@@ -52,7 +56,12 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Login attempt for email: {Email}", dto.Email);
 
-            var user = await _userManager.FindByEmailAsync(dto.Email);
+            //var user = await _userManager.FindByEmailAsync(dto.Email);
+            var normalizedEmail = _userManager.NormalizeEmail(dto.Email);
+
+            var user = await _userManager.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
             if (user == null)
             {
@@ -184,7 +193,8 @@ namespace MARN_API.Services.Implementations
                     .Fail("Google email not verified", resultType: ServiceResultType.Unauthorized);
             }
 
-            var user = await _userManager.FindByLoginAsync("Google", payload.Subject);
+            //var user = await _userManager.FindByLoginAsync("Google", payload.Subject);
+            var user = await _accountRepo.GetGoogleUser(payload.Subject);
 
             if (user == null)
             {

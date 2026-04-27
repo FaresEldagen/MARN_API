@@ -157,6 +157,7 @@ namespace MARN_API
             builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
             builder.Services.AddScoped<IWorkflowContractRepo, WorkflowContractRepo>();
             builder.Services.AddScoped<IWorkflowPaymentRepo, WorkflowPaymentRepo>();
+            builder.Services.AddScoped<IAccountRepo, AccountRepo>();
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
