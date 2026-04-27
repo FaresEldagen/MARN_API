@@ -150,6 +150,9 @@ namespace MARN_API
             builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
             builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
+            builder.Services.AddScoped<IPropertyAmenityRepo, PropertyAmenityRepo>();
+            builder.Services.AddScoped<IPropertyMediaRepo, PropertyMediaRepo>();
+            builder.Services.AddScoped<IPropertyRuleRepo, PropertyRuleRepo>();
             builder.Services.AddScoped<IRentalTransactionRepo, RentalTransactionRepo>();
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
@@ -165,8 +168,8 @@ namespace MARN_API
             builder.Services.AddScoped<IContractService, ContractService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IOwnerService, OwnerService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IRentalWorkflowService, RentalWorkflowService>();
             builder.Services.AddScoped<IFileService, FileService>();

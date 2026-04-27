@@ -164,5 +164,14 @@ namespace MARN_API.Repositories.Implementations
                     .SetProperty(p => p.DeletedAt, DateTime.UtcNow));
         }
         #endregion
+
+        
+        #region Property Operation
+        public async Task AddPropertyAsync(Property property)
+        {
+            await Context.Properties.AddAsync(property);
+            await Context.SaveChangesAsync();
+        }
+        #endregion
     }
 }

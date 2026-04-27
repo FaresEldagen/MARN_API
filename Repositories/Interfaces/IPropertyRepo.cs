@@ -22,5 +22,10 @@ namespace MARN_API.Repositories.Interfaces
         Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds);
         Task SoftDeleteByOwnerIdAsync(Guid ownerId);
         #endregion
+
+        
+        #region Property Operation
+        Task AddPropertyAsync(Property property);
+        #endregion
     }
 }

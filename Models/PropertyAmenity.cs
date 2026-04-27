@@ -4,6 +4,7 @@ namespace MARN_API.Models
 {
     public class PropertyAmenity
     {
+        public long Id { get; set; }
         public long PropertyId { get; set; }
         public AmenityType Amenity { get; set; }
 

@@ -984,81 +984,102 @@ namespace MARN_API.Migrations
 
             modelBuilder.Entity("MARN_API.Models.PropertyAmenity", b =>
                 {
-                    b.Property<long>("PropertyId")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("Amenity")
                         .HasColumnType("int");
 
-                    b.HasKey("PropertyId", "Amenity");
+                    b.Property<long>("PropertyId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
 
                     b.ToTable("PropertyAmenities");
 
                     b.HasData(
                         new
                         {
-                            PropertyId = 1001L,
-                            Amenity = 0
+                            Id = 1L,
+                            Amenity = 0,
+                            PropertyId = 1001L
                         },
                         new
                         {
-                            PropertyId = 1001L,
-                            Amenity = 2
+                            Id = 2L,
+                            Amenity = 2,
+                            PropertyId = 1001L
                         },
                         new
                         {
-                            PropertyId = 1001L,
-                            Amenity = 4
+                            Id = 3L,
+                            Amenity = 4,
+                            PropertyId = 1001L
                         },
                         new
                         {
-                            PropertyId = 1002L,
-                            Amenity = 0
+                            Id = 4L,
+                            Amenity = 0,
+                            PropertyId = 1002L
                         },
                         new
                         {
-                            PropertyId = 1002L,
-                            Amenity = 7
+                            Id = 5L,
+                            Amenity = 7,
+                            PropertyId = 1002L
                         },
                         new
                         {
-                            PropertyId = 1002L,
-                            Amenity = 8
+                            Id = 6L,
+                            Amenity = 8,
+                            PropertyId = 1002L
                         },
                         new
                         {
-                            PropertyId = 1003L,
-                            Amenity = 0
+                            Id = 7L,
+                            Amenity = 0,
+                            PropertyId = 1003L
                         },
                         new
                         {
-                            PropertyId = 1003L,
-                            Amenity = 5
+                            Id = 8L,
+                            Amenity = 5,
+                            PropertyId = 1003L
                         },
                         new
                         {
-                            PropertyId = 1004L,
-                            Amenity = 0
+                            Id = 9L,
+                            Amenity = 0,
+                            PropertyId = 1004L
                         },
                         new
                         {
-                            PropertyId = 1004L,
-                            Amenity = 2
+                            Id = 10L,
+                            Amenity = 2,
+                            PropertyId = 1004L
                         },
                         new
                         {
-                            PropertyId = 1004L,
-                            Amenity = 9
+                            Id = 11L,
+                            Amenity = 9,
+                            PropertyId = 1004L
                         },
                         new
                         {
-                            PropertyId = 1004L,
-                            Amenity = 10
+                            Id = 12L,
+                            Amenity = 10,
+                            PropertyId = 1004L
                         },
                         new
                         {
-                            PropertyId = 1004L,
-                            Amenity = 1
+                            Id = 13L,
+                            Amenity = 1,
+                            PropertyId = 1004L
                         });
                 });
 
