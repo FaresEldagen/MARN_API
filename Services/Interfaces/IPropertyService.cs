@@ -8,5 +8,10 @@ namespace MARN_API.Services.Interfaces
     public interface IPropertyService
     {
         Task<ServiceResult<bool>> AddPropertyAsync(AddPropertyDto dto, Guid userId);
+        Task<ServiceResult<PropertyEditDataDto>> GetPropertyEditAsync(long propertyId, Guid userId);
+        Task<ServiceResult<bool>> EditPropertyAsync(long propertyId, EditPropertyDto dto, Guid userId);
+        Task<ServiceResult<bool>> DeactivatePropertyAsync(long propertyId, Guid userId);
+        Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId);
+        Task<ServiceResult<bool>> ToggleSavePropertyAsync(long propertyId, Guid userId);
     }
 }

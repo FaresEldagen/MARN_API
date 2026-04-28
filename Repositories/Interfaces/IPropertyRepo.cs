@@ -25,6 +25,8 @@ namespace MARN_API.Repositories.Interfaces
 
         
         #region Property Operation
+        Task<Property?> GetByIdAsync(long id);
+        Task UpdatePropertyAsync(Property property);
         Task AddPropertyAsync(Property property);
         #endregion
     }

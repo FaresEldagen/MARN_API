@@ -9,5 +9,7 @@ namespace MARN_API.Repositories.Interfaces
         public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequests(Guid userId);
 
         public Task DeleteByUserIdAsync(Guid userId);
+        public Task DeleteByPropertyIdAsync(long propertyId);
+        public Task DeleteByPropertyIdsAsync(List<long> propertyIds);
     }
 }

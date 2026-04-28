@@ -1,4 +1,5 @@
 using AutoMapper;
+using System.Linq;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Property;
 using MARN_API.Enums;
@@ -23,6 +24,9 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyAmenityRepo _amenityRepo;
         private readonly IPropertyMediaRepo _mediaRepo;
         private readonly IPropertyRuleRepo _ruleRepo;
+        private readonly IBookingRequestRepo _bookingRequestRepo;
+        private readonly ISavedPropertyRepo _savedPropertyRepo;
+        private readonly MARN_API.Data.AppDbContext _context;
 
         public PropertyService(
             IPropertyRepo propertyRepo, 
@@ -32,7 +36,10 @@ namespace MARN_API.Services.Implementations
             IFileService fileService,
             IPropertyAmenityRepo amenityRepo,
             IPropertyMediaRepo mediaRepo,
-            IPropertyRuleRepo ruleRepo)
+            IPropertyRuleRepo ruleRepo,
+            IBookingRequestRepo bookingRequestRepo,
+            ISavedPropertyRepo savedPropertyRepo,
+            MARN_API.Data.AppDbContext context)
         {
             _propertyRepo = propertyRepo;
             _userManager = userManager;
@@ -42,6 +49,9 @@ namespace MARN_API.Services.Implementations
             _amenityRepo = amenityRepo;
             _mediaRepo = mediaRepo;
             _ruleRepo = ruleRepo;
+            _bookingRequestRepo = bookingRequestRepo;
+            _savedPropertyRepo = savedPropertyRepo;
+            _context = context;
         }
 
         public async Task<ServiceResult<bool>> AddPropertyAsync(AddPropertyDto dto, Guid userId)
@@ -127,6 +137,226 @@ namespace MARN_API.Services.Implementations
 
             _logger.LogInformation("Successfully fully mapped and saved property {PropertyId}", property.Id);
             return ServiceResult<bool>.Ok(true, "Property added successfully.");
+        }
+
+        public async Task<ServiceResult<PropertyEditDataDto>> GetPropertyEditAsync(long propertyId, Guid userId)
+        {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null)
+                return ServiceResult<PropertyEditDataDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.OwnerId != userId)
+                return ServiceResult<PropertyEditDataDto>.Fail("Unauthorized access.", resultType: ServiceResultType.Forbidden);
+
+            var dto = _mapper.Map<PropertyEditDataDto>(property);
+
+            var amenities = await _amenityRepo.GetByPropertyIdAsync(propertyId);
+            var rules = await _ruleRepo.GetByPropertyIdAsync(propertyId);
+            var media = await _mediaRepo.GetByPropertyIdAsync(propertyId);
+
+            dto.Amenities = _mapper.Map<System.Collections.Generic.List<PropertyAmenityDto>>(amenities);
+            dto.Rules = _mapper.Map<System.Collections.Generic.List<PropertyRuleDto>>(rules);
+            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(media);
+
+            return ServiceResult<PropertyEditDataDto>.Ok(dto);
+        }
+
+        public async Task<ServiceResult<bool>> EditPropertyAsync(long propertyId, EditPropertyDto dto, Guid userId)
+        {
+            _logger.LogInformation("Edit property attempt {PropertyId} for user {UserId}", propertyId, userId);
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null || user.AccountStatus != AccountStatus.Verified)
+            {
+                _logger.LogWarning("EditProperty failed: Account not verified for user {UserId}", userId);
+                return ServiceResult<bool>.Fail("Your account must be verified to edit a property.", resultType: ServiceResultType.Unauthorized);
+            }
+
+            if (dto.AddedMediaFiles != null && dto.AddedMediaFiles.Count > 10)
+            {
+                return ServiceResult<bool>.Fail("You cannot add more than 10 images at once.", resultType: ServiceResultType.BadRequest);
+            }
+
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null)
+            {
+                return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            if (property.OwnerId != userId)
+            {
+                return ServiceResult<bool>.Fail("Unauthorized access.", resultType: ServiceResultType.Forbidden);
+            }
+
+            if (property.Contracts != null && property.Contracts.Any(c => c.Status == ContractStatus.Active))
+            {
+                return ServiceResult<bool>.Fail("Cannot edit a property that has an active contract.", resultType: ServiceResultType.BadRequest);
+            }
+
+            _mapper.Map(dto, property);
+            property.Status = MARN_API.Enums.Property.PropertyStatus.Pending;
+
+            if (dto.NewProofOfOwnership != null)
+            {
+                if (!string.IsNullOrEmpty(property.ProofOfOwnership))
+                {
+                    _fileService.DeleteImage(property.ProofOfOwnership);
+                }
+
+                var proofPath = await _fileService.SaveImageAsync(dto.NewProofOfOwnership, "documents");
+                if (proofPath != null)
+                {
+                    property.ProofOfOwnership = proofPath;
+                }
+            }
+
+            await _propertyRepo.UpdatePropertyAsync(property);
+
+            if (dto.RemovedAmenityIds != null)
+            {
+                foreach(long id in dto.RemovedAmenityIds) await _amenityRepo.RemoveByObjectIdAsync(id);
+            }
+            if (dto.RemovedRuleIds != null)
+            {
+                foreach(long id in dto.RemovedRuleIds) await _ruleRepo.RemoveByObjectIdAsync(id);
+            }
+            if (dto.RemovedMediaIds != null)
+            {
+                var existingMedia = await _mediaRepo.GetByPropertyIdAsync(propertyId);
+                foreach(long id in dto.RemovedMediaIds) 
+                {
+                    var mediaItem = existingMedia.FirstOrDefault(m => m.Id == id);
+                    if (mediaItem != null)
+                    {
+                        _fileService.DeleteImage(mediaItem.Path);
+                    }
+                    await _mediaRepo.RemoveByObjectIdAsync(id);
+                }
+            }
+
+            if (dto.AddedAmenities != null)
+            {
+                foreach(var am in dto.AddedAmenities) await _amenityRepo.AddByPropertyIdAsync(propertyId, new PropertyAmenity { Amenity = am });
+            }
+            if (dto.AddedRules != null)
+            {
+                foreach(var rule in dto.AddedRules) await _ruleRepo.AddByPropertyIdAsync(propertyId, new PropertyRule { Rule = rule });
+            }
+
+            if (dto.NewPrimaryImage != null)
+            {
+                var existingMedia = await _mediaRepo.GetByPropertyIdAsync(propertyId);
+                var oldPrimary = existingMedia.FirstOrDefault(m => m.IsPrimary);
+                if (oldPrimary != null)
+                {
+                    _fileService.DeleteImage(oldPrimary.Path);
+                    await _mediaRepo.RemoveByObjectIdAsync(oldPrimary.Id);
+                }
+
+                var pPath = await _fileService.SaveImageAsync(dto.NewPrimaryImage, "properties");
+                if (pPath != null)
+                {
+                    await _mediaRepo.AddByPropertyIdAsync(propertyId, new PropertyMedia { Path = pPath, IsPrimary = true });
+                }
+            }
+
+            if (dto.AddedMediaFiles != null)
+            {
+                foreach (var mf in dto.AddedMediaFiles)
+                {
+                    var mPath = await _fileService.SaveImageAsync(mf, "properties");
+                    if (mPath != null)
+                    {
+                        await _mediaRepo.AddByPropertyIdAsync(propertyId, new PropertyMedia { Path = mPath, IsPrimary = false });
+                    }
+                }
+            }
+
+            _logger.LogInformation("Property {PropertyId} edited successfully by user {UserId}", propertyId, userId);
+            return ServiceResult<bool>.Ok(true, "Property updated successfully.");
+        }
+
+        public async Task<ServiceResult<bool>> DeactivatePropertyAsync(long propertyId, Guid userId)
+        {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null || property.OwnerId != userId)
+                return ServiceResult<bool>.Fail("Unauthorized or NotFound.", resultType: ServiceResultType.Forbidden);
+
+            property.IsActive = !property.IsActive;
+            await _propertyRepo.UpdatePropertyAsync(property);
+
+            return ServiceResult<bool>.Ok(true, "Property activation toggled.");
+        }
+
+        public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId)
+        {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null || property.OwnerId != userId)
+                return ServiceResult<bool>.Fail("Unauthorized or NotFound.", resultType: ServiceResultType.Forbidden);
+
+            if (property.Contracts != null && property.Contracts.Any(c => c.Status == ContractStatus.Active))
+            {
+                return ServiceResult<bool>.Fail("Property has active contracts and cannot be deleted.", resultType: ServiceResultType.BadRequest);
+            }
+
+            var filesToDelete = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(property.ProofOfOwnership))
+            {
+                filesToDelete.Add(property.ProofOfOwnership);
+            }
+
+            var mediaPaths = await _propertyRepo.GetMediaPathsByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
+            filesToDelete.AddRange(mediaPaths);
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
+                await _propertyRepo.DeleteMediaByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
+
+                property.DeletedAt = DateTime.UtcNow;
+                await _propertyRepo.UpdatePropertyAsync(property);
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Transaction failed deleting property {Id}", propertyId);
+                return ServiceResult<bool>.Fail("Error deleting property.", resultType: ServiceResultType.BadRequest);
+            }
+
+            foreach (var file in filesToDelete)
+            {
+                try { _fileService.DeleteImage(file); }
+                catch (Exception) { /* Ignored */ }
+            }
+
+            return ServiceResult<bool>.Ok(true, "Property deleted completely.");
+        }
+
+        public async Task<ServiceResult<bool>> ToggleSavePropertyAsync(long propertyId, Guid userId)
+        {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null || property.DeletedAt != null)
+                return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            bool isSaved = await _savedPropertyRepo.HasSavedPropertyAsync(userId, propertyId);
+            if (isSaved)
+            {
+                await _savedPropertyRepo.UnsavePropertyAsync(userId, propertyId);
+                return ServiceResult<bool>.Ok(false, "Property unsaved successfully.");
+            }
+            else
+            {
+                var savedProperty = new SavedProperty
+                {
+                    UserId = userId,
+                    PropertyId = propertyId
+                };
+                await _savedPropertyRepo.SavePropertyAsync(savedProperty);
+                return ServiceResult<bool>.Ok(true, "Property saved successfully.");
+            }
         }
     }
 }

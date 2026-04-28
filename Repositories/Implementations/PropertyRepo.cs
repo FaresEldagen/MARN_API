@@ -38,6 +38,7 @@ namespace MARN_API.Repositories.Implementations
                     Address = p.Address,
                     Type = p.Type,
                     Views = p.Views,
+                    IsSaved = p.SavedProperty.Any(s => s.UserId == userId),
 
                     OccupiedPlaces = p.Contracts
                         .Where(c => c.Status == ContractStatus.Active)
@@ -81,6 +82,7 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty}",
                     Title = p.Title,
                     Address = p.Address,
+                    IsSaved = p.SavedProperty.Any(s => s.UserId == userId),
 
                     MaxOccupants = p.MaxOccupants,
                     Bedrooms = p.Bedrooms,
@@ -167,6 +169,17 @@ namespace MARN_API.Repositories.Implementations
 
         
         #region Property Operation
+        public async Task<Property?> GetByIdAsync(long id)
+        {
+            return await Context.Properties.Include(p => p.Contracts).FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task UpdatePropertyAsync(Property property)
+        {
+            Context.Properties.Update(property);
+            await Context.SaveChangesAsync();
+        }
+
         public async Task AddPropertyAsync(Property property)
         {
             await Context.Properties.AddAsync(property);

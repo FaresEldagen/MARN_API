@@ -36,6 +36,7 @@ namespace MARN_API.Services.Implementations
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<AccountService> _logger;
+        private readonly IPropertyService _propertyService;
 
         public ProfileService(
             IBookingRequestRepo bookingRequestRepo,
@@ -53,7 +54,8 @@ namespace MARN_API.Services.Implementations
             IFileService fileService,
             IEmailService emailService,
             IMapper mapper,
-            ILogger<AccountService> logger
+            ILogger<AccountService> logger,
+            IPropertyService propertyService
         )
         {
             _bookingRequestRepo = bookingRequestRepo;
@@ -72,6 +74,7 @@ namespace MARN_API.Services.Implementations
             _emailService = emailService;
             _mapper = mapper;
             _logger = logger;
+            _propertyService = propertyService;
         }
 
 
@@ -623,13 +626,6 @@ namespace MARN_API.Services.Implementations
             if (!string.IsNullOrEmpty(user.BackIdPhoto))
                 filesToDelete.Add(user.BackIdPhoto);
 
-            // Collect property media paths for owned properties
-            var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
-            if (ownedPropertyIds.Count > 0)
-            {
-                var mediaPaths = await _propertyRepo.GetMediaPathsByPropertyIdsAsync(ownedPropertyIds);
-                filesToDelete.AddRange(mediaPaths);
-            }
 
             // Begin transactional deletion
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -655,16 +651,19 @@ namespace MARN_API.Services.Implementations
                 _logger.LogInformation("Deleting reviews for userId: {userId}", userId);
                 await _reviewRepo.DeleteByUserIdAsync(userId);
 
-                // 6. Handle owned properties (soft delete + media cleanup)
-                if (ownedPropertyIds.Count > 0)
+                // 6. Deleter user properties via PropertyService to correctly execute all property cleanup logic
+                var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
+                foreach(var propertyId in ownedPropertyIds)
                 {
-                    // Hard delete property media records
-                    _logger.LogInformation("Deleting property media records for {Count} properties owned by userId: {userId}", ownedPropertyIds.Count, userId);
-                    await _propertyRepo.DeleteMediaByPropertyIdsAsync(ownedPropertyIds);
-
-                    // Soft delete the properties themselves
-                    _logger.LogInformation("Soft deleting properties for userId: {userId}", userId);
-                    await _propertyRepo.SoftDeleteByOwnerIdAsync(userId);
+                    var propertyDeleteResult = await _propertyService.DeletePropertyAsync(propertyId, userId);
+                    if (!propertyDeleteResult.Success)
+                    {
+                        _logger.LogWarning("Delete User failed: Could not delete owned property {PropertyId} for userId: {userId}. Error: {Error}", 
+                            propertyId, 
+                            userId,
+                            propertyDeleteResult.Message);
+                        throw new Exception($"Failed to delete user's property with ID {propertyId}: {propertyDeleteResult.Message}");
+                    }
                 }
 
                 // 7. Soft delete the user

@@ -5,12 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System;
+using MARN_API.DTOs.Dashboard;
 
 namespace MARN_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PropertyController : ControllerBase
+    public class PropertyController : BaseController
     {
         private readonly IPropertyService _propertyService;
 
@@ -39,25 +40,132 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> AddProperty([FromForm] AddPropertyDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
-            {
-                return Unauthorized();
-            }
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
             var result = await _propertyService.AddPropertyAsync(dto, userId);
+            return HandleServiceResult<bool>(result);
+        }
 
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
+        /// <summary>
+        /// Retrieves the editable data details for a specific property including existing images and rule sets.
+        /// </summary>
+        /// <param name="propertyId">ID string of the property being retrieved</param>
+        /// <response code="200">Retrieval succeeded</response>
+        /// <response code="401">Unauthorized caller</response>
+        /// <response code="403">Caller doesn't own this property</response>
+        /// <response code="404">Property not found</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpGet("edit/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetPropertyEdit(long propertyId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
-            return Ok(result.Message);
+            var result = await _propertyService.GetPropertyEditAsync(propertyId, userId);
+            return HandleServiceResult<PropertyEditDataDto>(result);
+        }
+
+        /// <summary>
+        /// Submits an edit layout for modifying an existing property listing structure.
+        /// </summary>
+        /// <param name="propertyId">ID strings for updating matching property.</param>
+        /// <param name="dto">The updated contents of the property.</param>
+        /// <response code="200">Edits persisted seamlessly</response>
+        /// <response code="401">Unauthorized requester</response>
+        /// <response code="403">Requester fails ownership verification</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPut("edit/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> EditProperty(long propertyId, [FromForm] EditPropertyDto dto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _propertyService.EditPropertyAsync(propertyId, dto, userId);
+            return HandleServiceResult<bool>(result);
+        }
+
+        /// <summary>
+        /// Toggles a property's active status dynamically rendering it unsearchable or searchable.
+        /// </summary>
+        /// <param name="propertyId">ID strings for matching property.</param>
+        /// <response code="200">Reactivation/Deactivation persisted seamlessly</response>
+        /// <response code="401">Unauthorized requester</response>
+        /// <response code="403">Requester fails ownership verification</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPut("deactivate/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> DeactivateProperty(long propertyId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _propertyService.DeactivatePropertyAsync(propertyId, userId);
+            return HandleServiceResult<bool>(result);
+        }
+
+        /// <summary>
+        /// Triggers a nested deletion operation hard deleting connected bookings/images entirely and restricting access to older contracts smoothly.
+        /// </summary>
+        /// <param name="propertyId">ID strings for updating matching property.</param>
+        /// <response code="200">Deletions effectively propagated securely</response>
+        /// <response code="400">Halts immediately if the property is blocked by an active rent contract.</response>
+        /// <response code="401">Unauthorized requester</response>
+        /// <response code="403">Requester fails ownership verification</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpDelete("delete/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> DeleteProperty(long propertyId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _propertyService.DeletePropertyAsync(propertyId, userId);
+            return HandleServiceResult<bool>(result);
+        }
+
+        /// <summary>
+        /// Saves or unsaves a property for the authenticated user.
+        /// </summary>
+        /// <param name="propertyId">ID string of the property being saved/unsaved.</param>
+        /// <response code="200">Save state toggled successfully</response>
+        /// <response code="401">Unauthorized requester</response>
+        /// <response code="404">Property not found</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPost("save/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> SaveProperty(long propertyId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _propertyService.ToggleSavePropertyAsync(propertyId, userId);
+            return HandleServiceResult<bool>(result);
         }
     }
 }

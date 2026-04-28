@@ -19,5 +19,7 @@ namespace MARN_API.DTOs.Property
 
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
+
+        public bool IsSaved { get; set; }
     }
 }
