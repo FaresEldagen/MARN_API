@@ -132,7 +132,7 @@ namespace MARN_API.Repositories.Implementations
         #endregion
 
 
-        #region User Deletion
+        #region Deletion
         public async Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId)
         {
             return await Context.Properties
@@ -155,15 +155,6 @@ namespace MARN_API.Repositories.Implementations
             await Context.PropertyMedia
                 .Where(m => propertyIds.Contains(m.PropertyId))
                 .ExecuteDeleteAsync();
-        }
-
-        public async Task SoftDeleteByOwnerIdAsync(Guid ownerId)
-        {
-            await Context.Properties
-                .IgnoreQueryFilters()
-                .Where(p => p.OwnerId == ownerId && p.DeletedAt == null)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(p => p.DeletedAt, DateTime.UtcNow));
         }
         #endregion
 

@@ -16,11 +16,10 @@ namespace MARN_API.Repositories.Interfaces
         #endregion
 
 
-        #region User Deletion
+        #region Deletion
         Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId);
         Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds);
         Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds);
-        Task SoftDeleteByOwnerIdAsync(Guid ownerId);
         #endregion
 
         

@@ -265,7 +265,6 @@ namespace MARN_API.Services.Implementations
             if (RoommatePreferences != null)
             {
                 _mapper.Map(RoommatePreferences, profileData);
-                profileData.RoommatePreferencesEnabled = true;
             }
 
             _logger.LogInformation("Get Profile Settings Data successful for userId: {userId}", userId);
@@ -453,54 +452,31 @@ namespace MARN_API.Services.Implementations
 
             var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(dto.UserId);
 
-            if (dto.RoommatePreferencesEnabled)
+            try
             {
-                try
+                if (RoommatePreferences != null)
                 {
-                    if (RoommatePreferences != null)
-                    {
-                        RoommatePreferences = _mapper.Map(dto, RoommatePreferences);
-                        var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(RoommatePreferences);
-                    }
-                    else
-                    {
-                        RoommatePreferences = _mapper.Map<RoommatePreference>(dto);
-                        RoommatePreferences.UserId = dto.UserId;
-                        var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(RoommatePreferences);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(
-                        "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
-                        dto.UserId,
-                        ex
-                    );
-                    return ServiceResult<bool>.Fail(
-                        "Update Profile Data failed. An error occurred while saving roommate preferences.",
-                        resultType: ServiceResultType.BadRequest
-                    );
-                }
-            }
-            else if (RoommatePreferences != null)
-            {
-                try
-                {
-                    RoommatePreferences.RoommatePreferencesEnabled = false;
+                    RoommatePreferences = _mapper.Map(dto, RoommatePreferences);
                     var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(RoommatePreferences);
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(
-                        "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while disabling roommate preferences. Exception: {Exception}",
-                        dto.UserId,
-                        ex
-                    );
-                    return ServiceResult<bool>.Fail(
-                        "Update Profile Data failed. An error occurred while disabling roommate preferences.",
-                        resultType: ServiceResultType.BadRequest
-                    );
+                    RoommatePreferences = _mapper.Map<RoommatePreference>(dto);
+                    RoommatePreferences.UserId = dto.UserId;
+                    var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(RoommatePreferences);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
+                    dto.UserId,
+                    ex
+                );
+                return ServiceResult<bool>.Fail(
+                    "Update Profile Data failed. An error occurred while saving roommate preferences.",
+                    resultType: ServiceResultType.BadRequest
+                );
             }
 
             _logger.LogInformation("Update Roommate Preferences Data successful for user: {UserId}", user.Id);
