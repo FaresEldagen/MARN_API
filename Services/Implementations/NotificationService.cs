@@ -50,7 +50,7 @@ namespace MARN_API.Services.Implementations
             if (_tracker.IsOnline(request.UserId))
             {
                 // Send real-time notification via SignalR
-                await _notificationHub.Clients.User(request.UserId)
+                await _notificationHub.Clients.User(request.UserId.ToLower())
                     .SendAsync("ReceiveNotification", request);
             }
             else

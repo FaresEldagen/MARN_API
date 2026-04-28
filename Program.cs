@@ -296,7 +296,7 @@ namespace MARN_API
                         var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
                         // Extract query string token if request is destined for the SignalR hub
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
                         {
                             context.Token = accessToken;
                         }
