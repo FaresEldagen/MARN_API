@@ -394,7 +394,7 @@ namespace MARN_API.Services.Implementations
             var token = await GenerateEmailConfirmationTokenAsync(user);
 
             var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-            var confirmationLink = $"{frontBaseUrl}/Account/confirm-email?userId={user.Id}&token={token}";
+            var confirmationLink = $"{frontBaseUrl}/confirm-email?userId={user.Id}&token={token}";
 
             await _emailService.SendRegistrationConfirmationEmailAsync(user.Email!, user.FirstName, confirmationLink);
 
@@ -424,6 +424,9 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Failed to Confirm Email: User not found.");
             }
 
+            if (user.EmailConfirmed == true)
+                return ServiceResult<bool>.Ok(true, "The Email Allready Confirmed Successfully");
+
             var decodedBytes = WebEncoders.Base64UrlDecode(token);
             var decodedToken = Encoding.UTF8.GetString(decodedBytes);
 
@@ -440,7 +443,7 @@ namespace MARN_API.Services.Implementations
             }
 
             var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-            var loginLink = $"{frontBaseUrl}/Account/Login";
+            var loginLink = $"{frontBaseUrl}/login";
 
             await _emailService.SendAccountCreatedEmailAsync(user.Email!, user.FirstName!, loginLink);
 
@@ -474,7 +477,7 @@ namespace MARN_API.Services.Implementations
                 {
                     var token = await GenerateEmailConfirmationTokenAsync(user);
                     var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-                    var confirmationLink = $"{frontBaseUrl}/Account/confirm-email?userId={user.Id}&token={token}";
+                    var confirmationLink = $"{frontBaseUrl}/confirm-email?userId={user.Id}&token={token}";
 
                     await _emailService.SendResendConfirmationEmailAsync(user.Email!, user.FirstName!, confirmationLink);
                     _logger.LogInformation("Confirmation email resent for user {UserId}", user.Id);
@@ -609,6 +612,16 @@ namespace MARN_API.Services.Implementations
                 );
             }
 
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = user.Id.ToString(),
+                UserType = NotificationUserType.General,
+                Type = NotificationType.General,
+
+                Title = "Password Reset Successful!",
+                Body = $"Hello {user.FirstName}, your password has been updated successfully. You can now log in with your new credentials.\n\n" +
+                    "If you didn't make this change, please contact our support team immediately to secure your account.",
+            });
             _logger.LogInformation("Password reset successful for user: {UserId}", user.Id);
             return ServiceResult<bool>.Ok(true, "Password reset successful.");
         }
