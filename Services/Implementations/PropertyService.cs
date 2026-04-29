@@ -1,9 +1,11 @@
 using AutoMapper;
 using System.Linq;
 using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Notification;
 using MARN_API.DTOs.Property;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
@@ -28,6 +30,7 @@ namespace MARN_API.Services.Implementations
         private readonly ISavedPropertyRepo _savedPropertyRepo;
         private readonly IContractRepo _contractRepo;
         private readonly MARN_API.Data.AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
         public PropertyService(
             IPropertyRepo propertyRepo, 
@@ -41,7 +44,8 @@ namespace MARN_API.Services.Implementations
             IBookingRequestRepo bookingRequestRepo,
             ISavedPropertyRepo savedPropertyRepo,
             IContractRepo contractRepo,
-            MARN_API.Data.AppDbContext context)
+            MARN_API.Data.AppDbContext context,
+            INotificationService notificationService)
         {
             _propertyRepo = propertyRepo;
             _userManager = userManager;
@@ -55,6 +59,7 @@ namespace MARN_API.Services.Implementations
             _savedPropertyRepo = savedPropertyRepo;
             _contractRepo = contractRepo;
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<ServiceResult<bool>> AddPropertyAsync(AddPropertyDto dto, Guid userId)
@@ -139,29 +144,30 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Successfully fully mapped and saved property {PropertyId}", property.Id);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = userId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.PropertyAdded,
+
+                Title = "Property Submitted for Review",
+                Body = $"Your property \"{property.Title}\" has been submitted successfully and is now pending admin verification. " +
+                       "This process may take up to 24 hours. We'll notify you once it's approved.",
+
+                ActionType = NotificationActionType.Property,
+                ActionId = property.Id.ToString()
+            });
+
             return ServiceResult<bool>.Ok(true, "Property added successfully.");
         }
 
-        public async Task<ServiceResult<PropertyEditDataDto>> GetPropertyEditAsync(long propertyId, Guid userId)
+        public async Task<ServiceResult<PropertySearchResultDto>> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? userId)
         {
-            var property = await _propertyRepo.GetByIdAsync(propertyId);
-            if (property == null)
-                return ServiceResult<PropertyEditDataDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            _logger.LogInformation("SearchProperties called with keyword: {Keyword}, page: {Page}", filter.Keyword, filter.Page);
 
-            if (property.OwnerId != userId)
-                return ServiceResult<PropertyEditDataDto>.Fail("Unauthorized access.", resultType: ServiceResultType.Forbidden);
-
-            var dto = _mapper.Map<PropertyEditDataDto>(property);
-
-            var amenities = await _amenityRepo.GetByPropertyIdAsync(propertyId);
-            var rules = await _ruleRepo.GetByPropertyIdAsync(propertyId);
-            var media = await _mediaRepo.GetByPropertyIdAsync(propertyId);
-
-            dto.Amenities = _mapper.Map<System.Collections.Generic.List<PropertyAmenityDto>>(amenities);
-            dto.Rules = _mapper.Map<System.Collections.Generic.List<PropertyRuleDto>>(rules);
-            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(media);
-
-            return ServiceResult<PropertyEditDataDto>.Ok(dto);
+            var result = await _propertyRepo.SearchPropertiesAsync(filter, userId);
+            return ServiceResult<PropertySearchResultDto>.Ok(result);
         }
 
         public async Task<ServiceResult<PropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId, Guid? userId)
@@ -212,6 +218,28 @@ namespace MARN_API.Services.Implementations
             }
 
             return ServiceResult<PropertyDetailsDto>.Ok(dto);
+        }
+
+        public async Task<ServiceResult<PropertyEditDataDto>> GetPropertyEditAsync(long propertyId, Guid userId)
+        {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null)
+                return ServiceResult<PropertyEditDataDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.OwnerId != userId)
+                return ServiceResult<PropertyEditDataDto>.Fail("Unauthorized access.", resultType: ServiceResultType.Forbidden);
+
+            var dto = _mapper.Map<PropertyEditDataDto>(property);
+
+            var amenities = await _amenityRepo.GetByPropertyIdAsync(propertyId);
+            var rules = await _ruleRepo.GetByPropertyIdAsync(propertyId);
+            var media = await _mediaRepo.GetByPropertyIdAsync(propertyId);
+
+            dto.Amenities = _mapper.Map<System.Collections.Generic.List<PropertyAmenityDto>>(amenities);
+            dto.Rules = _mapper.Map<System.Collections.Generic.List<PropertyRuleDto>>(rules);
+            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(media);
+
+            return ServiceResult<PropertyEditDataDto>.Ok(dto);
         }
 
         public async Task<ServiceResult<bool>> EditPropertyAsync(long propertyId, EditPropertyDto dto, Guid userId)
@@ -326,7 +354,46 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Property {PropertyId} edited successfully by user {UserId}", propertyId, userId);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = userId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.PropertyEdited,
+
+                Title = "Property Update Under Review",
+                Body = $"Your property \"{property.Title}\" has been updated and its status is now set back to pending. " +
+                       "The admin will re-verify it, which may take up to 24 hours. We'll notify you once it's approved.",
+
+                ActionType = NotificationActionType.Property,
+                ActionId = propertyId.ToString()
+            });
+
             return ServiceResult<bool>.Ok(true, "Property updated successfully.");
+        }
+
+        public async Task<ServiceResult<bool>> ToggleSavePropertyAsync(long propertyId, Guid userId)
+        {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null || property.DeletedAt != null)
+                return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            bool isSaved = await _savedPropertyRepo.HasSavedPropertyAsync(userId, propertyId);
+            if (isSaved)
+            {
+                await _savedPropertyRepo.UnsavePropertyAsync(userId, propertyId);
+                return ServiceResult<bool>.Ok(false, "Property unsaved successfully.");
+            }
+            else
+            {
+                var savedProperty = new SavedProperty
+                {
+                    UserId = userId,
+                    PropertyId = propertyId
+                };
+                await _savedPropertyRepo.SavePropertyAsync(savedProperty);
+                return ServiceResult<bool>.Ok(true, "Property saved successfully.");
+            }
         }
 
         public async Task<ServiceResult<bool>> DeactivatePropertyAsync(long propertyId, Guid userId)
@@ -385,39 +452,18 @@ namespace MARN_API.Services.Implementations
                 catch (Exception) { /* Ignored */ }
             }
 
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = userId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.PropertyDeleted,
+
+                Title = "Property Deleted",
+                Body = $"Your property \"{property.Title}\" has been deleted successfully. " +
+                       "If this was a mistake or you'd like to restore it, please contact our support team for assistance.",
+            });
+
             return ServiceResult<bool>.Ok(true, "Property deleted completely.");
-        }
-
-        public async Task<ServiceResult<bool>> ToggleSavePropertyAsync(long propertyId, Guid userId)
-        {
-            var property = await _propertyRepo.GetByIdAsync(propertyId);
-            if (property == null || property.DeletedAt != null)
-                return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
-
-            bool isSaved = await _savedPropertyRepo.HasSavedPropertyAsync(userId, propertyId);
-            if (isSaved)
-            {
-                await _savedPropertyRepo.UnsavePropertyAsync(userId, propertyId);
-                return ServiceResult<bool>.Ok(false, "Property unsaved successfully.");
-            }
-            else
-            {
-                var savedProperty = new SavedProperty
-                {
-                    UserId = userId,
-                    PropertyId = propertyId
-                };
-                await _savedPropertyRepo.SavePropertyAsync(savedProperty);
-                return ServiceResult<bool>.Ok(true, "Property saved successfully.");
-            }
-        }
-
-        public async Task<ServiceResult<PropertySearchResultDto>> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? userId)
-        {
-            _logger.LogInformation("SearchProperties called with keyword: {Keyword}, page: {Page}", filter.Keyword, filter.Page);
-
-            var result = await _propertyRepo.SearchPropertiesAsync(filter, userId);
-            return ServiceResult<PropertySearchResultDto>.Ok(result);
         }
     }
 }

@@ -21,40 +21,6 @@ namespace MARN_API.Controllers
         }
 
 
-        /// <summary>
-        /// Searches and filters property listings with sorting and pagination.
-        /// Anonymous users can use this endpoint. Authenticated users get saved-state on each card.
-        /// </summary>
-        /// <param name="filter">
-        /// All filter, sort, and pagination parameters are optional query-string fields:
-        /// - Keyword, Latitude, Longitude, RadiusKm, City (enum), Governorate (enum)
-        /// - Type, RentalUnit, IsShared
-        /// - MinPrice, MaxPrice
-        /// - MinBedrooms, MinBeds, MinBathrooms, MinMaxOccupants
-        /// - MinSquareMeters, MaxSquareMeters
-        /// - MinRating
-        /// - Amenities (list)
-        /// - SortBy (enum: Newest | Price | Rating | Bedrooms | Bathrooms | SquareMeters | Distance)
-        /// - SortAscending
-        /// - Page, PageSize
-        /// </param>
-        /// <response code="200">Paginated list of property cards matching the filters</response>
-        /// <response code="401">If the user is not authenticated</response>
-        [AllowAnonymous]
-        [HttpGet("search")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> SearchProperties([FromQuery] PropertySearchFilterDto filter)
-        {
-            Guid? userId = null;
-            if (TryGetUserId(out var parsedUserId))
-            {
-                userId = parsedUserId;
-            }
-
-            var result = await _propertyService.SearchPropertiesAsync(filter, userId);
-            return HandleServiceResult<PropertySearchResultDto>(result);
-        }
 
         /// <summary>
         /// Add a new property listings for the authenticated user.
@@ -82,6 +48,68 @@ namespace MARN_API.Controllers
             return HandleServiceResult<bool>(result);
         }
 
+
+        /// <summary>
+        /// Searches and filters property listings with sorting and pagination.
+        /// Anonymous users can use this endpoint. Authenticated users get saved-state on each card.
+        /// </summary>
+        /// <param name="filter">
+        /// All filter, sort, and pagination parameters are optional query-string fields:
+        /// - Keyword, Latitude, Longitude, RadiusKm, City (enum), Governorate (enum)
+        /// - Type, RentalUnit, IsShared
+        /// - MinPrice, MaxPrice
+        /// - MinBedrooms, MinBeds, MinBathrooms, MinMaxOccupants
+        /// - MinSquareMeters, MaxSquareMeters
+        /// - MinRating
+        /// - Amenities (list)
+        /// - SortBy (enum: Newest | Price | Rating | Bedrooms | Bathrooms | SquareMeters | Distance)
+        /// - SortAscending
+        /// - Page, PageSize
+        /// </param>
+        /// <response code="200">Paginated list of property cards matching the filters</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [AllowAnonymous]
+        [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> SearchProperties([FromQuery] PropertySearchFilterDto filter)
+        {
+            Guid? userId = null;
+            if (TryGetUserId(out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
+
+            var result = await _propertyService.SearchPropertiesAsync(filter, userId);
+            return HandleServiceResult<PropertySearchResultDto>(result);
+        }
+
+
+        /// <summary>
+        /// Retrieves full property details with user-context and owner-only extras.
+        /// </summary>
+        /// <param name="propertyId">ID of the property.</param>
+        /// <response code="200">Property details returned successfully.</response>
+        /// <response code="404">Property not found.</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [AllowAnonymous]
+        [HttpGet("{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetProperty(long propertyId)
+        {
+            Guid? userId = null;
+            if (TryGetUserId(out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
+
+            var result = await _propertyService.GetPropertyDetailsAsync(propertyId, userId);
+            return HandleServiceResult<PropertyDetailsDto>(result);
+        }
+
+
         /// <summary>
         /// Retrieves the editable data details for a specific property including existing images and rule sets.
         /// </summary>
@@ -107,27 +135,6 @@ namespace MARN_API.Controllers
             return HandleServiceResult<PropertyEditDataDto>(result);
         }
 
-        /// <summary>
-        /// Retrieves full property details with user-context and owner-only extras.
-        /// </summary>
-        /// <param name="propertyId">ID of the property.</param>
-        /// <response code="200">Property details returned successfully.</response>
-        /// <response code="404">Property not found.</response>
-        [AllowAnonymous]
-        [HttpGet("{propertyId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetProperty(long propertyId)
-        {
-            Guid? userId = null;
-            if (TryGetUserId(out var parsedUserId))
-            {
-                userId = parsedUserId;
-            }
-
-            var result = await _propertyService.GetPropertyDetailsAsync(propertyId, userId);
-            return HandleServiceResult<PropertyDetailsDto>(result);
-        }
 
         /// <summary>
         /// Submits an edit layout for modifying an existing property listing structure.
@@ -153,6 +160,31 @@ namespace MARN_API.Controllers
             var result = await _propertyService.EditPropertyAsync(propertyId, dto, userId);
             return HandleServiceResult<bool>(result);
         }
+
+
+        /// <summary>
+        /// Saves or unsaves a property for the authenticated user.
+        /// </summary>
+        /// <param name="propertyId">ID string of the property being saved/unsaved.</param>
+        /// <response code="200">Save state toggled successfully</response>
+        /// <response code="401">Unauthorized requester</response>
+        /// <response code="404">Property not found</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize]
+        [HttpPost("save/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> SaveProperty(long propertyId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _propertyService.ToggleSavePropertyAsync(propertyId, userId);
+            return HandleServiceResult<bool>(result);
+        }
+
 
         /// <summary>
         /// Toggles a property's active status dynamically rendering it unsearchable or searchable.
@@ -199,29 +231,6 @@ namespace MARN_API.Controllers
                 return Unauthorized("User ID not found in token");
 
             var result = await _propertyService.DeletePropertyAsync(propertyId, userId);
-            return HandleServiceResult<bool>(result);
-        }
-
-        /// <summary>
-        /// Saves or unsaves a property for the authenticated user.
-        /// </summary>
-        /// <param name="propertyId">ID string of the property being saved/unsaved.</param>
-        /// <response code="200">Save state toggled successfully</response>
-        /// <response code="401">Unauthorized requester</response>
-        /// <response code="404">Property not found</response>
-        /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
-        [HttpPost("save/{propertyId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> SaveProperty(long propertyId)
-        {
-            if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
-
-            var result = await _propertyService.ToggleSavePropertyAsync(propertyId, userId);
             return HandleServiceResult<bool>(result);
         }
     }

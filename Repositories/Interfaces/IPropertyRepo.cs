@@ -16,13 +16,6 @@ namespace MARN_API.Repositories.Interfaces
         #endregion
 
 
-        #region Deletion
-        Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId);
-        Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds);
-        Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds);
-        #endregion
-
-        
         #region Property Operation
         Task<Property?> GetByIdAsync(long id);
         Task<PropertyDetailsDto?> GetPropertyDetailsAsync(long propertyId, Guid? currentUserId);
@@ -30,6 +23,13 @@ namespace MARN_API.Repositories.Interfaces
         Task IncrementViewsAsync(long propertyId);
         Task UpdatePropertyAsync(Property property);
         Task AddPropertyAsync(Property property);
+
+        #region Deletion
+        Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId);
+        Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds);
+        Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds);
+        #endregion
+
         #endregion
     }
 }

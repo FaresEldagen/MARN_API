@@ -126,35 +126,14 @@ namespace MARN_API.Repositories.Implementations
         }
         #endregion
 
-
-        #region Deletion
-        public async Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId)
-        {
-            return await Context.Properties
-                .IgnoreQueryFilters()
-                .Where(p => p.OwnerId == ownerId)
-                .Select(p => p.Id)
-                .ToListAsync();
-        }
-
-        public async Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds)
-        {
-            return await Context.PropertyMedia
-                .Where(m => propertyIds.Contains(m.PropertyId))
-                .Select(m => m.Path)
-                .ToListAsync();
-        }
-
-        public async Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds)
-        {
-            await Context.PropertyMedia
-                .Where(m => propertyIds.Contains(m.PropertyId))
-                .ExecuteDeleteAsync();
-        }
-        #endregion
-
         
         #region Property Operation
+        public async Task AddPropertyAsync(Property property)
+        {
+            await Context.Properties.AddAsync(property);
+            await Context.SaveChangesAsync();
+        }
+
         public async Task<PropertySearchResultDto> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? currentUserId)
         {
             var hasUser = currentUserId.HasValue;
@@ -549,11 +528,32 @@ namespace MARN_API.Repositories.Implementations
             await Context.SaveChangesAsync();
         }
 
-        public async Task AddPropertyAsync(Property property)
+        #region Deletion
+        public async Task<List<long>> GetPropertyIdsByOwnerAsync(Guid ownerId)
         {
-            await Context.Properties.AddAsync(property);
-            await Context.SaveChangesAsync();
+            return await Context.Properties
+                .IgnoreQueryFilters()
+                .Where(p => p.OwnerId == ownerId)
+                .Select(p => p.Id)
+                .ToListAsync();
         }
+
+        public async Task<List<string>> GetMediaPathsByPropertyIdsAsync(List<long> propertyIds)
+        {
+            return await Context.PropertyMedia
+                .Where(m => propertyIds.Contains(m.PropertyId))
+                .Select(m => m.Path)
+                .ToListAsync();
+        }
+
+        public async Task DeleteMediaByPropertyIdsAsync(List<long> propertyIds)
+        {
+            await Context.PropertyMedia
+                .Where(m => propertyIds.Contains(m.PropertyId))
+                .ExecuteDeleteAsync();
+        }
+        #endregion
+
         #endregion
     }
 }
