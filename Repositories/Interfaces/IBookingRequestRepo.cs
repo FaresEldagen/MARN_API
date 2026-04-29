@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Dashboard;
 using MARN_API.Models;
 
 namespace MARN_API.Repositories.Interfaces
@@ -7,6 +7,7 @@ namespace MARN_API.Repositories.Interfaces
     {
         public Task<List<RenterPendingBookingRequestDto>> GetRenterPendingRequests(Guid userId);
         public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequests(Guid userId);
+        public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequestsByProperty(Guid userId, long propertyId);
 
         public Task DeleteByUserIdAsync(Guid userId);
         public Task DeleteByPropertyIdAsync(long propertyId);

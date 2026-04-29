@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Property;
 using MARN_API.Models;
 
@@ -25,6 +25,9 @@ namespace MARN_API.Repositories.Interfaces
         
         #region Property Operation
         Task<Property?> GetByIdAsync(long id);
+        Task<PropertyDetailsDto?> GetPropertyDetailsAsync(long propertyId, Guid? currentUserId);
+        Task<PropertySearchResultDto> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? currentUserId);
+        Task IncrementViewsAsync(long propertyId);
         Task UpdatePropertyAsync(Property property);
         Task AddPropertyAsync(Property property);
         #endregion

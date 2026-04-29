@@ -26,6 +26,7 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyRuleRepo _ruleRepo;
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
+        private readonly IContractRepo _contractRepo;
         private readonly MARN_API.Data.AppDbContext _context;
 
         public PropertyService(
@@ -39,6 +40,7 @@ namespace MARN_API.Services.Implementations
             IPropertyRuleRepo ruleRepo,
             IBookingRequestRepo bookingRequestRepo,
             ISavedPropertyRepo savedPropertyRepo,
+            IContractRepo contractRepo,
             MARN_API.Data.AppDbContext context)
         {
             _propertyRepo = propertyRepo;
@@ -51,6 +53,7 @@ namespace MARN_API.Services.Implementations
             _ruleRepo = ruleRepo;
             _bookingRequestRepo = bookingRequestRepo;
             _savedPropertyRepo = savedPropertyRepo;
+            _contractRepo = contractRepo;
             _context = context;
         }
 
@@ -159,6 +162,56 @@ namespace MARN_API.Services.Implementations
             dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(media);
 
             return ServiceResult<PropertyEditDataDto>.Ok(dto);
+        }
+
+        public async Task<ServiceResult<PropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId, Guid? userId)
+        {
+            var dto = await _propertyRepo.GetPropertyDetailsAsync(propertyId, userId);
+            if (dto == null)
+            {
+                return ServiceResult<PropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            bool shouldIncrementViews = !userId.HasValue || dto.HostedBy.Id != userId.Value;
+            if (shouldIncrementViews)
+            {
+                await _propertyRepo.IncrementViewsAsync(propertyId);
+                dto.ViewsCount += 1;
+            }
+
+            if (userId.HasValue && dto.HostedBy.Id == userId.Value)
+            {
+                var ownerContracts = await _contractRepo.GetContractsByProperty(userId.Value, propertyId);
+                var ownerPendingRequests = await _bookingRequestRepo.GetOwnerPendingRequestsByProperty(userId.Value, propertyId);
+
+                dto.OwnerExtras = new OwnerPropertyExtrasDto
+                {
+                    PropertyStatus = (await _propertyRepo.GetByIdAsync(propertyId))?.Status,
+                    ContractsHistory = ownerContracts
+                        .Select(c => new OwnerPropertyContractHistoryDto
+                        {
+                            ContractId = c.ContractId,
+                            ContractStatus = c.ContractStatus,
+                            ExpiryDate = c.ExpiryDate,
+                            RenterId = c.RenterId,
+                            RenterName = c.RenterName
+                        })
+                        .ToList(),
+                    PendingBookingRequests = ownerPendingRequests
+                        .Select(r => new OwnerPropertyPendingBookingRequestDto
+                        {
+                            BookingRequestId = r.BookingRequestId,
+                            StartDate = r.StartDate,
+                            EndDate = r.EndDate,
+                            RenterId = r.RenterId,
+                            RenterName = r.RenterName,
+                            RenterProfileImage = r.RenterProfileImage
+                        })
+                        .ToList()
+                };
+            }
+
+            return ServiceResult<PropertyDetailsDto>.Ok(dto);
         }
 
         public async Task<ServiceResult<bool>> EditPropertyAsync(long propertyId, EditPropertyDto dto, Guid userId)
@@ -357,6 +410,14 @@ namespace MARN_API.Services.Implementations
                 await _savedPropertyRepo.SavePropertyAsync(savedProperty);
                 return ServiceResult<bool>.Ok(true, "Property saved successfully.");
             }
+        }
+
+        public async Task<ServiceResult<PropertySearchResultDto>> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? userId)
+        {
+            _logger.LogInformation("SearchProperties called with keyword: {Keyword}, page: {Page}", filter.Keyword, filter.Page);
+
+            var result = await _propertyRepo.SearchPropertiesAsync(filter, userId);
+            return ServiceResult<PropertySearchResultDto>.Ok(result);
         }
     }
 }

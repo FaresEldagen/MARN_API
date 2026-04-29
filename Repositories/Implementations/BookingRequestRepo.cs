@@ -1,4 +1,4 @@
-﻿using MARN_API.Data;
+using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
 using MARN_API.Models;
@@ -50,6 +50,28 @@ namespace MARN_API.Repositories.Implementations
                     PropertyId = r.PropertyId,
                     PropertyTitle = r.Property.Title,
 
+                    RenterId = r.RenterId,
+                    RenterName = $"{r.Renter.FirstName} {r.Renter.LastName}",
+                    RenterProfileImage = r.Renter.ProfileImage
+                })
+                .ToListAsync();
+        }
+
+        public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequestsByProperty(Guid userId, long propertyId)
+        {
+            return Context.BookingRequests
+                .AsNoTracking()
+                .Where(r => r.Property.Owner.Id == userId
+                    && r.PropertyId == propertyId
+                    && r.Status == Enums.BookingRequestStatus.Pending)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new OwnerPendingBookingRequestDto
+                {
+                    BookingRequestId = r.Id,
+                    StartDate = r.StartDate,
+                    EndDate = r.EndDate,
+                    PropertyId = r.PropertyId,
+                    PropertyTitle = r.Property.Title,
                     RenterId = r.RenterId,
                     RenterName = $"{r.Renter.FirstName} {r.Renter.LastName}",
                     RenterProfileImage = r.Renter.ProfileImage

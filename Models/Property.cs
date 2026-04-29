@@ -32,7 +32,6 @@ namespace MARN_API.Models
         public double Longitude { get; set; }
 
         public bool IsActive { get; set; } = true;
-        public PropertyAvailability Availability { get; set; } = PropertyAvailability.Available;
         public PropertyStatus Status { get; set; } = PropertyStatus.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -22,6 +22,41 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
+        /// Searches and filters property listings with sorting and pagination.
+        /// Anonymous users can use this endpoint. Authenticated users get saved-state on each card.
+        /// </summary>
+        /// <param name="filter">
+        /// All filter, sort, and pagination parameters are optional query-string fields:
+        /// - Keyword, Latitude, Longitude, RadiusKm, City (enum), Governorate (enum)
+        /// - Type, RentalUnit, IsShared
+        /// - MinPrice, MaxPrice
+        /// - MinBedrooms, MinBeds, MinBathrooms, MinMaxOccupants
+        /// - MinSquareMeters, MaxSquareMeters
+        /// - MinRating
+        /// - Amenities (list)
+        /// - SortBy (enum: Newest | Price | Rating | Bedrooms | Bathrooms | SquareMeters | Distance)
+        /// - SortAscending
+        /// - Page, PageSize
+        /// </param>
+        /// <response code="200">Paginated list of property cards matching the filters</response>
+        /// <response code="401">If the user is not authenticated</response>
+        [AllowAnonymous]
+        [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> SearchProperties([FromQuery] PropertySearchFilterDto filter)
+        {
+            Guid? userId = null;
+            if (TryGetUserId(out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
+
+            var result = await _propertyService.SearchPropertiesAsync(filter, userId);
+            return HandleServiceResult<PropertySearchResultDto>(result);
+        }
+
+        /// <summary>
         /// Add a new property listings for the authenticated user.
         /// </summary>
         /// <param name="dto">
@@ -56,7 +91,7 @@ namespace MARN_API.Controllers
         /// <response code="403">Caller doesn't own this property</response>
         /// <response code="404">Property not found</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
+        [Authorize(Roles = "Owner")]
         [HttpGet("edit/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -73,6 +108,28 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
+        /// Retrieves full property details with user-context and owner-only extras.
+        /// </summary>
+        /// <param name="propertyId">ID of the property.</param>
+        /// <response code="200">Property details returned successfully.</response>
+        /// <response code="404">Property not found.</response>
+        [AllowAnonymous]
+        [HttpGet("{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProperty(long propertyId)
+        {
+            Guid? userId = null;
+            if (TryGetUserId(out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
+
+            var result = await _propertyService.GetPropertyDetailsAsync(propertyId, userId);
+            return HandleServiceResult<PropertyDetailsDto>(result);
+        }
+
+        /// <summary>
         /// Submits an edit layout for modifying an existing property listing structure.
         /// </summary>
         /// <param name="propertyId">ID strings for updating matching property.</param>
@@ -81,7 +138,7 @@ namespace MARN_API.Controllers
         /// <response code="401">Unauthorized requester</response>
         /// <response code="403">Requester fails ownership verification</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
+        [Authorize(Roles = "Owner")]
         [HttpPut("edit/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -105,7 +162,7 @@ namespace MARN_API.Controllers
         /// <response code="401">Unauthorized requester</response>
         /// <response code="403">Requester fails ownership verification</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
+        [Authorize(Roles = "Owner")]
         [HttpPut("deactivate/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -129,7 +186,7 @@ namespace MARN_API.Controllers
         /// <response code="401">Unauthorized requester</response>
         /// <response code="403">Requester fails ownership verification</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
+        [Authorize(Roles = "Owner")]
         [HttpDelete("delete/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429030105_DropPropertyAvailability")]
+    partial class DropPropertyAvailability
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -909,7 +912,7 @@ namespace MARN_API.Migrations
                             Bathrooms = 1,
                             Bedrooms = 2,
                             Beds = 3,
-                            City = "Cairo",
+                            City = "",
                             CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A cozy seeded apartment suitable for testing active rentals.",
                             IsActive = true,
@@ -922,12 +925,12 @@ namespace MARN_API.Migrations
                             ProofOfOwnership = "",
                             RentalUnit = 1,
                             SquareMeters = 0.0,
-                            State = "Cairo Governorate",
+                            State = "",
                             Status = 1,
                             Title = "Cozy Seed Apartment",
                             Type = 0,
                             Views = 5,
-                            ZipCode = "11511"
+                            ZipCode = ""
                         },
                         new
                         {
@@ -936,7 +939,7 @@ namespace MARN_API.Migrations
                             Bathrooms = 1,
                             Bedrooms = 1,
                             Beds = 1,
-                            City = "Cairo",
+                            City = "",
                             CreatedAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A modern loft used for pending booking and payments tests.",
                             IsActive = true,
@@ -949,12 +952,12 @@ namespace MARN_API.Migrations
                             ProofOfOwnership = "",
                             RentalUnit = 1,
                             SquareMeters = 0.0,
-                            State = "Cairo Governorate",
+                            State = "",
                             Status = 1,
                             Title = "Modern Seed Loft",
                             Type = 0,
                             Views = 3,
-                            ZipCode = "11512"
+                            ZipCode = ""
                         },
                         new
                         {
@@ -963,7 +966,7 @@ namespace MARN_API.Migrations
                             Bathrooms = 1,
                             Bedrooms = 1,
                             Beds = 1,
-                            City = "Giza",
+                            City = "",
                             CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A small studio property used for saved properties and pending bookings.",
                             IsActive = true,
@@ -976,12 +979,12 @@ namespace MARN_API.Migrations
                             ProofOfOwnership = "",
                             RentalUnit = 1,
                             SquareMeters = 0.0,
-                            State = "Giza Governorate",
+                            State = "",
                             Status = 1,
                             Title = "Seed Studio Flat",
                             Type = 4,
                             Views = 1,
-                            ZipCode = "12511"
+                            ZipCode = ""
                         },
                         new
                         {
@@ -990,7 +993,7 @@ namespace MARN_API.Migrations
                             Bathrooms = 3,
                             Bedrooms = 4,
                             Beds = 5,
-                            City = "New Cairo",
+                            City = "",
                             CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A luxury villa owned by the dual-role Owner Z for owner dashboard testing.",
                             IsActive = true,
@@ -1003,12 +1006,12 @@ namespace MARN_API.Migrations
                             ProofOfOwnership = "",
                             RentalUnit = 1,
                             SquareMeters = 0.0,
-                            State = "Cairo Governorate",
+                            State = "",
                             Status = 1,
                             Title = "Luxury Seed Villa",
                             Type = 3,
                             Views = 12,
-                            ZipCode = "11835"
+                            ZipCode = ""
                         });
                 });
 
