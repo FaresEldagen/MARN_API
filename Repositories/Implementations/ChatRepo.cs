@@ -42,9 +42,7 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = u.ProfileImage == null
-                        ? null
-                        : $"{BaseUrl}{u.ProfileImage}",
+                    ProfileImage = u.ProfileImage,
 
                     IsDeleted = u.DeletedAt != null,
 
@@ -95,9 +93,7 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = u.ProfileImage == null
-                        ? null
-                        : $"{BaseUrl}{u.ProfileImage}",
+                    ProfileImage = u.ProfileImage,
 
                     IsDeleted = false,
 
@@ -134,9 +130,7 @@ namespace MARN_API.Repositories.Implementations
                 {
                     Id = u.Id.ToString(),
                     UserName = $"{u.FirstName} {u.LastName}",
-                    ProfileImage = u.ProfileImage == null
-                        ? null
-                        : $"{BaseUrl}{u.ProfileImage}",
+                    ProfileImage = u.ProfileImage,
 
                     IsDeleted = true,
 

@@ -38,6 +38,7 @@ namespace MARN_API.Services.Implementations
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<AccountService> _logger;
+        private readonly IPropertyService _propertyService;
 
         public ProfileService(
             IBookingRequestRepo bookingRequestRepo,
@@ -57,7 +58,8 @@ namespace MARN_API.Services.Implementations
             IFileService fileService,
             IEmailService emailService,
             IMapper mapper,
-            ILogger<AccountService> logger
+            ILogger<AccountService> logger,
+            IPropertyService propertyService
         )
         {
             _bookingRequestRepo = bookingRequestRepo;
@@ -78,6 +80,7 @@ namespace MARN_API.Services.Implementations
             _emailService = emailService;
             _mapper = mapper;
             _logger = logger;
+            _propertyService = propertyService;
         }
 
 
@@ -268,7 +271,6 @@ namespace MARN_API.Services.Implementations
             if (RoommatePreferences != null)
             {
                 _mapper.Map(RoommatePreferences, profileData);
-                profileData.RoommatePreferencesEnabled = true;
             }
 
             _logger.LogInformation("Get Profile Settings Data successful for userId: {userId}", userId);
@@ -456,54 +458,31 @@ namespace MARN_API.Services.Implementations
 
             var RoommatePreferences = await _roommatePreferenceRepo.GetRoommatePreferences(dto.UserId);
 
-            if (dto.RoommatePreferencesEnabled)
+            try
             {
-                try
+                if (RoommatePreferences != null)
                 {
-                    if (RoommatePreferences != null)
-                    {
-                        RoommatePreferences = _mapper.Map(dto, RoommatePreferences);
-                        var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(RoommatePreferences);
-                    }
-                    else
-                    {
-                        RoommatePreferences = _mapper.Map<RoommatePreference>(dto);
-                        RoommatePreferences.UserId = dto.UserId;
-                        var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(RoommatePreferences);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(
-                        "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
-                        dto.UserId,
-                        ex
-                    );
-                    return ServiceResult<bool>.Fail(
-                        "Update Profile Data failed. An error occurred while saving roommate preferences.",
-                        resultType: ServiceResultType.BadRequest
-                    );
-                }
-            }
-            else if (RoommatePreferences != null)
-            {
-                try
-                {
-                    RoommatePreferences.RoommatePreferencesEnabled = false;
+                    RoommatePreferences = _mapper.Map(dto, RoommatePreferences);
                     var roommate_result = await _roommatePreferenceRepo.UpdateRoommatePreferences(RoommatePreferences);
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(
-                        "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while disabling roommate preferences. Exception: {Exception}",
-                        dto.UserId,
-                        ex
-                    );
-                    return ServiceResult<bool>.Fail(
-                        "Update Profile Data failed. An error occurred while disabling roommate preferences.",
-                        resultType: ServiceResultType.BadRequest
-                    );
+                    RoommatePreferences = _mapper.Map<RoommatePreference>(dto);
+                    RoommatePreferences.UserId = dto.UserId;
+                    var roommate_result = await _roommatePreferenceRepo.CreateRoommatePreferences(RoommatePreferences);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Update Profile Data failed for userId: {userId}, Errors: Exception occurred while saving roommate preferences. Exception: {Exception}",
+                    dto.UserId,
+                    ex
+                );
+                return ServiceResult<bool>.Fail(
+                    "Update Profile Data failed. An error occurred while saving roommate preferences.",
+                    resultType: ServiceResultType.BadRequest
+                );
             }
 
             _logger.LogInformation("Update Roommate Preferences Data successful for user: {UserId}", user.Id);
@@ -629,13 +608,6 @@ namespace MARN_API.Services.Implementations
             if (!string.IsNullOrEmpty(user.BackIdPhoto))
                 filesToDelete.Add(user.BackIdPhoto);
 
-            // Collect property media paths for owned properties
-            var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
-            if (ownedPropertyIds.Count > 0)
-            {
-                var mediaPaths = await _propertyRepo.GetMediaPathsByPropertyIdsAsync(ownedPropertyIds);
-                filesToDelete.AddRange(mediaPaths);
-            }
 
             // Begin transactional deletion
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -661,16 +633,19 @@ namespace MARN_API.Services.Implementations
                 _logger.LogInformation("Deleting reviews for userId: {userId}", userId);
                 await _reviewRepo.DeleteByUserIdAsync(userId);
 
-                // 6. Handle owned properties (soft delete + media cleanup)
-                if (ownedPropertyIds.Count > 0)
+                // 6. Deleter user properties via PropertyService to correctly execute all property cleanup logic
+                var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
+                foreach(var propertyId in ownedPropertyIds)
                 {
-                    // Hard delete property media records
-                    _logger.LogInformation("Deleting property media records for {Count} properties owned by userId: {userId}", ownedPropertyIds.Count, userId);
-                    await _propertyRepo.DeleteMediaByPropertyIdsAsync(ownedPropertyIds);
-
-                    // Soft delete the properties themselves
-                    _logger.LogInformation("Soft deleting properties for userId: {userId}", userId);
-                    await _propertyRepo.SoftDeleteByOwnerIdAsync(userId);
+                    var propertyDeleteResult = await _propertyService.DeletePropertyAsync(propertyId, userId);
+                    if (!propertyDeleteResult.Success)
+                    {
+                        _logger.LogWarning("Delete User failed: Could not delete owned property {PropertyId} for userId: {userId}. Error: {Error}", 
+                            propertyId, 
+                            userId,
+                            propertyDeleteResult.Message);
+                        throw new Exception($"Failed to delete user's property with ID {propertyId}: {propertyDeleteResult.Message}");
+                    }
                 }
 
                 // 7. Hard delete all property ratings and comments written by this user

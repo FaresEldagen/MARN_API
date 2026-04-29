@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs.Dashboard;
+using MARN_API.DTOs.Dashboard;
 using MARN_API.Models;
 
 namespace MARN_API.Repositories.Interfaces
@@ -12,6 +12,7 @@ namespace MARN_API.Repositories.Interfaces
 
         #region Owner Dashboard
         public Task<List<OwnerContractCardDto>> GetContracts(Guid userId);
+        public Task<List<OwnerContractCardDto>> GetContractsByProperty(Guid userId, long propertyId);
         public Task<int> GetOwnedPropertiesOccupiedPlacesCount(Guid userId);
         #endregion
 

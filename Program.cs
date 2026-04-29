@@ -152,6 +152,9 @@ namespace MARN_API
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
             builder.Services.AddScoped<IPropertyRatingRepo, PropertyRatingRepo>();
             builder.Services.AddScoped<IPropertyCommentRepo, PropertyCommentRepo>();
+            builder.Services.AddScoped<IPropertyAmenityRepo, PropertyAmenityRepo>();
+            builder.Services.AddScoped<IPropertyMediaRepo, PropertyMediaRepo>();
+            builder.Services.AddScoped<IPropertyRuleRepo, PropertyRuleRepo>();
             builder.Services.AddScoped<IRentalTransactionRepo, RentalTransactionRepo>();
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
@@ -167,8 +170,8 @@ namespace MARN_API
             builder.Services.AddScoped<IContractService, ContractService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IOwnerService, OwnerService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IPropertyRatingService, PropertyRatingService>();
             builder.Services.AddScoped<IPropertyCommentService, PropertyCommentService>();
@@ -182,6 +185,7 @@ namespace MARN_API
             builder.Services.AddScoped<OpenTimestampsProofReader>();
             builder.Services.AddHttpClient<OpenTimestampsService>();
             builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
+            builder.Services.AddScoped<IOwnerService,OwnerService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
@@ -297,7 +301,7 @@ namespace MARN_API
                         var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
                         // Extract query string token if request is destined for the SignalR hub
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
                         {
                             context.Token = accessToken;
                         }

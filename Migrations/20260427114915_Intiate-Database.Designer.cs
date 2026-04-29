@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427114915_Intiate-Database")]
+    partial class IntiateDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -814,6 +817,9 @@ namespace MARN_API.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("Availability")
+                        .HasColumnType("int");
+
                     b.Property<int>("Bathrooms")
                         .HasColumnType("int");
 
@@ -822,10 +828,6 @@ namespace MARN_API.Migrations
 
                     b.Property<int>("Beds")
                         .HasColumnType("int");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -861,19 +863,8 @@ namespace MARN_API.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ProofOfOwnership")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("RentalUnit")
                         .HasColumnType("int");
-
-                    b.Property<double>("SquareMeters")
-                        .HasColumnType("float");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -889,11 +880,9 @@ namespace MARN_API.Migrations
                     b.Property<int>("Views")
                         .HasColumnType("int");
 
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("Availability");
 
                     b.HasIndex("OwnerId");
 
@@ -906,10 +895,10 @@ namespace MARN_API.Migrations
                         {
                             Id = 1001L,
                             Address = "123 Seed Street, Cairo",
+                            Availability = 0,
                             Bathrooms = 1,
                             Bedrooms = 2,
                             Beds = 3,
-                            City = "Cairo",
                             CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A cozy seeded apartment suitable for testing active rentals.",
                             IsActive = true,
@@ -919,24 +908,20 @@ namespace MARN_API.Migrations
                             MaxOccupants = 3,
                             OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
                             Price = 5000m,
-                            ProofOfOwnership = "",
                             RentalUnit = 1,
-                            SquareMeters = 0.0,
-                            State = "Cairo Governorate",
                             Status = 1,
                             Title = "Cozy Seed Apartment",
                             Type = 0,
-                            Views = 5,
-                            ZipCode = "11511"
+                            Views = 5
                         },
                         new
                         {
                             Id = 1002L,
                             Address = "456 Integration Avenue, Cairo",
+                            Availability = 0,
                             Bathrooms = 1,
                             Bedrooms = 1,
                             Beds = 1,
-                            City = "Cairo",
                             CreatedAt = new DateTime(2025, 2, 2, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A modern loft used for pending booking and payments tests.",
                             IsActive = true,
@@ -946,24 +931,20 @@ namespace MARN_API.Migrations
                             MaxOccupants = 2,
                             OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
                             Price = 7500m,
-                            ProofOfOwnership = "",
                             RentalUnit = 1,
-                            SquareMeters = 0.0,
-                            State = "Cairo Governorate",
                             Status = 1,
                             Title = "Modern Seed Loft",
                             Type = 0,
-                            Views = 3,
-                            ZipCode = "11512"
+                            Views = 3
                         },
                         new
                         {
                             Id = 1003L,
                             Address = "789 Scenario Road, Cairo",
+                            Availability = 0,
                             Bathrooms = 1,
                             Bedrooms = 1,
                             Beds = 1,
-                            City = "Giza",
                             CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A small studio property used for saved properties and pending bookings.",
                             IsActive = true,
@@ -973,24 +954,20 @@ namespace MARN_API.Migrations
                             MaxOccupants = 1,
                             OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
                             Price = 3500m,
-                            ProofOfOwnership = "",
                             RentalUnit = 1,
-                            SquareMeters = 0.0,
-                            State = "Giza Governorate",
                             Status = 1,
                             Title = "Seed Studio Flat",
                             Type = 4,
-                            Views = 1,
-                            ZipCode = "12511"
+                            Views = 1
                         },
                         new
                         {
                             Id = 1004L,
                             Address = "321 Elite Boulevard, Cairo",
+                            Availability = 0,
                             Bathrooms = 3,
                             Bedrooms = 4,
                             Beds = 5,
-                            City = "New Cairo",
                             CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "A luxury villa owned by the dual-role Owner Z for owner dashboard testing.",
                             IsActive = true,
@@ -1000,15 +977,11 @@ namespace MARN_API.Migrations
                             MaxOccupants = 6,
                             OwnerId = new Guid("66666666-6666-6666-6666-666666666666"),
                             Price = 15000m,
-                            ProofOfOwnership = "",
                             RentalUnit = 1,
-                            SquareMeters = 0.0,
-                            State = "Cairo Governorate",
                             Status = 1,
                             Title = "Luxury Seed Villa",
                             Type = 3,
-                            Views = 12,
-                            ZipCode = "11835"
+                            Views = 12
                         });
                 });
 
@@ -1113,42 +1086,6 @@ namespace MARN_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MARN_API.Models.PropertyComment", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long>("PropertyId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PropertyComments");
-                });
-
             modelBuilder.Entity("MARN_API.Models.PropertyMedia", b =>
                 {
                     b.Property<long>("Id")
@@ -1201,44 +1138,6 @@ namespace MARN_API.Migrations
                             IsPrimary = true,
                             Path = "/images/seed/property4-main.jpg",
                             PropertyId = 1004L
-                        });
-                });
-
-            modelBuilder.Entity("MARN_API.Models.PropertyRating", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long>("PropertyId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("PropertyId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("PropertyRatings", t =>
-                        {
-                            t.HasCheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
                         });
                 });
 
@@ -2132,25 +2031,6 @@ namespace MARN_API.Migrations
                     b.Navigation("Property");
                 });
 
-            modelBuilder.Entity("MARN_API.Models.PropertyComment", b =>
-                {
-                    b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("PropertyComments")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
-                        .WithMany("PropertyComments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Property");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MARN_API.Models.PropertyMedia", b =>
                 {
                     b.HasOne("MARN_API.Models.Property", "Property")
@@ -2160,25 +2040,6 @@ namespace MARN_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Property");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.PropertyRating", b =>
-                {
-                    b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("PropertyRatings")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
-                        .WithMany("PropertyRatings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Property");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyRule", b =>
@@ -2346,10 +2207,6 @@ namespace MARN_API.Migrations
 
                     b.Navigation("PaymentsAsRenter");
 
-                    b.Navigation("PropertyComments");
-
-                    b.Navigation("PropertyRatings");
-
                     b.Navigation("ReceivedMessages");
 
                     b.Navigation("ReportsFiled");
@@ -2374,10 +2231,6 @@ namespace MARN_API.Migrations
                     b.Navigation("Media");
 
                     b.Navigation("Payments");
-
-                    b.Navigation("PropertyComments");
-
-                    b.Navigation("PropertyRatings");
 
                     b.Navigation("RentalTransactions");
 

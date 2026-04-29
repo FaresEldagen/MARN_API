@@ -80,4 +80,4 @@ wwwroot/
 /appsettings.json
 /appsettings.json
 /MARN_Frontend
-Migrations/
+/serviceAccountKey.json

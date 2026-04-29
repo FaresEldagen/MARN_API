@@ -26,7 +26,6 @@ namespace MARN_API.Data.Configurations
             builder.Property(p => p.IsShared).IsRequired();
 
             builder.Property(p => p.Type).HasConversion<int>();
-            builder.Property(p => p.Availability).HasConversion<int>();
             builder.Property(p => p.Status).HasConversion<int>();
 
             builder.Property(p => p.CreatedAt)
@@ -34,7 +33,6 @@ namespace MARN_API.Data.Configurations
 
             builder.HasIndex(p => p.OwnerId);
             builder.HasIndex(p => p.Status);
-            builder.HasIndex(p => p.Availability);
         }
     }
 }

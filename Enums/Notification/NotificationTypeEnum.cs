@@ -1,4 +1,4 @@
-﻿namespace MARN_API.Enums.Notification
+namespace MARN_API.Enums.Notification
 {
     public enum NotificationType
     {
@@ -20,6 +20,10 @@
 
         PaymentReceived,
         WithdrawSuccess,
-        WithdrawFailed
+        WithdrawFailed,
+
+        PropertyAdded,
+        PropertyEdited,
+        PropertyDeleted
     }
 }

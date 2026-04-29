@@ -10,6 +10,7 @@ namespace MARN_API.DTOs.Dashboard
         public string Address { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
         public long Views { get; set; }
+        public bool IsSaved { get; set; }
 
         public int OccupiedPlaces { get; set; }
         public int TotalPlaces { get; set; }
