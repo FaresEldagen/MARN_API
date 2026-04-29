@@ -1,4 +1,4 @@
-﻿using MARN_API.Data;
+using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
 using MARN_API.Models;
@@ -107,6 +107,28 @@ namespace MARN_API.Repositories.Implementations
                     RenterId = c.RenterId,
                     RenterName = $"{c.Renter.FirstName} {c.Renter.LastName}"
                 })          
+                .ToListAsync();
+        }
+
+        public Task<List<OwnerContractCardDto>> GetContractsByProperty(Guid userId, long propertyId)
+        {
+            return Context.Contracts
+                .AsNoTracking()
+                .Where(c => c.OwnerId == userId && c.PropertyId == propertyId)
+                .OrderByDescending(c => c.LeaseEndDate)
+                .ThenByDescending(c => c.SubmittedAt)
+                .Select(c => new OwnerContractCardDto
+                {
+                    ContractId = c.Id,
+                    ContractStatus = c.Status,
+                    ExpiryDate = c.LeaseEndDate.HasValue
+                        ? c.LeaseEndDate.Value.ToDateTime(TimeOnly.MinValue)
+                        : c.SubmittedAt,
+                    PropertyId = c.PropertyId,
+                    PropertyTitle = c.Property.Title,
+                    RenterId = c.RenterId,
+                    RenterName = $"{c.Renter.FirstName} {c.Renter.LastName}"
+                })
                 .ToListAsync();
         }
 

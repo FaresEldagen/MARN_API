@@ -29,6 +29,7 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty,
                     Title = s.Property.Title,
                     Address = s.Property.Address,
+                    IsSaved = true,
 
                     MaxOccupants = s.Property.MaxOccupants,
                     Bedrooms = s.Property.Bedrooms,
@@ -42,6 +43,30 @@ namespace MARN_API.Repositories.Implementations
                     RentalUnit = s.Property.RentalUnit,
                 })
                 .ToListAsync();
+        }
+
+        public async Task<bool> HasSavedPropertyAsync(Guid userId, long propertyId)
+        {
+            return await Context.SavedProperties
+                .AnyAsync(s => s.UserId == userId && s.PropertyId == propertyId);
+        }
+
+        public async Task SavePropertyAsync(SavedProperty savedProperty)
+        {
+            await Context.SavedProperties.AddAsync(savedProperty);
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task UnsavePropertyAsync(Guid userId, long propertyId)
+        {
+            var savedProperty = await Context.SavedProperties
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.PropertyId == propertyId);
+            
+            if (savedProperty != null)
+            {
+                Context.SavedProperties.Remove(savedProperty);
+                await Context.SaveChangesAsync();
+            }
         }
     }
 }

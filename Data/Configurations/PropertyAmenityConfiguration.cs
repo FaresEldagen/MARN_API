@@ -9,8 +9,6 @@ namespace MARN_API.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<PropertyAmenity> builder)
         {
-            builder.HasKey(pa => new { pa.PropertyId, pa.Amenity });
-
             builder.Property(pa => pa.Amenity).HasConversion<int>();
 
             builder.Property(pa => pa.PropertyId).IsRequired();
