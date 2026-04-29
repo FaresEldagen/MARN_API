@@ -64,7 +64,13 @@ namespace MARN_API.Controllers
                 NotificationTypes = GetEnumValues<NotificationType>(),
                 NotificationActionTypes = GetEnumValues<NotificationActionType>(),
                 ServiceResultTypes = GetEnumValues<ServiceResultType>(),
-                UserActivityTypes = GetEnumValues<UserActivityType>()
+                UserActivityTypes = GetEnumValues<UserActivityType>(),
+                ContractAnchoringStatuses = GetEnumValues<ContractAnchoringStatus>(),
+                RentalPaymentStatuses = GetEnumValues<RentalPaymentStatus>(),
+                RentalTransactionStatuses = GetEnumValues<RentalTransactionStatus>(),
+                Cities = GetEnumValues<City>(),
+                Governorates = GetEnumValues<Governorate>(),
+                PropertySortByOptions = GetEnumValues<PropertySortBy>()
             };
 
             return HandleServiceResult(ServiceResult<object>.Ok(data));
@@ -147,5 +153,23 @@ namespace MARN_API.Controllers
 
         [HttpGet("user-activity-types")]
         public IActionResult GetUserActivityTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<UserActivityType>()));
+
+        [HttpGet("contract-anchoring-statuses")]
+        public IActionResult GetContractAnchoringStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractAnchoringStatus>()));
+
+        [HttpGet("rental-payment-statuses")]
+        public IActionResult GetRentalPaymentStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RentalPaymentStatus>()));
+
+        [HttpGet("rental-transaction-statuses")]
+        public IActionResult GetRentalTransactionStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RentalTransactionStatus>()));
+
+        [HttpGet("cities")]
+        public IActionResult GetCities() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<City>()));
+
+        [HttpGet("governorates")]
+        public IActionResult GetGovernorates() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<Governorate>()));
+
+        [HttpGet("property-sort-by")]
+        public IActionResult GetPropertySortBy() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PropertySortBy>()));
     }
 }
