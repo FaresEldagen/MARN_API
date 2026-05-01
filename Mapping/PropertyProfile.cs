@@ -1,5 +1,6 @@
 using AutoMapper;
 using MARN_API.DTOs.Property;
+using MARN_API.DTOs.PropertyFeedback;
 using MARN_API.Models;
 
 namespace MARN_API.Mapping
@@ -28,6 +29,9 @@ namespace MARN_API.Mapping
             CreateMap<PropertyAmenity, PropertyAmenityDto>();
             CreateMap<PropertyRule, PropertyRuleDto>();
             CreateMap<PropertyMedia, PropertyMediaDto>();
+
+            CreateMap<PropertyComment, PropertyCommentMutationDto>();
+            CreateMap<PropertyRating, PropertyRatingDto>();
         }
     }
 }

@@ -1,5 +1,8 @@
+using AutoMapper;
+using MARN_API.DTOs.Notification;
 using MARN_API.DTOs.PropertyFeedback;
 using MARN_API.Enums;
+using MARN_API.Enums.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
@@ -11,15 +14,21 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyRatingRepo _propertyRatingRepo;
         private readonly IPropertyRepo _propertyRepo;
         private readonly IContractRepo _contractRepo;
+        private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
         public PropertyRatingService(
             IPropertyRatingRepo propertyRatingRepo,
             IPropertyRepo propertyRepo,
-            IContractRepo contractRepo)
+            IContractRepo contractRepo,
+            IMapper mapper,
+            INotificationService notificationService)
         {
             _propertyRatingRepo = propertyRatingRepo;
             _propertyRepo = propertyRepo;
             _contractRepo = contractRepo;
+            _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<ServiceResult<PropertyRatingSummaryDto>> GetSummaryAsync(long propertyId, Guid? currentUserId = null)
@@ -37,9 +46,20 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<PropertyRatingDto>> CreateAsync(long propertyId, Guid userId, CreatePropertyRatingDto dto)
         {
-            var validation = await ValidatePropertyInteractionAsync(propertyId, userId);
-            if (validation != null)
-                return MapFailure<PropertyRating, PropertyRatingDto>(validation);
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null)
+            {
+                return ServiceResult<PropertyRatingDto>.Fail(
+                    "Property not found",
+                    resultType: ServiceResultType.NotFound);
+            }
+
+            if (!await _contractRepo.HasEligiblePropertyContractAsync(userId, propertyId))
+            {
+                return ServiceResult<PropertyRatingDto>.Fail(
+                    "You are not allowed to rate or comment on this property",
+                    resultType: ServiceResultType.Forbidden);
+            }
 
             var existingRating = await _propertyRatingRepo.GetByPropertyAndUserAsync(propertyId, userId);
             if (existingRating != null)
@@ -48,8 +68,22 @@ namespace MARN_API.Services.Implementations
                 existingRating.UpdatedAt = DateTime.UtcNow;
 
                 await _propertyRatingRepo.UpdateAsync(existingRating);
+
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = property.OwnerId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.NewReview,
+
+                    Title = "Rating Updated on Your Property",
+                    Body = $"A user has updated their rating to {dto.Rating} stars on your property \"{property.Title}\".",
+
+                    ActionType = NotificationActionType.Property,
+                    ActionId = propertyId.ToString()
+                });
+
                 return ServiceResult<PropertyRatingDto>.Ok(
-                    MapRating(existingRating),
+                    _mapper.Map<PropertyRatingDto>(existingRating),
                     "Rating updated successfully");
             }
 
@@ -61,14 +95,39 @@ namespace MARN_API.Services.Implementations
             };
 
             await _propertyRatingRepo.CreateAsync(rating);
-            return ServiceResult<PropertyRatingDto>.Ok(MapRating(rating), "Rating created successfully", ServiceResultType.Created);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = property.OwnerId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.NewReview,
+
+                Title = "New Rating on Your Property",
+                Body = $"A user has rated your property with {dto.Rating} stars: \"{property.Title}\".",
+
+                ActionType = NotificationActionType.Property,
+                ActionId = propertyId.ToString()
+            });
+
+            return ServiceResult<PropertyRatingDto>.Ok(_mapper.Map<PropertyRatingDto>(rating), "Rating created successfully", ServiceResultType.Created);
         }
 
         public async Task<ServiceResult<PropertyRatingDto>> UpdateAsync(long propertyId, Guid userId, UpdatePropertyRatingDto dto)
         {
-            var validation = await ValidatePropertyInteractionAsync(propertyId, userId);
-            if (validation != null)
-                return MapFailure<PropertyRating, PropertyRatingDto>(validation);
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null)
+            {
+                return ServiceResult<PropertyRatingDto>.Fail(
+                    "Property not found",
+                    resultType: ServiceResultType.NotFound);
+            }
+
+            if (!await _contractRepo.HasEligiblePropertyContractAsync(userId, propertyId))
+            {
+                return ServiceResult<PropertyRatingDto>.Fail(
+                    "You are not allowed to rate or comment on this property",
+                    resultType: ServiceResultType.Forbidden);
+            }
 
             var rating = await _propertyRatingRepo.GetByPropertyAndUserAsync(propertyId, userId);
             if (rating == null)
@@ -82,7 +141,21 @@ namespace MARN_API.Services.Implementations
             rating.UpdatedAt = DateTime.UtcNow;
 
             await _propertyRatingRepo.UpdateAsync(rating);
-            return ServiceResult<PropertyRatingDto>.Ok(MapRating(rating), "Rating updated successfully");
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = property.OwnerId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.NewReview,
+
+                Title = "Rating Updated on Your Property",
+                Body = $"A user has updated their rating to {dto.Rating} stars on your property \"{property.Title}\".",
+
+                ActionType = NotificationActionType.Property,
+                ActionId = propertyId.ToString()
+            });
+
+            return ServiceResult<PropertyRatingDto>.Ok(_mapper.Map<PropertyRatingDto>(rating), "Rating updated successfully");
         }
 
         public async Task<ServiceResult<bool>> DeleteAsync(long propertyId, Guid userId)
@@ -110,25 +183,6 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "Rating deleted successfully");
         }
 
-        private async Task<ServiceResult<PropertyRating>?> ValidatePropertyInteractionAsync(long propertyId, Guid userId)
-        {
-            if (!await _propertyRepo.ExistsAsync(propertyId))
-            {
-                return ServiceResult<PropertyRating>.Fail(
-                    "Property not found",
-                    resultType: ServiceResultType.NotFound);
-            }
-
-            if (!await _contractRepo.HasEligiblePropertyContractAsync(userId, propertyId))
-            {
-                return ServiceResult<PropertyRating>.Fail(
-                    "You are not allowed to rate or comment on this property",
-                    resultType: ServiceResultType.Forbidden);
-            }
-
-            return null;
-        }
-
         private async Task<ServiceResult<bool>?> ValidatePropertyAccessAsync(long propertyId)
         {
             if (!await _propertyRepo.ExistsAsync(propertyId))
@@ -139,24 +193,6 @@ namespace MARN_API.Services.Implementations
             }
 
             return null;
-        }
-
-        private static PropertyRatingDto MapRating(PropertyRating rating)
-        {
-            return new PropertyRatingDto
-            {
-                RatingId = rating.Id,
-                PropertyId = rating.PropertyId,
-                UserId = rating.UserId,
-                Rating = rating.Rating,
-                CreatedAt = rating.CreatedAt,
-                UpdatedAt = rating.UpdatedAt
-            };
-        }
-
-        private static ServiceResult<TTarget> MapFailure<TSource, TTarget>(ServiceResult<TSource> failure)
-        {
-            return ServiceResult<TTarget>.Fail(failure.Message ?? "An error occurred.", failure.Errors, failure.Action, failure.ResultType);
         }
     }
 }
