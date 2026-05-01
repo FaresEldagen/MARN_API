@@ -23,6 +23,7 @@ namespace MARN_API.Data.Seed
                     RenterId = renterAId,
                     StartDate = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc),
                     EndDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly,
                     Status = BookingRequestStatus.Pending,
                     CreatedAt = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
@@ -35,6 +36,7 @@ namespace MARN_API.Data.Seed
                     RenterId = renterAId,
                     StartDate = new DateTime(2025, 9, 1, 0, 0, 0, DateTimeKind.Utc),
                     EndDate = new DateTime(2025, 10, 1, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.OneTime,
                     Status = BookingRequestStatus.Accepted,
                     CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, DateTimeKind.Utc)
                 },
@@ -47,6 +49,7 @@ namespace MARN_API.Data.Seed
                     RenterId = renterBId,
                     StartDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc),
                     EndDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly,
                     Status = BookingRequestStatus.Pending,
                     CreatedAt = new DateTime(2025, 4, 2, 0, 0, 0, DateTimeKind.Utc)
                 },
@@ -59,6 +62,7 @@ namespace MARN_API.Data.Seed
                     RenterId = ownerZId,
                     StartDate = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc),
                     EndDate = new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.OneTime,
                     Status = BookingRequestStatus.Pending,
                     CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, DateTimeKind.Utc)
                 }

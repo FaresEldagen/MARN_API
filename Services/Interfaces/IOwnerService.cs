@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using MARN_API.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace MARN_API.Services.Interfaces
 {
     public interface IOwnerService
     {
-        public Task<IdentityResult> AddOwnerRole(Guid id);
+        public Task<ServiceResult<string>> AddOwnerRole(Guid id);
     }
 }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Google.Apis.Auth;
 using MARN_API.DTOs.Auth;
 using MARN_API.DTOs.Notification;
@@ -148,7 +148,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<LoginResponseDto>.Ok(response);
         }
 
-        private async Task<LoginResponseDto> CreateJwtForUserAsync(ApplicationUser user, bool rememberMe, string provider = null!)
+        public async Task<LoginResponseDto> CreateJwtForUserAsync(ApplicationUser user, bool rememberMe = false, string provider = null!)
         {
             var roles = await _userManager.GetRolesAsync(user);
 

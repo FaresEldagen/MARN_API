@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth;
+using Google.Apis.Auth;
 using MARN_API.DTOs.Auth;
 using MARN_API.Models;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +12,7 @@ namespace MARN_API.Services.Interfaces
         public Task<ServiceResult<LoginResponseDto>> LoginAsync(LogInDto dto);
         public Task<ServiceResult<LoginResponseDto>> GoogleLoginAsync(GoogleLoginDto dto);
         public Task<ServiceResult<LoginResponseDto>> VerifyTwoFactorAsync(VerifyTwoFactorDto dto);
+        public Task<LoginResponseDto> CreateJwtForUserAsync(ApplicationUser user, bool rememberMe = false, string provider = null!);
         #endregion
 
 

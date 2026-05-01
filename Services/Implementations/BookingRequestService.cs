@@ -84,12 +84,32 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Start and end date must align with the rental duration unit (e.g. complete months/years).", resultType: ServiceResultType.BadRequest);
             }
 
+            // Validate PaymentFrequency based on RentalUnit
+            if (property.RentalUnit == RentalUnit.Daily && dto.PaymentFrequency != PaymentFrequency.OneTime)
+            {
+                return ServiceResult<bool>.Fail("For daily rentals, only 'OneTime' payment frequency is allowed.", resultType: ServiceResultType.BadRequest);
+            }
+            if (property.RentalUnit == RentalUnit.Monthly && dto.PaymentFrequency != PaymentFrequency.OneTime && dto.PaymentFrequency != PaymentFrequency.Monthly)
+            {
+                return ServiceResult<bool>.Fail("For monthly rentals, only 'OneTime' or 'Monthly' payment frequencies are allowed.", resultType: ServiceResultType.BadRequest);
+            }
+            // For Yearly, any PaymentFrequency (OneTime, Monthly, Quarterly, Yearly) is allowed, so no check is needed.
+
             var bookingRequest = _mapper.Map<Models.BookingRequest>(dto);
             bookingRequest.RenterId = userId;
             bookingRequest.Status = Enums.BookingRequestStatus.Pending;
             bookingRequest.CreatedAt = DateTime.UtcNow;
 
             await _bookingRequestRepo.AddBookingRequestAsync(bookingRequest);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = property.OwnerId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.NewBookingRequest,
+                Title = "New Booking Request",
+                Body = $"You have received a new booking request for \"{property.Title}\" from {user.FirstName} {user.LastName}."
+            });
 
             _logger.LogInformation("Add Booking Request successful for userId: {userId}, propertyId: {propertyId}", userId, dto.PropertyId);
             return ServiceResult<bool>.Ok(true, "Booking request added successfully.");

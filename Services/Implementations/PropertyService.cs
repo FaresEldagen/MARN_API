@@ -103,11 +103,6 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
-            if (!await _userManager.IsInRoleAsync(user, "Owner"))
-            {
-                await _userManager.AddToRoleAsync(user, "Owner");
-                _logger.LogInformation("Assigned 'Owner' role to user {UserId} smoothly.", userId);
-            }
 
             await _propertyRepo.AddPropertyAsync(property);
             _logger.LogInformation("Added Property {PropertyId} for user {UserId}", property.Id, userId);
