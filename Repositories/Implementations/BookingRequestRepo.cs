@@ -16,6 +16,8 @@ namespace MARN_API.Repositories.Implementations
         }
 
 
+
+        #region Dashboards
         public Task<List<RenterPendingBookingRequestDto>> GetRenterPendingRequests(Guid userId)
         {
             return Context.BookingRequests
@@ -78,8 +80,10 @@ namespace MARN_API.Repositories.Implementations
                 })
                 .ToListAsync();
         }
+        #endregion
 
 
+        #region User and Property Deletion
         public async Task DeleteByUserIdAsync(Guid userId)
         {
             await Context.BookingRequests
@@ -100,5 +104,30 @@ namespace MARN_API.Repositories.Implementations
                 .Where(b => propertyIds.Contains(b.PropertyId))
                 .ExecuteDeleteAsync();
         }
+        #endregion
+
+
+        #region Booking Request Operations
+        public async Task AddBookingRequestAsync(BookingRequest bookingRequest)
+        {
+            await Context.BookingRequests.AddAsync(bookingRequest);
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task<BookingRequest?> GetByIdAsync(long id)
+        {
+            return await Context.BookingRequests
+                .Include(b => b.Property)
+                .Include(b => b.Property.Owner)
+                .Include(b => b.Renter)
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
+
+        public async Task DeleteAsync(BookingRequest bookingRequest)
+        {
+            Context.BookingRequests.Remove(bookingRequest);
+            await Context.SaveChangesAsync();
+        }
+        #endregion
     }
 }

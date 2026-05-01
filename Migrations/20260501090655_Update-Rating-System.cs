@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -15,6 +15,86 @@ namespace MARN_API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Reviews");
+
+            migrationBuilder.CreateTable(
+                name: "PropertyComments",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PropertyId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyComments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PropertyComments_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PropertyComments_Properties_PropertyId",
+                        column: x => x.PropertyId,
+                        principalTable: "Properties",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PropertyRatings",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PropertyId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyRatings", x => x.Id);
+                    table.CheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
+                    table.ForeignKey(
+                        name: "FK_PropertyRatings_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PropertyRatings_Properties_PropertyId",
+                        column: x => x.PropertyId,
+                        principalTable: "Properties",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyComments_PropertyId",
+                table: "PropertyComments",
+                column: "PropertyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyComments_UserId",
+                table: "PropertyComments",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyRatings_PropertyId_UserId",
+                table: "PropertyRatings",
+                columns: new[] { "PropertyId", "UserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyRatings_UserId",
+                table: "PropertyRatings",
+                column: "UserId");
 
             migrationBuilder.InsertData(
                 table: "Contracts",
@@ -50,6 +130,12 @@ namespace MARN_API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "PropertyComments");
+
+            migrationBuilder.DropTable(
+                name: "PropertyRatings");
+
             migrationBuilder.DeleteData(
                 table: "Contracts",
                 keyColumn: "Id",
@@ -64,36 +150,6 @@ namespace MARN_API.Migrations
                 table: "Contracts",
                 keyColumn: "Id",
                 keyValue: 950003L);
-
-            migrationBuilder.DeleteData(
-                table: "PropertyComments",
-                keyColumn: "Id",
-                keyValue: 900001L);
-
-            migrationBuilder.DeleteData(
-                table: "PropertyComments",
-                keyColumn: "Id",
-                keyValue: 900002L);
-
-            migrationBuilder.DeleteData(
-                table: "PropertyComments",
-                keyColumn: "Id",
-                keyValue: 900003L);
-
-            migrationBuilder.DeleteData(
-                table: "PropertyRatings",
-                keyColumn: "Id",
-                keyValue: 900001L);
-
-            migrationBuilder.DeleteData(
-                table: "PropertyRatings",
-                keyColumn: "Id",
-                keyValue: 900002L);
-
-            migrationBuilder.DeleteData(
-                table: "PropertyRatings",
-                keyColumn: "Id",
-                keyValue: 900003L);
 
             migrationBuilder.CreateTable(
                 name: "Reviews",

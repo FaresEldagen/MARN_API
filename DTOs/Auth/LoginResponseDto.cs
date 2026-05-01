@@ -7,8 +7,8 @@ namespace MARN_API.DTOs.Auth
 {
     public class LoginResponseDto
     {
-        public string? Token { get; set; }
-        public DateTime? Expiration { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public DateTime Expiration { get; set; }
 
         public bool RequiresTwoFactor { get; set; }
         public string? TwoFactorProvider { get; set; }

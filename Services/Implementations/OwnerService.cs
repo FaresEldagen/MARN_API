@@ -10,19 +10,22 @@ namespace MARN_API.Services.Implementations
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _dbContext;
+        private readonly IAccountService _accountService;
 
-        public OwnerService(UserManager<ApplicationUser> userManager, AppDbContext dbContext)
+        public OwnerService(UserManager<ApplicationUser> userManager, AppDbContext dbContext, IAccountService accountService)
         {
             _userManager = userManager;
             _dbContext = dbContext;
+            _accountService = accountService;
         }
 
-        public async Task<IdentityResult> AddOwnerRole(Guid id)
+
+        public async Task<ServiceResult<string>> AddOwnerRole(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
             {
-                return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+                return ServiceResult<string>.Fail("User not found.");
             }
 
             if (!await _userManager.IsInRoleAsync(user, "Owner"))
@@ -30,14 +33,16 @@ namespace MARN_API.Services.Implementations
                 var roleResult = await _userManager.AddToRoleAsync(user, "Owner");
                 if (!roleResult.Succeeded)
                 {
-                    return roleResult;
+                    return ServiceResult<string>.Fail("Failed to add owner role.", roleResult.Errors.Select(e => e.Description).ToList());
                 }
             }
 
             await _dbContext.Database.ExecuteSqlInterpolatedAsync(
                 $"UPDATE AspNetUsers SET Discriminator = {"Owner"} WHERE Id = {id}");
 
-            return IdentityResult.Success;
+            var loginResponse = await _accountService.CreateJwtForUserAsync(user);
+
+            return ServiceResult<string>.Ok(loginResponse.Token, "Successfully became an owner");
         }
     }
 }

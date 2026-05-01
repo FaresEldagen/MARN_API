@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System;
 using MARN_API.DTOs.Dashboard;
+using MARN_API.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace MARN_API.Controllers
 {
@@ -46,6 +48,27 @@ namespace MARN_API.Controllers
 
             var result = await _propertyService.AddPropertyAsync(dto, userId);
             return HandleServiceResult<bool>(result);
+        }
+
+        /// <summary>
+        /// Adds the Owner role to the authenticated user and returns a new JWT token.
+        /// </summary>
+        /// <response code="200">Owner role added successfully and new JWT returned.</response>
+        /// <response code="400">If validation fails or user not found.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        [Authorize]
+        [HttpPost("become-owner")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> BecomeAnOwner(
+            [FromServices] IOwnerService ownerService)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await ownerService.AddOwnerRole(userId);
+            return HandleServiceResult<string>(result);
         }
 
 
