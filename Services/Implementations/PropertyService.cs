@@ -29,6 +29,8 @@ namespace MARN_API.Services.Implementations
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
         private readonly IContractRepo _contractRepo;
+        private readonly IPropertyRatingRepo _propertyRatingRepo;
+        private readonly IPropertyCommentRepo _propertyCommentRepo;
         private readonly MARN_API.Data.AppDbContext _context;
         private readonly INotificationService _notificationService;
 
@@ -44,6 +46,8 @@ namespace MARN_API.Services.Implementations
             IBookingRequestRepo bookingRequestRepo,
             ISavedPropertyRepo savedPropertyRepo,
             IContractRepo contractRepo,
+            IPropertyRatingRepo propertyRatingRepo,
+            IPropertyCommentRepo propertyCommentRepo,
             MARN_API.Data.AppDbContext context,
             INotificationService notificationService)
         {
@@ -58,6 +62,8 @@ namespace MARN_API.Services.Implementations
             _bookingRequestRepo = bookingRequestRepo;
             _savedPropertyRepo = savedPropertyRepo;
             _contractRepo = contractRepo;
+            _propertyRatingRepo = propertyRatingRepo;
+            _propertyCommentRepo = propertyCommentRepo;
             _context = context;
             _notificationService = notificationService;
         }
@@ -432,6 +438,8 @@ namespace MARN_API.Services.Implementations
             try
             {
                 await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
+                await _propertyCommentRepo.DeleteByPropertyIdAsync(propertyId);
+                await _propertyRatingRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyRepo.DeleteMediaByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
 
                 property.DeletedAt = DateTime.UtcNow;

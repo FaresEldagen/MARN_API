@@ -13,6 +13,7 @@ namespace MARN_API.Repositories.Interfaces
         public Task<int> GetOwnedPropertiesPlacesCount(Guid userId);
         public Task<float> GetOwnerAverageRating(Guid userid);
         public Task<int> GetOwnerRatingsCount(Guid userId);
+        public Task<bool> ExistsAsync(long propertyId);
         #endregion
 
 

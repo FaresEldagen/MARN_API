@@ -150,6 +150,8 @@ namespace MARN_API
             builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
             builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPropertyRepo, PropertyRepo>();
+            builder.Services.AddScoped<IPropertyRatingRepo, PropertyRatingRepo>();
+            builder.Services.AddScoped<IPropertyCommentRepo, PropertyCommentRepo>();
             builder.Services.AddScoped<IPropertyAmenityRepo, PropertyAmenityRepo>();
             builder.Services.AddScoped<IPropertyMediaRepo, PropertyMediaRepo>();
             builder.Services.AddScoped<IPropertyRuleRepo, PropertyRuleRepo>();
@@ -157,7 +159,6 @@ namespace MARN_API
             builder.Services.AddScoped<IRoommatePreferenceRepo, RoommatePreferenceRepo>();
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
             builder.Services.AddScoped<IReportRepo, ReportRepo>();
-            builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
             builder.Services.AddScoped<IWorkflowContractRepo, WorkflowContractRepo>();
             builder.Services.AddScoped<IWorkflowPaymentRepo, WorkflowPaymentRepo>();
             builder.Services.AddScoped<IAccountRepo, AccountRepo>();
@@ -171,6 +172,8 @@ namespace MARN_API
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IPropertyRatingService, PropertyRatingService>();
+            builder.Services.AddScoped<IPropertyCommentService, PropertyCommentService>();
             builder.Services.AddScoped<IRentalWorkflowService, RentalWorkflowService>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IChatRepo, ChatRepo>();
@@ -181,6 +184,7 @@ namespace MARN_API
             builder.Services.AddScoped<OpenTimestampsProofReader>();
             builder.Services.AddHttpClient<OpenTimestampsService>();
             builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
+            builder.Services.AddScoped<IOwnerService,OwnerService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();

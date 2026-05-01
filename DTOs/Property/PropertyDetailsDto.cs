@@ -29,12 +29,14 @@ namespace MARN_API.DTOs.Property
         public DateTime CreatedAt { get; set; }
         public bool IsSaved { get; set; }
         public float AverageRating { get; set; }
-        public int ReviewsCount { get; set; }
+        public int RatingsCount { get; set; }
+        public int CommentsCount { get; set; }
+        public int? CurrentUserRating { get; set; }
 
         public List<PropertyAmenityItemDto> Amenities { get; set; } = new();
         public List<PropertyRuleItemDto> Rules { get; set; } = new();
         public List<PropertyMediaItemDto> Media { get; set; } = new();
-        public List<PropertyReviewDto> Reviews { get; set; } = new();
+        public List<PropertyCommentDetailsDto> Comments { get; set; } = new();
         public List<PropertyBookingRequestDto> CurrentUserBookingRequests { get; set; } = new();
 
         public PropertyHostedByDto HostedBy { get; set; } = new();
@@ -70,19 +72,19 @@ namespace MARN_API.DTOs.Property
         public string? Bio { get; set; }
     }
 
-    public class PropertyReviewDto
+    public class PropertyCommentDetailsDto
     {
-        public long ReviewId { get; set; }
-        public Guid ReviewerId { get; set; }
-        public string ReviewerFullName { get; set; } = string.Empty;
-        public string? ReviewerProfileImage { get; set; }
+        public long CommentId { get; set; }
+        public Guid CommenterId { get; set; }
+        public string CommenterFullName { get; set; } = string.Empty;
+        public string? CommenterProfileImage { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int Rating { get; set; }
-        public string? Comment { get; set; }
-        public PropertyReviewStayInfoDto StayInfo { get; set; } = new();
+        public int? Rating { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public PropertyCommentStayInfoDto StayInfo { get; set; } = new();
     }
 
-    public class PropertyReviewStayInfoDto
+    public class PropertyCommentStayInfoDto
     {
         public DateOnly? CheckIn { get; set; }
         public DateOnly? CheckOut { get; set; }

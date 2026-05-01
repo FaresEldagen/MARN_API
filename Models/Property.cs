@@ -44,7 +44,8 @@ namespace MARN_API.Models
         public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
         public virtual ICollection<RentalTransaction> RentalTransactions { get; set; } = new HashSet<RentalTransaction>();
         public virtual ICollection<BookingRequest> BookingRequests { get; set; } = new HashSet<BookingRequest>();
-        public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
+        public virtual ICollection<PropertyRating> PropertyRatings { get; set; } = new HashSet<PropertyRating>();
+        public virtual ICollection<PropertyComment> PropertyComments { get; set; } = new HashSet<PropertyComment>();
         public virtual ICollection<PropertyAmenity> Amenities { get; set; } = new HashSet<PropertyAmenity>();
         public virtual ICollection<PropertyRule> Rules { get; set; } = new HashSet<PropertyRule>();
         public virtual ICollection<PropertyMedia> Media { get; set; } = new HashSet<PropertyMedia>();

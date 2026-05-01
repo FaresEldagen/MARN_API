@@ -1113,6 +1113,42 @@ namespace MARN_API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MARN_API.Models.PropertyComment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long>("PropertyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PropertyComments");
+                });
+
             modelBuilder.Entity("MARN_API.Models.PropertyMedia", b =>
                 {
                     b.Property<long>("Id")
@@ -1165,6 +1201,44 @@ namespace MARN_API.Migrations
                             IsPrimary = true,
                             Path = "/images/seed/property4-main.jpg",
                             PropertyId = 1004L
+                        });
+                });
+
+            modelBuilder.Entity("MARN_API.Models.PropertyRating", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<long>("PropertyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PropertyId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("PropertyRatings", t =>
+                        {
+                            t.HasCheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
                         });
                 });
 
@@ -2058,6 +2132,25 @@ namespace MARN_API.Migrations
                     b.Navigation("Property");
                 });
 
+            modelBuilder.Entity("MARN_API.Models.PropertyComment", b =>
+                {
+                    b.HasOne("MARN_API.Models.Property", "Property")
+                        .WithMany("PropertyComments")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
+                        .WithMany("PropertyComments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MARN_API.Models.PropertyMedia", b =>
                 {
                     b.HasOne("MARN_API.Models.Property", "Property")
@@ -2067,6 +2160,25 @@ namespace MARN_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("MARN_API.Models.PropertyRating", b =>
+                {
+                    b.HasOne("MARN_API.Models.Property", "Property")
+                        .WithMany("PropertyRatings")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
+                        .WithMany("PropertyRatings")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyRule", b =>
@@ -2234,6 +2346,10 @@ namespace MARN_API.Migrations
 
                     b.Navigation("PaymentsAsRenter");
 
+                    b.Navigation("PropertyComments");
+
+                    b.Navigation("PropertyRatings");
+
                     b.Navigation("ReceivedMessages");
 
                     b.Navigation("ReportsFiled");
@@ -2258,6 +2374,10 @@ namespace MARN_API.Migrations
                     b.Navigation("Media");
 
                     b.Navigation("Payments");
+
+                    b.Navigation("PropertyComments");
+
+                    b.Navigation("PropertyRatings");
 
                     b.Navigation("RentalTransactions");
 
