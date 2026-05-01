@@ -5,7 +5,11 @@ namespace MARN_API.Enums.Notification
         General = 0,
 
         NewMessage,
+
         NewBookingRequest,
+        BookingRequestCanceled,
+        BookingRequestRejected,
+
         NewReview,
 
         ContractStarted,

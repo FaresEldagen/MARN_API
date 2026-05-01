@@ -8,5 +8,7 @@ namespace MARN_API.Services.Interfaces
     public interface IBookingRequestService
     {
         Task<ServiceResult<bool>> AddBookingRequestAsync(Guid userId, AddBookingRequestDto dto);
+        Task<ServiceResult<bool>> CancelBookingRequestAsync(Guid userId, long bookingRequestId);
+        Task<ServiceResult<bool>> StartChatAsync(Guid userId, long bookingRequestId);
     }
 }

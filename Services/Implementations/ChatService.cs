@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MARN_API.DTOs.Chat;
 using MARN_API.DTOs.Notification;
+using MARN_API.Enums;
 using MARN_API.Enums.Notification;
 using MARN_API.Hubs;
 using MARN_API.Data;
@@ -124,7 +125,7 @@ namespace MARN_API.Services.Implementations
             if (senderUser == null)
             {
                 _logger.LogWarning("Sender user {SenderId} not found", senderId);
-                return ServiceResult<MessageDto>.Fail("Sender user not found");
+                return ServiceResult<MessageDto>.Fail("Sender user not found", resultType: ServiceResultType.Unauthorized);
             }
 
             var receiverUser = await _dbContext.Users
@@ -133,7 +134,7 @@ namespace MARN_API.Services.Implementations
             if (receiverUser == null)
             {
                 _logger.LogWarning("Receiver user {ReceiverId} not found", receiverId);
-                return ServiceResult<MessageDto>.Fail("Receiver user not found");
+                return ServiceResult<MessageDto>.Fail("Receiver user not found", resultType: ServiceResultType.NotFound);
             }
 
             // Prevent sending messages to soft-deleted users
