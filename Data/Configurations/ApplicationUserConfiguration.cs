@@ -31,11 +31,6 @@ namespace MARN_API.Data.Configurations
                      builder.Property(u => u.CreatedAt)
                             .HasDefaultValueSql("GETUTCDATE()");
 
-                     builder.HasMany(u => u.Reviews)
-                            .WithOne(r => r.User)
-                            .HasForeignKey(r => r.UserId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
                      builder.HasMany(u => u.Notifications)
                             .WithOne(n => n.User)
                             .HasForeignKey(n => n.UserId)

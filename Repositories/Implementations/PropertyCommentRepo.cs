@@ -81,5 +81,12 @@ namespace MARN_API.Repositories.Implementations
                 .Where(c => c.UserId == userId)
                 .ExecuteDeleteAsync();
         }
+
+        public async Task DeleteByPropertyIdAsync(long propertyId)
+        {
+            await Context.PropertyComments
+                .Where(c => c.PropertyId == propertyId)
+                .ExecuteDeleteAsync();
+        }
     }
 }

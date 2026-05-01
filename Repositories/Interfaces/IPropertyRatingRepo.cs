@@ -12,5 +12,6 @@ namespace MARN_API.Repositories.Interfaces
         Task<PropertyRating> UpdateAsync(PropertyRating rating);
         Task DeleteAsync(PropertyRating rating);
         Task DeleteByUserIdAsync(Guid userId);
+        Task DeleteByPropertyIdAsync(long propertyId);
     }
 }

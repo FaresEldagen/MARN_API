@@ -46,8 +46,8 @@ namespace MARN_API.Repositories.Implementations
                     Price = p.Price,
                     RentalUnit = p.RentalUnit,
                     
-                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => (float?)r.Rating) ?? 0f : 0f,
-                    Ratings = p.Reviews.Count,
+                    AverageRating = p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f,
+                    Ratings = p.PropertyRatings.Count,
 
                     ActiveContracts = p.Contracts
                         .Where(c => c.PropertyId == p.Id && c.Status == ContractStatus.Active)
@@ -84,8 +84,8 @@ namespace MARN_API.Repositories.Implementations
                     Bathrooms = p.Bathrooms,
 
                     Type = p.Type,
-                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => (float?)r.Rating) ?? 0f : 0f,
-                    Ratings = p.Reviews.Count,
+                    AverageRating = p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f,
+                    Ratings = p.PropertyRatings.Count,
 
                     Price = p.Price,
                     RentalUnit = p.RentalUnit,
@@ -111,7 +111,7 @@ namespace MARN_API.Repositories.Implementations
         {
             var avg = await Context.Properties
                 .Where(p => p.OwnerId == userid)
-                .SelectMany(p => p.Reviews)
+                .SelectMany(p => p.PropertyRatings)
                 .AverageAsync(r => (float?)r.Rating);
 
             return avg ?? 0f;
@@ -121,7 +121,7 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Properties
                 .Where(p => p.OwnerId == userId)
-                .SelectMany(p => p.Reviews)
+                .SelectMany(p => p.PropertyRatings)
                 .CountAsync();
         }
 
@@ -261,8 +261,8 @@ namespace MARN_API.Repositories.Implementations
             {
                 var minRating = filter.MinRating.Value;
                 query = query.Where(p =>
-                    p.Reviews.Any() &&
-                    p.Reviews.Average(r => (float?)r.Rating) >= minRating);
+                    p.PropertyRatings.Any() &&
+                    p.PropertyRatings.Average(r => (float?)r.Rating) >= minRating);
             }
 
             // ── Amenities (must have ALL) ───────────────────────────
@@ -287,8 +287,8 @@ namespace MARN_API.Repositories.Implementations
                     : query.OrderByDescending(p => p.Price),
 
                 PropertySortBy.Rating => filter.SortAscending ?? false
-                    ? query.OrderBy(p => p.Reviews.Any() ? p.Reviews.Average(r => (float?)r.Rating) ?? 0f : 0f)
-                    : query.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => (float?)r.Rating) ?? 0f : 0f),
+                    ? query.OrderBy(p => p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f)
+                    : query.OrderByDescending(p => p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f),
 
                 PropertySortBy.Bedrooms => filter.SortAscending ?? false
                     ? query.OrderBy(p => p.Bedrooms)
@@ -373,10 +373,10 @@ namespace MARN_API.Repositories.Implementations
                     Bathrooms = p.Bathrooms,
                     MaxOccupants = p.MaxOccupants,
                     Type = p.Type,
-                    AverageRating = p.Reviews.Any()
-                        ? p.Reviews.Average(r => (float?)r.Rating) ?? 0f
+                    AverageRating = p.PropertyRatings.Any()
+                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
                         : 0f,
-                    Ratings = p.Reviews.Count,
+                    Ratings = p.PropertyRatings.Count,
                     Price = p.Price,
                     RentalUnit = p.RentalUnit,
                     IsSaved = hasUser && p.SavedProperty.Any(s => s.UserId == userId),
@@ -430,8 +430,15 @@ namespace MARN_API.Repositories.Implementations
                     Availability = !p.Contracts.Any(c => c.Status == ContractStatus.Active),
                     CreatedAt = p.CreatedAt,
                     IsSaved = hasCurrentUser && p.SavedProperty.Any(s => s.UserId == userId),
-                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => (float?)r.Rating) ?? 0f : 0f,
-                    ReviewsCount = p.Reviews.Count,
+                    AverageRating = p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f,
+                    RatingsCount = p.PropertyRatings.Count,
+                    CommentsCount = p.PropertyComments.Count,
+                    CurrentUserRating = hasCurrentUser
+                        ? p.PropertyRatings
+                            .Where(r => r.UserId == userId)
+                            .Select(r => (int?)r.Rating)
+                            .FirstOrDefault()
+                        : null,
 
                     Amenities = p.Amenities
                         .Select(a => new PropertyAmenityItemDto
@@ -470,36 +477,39 @@ namespace MARN_API.Repositories.Implementations
                             })
                             .ToList()
                         : new List<PropertyBookingRequestDto>(),
-                    Reviews = p.Reviews
-                        .OrderByDescending(r => r.CreatedAt)
-                        .Select(r => new PropertyReviewDto
+                    Comments = p.PropertyComments
+                        .OrderByDescending(c => c.CreatedAt)
+                        .Select(c => new PropertyCommentDetailsDto
                         {
-                            ReviewId = r.Id,
-                            ReviewerId = r.UserId,
-                            ReviewerFullName = $"{r.User.FirstName} {r.User.LastName}",
-                            ReviewerProfileImage = string.IsNullOrEmpty(r.User.ProfileImage) ? null : r.User.ProfileImage,
-                            CreatedAt = r.CreatedAt,
-                            Rating = r.Rating,
-                            Comment = r.Comment,
-                            StayInfo = new PropertyReviewStayInfoDto
+                            CommentId = c.Id,
+                            CommenterId = c.UserId,
+                            CommenterFullName = $"{c.User.FirstName} {c.User.LastName}",
+                            CommenterProfileImage = string.IsNullOrEmpty(c.User.ProfileImage) ? null : c.User.ProfileImage,
+                            CreatedAt = c.CreatedAt,
+                            Rating = p.PropertyRatings
+                                .Where(pr => pr.UserId == c.UserId)
+                                .Select(pr => (int?)pr.Rating)
+                                .FirstOrDefault(),
+                            Content = c.Content,
+                            StayInfo = new PropertyCommentStayInfoDto
                             {
                                 CheckIn = p.Contracts
-                                    .Where(c => c.RenterId == r.UserId)
-                                    .OrderByDescending(c => c.LeaseEndDate)
-                                    .ThenByDescending(c => c.SubmittedAt)
-                                    .Select(c => c.LeaseStartDate)
+                                    .Where(contract => contract.RenterId == c.UserId)
+                                    .OrderByDescending(contract => contract.LeaseEndDate)
+                                    .ThenByDescending(contract => contract.SubmittedAt)
+                                    .Select(contract => contract.LeaseStartDate)
                                     .FirstOrDefault(),
                                 CheckOut = p.Contracts
-                                    .Where(c => c.RenterId == r.UserId)
-                                    .OrderByDescending(c => c.LeaseEndDate)
-                                    .ThenByDescending(c => c.SubmittedAt)
-                                    .Select(c => c.LeaseEndDate)
+                                    .Where(contract => contract.RenterId == c.UserId)
+                                    .OrderByDescending(contract => contract.LeaseEndDate)
+                                    .ThenByDescending(contract => contract.SubmittedAt)
+                                    .Select(contract => contract.LeaseEndDate)
                                     .FirstOrDefault(),
                                 IsContractActive = p.Contracts
-                                    .Where(c => c.RenterId == r.UserId)
-                                    .OrderByDescending(c => c.LeaseEndDate)
-                                    .ThenByDescending(c => c.SubmittedAt)
-                                    .Select(c => c.Status == ContractStatus.Active)
+                                    .Where(contract => contract.RenterId == c.UserId)
+                                    .OrderByDescending(contract => contract.LeaseEndDate)
+                                    .ThenByDescending(contract => contract.SubmittedAt)
+                                    .Select(contract => contract.Status == ContractStatus.Active)
                                     .FirstOrDefault()
                             }
                         })
@@ -511,7 +521,7 @@ namespace MARN_API.Repositories.Implementations
                         ProfileImage = string.IsNullOrEmpty(p.Owner.ProfileImage) ? null : p.Owner.ProfileImage,
                         AverageRating = Context.Properties
                             .Where(op => op.OwnerId == p.OwnerId)
-                            .SelectMany(op => op.Reviews)
+                            .SelectMany(op => op.PropertyRatings)
                             .Average(r => (float?)r.Rating) ?? 0f,
                         PropertiesCount = Context.Properties.Count(op => op.OwnerId == p.OwnerId),
                         Bio = p.Owner.Bio

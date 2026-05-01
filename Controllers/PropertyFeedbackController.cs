@@ -48,25 +48,25 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
-        /// Creates the current user's rating for a property.
+        /// Creates the current user's rating for a property, or updates it if one already exists.
         /// </summary>
         /// <param name="propertyId">The property identifier.</param>
         /// <param name="dto">The rating payload.</param>
+        /// <response code="200">Returns the updated rating when the user has already rated this property.</response>
         /// <response code="201">Returns the newly created rating.</response>
         /// <response code="400">If the request payload is invalid.</response>
         /// <response code="401">If the user is not authenticated.</response>
         /// <response code="403">If the user does not have an eligible contract for this property.</response>
         /// <response code="404">If the property does not exist.</response>
-        /// <response code="409">If the user has already rated this property.</response>
         /// <response code="500">If an unexpected server error occurs.</response>
         [Authorize]
         [HttpPost("ratings")]
-        [ProducesResponseType(typeof(ApiResponseDto<PropertyRating>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponseDto<PropertyRatingDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseDto<PropertyRatingDto>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateRating(long propertyId, [FromBody] CreatePropertyRatingDto dto)
         {
@@ -90,7 +90,7 @@ namespace MARN_API.Controllers
         /// <response code="500">If an unexpected server error occurs.</response>
         [Authorize]
         [HttpPut("ratings/me")]
-        [ProducesResponseType(typeof(ApiResponseDto<PropertyRating>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseDto<PropertyRatingDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
@@ -174,7 +174,7 @@ namespace MARN_API.Controllers
         /// <response code="500">If an unexpected server error occurs.</response>
         [Authorize]
         [HttpPost("comments")]
-        [ProducesResponseType(typeof(ApiResponseDto<PropertyComment>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponseDto<PropertyCommentMutationDto>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
@@ -203,7 +203,7 @@ namespace MARN_API.Controllers
         /// <response code="500">If an unexpected server error occurs.</response>
         [Authorize]
         [HttpPut("comments/{commentId:long}")]
-        [ProducesResponseType(typeof(ApiResponseDto<PropertyComment>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseDto<PropertyCommentMutationDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]

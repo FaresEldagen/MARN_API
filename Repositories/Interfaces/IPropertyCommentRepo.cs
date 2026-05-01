@@ -12,5 +12,6 @@ namespace MARN_API.Repositories.Interfaces
         Task<PropertyComment> UpdateAsync(PropertyComment comment);
         Task DeleteAsync(PropertyComment comment);
         Task DeleteByUserIdAsync(Guid userId);
+        Task DeleteByPropertyIdAsync(long propertyId);
     }
 }

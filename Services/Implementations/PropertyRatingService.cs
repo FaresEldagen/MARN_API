@@ -35,17 +35,22 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<PropertyRatingSummaryDto>.Ok(summary);
         }
 
-        public async Task<ServiceResult<PropertyRating>> CreateAsync(long propertyId, Guid userId, CreatePropertyRatingDto dto)
+        public async Task<ServiceResult<PropertyRatingDto>> CreateAsync(long propertyId, Guid userId, CreatePropertyRatingDto dto)
         {
             var validation = await ValidatePropertyInteractionAsync(propertyId, userId);
             if (validation != null)
-                return validation;
+                return MapFailure<PropertyRating, PropertyRatingDto>(validation);
 
-            if (await _propertyRatingRepo.ExistsAsync(propertyId, userId))
+            var existingRating = await _propertyRatingRepo.GetByPropertyAndUserAsync(propertyId, userId);
+            if (existingRating != null)
             {
-                return ServiceResult<PropertyRating>.Fail(
-                    "You have already rated this property",
-                    resultType: ServiceResultType.Conflict);
+                existingRating.Rating = dto.Rating;
+                existingRating.UpdatedAt = DateTime.UtcNow;
+
+                await _propertyRatingRepo.UpdateAsync(existingRating);
+                return ServiceResult<PropertyRatingDto>.Ok(
+                    MapRating(existingRating),
+                    "Rating updated successfully");
             }
 
             var rating = new PropertyRating
@@ -56,19 +61,19 @@ namespace MARN_API.Services.Implementations
             };
 
             await _propertyRatingRepo.CreateAsync(rating);
-            return ServiceResult<PropertyRating>.Ok(rating, "Rating created successfully", ServiceResultType.Created);
+            return ServiceResult<PropertyRatingDto>.Ok(MapRating(rating), "Rating created successfully", ServiceResultType.Created);
         }
 
-        public async Task<ServiceResult<PropertyRating>> UpdateAsync(long propertyId, Guid userId, UpdatePropertyRatingDto dto)
+        public async Task<ServiceResult<PropertyRatingDto>> UpdateAsync(long propertyId, Guid userId, UpdatePropertyRatingDto dto)
         {
             var validation = await ValidatePropertyInteractionAsync(propertyId, userId);
             if (validation != null)
-                return validation;
+                return MapFailure<PropertyRating, PropertyRatingDto>(validation);
 
             var rating = await _propertyRatingRepo.GetByPropertyAndUserAsync(propertyId, userId);
             if (rating == null)
             {
-                return ServiceResult<PropertyRating>.Fail(
+                return ServiceResult<PropertyRatingDto>.Fail(
                     "Rating not found",
                     resultType: ServiceResultType.NotFound);
             }
@@ -77,7 +82,7 @@ namespace MARN_API.Services.Implementations
             rating.UpdatedAt = DateTime.UtcNow;
 
             await _propertyRatingRepo.UpdateAsync(rating);
-            return ServiceResult<PropertyRating>.Ok(rating, "Rating updated successfully");
+            return ServiceResult<PropertyRatingDto>.Ok(MapRating(rating), "Rating updated successfully");
         }
 
         public async Task<ServiceResult<bool>> DeleteAsync(long propertyId, Guid userId)
@@ -134,6 +139,24 @@ namespace MARN_API.Services.Implementations
             }
 
             return null;
+        }
+
+        private static PropertyRatingDto MapRating(PropertyRating rating)
+        {
+            return new PropertyRatingDto
+            {
+                RatingId = rating.Id,
+                PropertyId = rating.PropertyId,
+                UserId = rating.UserId,
+                Rating = rating.Rating,
+                CreatedAt = rating.CreatedAt,
+                UpdatedAt = rating.UpdatedAt
+            };
+        }
+
+        private static ServiceResult<TTarget> MapFailure<TSource, TTarget>(ServiceResult<TSource> failure)
+        {
+            return ServiceResult<TTarget>.Fail(failure.Message ?? "An error occurred.", failure.Errors, failure.Action, failure.ResultType);
         }
     }
 }

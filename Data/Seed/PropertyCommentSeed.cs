@@ -5,39 +5,35 @@ using MARN_API.Models;
 
 namespace MARN_API.Data.Seed
 {
-    public class ReviewSeed : IEntityTypeConfiguration<Review>
+    public class PropertyCommentSeed : IEntityTypeConfiguration<PropertyComment>
     {
-        public void Configure(EntityTypeBuilder<Review> builder)
+        public void Configure(EntityTypeBuilder<PropertyComment> builder)
         {
             builder.HasData(
-                new Review
+                new PropertyComment
                 {
-                    Id = 1,
+                    Id = 900001,
                     PropertyId = 1001,
                     UserId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    Rating = 5,
-                    Comment = "Great place! Very clean and quiet.",
+                    Content = "Great place! Very clean and quiet.",
                     CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
-                new Review
+                new PropertyComment
                 {
-                    Id = 2,
+                    Id = 900002,
                     PropertyId = 1001,
                     UserId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                    Rating = 4,
-                    Comment = "Awesome location, but the neighbors were a bit noisy.",
+                    Content = "Awesome location, but the neighbors were a bit noisy.",
                     CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, DateTimeKind.Utc)
                 },
-                new Review
+                new PropertyComment
                 {
-                    Id = 3,
+                    Id = 900003,
                     PropertyId = 1004,
                     UserId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    Rating = 5,
-                    Comment = "Superb luxury villa. Highly recommend!",
+                    Content = "Superb luxury villa. Highly recommend!",
                     CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, DateTimeKind.Utc)
-                }
-            );
+                });
         }
     }
 }

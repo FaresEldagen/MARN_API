@@ -22,7 +22,6 @@ namespace MARN_API.Data
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<RentalTransaction> RentalTransactions => Set<RentalTransaction>();
         public DbSet<RoommatePreference> RoommatePreferences => Set<RoommatePreference>();
-        public DbSet<Review> Reviews => Set<Review>();
         public DbSet<PropertyRating> PropertyRatings => Set<PropertyRating>();
         public DbSet<PropertyComment> PropertyComments => Set<PropertyComment>();
         public DbSet<PropertyAmenity> PropertyAmenities => Set<PropertyAmenity>();
@@ -51,7 +50,6 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new PaymentConfiguration());
             builder.ApplyConfiguration(new RentalTransactionConfiguration());
             builder.ApplyConfiguration(new RoommatePreferenceConfiguration());
-            builder.ApplyConfiguration(new ReviewConfiguration());
             builder.ApplyConfiguration(new PropertyRatingConfiguration());
             builder.ApplyConfiguration(new PropertyCommentConfiguration());
             builder.ApplyConfiguration(new PropertyAmenityConfiguration());
@@ -77,9 +75,11 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new NotificationSeed());
             builder.ApplyConfiguration(new AdminSeed());
             builder.ApplyConfiguration(new RoommatePreferenceSeed());
+            builder.ApplyConfiguration(new ContractSeed());
+            builder.ApplyConfiguration(new PropertyRatingSeed());
+            builder.ApplyConfiguration(new PropertyCommentSeed());
             builder.ApplyConfiguration(new PropertyAmenitySeed());
             builder.ApplyConfiguration(new PropertyRuleSeed());
-            builder.ApplyConfiguration(new ReviewSeed());
             builder.ApplyConfiguration(new MessageSeed());
             builder.ApplyConfiguration(new ReportSeed());
             builder.ApplyConfiguration(new UserActivitySeed());

@@ -28,7 +28,6 @@ namespace MARN_API.Services.Implementations
         private readonly IRoommatePreferenceRepo _roommatePreferenceRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
         private readonly IReportRepo _reportRepo;
-        private readonly IReviewRepo _reviewRepo;
         private readonly IPropertyRatingRepo _propertyRatingRepo;
         private readonly IPropertyCommentRepo _propertyCommentRepo;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -49,7 +48,6 @@ namespace MARN_API.Services.Implementations
             IRoommatePreferenceRepo roommatePreferenceRepo,
             ISavedPropertyRepo savedPropertyRepo,
             IReportRepo reportRepo,
-            IReviewRepo reviewRepo,
             IPropertyRatingRepo propertyRatingRepo,
             IPropertyCommentRepo propertyCommentRepo,
             UserManager<ApplicationUser> userManager,
@@ -70,7 +68,6 @@ namespace MARN_API.Services.Implementations
             _roommatePreferenceRepo = roommatePreferenceRepo;
             _savedPropertyRepo = savedPropertyRepo;
             _reportRepo = reportRepo;
-            _reviewRepo = reviewRepo;
             _propertyRatingRepo = propertyRatingRepo;
             _propertyCommentRepo = propertyCommentRepo;
             _userManager = userManager;
@@ -629,11 +626,7 @@ namespace MARN_API.Services.Implementations
                 _logger.LogInformation("Deleting reports for userId: {userId}", userId);
                 await _reportRepo.DeleteByReporterIdAsync(userId);
 
-                // 5. Hard delete all reviews written by this user
-                _logger.LogInformation("Deleting reviews for userId: {userId}", userId);
-                await _reviewRepo.DeleteByUserIdAsync(userId);
-
-                // 6. Deleter user properties via PropertyService to correctly execute all property cleanup logic
+                // 5. Delete user properties via PropertyService to correctly execute all property cleanup logic
                 var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
                 foreach(var propertyId in ownedPropertyIds)
                 {
@@ -648,14 +641,14 @@ namespace MARN_API.Services.Implementations
                     }
                 }
 
-                // 7. Hard delete all property ratings and comments written by this user
+                // 6. Hard delete all property ratings and comments written by this user
                 _logger.LogInformation("Deleting property ratings for userId: {userId}", userId);
                 await _propertyRatingRepo.DeleteByUserIdAsync(userId);
 
                 _logger.LogInformation("Deleting property comments for userId: {userId}", userId);
                 await _propertyCommentRepo.DeleteByUserIdAsync(userId);
 
-                // 8. Soft delete the user
+                // 7. Soft delete the user
                 user.DeletedAt = DateTime.UtcNow;
                 var result = await _userManager.UpdateAsync(user);
 

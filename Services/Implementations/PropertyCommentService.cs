@@ -36,49 +36,65 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<PagedResult<PropertyCommentDto>>.Ok(comments);
         }
 
-        public async Task<ServiceResult<PropertyComment>> CreateAsync(long propertyId, Guid userId, CreatePropertyCommentDto dto)
+        public async Task<ServiceResult<PropertyCommentMutationDto>> CreateAsync(long propertyId, Guid userId, CreatePropertyCommentDto dto)
         {
             var validation = await ValidatePropertyInteractionAsync(propertyId, userId);
             if (validation != null)
-                return validation;
+                return MapFailure<PropertyComment, PropertyCommentMutationDto>(validation);
+
+            var trimmedContent = dto.Content.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedContent))
+            {
+                return ServiceResult<PropertyCommentMutationDto>.Fail(
+                    "Comment content is required.",
+                    resultType: ServiceResultType.BadRequest);
+            }
 
             var comment = new PropertyComment
             {
                 PropertyId = propertyId,
                 UserId = userId,
-                Content = dto.Content.Trim()
+                Content = trimmedContent
             };
 
             await _propertyCommentRepo.CreateAsync(comment);
-            return ServiceResult<PropertyComment>.Ok(comment, "Comment created successfully", ServiceResultType.Created);
+            return ServiceResult<PropertyCommentMutationDto>.Ok(MapComment(comment), "Comment created successfully", ServiceResultType.Created);
         }
 
-        public async Task<ServiceResult<PropertyComment>> UpdateAsync(long propertyId, long commentId, Guid userId, UpdatePropertyCommentDto dto)
+        public async Task<ServiceResult<PropertyCommentMutationDto>> UpdateAsync(long propertyId, long commentId, Guid userId, UpdatePropertyCommentDto dto)
         {
             var validation = await ValidatePropertyInteractionAsync(propertyId, userId);
             if (validation != null)
-                return validation;
+                return MapFailure<PropertyComment, PropertyCommentMutationDto>(validation);
 
             var comment = await _propertyCommentRepo.GetByIdAsync(commentId);
             if (comment == null || comment.PropertyId != propertyId)
             {
-                return ServiceResult<PropertyComment>.Fail(
+                return ServiceResult<PropertyCommentMutationDto>.Fail(
                     "Comment not found",
                     resultType: ServiceResultType.NotFound);
             }
 
             if (comment.UserId != userId)
             {
-                return ServiceResult<PropertyComment>.Fail(
+                return ServiceResult<PropertyCommentMutationDto>.Fail(
                     "You are not allowed to edit this comment",
                     resultType: ServiceResultType.Forbidden);
             }
 
-            comment.Content = dto.Content.Trim();
+            var trimmedContent = dto.Content.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedContent))
+            {
+                return ServiceResult<PropertyCommentMutationDto>.Fail(
+                    "Comment content is required.",
+                    resultType: ServiceResultType.BadRequest);
+            }
+
+            comment.Content = trimmedContent;
             comment.UpdatedAt = DateTime.UtcNow;
 
             await _propertyCommentRepo.UpdateAsync(comment);
-            return ServiceResult<PropertyComment>.Ok(comment, "Comment updated successfully");
+            return ServiceResult<PropertyCommentMutationDto>.Ok(MapComment(comment), "Comment updated successfully");
         }
 
         public async Task<ServiceResult<bool>> DeleteAsync(long propertyId, long commentId, Guid userId)
@@ -133,6 +149,24 @@ namespace MARN_API.Services.Implementations
             }
 
             return null;
+        }
+
+        private static PropertyCommentMutationDto MapComment(PropertyComment comment)
+        {
+            return new PropertyCommentMutationDto
+            {
+                CommentId = comment.Id,
+                PropertyId = comment.PropertyId,
+                UserId = comment.UserId,
+                Content = comment.Content,
+                CreatedAt = comment.CreatedAt,
+                UpdatedAt = comment.UpdatedAt
+            };
+        }
+
+        private static ServiceResult<TTarget> MapFailure<TSource, TTarget>(ServiceResult<TSource> failure)
+        {
+            return ServiceResult<TTarget>.Fail(failure.Message ?? "An error occurred.", failure.Errors, failure.Action, failure.ResultType);
         }
     }
 }
