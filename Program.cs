@@ -185,6 +185,7 @@ namespace MARN_API
             builder.Services.AddHttpClient<OpenTimestampsService>();
             builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
             builder.Services.AddScoped<IOwnerService,OwnerService>();
+            builder.Services.AddScoped<IBookingRequestService, BookingRequestService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();

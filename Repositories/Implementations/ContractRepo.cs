@@ -163,5 +163,12 @@ namespace MARN_API.Repositories.Implementations
                     c.PropertyId == propertyId &&
                     (c.Status == ContractStatus.Active || c.Status == ContractStatus.Expired));
         }
+
+        public Task<bool> HasActiveContractsForPropertyAsync(long propertyId)
+        {
+            return Context.Contracts
+                .AsNoTracking()
+                .AnyAsync(c => c.PropertyId == propertyId && c.Status == ContractStatus.Active);
+        }
     }
 }

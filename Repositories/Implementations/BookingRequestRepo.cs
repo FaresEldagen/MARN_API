@@ -100,5 +100,11 @@ namespace MARN_API.Repositories.Implementations
                 .Where(b => propertyIds.Contains(b.PropertyId))
                 .ExecuteDeleteAsync();
         }
+
+        public async Task AddBookingRequestAsync(BookingRequest bookingRequest)
+        {
+            await Context.BookingRequests.AddAsync(bookingRequest);
+            await Context.SaveChangesAsync();
+        }
     }
 }

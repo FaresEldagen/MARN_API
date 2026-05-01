@@ -12,5 +12,6 @@ namespace MARN_API.Repositories.Interfaces
         public Task DeleteByUserIdAsync(Guid userId);
         public Task DeleteByPropertyIdAsync(long propertyId);
         public Task DeleteByPropertyIdsAsync(List<long> propertyIds);
+        public Task AddBookingRequestAsync(BookingRequest bookingRequest);
     }
 }

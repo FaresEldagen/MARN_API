@@ -12,6 +12,7 @@ namespace MARN_API.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public BookingRequestStatus Status { get; set; } = BookingRequestStatus.Pending;
+        public PaymentFrequency PaymentFrequency { get; set; } = PaymentFrequency.OneTime;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public virtual Property Property { get; set; } = null!;
