@@ -52,7 +52,6 @@ namespace MARN_API.Controllers
                 SharingLevels = GetEnumValues<SharingLevel>(),
                 SleepSchedules = GetEnumValues<SleepSchedule>(),
                 WorkSchedules = GetEnumValues<WorkSchedule>(),
-                BookingRequestStatuses = GetEnumValues<BookingRequestStatus>(),
                 ContractStatuses = GetEnumValues<ContractStatus>(),
                 PaymentStatuses = GetEnumValues<PaymentStatus>(),
                 PaymentFrequencies = GetEnumValues<PaymentFrequency>(),
@@ -114,9 +113,6 @@ namespace MARN_API.Controllers
 
         [HttpGet("work-schedules")]
         public IActionResult GetWorkSchedules() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<WorkSchedule>()));
-
-        [HttpGet("booking-request-statuses")]
-        public IActionResult GetBookingRequestStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<BookingRequestStatus>()));
 
         [HttpGet("contract-statuses")]
         public IActionResult GetContractStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractStatus>()));

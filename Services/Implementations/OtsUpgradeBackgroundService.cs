@@ -14,6 +14,7 @@ namespace MARN_API.Services.Implementations
             _logger = logger;
         }
 
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var interval = TimeSpan.FromHours(1);
@@ -23,12 +24,11 @@ namespace MARN_API.Services.Implementations
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    var repo = scope.ServiceProvider.GetRequiredService<IWorkflowContractRepo>();
+                    var repo = scope.ServiceProvider.GetRequiredService<IContractRepo>();
                     var otsService = scope.ServiceProvider.GetRequiredService<OpenTimestampsService>();
                     var proofReader = scope.ServiceProvider.GetRequiredService<OpenTimestampsProofReader>();
-                    var rentalRepo = scope.ServiceProvider.GetRequiredService<IRentalTransactionRepo>();
-
                     var pendingContracts = await repo.GetPendingContractsAsync();
+
                     foreach (var contract in pendingContracts)
                     {
                         try
@@ -50,16 +50,7 @@ namespace MARN_API.Services.Implementations
                             contract.AnchoredAt = DateTime.UtcNow;
                             contract.TransactionId = proofData.TransactionIds.FirstOrDefault();
                             contract.MerkleRoot = proofData.MerkleRoots.FirstOrDefault();
-                            contract.UpdatedAt = DateTime.UtcNow;
                             await repo.UpdateAsync(contract);
-
-                            var transaction = await rentalRepo.GetByContractIdAsync(contract.Id);
-                            if (transaction is not null)
-                            {
-                                transaction.Status = RentalTransactionStatus.Anchored;
-                                transaction.CompletedAt = DateTime.UtcNow;
-                                await rentalRepo.UpdateAsync(transaction);
-                            }
                         }
                         catch (Exception innerEx)
                         {

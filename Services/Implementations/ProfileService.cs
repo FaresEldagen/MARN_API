@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Notification;
@@ -12,7 +12,6 @@ using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Stripe;
 using System.Globalization;
 using System.Threading.Channels;
 
@@ -21,7 +20,7 @@ namespace MARN_API.Services.Implementations
     public class ProfileService : IProfileService
     {
         private readonly IBookingRequestRepo _bookingRequestRepo;
-        private readonly IContractRepo _contractRepo;   
+        private readonly IContractRepo _contractRepo;
         private readonly INotificationRepo _notificationRepo;
         private readonly IPaymentRepo _paymentRepo;
         private readonly IPropertyRepo _propertyRepo;
@@ -111,6 +110,8 @@ namespace MARN_API.Services.Implementations
             
             var accountSatus = user.AccountStatus;
 
+            var allContracts = await _contractRepo.GetRenterContracts(userId);
+
             var dashboardData = new RenterDashboardDto
             {
                 ActiveRentals = activeRentals,
@@ -129,6 +130,8 @@ namespace MARN_API.Services.Implementations
                 Recommendations = recommendations,
 
                 AccountStatus = accountSatus,
+                
+                AllContracts = allContracts
             };
 
             _logger.LogInformation("Get Renter Dashboard Data successful for userId: {userId}", userId);
@@ -162,7 +165,7 @@ namespace MARN_API.Services.Implementations
             var averageRating = await _propertyRepo.GetOwnerAverageRating(userId);
             var ratingsCount = await _propertyRepo.GetOwnerRatingsCount(userId);
 
-            var allContracts = await _contractRepo.GetContracts(userId);
+            var allContracts = await _contractRepo.GetOwnerContracts(userId);
 
             var notifications = await _notificationRepo.GetOwnerDashboardNotifications(userId);
             var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
@@ -583,7 +586,7 @@ namespace MARN_API.Services.Implementations
             }
 
             // Check for active contracts before proceeding
-            var hasActiveContracts = await _contractRepo.CheackActiveContractsByUserId(userId);
+            var hasActiveContracts = await _contractRepo.HasActiveContractsAsync(userId);
 
             if (hasActiveContracts)
             {

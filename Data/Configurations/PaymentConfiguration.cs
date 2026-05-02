@@ -32,11 +32,6 @@ namespace MARN_API.Data.Configurations
                    .HasForeignKey(p => p.ContractId)
                    .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(p => p.Property)
-                   .WithMany(p => p.Payments)
-                   .HasForeignKey(p => p.PropertyId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne(p => p.Renter)
                    .WithMany(u => u.PaymentsAsRenter)
                    .HasForeignKey(p => p.RenterId)

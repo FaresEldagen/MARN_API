@@ -1,5 +1,6 @@
 using System.Globalization;
 using MARN_API.DTOs.Contracts;
+using MARN_API.Enums;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -10,9 +11,19 @@ namespace MARN_API.Services.Implementations
     {
         public GeneratedContractPdfResult Generate(ContractPdfRequest request)
         {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Landlord);
+            ArgumentNullException.ThrowIfNull(request.Tenant);
+            ArgumentNullException.ThrowIfNull(request.Property);
+            ArgumentNullException.ThrowIfNull(request.RentalTerms);
+            ArgumentNullException.ThrowIfNull(request.ElectronicSignature);
+
+            request.IssuedAtUtc ??= DateTime.UtcNow;
+            request.ContractNumber ??= $"MARN-{request.IssuedAtUtc:yyyyMMdd-HHmmss}";
+            request.GoverningLawNote ??= "This document is electronically signed and intended to be legally binding under Egypt Law No. 15 of 2004.";
+
             QuestPDF.Settings.License = LicenseType.Community;
 
-            var normalized = Normalize(request);
             var pdfBytes = Document.Create(document =>
             {
                 document.Page(page =>
@@ -22,83 +33,18 @@ namespace MARN_API.Services.Implementations
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(style => style.FontSize(11).FontColor(Colors.Grey.Darken4));
 
-                    page.Header().Element(container => ComposeHeader(container, normalized));
-                    page.Content().PaddingVertical(18).Element(container => ComposeContent(container, normalized));
+                    page.Header().Element(container => ComposeHeader(container, request));
+                    page.Content().PaddingVertical(18).Element(container => ComposeContent(container, request));
                     page.Footer().Element(ComposeFooter);
                 });
             }).GeneratePdf();
 
             return new GeneratedContractPdfResult
             {
-                FileName = $"rental-contract-{SanitizeFilePart(normalized.ContractNumber!)}.pdf",
+                FileName = $"rental-contract-{SanitizeFilePart(request.ContractNumber)}.pdf",
                 Content = pdfBytes,
-                ContractNumber = normalized.ContractNumber!,
-                GeneratedAtUtc = normalized.IssuedAtUtc!.Value
-            };
-        }
-
-        private static ContractPdfRequest Normalize(ContractPdfRequest request)
-        {
-            var issuedAtUtc = request.IssuedAtUtc?.ToUniversalTime() ?? DateTime.UtcNow;
-            var contractNumber = string.IsNullOrWhiteSpace(request.ContractNumber)
-                ? $"MARN-{issuedAtUtc:yyyyMMdd-HHmmss}"
-                : request.ContractNumber.Trim();
-
-            var landlord = request.Landlord ?? new PartyInfo();
-            var tenant = request.Tenant ?? new PartyInfo();
-            var property = request.Property ?? new PropertyInfo();
-            var rentalTerms = request.RentalTerms ?? new RentalTermsInfo();
-            var signature = request.ElectronicSignature ?? new ElectronicSignatureInfo();
-
-            landlord.FullName ??= "Mahmoud Hassan";
-            landlord.NationalId ??= "28401011234567";
-            landlord.Email ??= "mahmoud.owner@example.com";
-            landlord.PhoneNumber ??= "+20 100 123 4567";
-            landlord.Address ??= "12 Nile Corniche, Maadi, Cairo, Egypt";
-
-            tenant.FullName ??= "Ahmed Mohamed";
-            tenant.NationalId ??= "29901011234567";
-            tenant.Email ??= "ahmed.tenant@example.com";
-            tenant.PhoneNumber ??= "+20 101 765 4321";
-            tenant.Address ??= "45 Abbas El Akkad St, Nasr City, Cairo, Egypt";
-
-            property.ListingTitle ??= "Furnished One-Bedroom Apartment";
-            property.AddressLine ??= "Building 18, Street 206";
-            property.UnitNumber ??= "Unit 7B";
-            property.City ??= "Cairo";
-            property.Country ??= "Egypt";
-            property.Description ??= "A fully furnished residential unit offered for private residential use only.";
-
-            rentalTerms.Currency ??= "EGP";
-            rentalTerms.MonthlyRentAmount = rentalTerms.MonthlyRentAmount <= 0 ? 18500m : rentalTerms.MonthlyRentAmount;
-            rentalTerms.PlatformFeeAmount ??= 0m;
-            rentalTerms.LeaseStartDate ??= DateOnly.FromDateTime(issuedAtUtc.Date);
-            rentalTerms.LeaseEndDate ??= rentalTerms.LeaseStartDate.Value.AddMonths(12);
-            rentalTerms.PaymentDueDay ??= 1;
-            rentalTerms.PaymentMethod ??= "Stripe card payment";
-            rentalTerms.CheckInWindow ??= "From 2:00 PM";
-            rentalTerms.CheckOutWindow ??= "By 12:00 PM";
-
-            signature.SignerName ??= tenant.FullName;
-            signature.SignerNationalId ??= tenant.NationalId;
-            signature.SignedAtUtc = signature.SignedAtUtc?.ToUniversalTime() ?? issuedAtUtc;
-            signature.PaymentIntentId ??= "pi_3TN_dummy123456789";
-            signature.ReceiptUrl ??= $"https://pay.stripe.com/receipts/{contractNumber}";
-            signature.ConsentStatement ??= "I have read and agree to the terms of this Rental Agreement and I consent to sign electronically.";
-
-            return new ContractPdfRequest
-            {
-                ContractNumber = contractNumber,
-                IssuedAtUtc = issuedAtUtc,
-                Landlord = landlord,
-                Tenant = tenant,
-                Property = property,
-                RentalTerms = rentalTerms,
-                ElectronicSignature = signature,
-                AdditionalTerms = request.AdditionalTerms,
-                GoverningLawNote = string.IsNullOrWhiteSpace(request.GoverningLawNote)
-                    ? "This document is electronically signed and intended to be legally binding under Egypt Law No. 15 of 2004."
-                    : request.GoverningLawNote.Trim()
+                ContractNumber = request.ContractNumber,
+                GeneratedAtUtc = request.IssuedAtUtc.Value
             };
         }
 
@@ -115,7 +61,7 @@ namespace MARN_API.Services.Implementations
 
                     inner.Item().PaddingTop(6).Text(text =>
                     {
-                        text.Span("Prepared for digital acceptance and payment confirmation").FontColor("#D7E6E8");
+                        text.Span("Prepared for digital acceptance and contract verification").FontColor("#D7E6E8");
                     });
                 });
 
@@ -171,11 +117,9 @@ namespace MARN_API.Services.Implementations
                     row.RelativeItem().Element(card =>
                         ComposeInfoCard(card, "Financial Terms", new[]
                         {
-                            ("Monthly Rent", FormatMoney(rentalTerms.MonthlyRentAmount, rentalTerms.Currency!)),
-                            ("Platform Fee", FormatMoney(rentalTerms.PlatformFeeAmount ?? 0m, rentalTerms.Currency!)),
-                            ("Payment Due Day", $"Day {rentalTerms.PaymentDueDay}"),
-                            ("Payment Method", rentalTerms.PaymentMethod!)
-                        }));
+                            ("Rent Amount", FormatMoney(rentalTerms.RentAmount, rentalTerms.Currency!)),
+                            ("Total Contract Amount", FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency!)),
+                            ("Payment Frequency", FormatPaymentFrequency(rentalTerms.PaymentFrequency))                        }));
 
                     row.ConstantItem(12);
 
@@ -184,8 +128,6 @@ namespace MARN_API.Services.Implementations
                         {
                             ("Lease Start", $"{rentalTerms.LeaseStartDate:yyyy-MM-dd}"),
                             ("Lease End", $"{rentalTerms.LeaseEndDate:yyyy-MM-dd}"),
-                            ("Check-In", rentalTerms.CheckInWindow!),
-                            ("Check-Out", rentalTerms.CheckOutWindow!),
                             ("Usage", "Residential use only")
                         }));
                 });
@@ -203,7 +145,7 @@ namespace MARN_API.Services.Implementations
                     ComposeSection(section, "Electronic Signature and Consent", body =>
                     {
                         body.Item().Text(signature.ConsentStatement!);
-                        body.Item().PaddingTop(8).Text("The parties acknowledge that pressing the platform acceptance button, completing identity verification, and authorizing payment together form the electronic act of signature for this agreement.");
+                        body.Item().PaddingTop(8).Text("The parties acknowledge that pressing the platform acceptance button and completing identity verification together form the electronic act of signature for this agreement.");
                     }));
 
                 column.Item().Border(1).BorderColor("#D5E3E6").Background("#F6FAFA").Padding(16).Column(block =>
@@ -220,8 +162,7 @@ namespace MARN_API.Services.Implementations
                         table.Cell().PaddingRight(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, "Digitally Signed By", signature.SignerName!));
                         table.Cell().PaddingLeft(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, "National ID", signature.SignerNationalId!));
                         table.Cell().PaddingRight(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, "Timestamp", $"{signature.SignedAtUtc:yyyy-MM-dd HH:mm:ss} UTC"));
-                        table.Cell().PaddingLeft(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, "Payment Intent ID", signature.PaymentIntentId!));
-                        table.Cell().PaddingRight(8).Element(cell => ComposeVerificationLinkCell(cell, "Receipt", "View receipt", signature.ReceiptUrl!));
+                        table.Cell().PaddingLeft(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, "Total Amount", FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency!)));
                     });
 
                     block.Item().PaddingTop(12).Text(request.GoverningLawNote!).Italic().FontColor("#35555D");
@@ -320,21 +261,6 @@ namespace MARN_API.Services.Implementations
             });
         }
 
-        private static void ComposeVerificationLinkCell(IContainer container, string label, string linkText, string url)
-        {
-            container.Column(column =>
-            {
-                column.Item().Text(label).FontSize(9).SemiBold().FontColor("#5E777D");
-                column.Item().PaddingTop(2).Text(text =>
-                {
-                    text.Hyperlink(linkText, url)
-                        .SemiBold()
-                        .Underline()
-                        .FontColor(Colors.Blue.Darken2);
-                });
-            });
-        }
-
         private static string SanitizeFilePart(string value)
         {
             var invalidChars = Path.GetInvalidFileNameChars();
@@ -351,6 +277,18 @@ namespace MARN_API.Services.Implementations
         private static string FormatMoney(decimal amount, string currency)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:N2} {1}", amount, currency);
+        }
+
+        private static string FormatPaymentFrequency(PaymentFrequency frequency)
+        {
+            return frequency switch
+            {
+                PaymentFrequency.OneTime => "One-Time",
+                PaymentFrequency.Monthly => "Monthly",
+                PaymentFrequency.Quarterly => "Quarterly",
+                PaymentFrequency.Yearly => "Yearly",
+                _ => frequency.ToString()
+            };
         }
     }
 }

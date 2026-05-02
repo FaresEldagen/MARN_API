@@ -473,7 +473,7 @@ namespace MARN_API.Repositories.Implementations
                                 BookingRequestId = b.Id,
                                 StartDate = b.StartDate,
                                 EndDate = b.EndDate,
-                                Status = b.Status
+                                PaymentFrequency = b.PaymentFrequency
                             })
                             .ToList()
                         : new List<PropertyBookingRequestDto>(),
@@ -496,19 +496,16 @@ namespace MARN_API.Repositories.Implementations
                                 CheckIn = p.Contracts
                                     .Where(contract => contract.RenterId == c.UserId)
                                     .OrderByDescending(contract => contract.LeaseEndDate)
-                                    .ThenByDescending(contract => contract.SubmittedAt)
                                     .Select(contract => contract.LeaseStartDate)
                                     .FirstOrDefault(),
                                 CheckOut = p.Contracts
                                     .Where(contract => contract.RenterId == c.UserId)
                                     .OrderByDescending(contract => contract.LeaseEndDate)
-                                    .ThenByDescending(contract => contract.SubmittedAt)
                                     .Select(contract => contract.LeaseEndDate)
                                     .FirstOrDefault(),
                                 IsContractActive = p.Contracts
                                     .Where(contract => contract.RenterId == c.UserId)
                                     .OrderByDescending(contract => contract.LeaseEndDate)
-                                    .ThenByDescending(contract => contract.SubmittedAt)
                                     .Select(contract => contract.Status == ContractStatus.Active)
                                     .FirstOrDefault()
                             }

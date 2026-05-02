@@ -14,6 +14,7 @@ namespace MARN_API.Enums.Notification
 
         ContractStarted,
         ContractCanceled,
+        ContractSigned,
         ContractCompleted,
 
         PaymentArrived, 

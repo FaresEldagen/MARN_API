@@ -26,6 +26,48 @@ namespace MARN_API.Controllers
         }
 
 
+
+        /// <summary>
+        /// Return all the notifications of the current user, ordered by created date (newest first).
+        /// </summary>
+        /// <response code="200">
+        /// Return all the notifications of the current user contains id, type, title, body, data (optional), isRead and createdAt.
+        /// </response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [HttpGet("notifications-get")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> GetNotifications()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _notificationService.GetUserNotificationsAsync(userId);
+            return HandleServiceResult(result);
+        }
+
+
+        [HttpGet("test-notification")]
+        public async Task<IActionResult> TestNotification()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = userId.ToString(),
+                Type = NotificationType.General,
+                Title = "Test Notificaiton",
+                Body = "This is a test notification",
+                SaveInDB = false
+            });
+
+            return Ok();
+        }
+
+
         /// <summary>
         /// Saves or updates the Firebase Cloud Messaging (FCM) token for the current user's device.
         /// </summary>
@@ -79,47 +121,6 @@ namespace MARN_API.Controllers
 
             var result = await _notificationService.RemoveDeviceTokenAsync(userId.ToString(), request.token);
             return HandleServiceResult(result);
-        }
-
-
-        /// <summary>
-        /// Return all the notifications of the current user, ordered by created date (newest first).
-        /// </summary>
-        /// <response code="200">
-        /// Return all the notifications of the current user contains id, type, title, body, data (optional), isRead and createdAt.
-        /// </response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="429">If rate limit is exceeded</response>
-        [HttpGet("notifications-get")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> GetNotifications()
-        {
-            if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
-
-            var result = await _notificationService.GetUserNotificationsAsync(userId);
-            return HandleServiceResult(result);
-        }
-
-
-        [HttpGet("test-notification")]
-        public async Task<IActionResult> TestNotification()
-        {
-            if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
-
-            await _notificationService.SendNotificationAsync(new NotificationRequestDto
-            {
-                UserId = userId.ToString(),
-                Type = NotificationType.General,
-                Title = "Test Notificaiton",
-                Body = "This is a test notification",
-                SaveInDB = false
-            });
-
-            return Ok();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -43,7 +43,8 @@ namespace MARN_API.Models
         public virtual ICollection<Report> ReportsFiled { get; set; } = new HashSet<Report>();
         public virtual ICollection<UserActivity> Activities { get; set; } = new HashSet<UserActivity>();
         public virtual ICollection<SavedProperty> SavedProperty { get; set; } = new HashSet<SavedProperty>();
-        public virtual ConnectedAccount? ConnectedAccount { get; set; }
+        // Removed: ConnectedAccount navigation property (Stripe payment system decoupling)
+        //public virtual ConnectedAccount? ConnectedAccount { get; set; }
 
         [InverseProperty(nameof(Message.Sender))]
         public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();

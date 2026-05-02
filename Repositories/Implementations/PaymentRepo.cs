@@ -1,4 +1,4 @@
-﻿using MARN_API.Data;
+using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
 using MARN_API.Models;

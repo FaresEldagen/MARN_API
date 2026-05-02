@@ -96,7 +96,7 @@ namespace MARN_API.DTOs.Property
         public long BookingRequestId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public BookingRequestStatus Status { get; set; }
+        public PaymentFrequency PaymentFrequency { get; set; }
     }
 
     public class OwnerPropertyExtrasDto
