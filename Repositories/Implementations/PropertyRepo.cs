@@ -427,7 +427,9 @@ namespace MARN_API.Repositories.Implementations
                     Latitude = p.Latitude,
                     Longitude = p.Longitude,
                     IsActive = p.IsActive,
-                    Availability = !p.Contracts.Any(c => c.Status == ContractStatus.Active),
+                    Availability = p.IsShared 
+                        ? p.Contracts.Count(c => c.Status == ContractStatus.Active) < p.MaxOccupants
+                        : !p.Contracts.Any(c => c.Status == ContractStatus.Active),
                     CreatedAt = p.CreatedAt,
                     IsSaved = hasCurrentUser && p.SavedProperty.Any(s => s.UserId == userId),
                     AverageRating = p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f,
@@ -477,6 +479,16 @@ namespace MARN_API.Repositories.Implementations
                             })
                             .ToList()
                         : new List<PropertyBookingRequestDto>(),
+                    ActiveRenters = p.Contracts
+                        .Where(c => c.Status == ContractStatus.Active)
+                        .Select(c => new ActiveRenterDto
+                        {
+                            Id = c.RenterId,
+                            Name = $"{c.Renter.FirstName} {c.Renter.LastName}",
+                            ProfilePhoto = c.Renter.ProfileImage,
+                            MatchingPercentage = p.IsShared ? 85.0 : null // Dummy value for now
+                        })
+                        .ToList(),
                     Comments = p.PropertyComments
                         .OrderByDescending(c => c.CreatedAt)
                         .Select(c => new PropertyCommentDetailsDto

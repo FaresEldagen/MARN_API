@@ -174,6 +174,7 @@ namespace MARN_API
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IOwnerService,OwnerService>();
             builder.Services.AddScoped<IBookingRequestService, BookingRequestService>();
+            builder.Services.AddScoped<IHomepageService, HomepageService>();
 
             builder.Services.AddScoped<ContractPdfGenerator>();
             builder.Services.AddScoped<HashingService>();

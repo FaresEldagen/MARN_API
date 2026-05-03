@@ -39,8 +39,18 @@ namespace MARN_API.DTOs.Property
         public List<PropertyCommentDetailsDto> Comments { get; set; } = new();
         public List<PropertyBookingRequestDto> CurrentUserBookingRequests { get; set; } = new();
 
+        public List<ActiveRenterDto> ActiveRenters { get; set; } = new();
+
         public PropertyHostedByDto HostedBy { get; set; } = new();
         public OwnerPropertyExtrasDto OwnerExtras { get; set; } = new();
+    }
+
+    public class ActiveRenterDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? ProfilePhoto { get; set; }
+        public double? MatchingPercentage { get; set; }
     }
 
     public class PropertyAmenityItemDto
