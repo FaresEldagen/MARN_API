@@ -13,6 +13,8 @@ namespace MARN_API.Data.Seed
             var renterAId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var renterBId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var renterCId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            var renterDId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+            var renterEId = Guid.Parse("88888888-8888-8888-8888-888888888888");
 
             // All seeded renters share the same demo password:
             // Password: Password123!
@@ -102,6 +104,52 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 3, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ApplicationUser
+                {
+                    Id = renterDId,
+                    UserName = "renter.d@example.com",
+                    NormalizedUserName = "RENTER.D@EXAMPLE.COM",
+                    Email = "renter.d@example.com",
+                    NormalizedEmail = "RENTER.D@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-RENTER-D-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-RENTER-D-CONCURRENCY-STAMP",
+                    FirstName = "Renter",
+                    LastName = "Delta",
+                    Language = Language.English,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ApplicationUser
+                {
+                    Id = renterEId,
+                    UserName = "renter.e@example.com",
+                    NormalizedUserName = "RENTER.E@EXAMPLE.COM",
+                    Email = "renter.e@example.com",
+                    NormalizedEmail = "RENTER.E@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-RENTER-E-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-RENTER-E-CONCURRENCY-STAMP",
+                    FirstName = "Renter",
+                    LastName = "Epsilon",
+                    Language = Language.English,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }
