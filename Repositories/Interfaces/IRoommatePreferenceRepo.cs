@@ -1,4 +1,4 @@
-﻿using MARN_API.Models;
+using MARN_API.Models;
 
 namespace MARN_API.Repositories.Interfaces
 {
@@ -7,5 +7,6 @@ namespace MARN_API.Repositories.Interfaces
         public Task<RoommatePreference?> GetRoommatePreferences(Guid userId);
         public Task<RoommatePreference> UpdateRoommatePreferences(RoommatePreference updatedPreferences);
         public Task<RoommatePreference> CreateRoommatePreferences(RoommatePreference newPreferences);
+        public Task<List<RoommatePreference>> GetPotentialMatchesAsync(Guid currentUserId, MARN_API.Enums.Property.Governorate governorate, MARN_API.Enums.Account.Gender currentGender);
     }
 }
