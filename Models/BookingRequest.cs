@@ -11,7 +11,6 @@ namespace MARN_API.Models
         public Guid RenterId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public BookingRequestStatus Status { get; set; } = BookingRequestStatus.Pending;
         public PaymentFrequency PaymentFrequency { get; set; } = PaymentFrequency.OneTime;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

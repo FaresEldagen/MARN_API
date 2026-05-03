@@ -41,8 +41,6 @@ namespace MARN_API.Models
         public Guid OwnerId { get; set; }
         public virtual Owner Owner { get; set; } = null!;
         public virtual ICollection<Contract> Contracts { get; set; } = new HashSet<Contract>();
-        public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
-        public virtual ICollection<RentalTransaction> RentalTransactions { get; set; } = new HashSet<RentalTransaction>();
         public virtual ICollection<BookingRequest> BookingRequests { get; set; } = new HashSet<BookingRequest>();
         public virtual ICollection<PropertyRating> PropertyRatings { get; set; } = new HashSet<PropertyRating>();
         public virtual ICollection<PropertyComment> PropertyComments { get; set; } = new HashSet<PropertyComment>();

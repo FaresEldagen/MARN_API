@@ -16,13 +16,77 @@ namespace MARN_API.Services.Implementations
         private readonly IConfiguration _configuration;
         private readonly ILogger<OpenTimestampsService> _logger;
 
-        public OpenTimestampsService(HttpClient httpClient, IConfiguration configuration, ILogger<OpenTimestampsService> logger)
+        public OpenTimestampsService(
+            HttpClient httpClient, 
+            IConfiguration configuration, 
+            ILogger<OpenTimestampsService> logger)
         {
             _httpClient = httpClient;
             _configuration = configuration;
             _logger = logger;
         }
 
+
+        public async Task<byte[]> SubmitHashAsync(string hashHex)
+        {
+            var hashBytes = ConvertHexStringToByteArray(hashHex);
+            foreach (var server in GetCalendarServers())
+            {
+                try
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Post, $"{server.TrimEnd('/')}/digest");
+                    request.Content = new ByteArrayContent(hashBytes);
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+                    var response = await _httpClient.SendAsync(request);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var attestation = await response.Content.ReadAsByteArrayAsync();
+                        return BuildDetachedOtsFile(hashHex, attestation);
+                    }
+
+                    _logger.LogWarning("Calendar server {Server} returned status {Status}.", server, response.StatusCode);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to submit to calendar server {Server}.", server);
+                }
+            }
+
+            throw new Exception("All OpenTimestamps calendar servers failed to process the request.");
+        }
+
+        public async Task<byte[]?> UpgradeOtsAsync(byte[] pendingOtsBytes)
+        {
+            var commitmentHashHex = CalculateCommitmentHash(pendingOtsBytes);
+
+            foreach (var server in GetCalendarServers())
+            {
+                try
+                {
+                    var response = await _httpClient.GetAsync($"{server.TrimEnd('/')}/timestamp/{commitmentHashHex}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var attestation = await response.Content.ReadAsByteArrayAsync();
+                        return MergeOtsUpgrade(pendingOtsBytes, attestation);
+                    }
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to check upgrade from calendar server {Server}.", server);
+                }
+            }
+
+            return null;
+        }
+
+
+        #region Helper Methods
         private string[] GetCalendarServers()
         {
             return _configuration.GetSection("OpenTimestamps:CalendarServers").Get<string[]>()
@@ -137,63 +201,6 @@ namespace MARN_API.Services.Implementations
 
             return pendingOtsBytes;
         }
-
-        public async Task<byte[]> SubmitHashAsync(string hashHex)
-        {
-            var hashBytes = ConvertHexStringToByteArray(hashHex);
-            foreach (var server in GetCalendarServers())
-            {
-                try
-                {
-                    using var request = new HttpRequestMessage(HttpMethod.Post, $"{server.TrimEnd('/')}/digest");
-                    request.Content = new ByteArrayContent(hashBytes);
-                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-                    var response = await _httpClient.SendAsync(request);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var attestation = await response.Content.ReadAsByteArrayAsync();
-                        return BuildDetachedOtsFile(hashHex, attestation);
-                    }
-
-                    _logger.LogWarning("Calendar server {Server} returned status {Status}.", server, response.StatusCode);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to submit to calendar server {Server}.", server);
-                }
-            }
-
-            throw new Exception("All OpenTimestamps calendar servers failed to process the request.");
-        }
-
-        public async Task<byte[]?> UpgradeOtsAsync(byte[] pendingOtsBytes)
-        {
-            var commitmentHashHex = CalculateCommitmentHash(pendingOtsBytes);
-
-            foreach (var server in GetCalendarServers())
-            {
-                try
-                {
-                    var response = await _httpClient.GetAsync($"{server.TrimEnd('/')}/timestamp/{commitmentHashHex}");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var attestation = await response.Content.ReadAsByteArrayAsync();
-                        return MergeOtsUpgrade(pendingOtsBytes, attestation);
-                    }
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                    {
-                        continue;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to check upgrade from calendar server {Server}.", server);
-                }
-            }
-
-            return null;
-        }
+        #endregion
     }
 }

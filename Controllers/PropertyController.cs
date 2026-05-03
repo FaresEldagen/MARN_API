@@ -25,6 +25,27 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
+        /// Adds the Owner role to the authenticated user and returns a new JWT token.
+        /// </summary>
+        /// <response code="200">Owner role added successfully and new JWT returned.</response>
+        /// <response code="400">If validation fails or user not found.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        [Authorize]
+        [HttpPost("become-owner")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> BecomeAnOwner([FromServices] IOwnerService ownerService)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await ownerService.AddOwnerRole(userId);
+            return HandleServiceResult<string>(result);
+        }
+
+
+        /// <summary>
         /// Add a new property listings for the authenticated user.
         /// </summary>
         /// <param name="dto">
@@ -48,27 +69,6 @@ namespace MARN_API.Controllers
 
             var result = await _propertyService.AddPropertyAsync(dto, userId);
             return HandleServiceResult<bool>(result);
-        }
-
-        /// <summary>
-        /// Adds the Owner role to the authenticated user and returns a new JWT token.
-        /// </summary>
-        /// <response code="200">Owner role added successfully and new JWT returned.</response>
-        /// <response code="400">If validation fails or user not found.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        [Authorize]
-        [HttpPost("become-owner")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> BecomeAnOwner(
-            [FromServices] IOwnerService ownerService)
-        {
-            if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
-
-            var result = await ownerService.AddOwnerRole(userId);
-            return HandleServiceResult<string>(result);
         }
 
 
@@ -186,6 +186,30 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
+        /// Toggles a property's active status dynamically rendering it unsearchable or searchable.
+        /// </summary>
+        /// <param name="propertyId">ID strings for matching property.</param>
+        /// <response code="200">Reactivation/Deactivation persisted seamlessly</response>
+        /// <response code="401">Unauthorized requester</response>
+        /// <response code="403">Requester fails ownership verification</response>
+        /// <response code="429">If rate limit is exceeded</response>
+        [Authorize(Roles = "Owner")]
+        [HttpPut("deactivate/{propertyId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> DeactivateProperty(long propertyId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            var result = await _propertyService.DeactivatePropertyAsync(propertyId, userId);
+            return HandleServiceResult<bool>(result);
+        }
+
+
+        /// <summary>
         /// Saves or unsaves a property for the authenticated user.
         /// </summary>
         /// <param name="propertyId">ID string of the property being saved/unsaved.</param>
@@ -208,29 +232,6 @@ namespace MARN_API.Controllers
             return HandleServiceResult<bool>(result);
         }
 
-
-        /// <summary>
-        /// Toggles a property's active status dynamically rendering it unsearchable or searchable.
-        /// </summary>
-        /// <param name="propertyId">ID strings for matching property.</param>
-        /// <response code="200">Reactivation/Deactivation persisted seamlessly</response>
-        /// <response code="401">Unauthorized requester</response>
-        /// <response code="403">Requester fails ownership verification</response>
-        /// <response code="429">If rate limit is exceeded</response>
-        [Authorize(Roles = "Owner")]
-        [HttpPut("deactivate/{propertyId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> DeactivateProperty(long propertyId)
-        {
-            if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
-
-            var result = await _propertyService.DeactivatePropertyAsync(propertyId, userId);
-            return HandleServiceResult<bool>(result);
-        }
 
         /// <summary>
         /// Triggers a nested deletion operation hard deleting connected bookings/images entirely and restricting access to older contracts smoothly.

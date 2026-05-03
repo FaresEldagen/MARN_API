@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs.Property;
+using MARN_API.DTOs.Property;
 using MARN_API.Enums.Account;
 using MARN_API.Models;
 
@@ -15,6 +15,6 @@ namespace MARN_API.DTOs.Dashboard
         public ICollection<RenterPendingBookingRequestDto>? PendingBookingRequests { get; set; }
         public ICollection<PropertyCardDto>? SavedProperties { get; set; }
         public ICollection<NotificationMiniCardDto>? Notifications { get; set; }
-        public ICollection<PropertyCardDto>? Recommendations { get; set; }
+        public ICollection<RenterContractCardDto>? AllContracts { get; set; }
     }
 }

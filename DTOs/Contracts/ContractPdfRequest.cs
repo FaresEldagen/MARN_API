@@ -1,3 +1,5 @@
+using MARN_API.Enums;
+
 namespace MARN_API.DTOs.Contracts
 {
     public class ContractPdfRequest
@@ -34,15 +36,12 @@ namespace MARN_API.DTOs.Contracts
 
     public class RentalTermsInfo
     {
-        public decimal MonthlyRentAmount { get; set; }
-        public decimal? PlatformFeeAmount { get; set; }
+        public decimal RentAmount { get; set; }
+        public decimal TotalContractAmount { get; set; }
+        public PaymentFrequency PaymentFrequency { get; set; } = PaymentFrequency.OneTime;
         public string? Currency { get; set; }
         public DateOnly? LeaseStartDate { get; set; }
         public DateOnly? LeaseEndDate { get; set; }
-        public int? PaymentDueDay { get; set; }
-        public string? PaymentMethod { get; set; }
-        public string? CheckInWindow { get; set; }
-        public string? CheckOutWindow { get; set; }
     }
 
     public class ElectronicSignatureInfo
@@ -50,8 +49,6 @@ namespace MARN_API.DTOs.Contracts
         public string? SignerName { get; set; }
         public string? SignerNationalId { get; set; }
         public DateTime? SignedAtUtc { get; set; }
-        public string? PaymentIntentId { get; set; }
-        public string? ReceiptUrl { get; set; }
         public string? ConsentStatement { get; set; }
     }
 

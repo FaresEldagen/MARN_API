@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260501195344_Removing-old-payment-system-and-update-contracts")]
+    partial class Removingoldpaymentsystemandupdatecontracts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,6 +262,9 @@ namespace MARN_API.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RenterId");
@@ -279,7 +285,8 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 1,
                             PropertyId = 1002L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
                         },
                         new
                         {
@@ -289,7 +296,8 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 0,
                             PropertyId = 1002L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1
                         },
                         new
                         {
@@ -299,7 +307,8 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 1,
                             PropertyId = 1003L,
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
                         },
                         new
                         {
@@ -309,7 +318,8 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 0,
                             PropertyId = 1003L,
                             RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
                         });
                 });
 
@@ -326,6 +336,11 @@ namespace MARN_API.Migrations
 
                     b.Property<int>("AnchoringStatus")
                         .HasColumnType("int");
+
+                    b.Property<string>("ContractNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -380,6 +395,9 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContractNumber")
+                        .IsUnique();
+
                     b.HasIndex("RenterId");
 
                     b.HasIndex("PropertyId", "RenterId");
@@ -394,6 +412,7 @@ namespace MARN_API.Migrations
                         {
                             Id = 950001L,
                             AnchoringStatus = 0,
+                            ContractNumber = "SEED-CONTRACT-1001-ACTIVE-A",
                             CreatedAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1001-active-a.pdf",
                             Hash = "SEEDHASH1001ACTIVEA",
@@ -410,6 +429,7 @@ namespace MARN_API.Migrations
                         {
                             Id = 950002L,
                             AnchoringStatus = 0,
+                            ContractNumber = "SEED-CONTRACT-1001-EXPIRED-B",
                             CreatedAt = new DateTime(2023, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1001-expired-b.pdf",
                             Hash = "SEEDHASH1001EXPIREDB",
@@ -426,6 +446,7 @@ namespace MARN_API.Migrations
                         {
                             Id = 950003L,
                             AnchoringStatus = 0,
+                            ContractNumber = "SEED-CONTRACT-1004-EXPIRED-A",
                             CreatedAt = new DateTime(2024, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1004-expired-a.pdf",
                             Hash = "SEEDHASH1004EXPIREDA",
@@ -548,7 +569,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
                             Data = "{\"propertyName\":\"Cozy Seed Apartment\"}",
                             Title = "Upcoming Payment Due",
-                            Type = 11,
+                            Type = 10,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             UserType = 1
                         },
@@ -618,7 +639,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 4, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             Data = "{\"amount\":\"1200\", \"currency\":\"USD\"}",
                             Title = "Payment received",
-                            Type = 15,
+                            Type = 14,
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
                             UserType = 2
                         },
@@ -641,7 +662,7 @@ namespace MARN_API.Migrations
                             Body = "Your next rent payment for Cozy Seed Apartment is due soon.",
                             CreatedAt = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             Title = "Rent Payment Due Soon",
-                            Type = 11,
+                            Type = 10,
                             UserId = new Guid("66666666-6666-6666-6666-666666666666"),
                             UserType = 1
                         },
