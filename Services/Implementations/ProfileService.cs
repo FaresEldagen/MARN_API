@@ -109,8 +109,10 @@ namespace MARN_API.Services.Implementations
             var accountSatus = user.AccountStatus;
 
             var allContracts = await _contractRepo.GetRenterContracts(userId);
+            var paidPayments = await _paymentRepo.GetPaidPayments(userId);
 
             var dashboardData = new RenterDashboardDto
+
             {
                 ActiveRentals = activeRentals,
                 ActiveRentalsCount = activeRentalsCount,
@@ -127,8 +129,10 @@ namespace MARN_API.Services.Implementations
 
                 AccountStatus = accountSatus,
                 
-                AllContracts = allContracts
+                AllContracts = allContracts,
+                PaidPayments = paidPayments
             };
+
 
             _logger.LogInformation("Get Renter Dashboard Data successful for userId: {userId}", userId);
             return ServiceResult<RenterDashboardDto>.Ok(dashboardData);
@@ -162,8 +166,10 @@ namespace MARN_API.Services.Implementations
             var ratingsCount = await _propertyRepo.GetOwnerRatingsCount(userId);
 
             var allContracts = await _contractRepo.GetOwnerContracts(userId);
+            var receivedPayments = await _paymentRepo.GetReceivedPayments(userId);
 
             var notifications = await _notificationRepo.GetOwnerDashboardNotifications(userId);
+
             var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
 
             var pendingBookingRequests = await _bookingRequestRepo.GetOwnerPendingRequests(userId);
@@ -195,9 +201,11 @@ namespace MARN_API.Services.Implementations
 
                 PendingBookingRequests = pendingBookingRequests,
                 PendingBookingRequestsCount = pendingBookingRequestsCount,
-
                 AccountStatus = accountSatus,
+                ReceivedPayments = receivedPayments
             };
+
+
 
             _logger.LogInformation("Get Owner Dashboard Data successful for userId: {userId}", userId);
             return ServiceResult<OwnerDashboardDto>.Ok(dashboardData);

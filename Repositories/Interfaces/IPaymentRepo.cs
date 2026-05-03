@@ -8,7 +8,9 @@ namespace MARN_API.Repositories.Interfaces
         #region User Dashboard
         public Task<RenterNextPaymentDto?> GetNextPayment(Guid userId);
 
+        public Task<List<PaidPaymentDto>> GetPaidPayments(Guid userId);
         #endregion
+
 
 
         #region Owner Dashboard
@@ -16,6 +18,13 @@ namespace MARN_API.Repositories.Interfaces
         public Task<List<YearlyEarningDto>> GetEarningOverviewYearly(Guid userId);
         public Task<decimal> GetWithdrawableEarnings(Guid userId);
         public Task<decimal> GetOnHoldEarnings(Guid userId);
+        public Task<List<ReceivedPaymentDto>> GetReceivedPayments(Guid userId);
+        #endregion
+
+
+
+        #region Payment Checkout
+        public Task<PaymentSchedule?> GetPaymentScheduleById(long paymentScheduleId);
         #endregion
     }
 }

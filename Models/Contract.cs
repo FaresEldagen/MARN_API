@@ -1,5 +1,6 @@
 using System;
 using MARN_API.Enums;
+using MARN_API.Enums.Payment;
 
 namespace MARN_API.Models
 {
@@ -18,7 +19,6 @@ namespace MARN_API.Models
         public DateOnly LeaseEndDate { get; set; }
 
         public DateTime? SignedByRenterAt { get; set; }
-        //public int Version { get; set; } = 1;
 
 
         // Fields for contract anchoring
@@ -34,5 +34,6 @@ namespace MARN_API.Models
 
         public virtual Property Property { get; set; } = null!;
         public virtual ApplicationUser Renter { get; set; } = null!;
+        public virtual ICollection<PaymentSchedule> PaymentSchedules { get; set; } = new HashSet<PaymentSchedule>();
     }
 }

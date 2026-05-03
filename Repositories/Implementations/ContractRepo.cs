@@ -2,6 +2,7 @@ using MARN_API.Data;
 using MARN_API.DTOs.Common;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums;
+using MARN_API.Enums.Payment;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -44,39 +45,39 @@ namespace MARN_API.Repositories.Implementations
 
                     PaymentFrequency = c.PaymentFrequency,
 
-                    NextPaymentAmount = Context.Payments
-                        .Where(p => p.ContractId == c.Id && p.DueDate >= now)
+                    NextPaymentAmount = Context.PaymentSchedules
+                        .Where(p => p.ContractId == c.Id && p.DueDate - now <= TimeSpan.FromDays(7))
                         .OrderBy(p => p.DueDate)
-                        .Select(p => (decimal?)p.AmountTotal)
+                        .Select(p => (decimal?)p.Amount)
                         .FirstOrDefault()
-                        ?? Context.Payments
+                        ?? Context.PaymentSchedules
                             .Where(p => p.ContractId == c.Id)
                             .OrderByDescending(p => p.DueDate)
-                            .Select(p => (decimal?)p.AmountTotal)
+                            .Select(p => (decimal?)p.Amount)
                             .FirstOrDefault()
                         ?? 0m,
 
-                    PaymentId = Context.Payments
-                        .Where(p => p.ContractId == c.Id && p.DueDate >= now)
+                    PaymentId = Context.PaymentSchedules
+                        .Where(p => p.ContractId == c.Id && p.DueDate - now <= TimeSpan.FromDays(7))
                         .OrderBy(p => p.DueDate)
                         .Select(p => (long?)p.Id)
                         .FirstOrDefault()
-                        ?? Context.Payments
+                        ?? Context.PaymentSchedules
                             .Where(p => p.ContractId == c.Id)
                             .OrderByDescending(p => p.DueDate)
                             .Select(p => (long?)p.Id)
                             .FirstOrDefault()
                         ?? 0L,
 
-                    IsPaymentMade = Context.Payments
-                        .Where(p => p.ContractId == c.Id && p.DueDate >= now)
+                    IsPaymentMade = Context.PaymentSchedules
+                        .Where(p => p.ContractId == c.Id && p.DueDate - now <= TimeSpan.FromDays(7))
                         .OrderBy(p => p.DueDate)
-                        .Select(p => (bool?)(p.Status == PaymentStatus.Succeeded))
+                        .Select(p => (bool?)(p.Status == PaymentScheduleStatus.PaidEarly || p.Status == PaymentScheduleStatus.PaidOnTime || p.Status == PaymentScheduleStatus.PaidLate))
                         .FirstOrDefault()
-                        ?? Context.Payments
+                        ?? Context.PaymentSchedules
                             .Where(p => p.ContractId == c.Id)
                             .OrderByDescending(p => p.DueDate)
-                            .Select(p => (bool?)(p.Status == PaymentStatus.Succeeded))
+                            .Select(p => (bool?)(p.Status == PaymentScheduleStatus.PaidEarly || p.Status == PaymentScheduleStatus.PaidOnTime || p.Status == PaymentScheduleStatus.PaidLate))
                             .FirstOrDefault()
                         ?? false
                 })

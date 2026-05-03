@@ -2,6 +2,7 @@ using MARN_API.DTOs.Lookup;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
 using MARN_API.Enums.Notification;
+using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 using MARN_API.Enums.RoommatePreferences;
 using MARN_API.Models;

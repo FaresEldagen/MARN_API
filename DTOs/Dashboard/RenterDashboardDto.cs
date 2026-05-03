@@ -16,5 +16,7 @@ namespace MARN_API.DTOs.Dashboard
         public ICollection<PropertyCardDto>? SavedProperties { get; set; }
         public ICollection<NotificationMiniCardDto>? Notifications { get; set; }
         public ICollection<RenterContractCardDto>? AllContracts { get; set; }
+        public ICollection<PaidPaymentDto>? PaidPayments { get; set; }
     }
 }
+

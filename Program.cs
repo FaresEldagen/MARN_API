@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using MARN_API.Hubs;
 
+
 namespace MARN_API
 {
     public class Program
@@ -175,6 +176,7 @@ namespace MARN_API
             builder.Services.AddScoped<IOwnerService,OwnerService>();
             builder.Services.AddScoped<IBookingRequestService, BookingRequestService>();
             builder.Services.AddScoped<IHomepageService, HomepageService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
 
             builder.Services.AddScoped<ContractPdfGenerator>();
             builder.Services.AddScoped<HashingService>();
@@ -184,6 +186,11 @@ namespace MARN_API
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
+            #endregion
+
+
+            #region Stripe Configuration
+            Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
             #endregion
 
 

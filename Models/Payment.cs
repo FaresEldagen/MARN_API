@@ -1,32 +1,25 @@
 using System;
-using MARN_API.Enums;
+using MARN_API.Enums.Payment;
 
 namespace MARN_API.Models
 {
     public class Payment
     {
         public long Id { get; set; }
-        public long? ContractId { get; set; }
-        public string StripeSessionId { get; set; } = string.Empty;
+        public long PaymentScheduleId { get; set; }
+
         public decimal AmountTotal { get; set; }
         public decimal PlatformFee { get; set; }
         public decimal OwnerAmount { get; set; }
-        public Guid RenterId { get; set; }
-        public string? RenterEmail { get; set; }
-        public Guid OwnerId { get; set; }
-        public long PropertyId { get; set; }
-        public string OwnerStripeAccountId { get; set; } = string.Empty;
-        public DateTime DueDate { get; set; }
-        public DateTime? PaidAt { get; set; }
-        public DateTime? AvailableAt { get; set; }
-        public string? PaymentIntentId { get; set; }
-        public string? ReceiptUrl { get; set; }
-        public string Currency { get; set; } = "EGP";
-        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string Currency { get; set; } = "egp";
 
-        public virtual Contract? Contract { get; set; }
-        public virtual Property Property { get; set; } = null!;
-        public virtual ApplicationUser Renter { get; set; } = null!;
+        public string PaymentIntentId { get; set; } = string.Empty;
+
+        public DateTime PaidAt { get; set; } = DateTime.UtcNow;
+        public DateTime AvailableAt { get; set; }
+
+        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
+
+        public virtual PaymentSchedule PaymentSchedule { get; set; } = null!;
     }
 }

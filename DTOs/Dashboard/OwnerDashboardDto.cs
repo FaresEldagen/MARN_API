@@ -1,4 +1,4 @@
-﻿using MARN_API.DTOs.Property;
+using MARN_API.DTOs.Property;
 using MARN_API.Enums.Account;
 
 namespace MARN_API.DTOs.Dashboard
@@ -29,5 +29,6 @@ namespace MARN_API.DTOs.Dashboard
         public ICollection<OwnerPendingBookingRequestDto>? PendingBookingRequests { get; set; }
 
         public AccountStatus AccountStatus { get; set; }
+        public ICollection<ReceivedPaymentDto>? ReceivedPayments { get; set; }
     }
-}
+}
