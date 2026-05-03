@@ -40,7 +40,7 @@ namespace MARN_API.Controllers
             }
 
             var result = await _homepageService.GetRecommendedPropertiesAsync(userId);
-            return HandleResult(result);
+            return HandleServiceResult(result);
         }
     }
 }
