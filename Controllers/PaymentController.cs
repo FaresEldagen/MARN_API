@@ -1,11 +1,12 @@
-﻿using MARN_API.DTOs.BookingRequest;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using Stripe;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace MARN_API.Controllers
 {
@@ -15,10 +16,17 @@ namespace MARN_API.Controllers
     public class PaymentController : BaseController
     {
         private readonly IPaymentService _paymentService;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(
+            IPaymentService paymentService, 
+            IConfiguration configuration,
+            ILogger<PaymentController> logger)
         {
             _paymentService = paymentService;
+            _configuration = configuration;
+            _logger = logger;
         }
 
 
@@ -42,5 +50,44 @@ namespace MARN_API.Controllers
         }
 
 
+        /// <summary>
+        /// </summary>
+        [AllowAnonymous]
+        [HttpPost("webhook")]
+        public async Task<IActionResult> Webhook()
+        {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+
+            try
+            {
+                var stripeEvent = EventUtility.ConstructEvent(
+                    json,
+                    Request.Headers["Stripe-Signature"],
+                    _configuration["Stripe:WebhookSecret"]
+                );
+
+                var intent = stripeEvent.Data.Object as PaymentIntent;
+
+                if (stripeEvent.Type == "payment_intent.succeeded")
+                {
+                    await _paymentService.HandleSuccessfulPayment(intent!);
+                }
+                else if (stripeEvent.Type == "payment_intent.payment_failed")
+                {
+                    await _paymentService.HandleFailedPayment(intent!);
+                }
+                else if (stripeEvent.Type == "payment_intent.processing")
+                {
+                    _logger.LogInformation("Payment is processing...");
+                }
+            }
+            catch (StripeException e)
+            {
+                _logger.LogError(e, "Stripe webhook signature validation failed: {Message}", e.StripeError?.Message);
+                return BadRequest();
+            }
+
+            return Ok();
+        }
     }
 }

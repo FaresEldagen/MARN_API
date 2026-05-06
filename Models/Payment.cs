@@ -15,10 +15,8 @@ namespace MARN_API.Models
 
         public string PaymentIntentId { get; set; } = string.Empty;
 
-        public DateTime PaidAt { get; set; } = DateTime.UtcNow;
+        public DateTime PaidAt { get; set; }
         public DateTime AvailableAt { get; set; }
-
-        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
 
         public virtual PaymentSchedule PaymentSchedule { get; set; } = null!;
     }

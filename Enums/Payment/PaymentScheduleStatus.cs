@@ -1,11 +1,15 @@
-﻿namespace MARN_API.Enums.Payment
+namespace MARN_API.Enums.Payment
 {
     public enum PaymentScheduleStatus
     {
-        Pending = 0,
+        NotAvailableYet = 0,
+        Available,
+        DueToday,
+
         PaidEarly,
         PaidOnTime,
         PaidLate,
-        Missed
+
+        Overdue
     }
 }

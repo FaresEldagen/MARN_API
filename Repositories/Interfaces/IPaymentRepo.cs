@@ -25,6 +25,11 @@ namespace MARN_API.Repositories.Interfaces
 
         #region Payment Checkout
         public Task<PaymentSchedule?> GetPaymentScheduleById(long paymentScheduleId);
+        public Task<List<PaymentSchedule>> GetPendingPaymentSchedules(int skip, int take);
+        public Task UpdatePaymentSchedule(PaymentSchedule paymentSchedule);
+
+        public Task AddPayment (Payment payment, PaymentSchedule paymentSchedule);
+        public Task<bool> PaymentExistsByIntentId(string paymentIntentId);
         #endregion
     }
 }

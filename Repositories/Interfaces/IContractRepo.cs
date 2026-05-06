@@ -26,6 +26,7 @@ namespace MARN_API.Repositories.Interfaces
         Task AddAsync(Contract contract);
         Task<Contract?> GetByIdAsync(long contractId);
         Task<IEnumerable<Contract>> GetPendingContractsAsync();
+        Task SignContractAsync(Contract contract);
         Task UpdateAsync(Contract contract);
         Task DeleteAsync(Contract contract);
         #endregion

@@ -11,9 +11,11 @@ namespace MARN_API.Models
         public string Currency { get; set; } = "egp";
         public DateTime DueDate { get; set; }
 
-        public PaymentScheduleStatus Status { get; set; } = PaymentScheduleStatus.Pending;
+        public PaymentScheduleStatus Status { get; set; } = PaymentScheduleStatus.NotAvailableYet;
+
+        public string? PaymentIntentId { get; set; }
 
         public virtual Contract Contract { get; set; } = null!;
-        public virtual Payment? Payment { get; set; }
+        public virtual ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
     }
 }

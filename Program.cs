@@ -183,6 +183,7 @@ namespace MARN_API
             builder.Services.AddScoped<OpenTimestampsProofReader>();
             builder.Services.AddHttpClient<OpenTimestampsService>();
             builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
+            builder.Services.AddHostedService<PaymentBackgroundService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
@@ -380,13 +381,13 @@ namespace MARN_API
             app.UseSwagger();
             app.UseSwaggerUI();
 
+            app.UseCors();
+            //app.UseCors(builder.Configuration["AppSettings:FrontBaseUrl"]!);
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRateLimiter();
-
-            app.UseCors();
-            //app.UseCors(builder.Configuration["AppSettings:FrontBaseUrl"]!);
 
             app.UseAuthentication();
             app.UseAuthorization();

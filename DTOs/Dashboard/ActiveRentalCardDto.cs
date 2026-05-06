@@ -1,4 +1,4 @@
-﻿using MARN_API.Enums;
+using MARN_API.Enums;
 using MARN_API.Enums.Payment;
 using MARN_API.Models;
 
@@ -15,9 +15,11 @@ namespace MARN_API.DTOs.Dashboard
         public string PropertyAddress { get; set; } = string.Empty;
         public string PropertyImageUrl { get; set; } = string.Empty;
 
-        public long PaymentId { get; set; }
-        public decimal NextPaymentAmount { get; set; }
         public PaymentFrequency PaymentFrequency { get; set; }
-        public bool IsPaymentMade { get; set; }
+
+        public DateTime? NextPaymentScheduleDate { get; set; }
+        public long? NextPaymentScheduleId { get; set; }
+        public PaymentScheduleStatus? NextPaymentScheduleStatus { get; set; }
+        public Guid OwnerId { get; set; }
     }
 }

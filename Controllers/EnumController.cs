@@ -54,7 +54,6 @@ namespace MARN_API.Controllers
                 SleepSchedules = GetEnumValues<SleepSchedule>(),
                 WorkSchedules = GetEnumValues<WorkSchedule>(),
                 ContractStatuses = GetEnumValues<ContractStatus>(),
-                PaymentStatuses = GetEnumValues<PaymentStatus>(),
                 PaymentFrequencies = GetEnumValues<PaymentFrequency>(),
                 ReportStatuses = GetEnumValues<ReportStatus>(),
                 ReportableTypes = GetEnumValues<ReportableType>(),
@@ -117,9 +116,6 @@ namespace MARN_API.Controllers
 
         [HttpGet("contract-statuses")]
         public IActionResult GetContractStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractStatus>()));
-
-        [HttpGet("payment-statuses")]
-        public IActionResult GetPaymentStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentStatus>()));
 
         [HttpGet("payment-frequencies")]
         public IActionResult GetPaymentFrequencies() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentFrequency>()));

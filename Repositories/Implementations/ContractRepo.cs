@@ -23,8 +23,6 @@ namespace MARN_API.Repositories.Implementations
         #region Dashboards
         public Task<List<ActiveRentalCardDto>> GetActiveRentals(Guid userId)
         {
-            var now = DateTime.UtcNow;
-
             return Context.Contracts
                 .AsNoTracking()
                 .Where(c => c.RenterId == userId && c.Status == ContractStatus.Active)
@@ -45,41 +43,31 @@ namespace MARN_API.Repositories.Implementations
 
                     PaymentFrequency = c.PaymentFrequency,
 
-                    NextPaymentAmount = Context.PaymentSchedules
-                        .Where(p => p.ContractId == c.Id && p.DueDate - now <= TimeSpan.FromDays(7))
+                    NextPaymentScheduleDate = c.PaymentSchedules
+                        .Where(p => p.Status != PaymentScheduleStatus.PaidEarly
+                                 && p.Status != PaymentScheduleStatus.PaidOnTime
+                                 && p.Status != PaymentScheduleStatus.PaidLate)
                         .OrderBy(p => p.DueDate)
-                        .Select(p => (decimal?)p.Amount)
-                        .FirstOrDefault()
-                        ?? Context.PaymentSchedules
-                            .Where(p => p.ContractId == c.Id)
-                            .OrderByDescending(p => p.DueDate)
-                            .Select(p => (decimal?)p.Amount)
-                            .FirstOrDefault()
-                        ?? 0m,
+                        .Select(p => (DateTime?)p.DueDate)
+                        .FirstOrDefault(),
 
-                    PaymentId = Context.PaymentSchedules
-                        .Where(p => p.ContractId == c.Id && p.DueDate - now <= TimeSpan.FromDays(7))
+                    NextPaymentScheduleId = c.PaymentSchedules
+                        .Where(p => p.Status != PaymentScheduleStatus.PaidEarly
+                                 && p.Status != PaymentScheduleStatus.PaidOnTime
+                                 && p.Status != PaymentScheduleStatus.PaidLate)
                         .OrderBy(p => p.DueDate)
                         .Select(p => (long?)p.Id)
-                        .FirstOrDefault()
-                        ?? Context.PaymentSchedules
-                            .Where(p => p.ContractId == c.Id)
-                            .OrderByDescending(p => p.DueDate)
-                            .Select(p => (long?)p.Id)
-                            .FirstOrDefault()
-                        ?? 0L,
+                        .FirstOrDefault(),
 
-                    IsPaymentMade = Context.PaymentSchedules
-                        .Where(p => p.ContractId == c.Id && p.DueDate - now <= TimeSpan.FromDays(7))
+                    NextPaymentScheduleStatus = c.PaymentSchedules
+                        .Where(p => p.Status != PaymentScheduleStatus.PaidEarly
+                                 && p.Status != PaymentScheduleStatus.PaidOnTime
+                                 && p.Status != PaymentScheduleStatus.PaidLate)
                         .OrderBy(p => p.DueDate)
-                        .Select(p => (bool?)(p.Status == PaymentScheduleStatus.PaidEarly || p.Status == PaymentScheduleStatus.PaidOnTime || p.Status == PaymentScheduleStatus.PaidLate))
-                        .FirstOrDefault()
-                        ?? Context.PaymentSchedules
-                            .Where(p => p.ContractId == c.Id)
-                            .OrderByDescending(p => p.DueDate)
-                            .Select(p => (bool?)(p.Status == PaymentScheduleStatus.PaidEarly || p.Status == PaymentScheduleStatus.PaidOnTime || p.Status == PaymentScheduleStatus.PaidLate))
-                            .FirstOrDefault()
-                        ?? false
+                        .Select(p => (PaymentScheduleStatus?)p.Status)
+                        .FirstOrDefault(),
+
+                    OwnerId = c.Property.OwnerId
                 })
                 .ToListAsync();
         }
@@ -208,6 +196,90 @@ namespace MARN_API.Repositories.Implementations
             return await Context.Contracts
                 .Where(c => c.AnchoringStatus == ContractAnchoringStatus.Pending)
                 .ToListAsync();
+        }
+
+        public async Task SignContractAsync(Contract contract)
+        {
+            await using var transaction = await Context.Database.BeginTransactionAsync();
+            try
+            {
+                Context.Contracts.Update(contract);
+
+                // Generate Payment Schedules based on start date, end date and payment frequency
+                var schedules = GeneratePaymentSchedules(contract);
+                await Context.PaymentSchedules.AddRangeAsync(schedules);
+
+                await Context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        private static List<PaymentSchedule> GeneratePaymentSchedules(Contract contract)
+        {
+            var schedules = new List<PaymentSchedule>();
+
+            var dueDates = GetDueDates(contract.LeaseStartDate, contract.LeaseEndDate, contract.PaymentFrequency);
+            if (dueDates.Count == 0)
+                return schedules;
+
+            // Each period's amount is the property's rental price (no splitting / rounding needed)
+            decimal amountPerPeriod = contract.Property.Price;
+
+            for (int i = 0; i < dueDates.Count; i++)
+            {
+                schedules.Add(new PaymentSchedule
+                {
+                    ContractId = contract.Id,
+                    DueDate    = dueDates[i],
+                    Amount     = amountPerPeriod,
+                    Currency   = "egp",
+                    Status     = (dueDates[i] - DateTime.UtcNow).TotalDays <= 7
+                                    ? PaymentScheduleStatus.Available
+                                    : PaymentScheduleStatus.NotAvailableYet
+                });
+            }
+
+            return schedules;
+        }
+
+        private static List<DateTime> GetDueDates(DateOnly start, DateOnly end, PaymentFrequency frequency)
+        {
+            var dates = new List<DateTime>();
+
+            // OneTime → single payment due on the lease end date (after the full duration)
+            if (frequency == PaymentFrequency.OneTime)
+            {
+                dates.Add(end.ToDateTime(TimeOnly.MinValue));
+                return dates;
+            }
+
+            // All recurring frequencies: first due date is one period AFTER the start date
+            var current = frequency switch
+            {
+                PaymentFrequency.Monthly   => start.AddMonths(1),
+                PaymentFrequency.Quarterly => start.AddMonths(3),
+                PaymentFrequency.Yearly    => start.AddYears(1),
+                _                          => end.AddDays(1)
+            };
+
+            while (current <= end)
+            {
+                dates.Add(current.ToDateTime(TimeOnly.MinValue));
+                current = frequency switch
+                {
+                    PaymentFrequency.Monthly   => current.AddMonths(1),
+                    PaymentFrequency.Quarterly => current.AddMonths(3),
+                    PaymentFrequency.Yearly    => current.AddYears(1),
+                    _                          => end.AddDays(1)
+                };
+            }
+
+            return dates;
         }
 
         public async Task UpdateAsync(Contract contract)

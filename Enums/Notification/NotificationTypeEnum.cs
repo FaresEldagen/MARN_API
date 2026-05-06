@@ -17,10 +17,10 @@ namespace MARN_API.Enums.Notification
         ContractSigned,
         ContractCompleted,
 
-        PaymentArrived, 
         UpcomingPayment,
-        DelaiedPayment,
-        PaymentSucces,
+        PaymentArrived,
+        DelayedPayment,
+        PaymentSuccessful,
         PaymentFailed,
 
         PaymentReceived,
