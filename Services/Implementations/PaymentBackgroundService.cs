@@ -24,16 +24,16 @@ namespace MARN_API.Services.Implementations
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var interval = TimeSpan.FromHours(1);
+            //var interval = TimeSpan.FromHours(1);
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                //var now = DateTime.UtcNow;
-                //var nextRun = now.Date.AddDays(1);
-                //var delay = nextRun - now;
+                var now = DateTime.UtcNow;
+                var nextRun = now.Date.AddDays(1);
+                var delay = nextRun - now;
 
-                //_logger.LogInformation("PaymentBackgroundService will run after {Delay}", delay);
-                //await Task.Delay(delay, stoppingToken);
+                _logger.LogInformation("PaymentBackgroundService will run after {Delay}", delay);
+                await Task.Delay(delay, stoppingToken);
 
                 try
                 {
@@ -130,7 +130,7 @@ namespace MARN_API.Services.Implementations
                     _logger.LogError(ex, "Error occurred in PaymentBackgroundService.");
                 }
 
-                await Task.Delay(interval, stoppingToken);
+                //await Task.Delay(interval, stoppingToken);
             }
         }
     }

@@ -254,15 +254,16 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Your account must be verified to edit a property.", resultType: ServiceResultType.Unauthorized);
             }
 
-            if (dto.AddedMediaFiles != null && dto.AddedMediaFiles.Count > 10)
-            {
-                return ServiceResult<bool>.Fail("You cannot add more than 10 images at once.", resultType: ServiceResultType.BadRequest);
-            }
-
             var property = await _propertyRepo.GetByIdAsync(propertyId);
             if (property == null)
             {
                 return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            if (dto.AddedMediaFiles != null && 
+                (property.Media.Count + dto.AddedMediaFiles.Count - dto.RemovedMediaIds.Count) > 9)
+            {
+                return ServiceResult<bool>.Fail("You cannot add more than 10 images at once.", resultType: ServiceResultType.BadRequest);
             }
 
             if (property.OwnerId != userId)

@@ -30,16 +30,22 @@ namespace MARN_API.Controllers
         }
 
 
+        #region Payment
         /// <summary>
+        /// Create a Stripe Payment Intent for a specific payment schedule.
         /// </summary>
-        /// <param name="paymentScheduleId"></param>
-        /// <response code="200"></response>
-        /// <response code="401"></response>
-        /// <response code="404"></response>
+        /// <param name="paymentScheduleId">The ID of the payment schedule to pay for.</param>
+        /// <response code="200">
+        /// Returns the Stripe client secret required to complete the payment on the frontend.
+        /// </response>
+        /// <response code="401">If the user is not authenticated or user ID is missing from token.</response>
+        /// <response code="404">If the payment schedule is not found or does not belong to the user.</response>
+        /// <response code="429">If rate limit is exceeded.</response>
         [HttpPost("start-payment")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> StartPayment(long paymentScheduleId)
         {
             if (!TryGetUserId(out var userId))
@@ -51,9 +57,14 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
+        /// Stripe Webhook endpoint to handle payment events (success, failure, processing). [No thing to deal with as a frontend or flutter]
         /// </summary>
+        /// <response code="200">Webhook processed successfully.</response>
+        /// <response code="400">If the Stripe signature validation fails.</response>
         [AllowAnonymous]
         [HttpPost("webhook")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Webhook()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
@@ -89,5 +100,6 @@ namespace MARN_API.Controllers
 
             return Ok();
         }
+        #endregion
     }
 }
