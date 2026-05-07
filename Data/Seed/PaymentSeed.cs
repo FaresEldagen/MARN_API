@@ -2,6 +2,8 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MARN_API.Models;
+using MARN_API.Enums.Payment;
+
 
 namespace MARN_API.Data.Seed
 {
@@ -50,7 +52,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20001",
                     PaidAt = new DateTime(2025, 1, 29, 12, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 2, 8, 12, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 2, 8, 12, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20002 – PaidOnTime
@@ -64,7 +67,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20002",
                     PaidAt = new DateTime(2025, 2, 28, 10, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 3, 10, 10, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 3, 10, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20003 – PaidLate
@@ -78,7 +82,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20003",
                     PaidAt = new DateTime(2025, 4, 5, 9, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 4, 15, 9, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 4, 15, 9, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // ── Renter B / Contract 1000002 / Quarterly ────────────────────────────────
@@ -94,7 +99,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20010",
                     PaidAt = new DateTime(2025, 3, 22, 14, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 4, 1, 14, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 4, 1, 14, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // ── Renter C / Contract 1000003 / Yearly ───────────────────────────────────
@@ -110,7 +116,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20020",
                     PaidAt = new DateTime(2025, 6, 1, 8, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 6, 11, 8, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 6, 11, 8, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // ── Renter A / Contract 1000004 / Monthly / Owner Z ────────────────────────
@@ -126,7 +133,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20030",
                     PaidAt = new DateTime(2025, 2, 26, 11, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 3, 8, 11, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 3, 8, 11, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20031 – PaidOnTime
@@ -140,7 +148,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20031",
                     PaidAt = new DateTime(2025, 4, 1, 9, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 4, 11, 9, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 4, 11, 9, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20032 – PaidLate
@@ -154,7 +163,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20032",
                     PaidAt = new DateTime(2025, 5, 8, 16, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 5, 18, 16, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 5, 18, 16, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20033 – PaidOnTime
@@ -168,7 +178,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20033",
                     PaidAt = new DateTime(2025, 8, 1, 10, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 8, 11, 10, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 8, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // ── Renter B / Contract 1000005 / OneTime ──────────────────────────────────
@@ -184,7 +195,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20040",
                     PaidAt = new DateTime(2025, 4, 11, 13, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 4, 21, 13, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 4, 21, 13, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // ── Renter A / Contract 1000006 / Quarterly / Expired ─────────────────────
@@ -200,7 +212,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20050",
                     PaidAt = new DateTime(2024, 3, 31, 10, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2024, 4, 10, 10, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2024, 4, 10, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20051 – PaidOnTime Q2
@@ -214,7 +227,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20051",
                     PaidAt = new DateTime(2024, 6, 30, 10, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2024, 7, 10, 10, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2024, 7, 10, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20052 – PaidLate Q3
@@ -228,7 +242,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20052",
                     PaidAt = new DateTime(2024, 10, 7, 10, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2024, 10, 17, 10, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2024, 10, 17, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 },
 
                 // Schedule 20053 – PaidEarly Q4
@@ -242,7 +257,8 @@ namespace MARN_API.Data.Seed
                     Currency = "egp",
                     PaymentIntentId = "pi_seed_20053",
                     PaidAt = new DateTime(2024, 12, 25, 10, 0, 0, DateTimeKind.Utc),
-                    AvailableAt = new DateTime(2025, 1, 4, 10, 0, 0, DateTimeKind.Utc)
+                    AvailableAt = new DateTime(2025, 1, 4, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 }
             );
         }

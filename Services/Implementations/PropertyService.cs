@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using MARN_API.Enums.Contract;
 
 namespace MARN_API.Services.Implementations
 {
@@ -119,6 +120,9 @@ namespace MARN_API.Services.Implementations
             {
                 foreach (var rule in dto.Rules)
                 {
+                    if (string.IsNullOrWhiteSpace(rule))
+                        continue;
+
                     await _ruleRepo.AddByPropertyIdAsync(property.Id, new PropertyRule { Rule = rule });
                 }
             }

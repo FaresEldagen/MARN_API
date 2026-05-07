@@ -1,7 +1,7 @@
 using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Property;
-using MARN_API.Enums;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Property;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;

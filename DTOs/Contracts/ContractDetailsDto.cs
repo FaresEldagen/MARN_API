@@ -1,4 +1,4 @@
-using MARN_API.Enums;
+using MARN_API.Enums.Contract;
 
 namespace MARN_API.DTOs.Contracts
 {

@@ -17,6 +17,7 @@ namespace MARN_API.Models
 
         public DateTime PaidAt { get; set; }
         public DateTime AvailableAt { get; set; }
+        public PaymentStatus Status { get; set; } = PaymentStatus.OnHold;
 
         public virtual PaymentSchedule PaymentSchedule { get; set; } = null!;
     }

@@ -1,4 +1,4 @@
-using MARN_API.Enums;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Payment;
 using MARN_API.Models;
 

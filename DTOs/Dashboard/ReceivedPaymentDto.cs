@@ -1,3 +1,4 @@
+using MARN_API.Enums.Payment;
 using System;
 
 namespace MARN_API.DTOs.Dashboard
@@ -8,5 +9,6 @@ namespace MARN_API.DTOs.Dashboard
         public long ContractId { get; set; }
         public DateTime PaidAt { get; set; }
         public DateTime AvailableAt { get; set; }
+        public PaymentStatus Status { get; set; }
     }
 }

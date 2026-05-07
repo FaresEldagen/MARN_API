@@ -1,6 +1,6 @@
 using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
-using MARN_API.Enums;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Payment;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
@@ -91,7 +91,7 @@ namespace MARN_API.Repositories.Implementations
             return Context.Payments
                 .Where(p =>
                     p.PaymentSchedule.Contract.Property.OwnerId == userId &&
-                    p.AvailableAt.Date <= DateTime.UtcNow.Date)
+                    p.Status == PaymentStatus.Available)
                 .SumAsync(p => p.OwnerAmount);
         }
 
@@ -100,7 +100,7 @@ namespace MARN_API.Repositories.Implementations
             return Context.Payments
                 .Where(p =>
                     p.PaymentSchedule.Contract.Property.OwnerId == userId &&
-                    p.AvailableAt.Date > DateTime.UtcNow.Date)
+                    p.Status == PaymentStatus.OnHold)
                 .SumAsync(p => p.OwnerAmount);
         }
 
@@ -115,7 +115,8 @@ namespace MARN_API.Repositories.Implementations
                     AmountReceived = p.OwnerAmount,
                     ContractId = p.PaymentSchedule.ContractId,
                     PaidAt = p.PaidAt,
-                    AvailableAt = p.AvailableAt
+                    AvailableAt = p.AvailableAt,
+                    Status = p.Status
                 })
                 .ToListAsync();
         }
@@ -145,12 +146,12 @@ namespace MARN_API.Repositories.Implementations
                 .ToListAsync();
         }
 
-
         public Task UpdatePaymentSchedule(PaymentSchedule paymentSchedule)
         {
             Context.PaymentSchedules.Update(paymentSchedule);
             return Context.SaveChangesAsync();
         }
+
 
         public async Task AddPayment(Payment payment, PaymentSchedule paymentSchedule)
         {
@@ -163,7 +164,6 @@ namespace MARN_API.Repositories.Implementations
 
                 await Context.SaveChangesAsync();
 
-                // Check if this was the last unpaid schedule for the contract
                 bool hasRemainingUnpaid = await Context.PaymentSchedules
                     .AnyAsync(ps =>
                         ps.ContractId == paymentSchedule.ContractId &&
@@ -187,10 +187,26 @@ namespace MARN_API.Repositories.Implementations
                 throw;
             }
         }
-        
+
         public Task<bool> PaymentExistsByIntentId(string paymentIntentId)
         {
             return Context.Payments.AnyAsync(p => p.PaymentIntentId == paymentIntentId);
+        }
+
+        public Task<List<Payment>> GetOnHoldPayments(int skip, int take)
+        {
+            return Context.Payments
+                .Where(p => p.Status == PaymentStatus.OnHold)
+                .OrderBy(p => p.Id)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+        }
+
+        public Task UpdatePayment(Payment payment)
+        {
+            Context.Payments.Update(payment);
+            return Context.SaveChangesAsync();
         }
         #endregion
     }

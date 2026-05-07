@@ -183,6 +183,8 @@ namespace MARN_API
             builder.Services.AddScoped<OpenTimestampsProofReader>();
             builder.Services.AddHttpClient<OpenTimestampsService>();
             builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
+
+            builder.Services.AddHostedService<PaymentScheduleBackgroundService>();
             builder.Services.AddHostedService<PaymentBackgroundService>();
 
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();

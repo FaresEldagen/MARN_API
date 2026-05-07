@@ -3,6 +3,7 @@ using MARN_API.DTOs.Common;
 using MARN_API.DTOs.Contracts;
 using MARN_API.DTOs.Notification;
 using MARN_API.Enums;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Notification;
 using MARN_API.Enums.Property;
 using MARN_API.Models;

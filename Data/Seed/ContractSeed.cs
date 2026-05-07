@@ -1,9 +1,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MARN_API.Enums;
 using MARN_API.Models;
 using MARN_API.Enums.Payment;
+using MARN_API.Enums.Contract;
 
 namespace MARN_API.Data.Seed
 {

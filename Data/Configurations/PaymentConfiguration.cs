@@ -13,6 +13,7 @@ namespace MARN_API.Data.Configurations
             builder.Property(p => p.AmountTotal).HasColumnType("decimal(18,2)");
             builder.Property(p => p.OwnerAmount).HasColumnType("decimal(18,2)");
             builder.Property(p => p.PlatformFee).HasColumnType("decimal(18,2)");
+            builder.Property(p => p.Status).HasConversion<int>();
 
             builder.HasIndex(p => p.AvailableAt);
             builder.HasIndex(p => p.PaymentIntentId).IsUnique();

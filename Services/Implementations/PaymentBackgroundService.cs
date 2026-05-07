@@ -41,82 +41,31 @@ namespace MARN_API.Services.Implementations
                     var repo = scope.ServiceProvider.GetRequiredService<IPaymentRepo>();
                     var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
+                    // Handling OnHold Payments status updates and notifications
                     var skip = 0;
-                    List<PaymentSchedule> batch;
+                    List<Payment> batch;
 
                     do
                     {
-                        batch = await repo.GetPendingPaymentSchedules(skip, BatchSize);
+                        batch = await repo.GetOnHoldPayments(skip, BatchSize);
                         var today = DateTime.UtcNow.Date;
 
-                        foreach (var paymentSchedule in batch)
+                        foreach (var payment in batch)
                         {
-                            var statusChanged = false;
-
-                            if (paymentSchedule.Status == PaymentScheduleStatus.NotAvailableYet &&
-                                paymentSchedule.DueDate.Date - today <= TimeSpan.FromDays(7))
+                            if (payment.Status == PaymentStatus.OnHold &&
+                                payment.AvailableAt.Date <= today)
                             {
-                                paymentSchedule.Status = PaymentScheduleStatus.Available;
-                                statusChanged = true;
-                            }
+                                payment.Status = PaymentStatus.Available;
+                                await repo.UpdatePayment(payment);
 
-                            if ((paymentSchedule.Status == PaymentScheduleStatus.NotAvailableYet ||
-                                paymentSchedule.Status == PaymentScheduleStatus.Available) &&
-                                paymentSchedule.DueDate.Date == today)
-                            {
-                                paymentSchedule.Status = PaymentScheduleStatus.DueToday;
-                                statusChanged = true;
-                            }
-
-                            if ((paymentSchedule.Status == PaymentScheduleStatus.NotAvailableYet ||
-                                paymentSchedule.Status == PaymentScheduleStatus.Available ||
-                                paymentSchedule.Status == PaymentScheduleStatus.DueToday) &&
-                                paymentSchedule.DueDate.Date < today)
-                            {
-                                paymentSchedule.Status = PaymentScheduleStatus.Overdue;
-                                statusChanged = true;
-                            }
-
-                            if (statusChanged)
-                                await repo.UpdatePaymentSchedule(paymentSchedule);
-
-                            if (paymentSchedule.Status == PaymentScheduleStatus.Available)
-                            {
-                                var daysLeft = (int)(paymentSchedule.DueDate.Date - today).TotalDays;
                                 await notificationService.SendNotificationAsync(new NotificationRequestDto
                                 {
-                                    UserId = paymentSchedule.Contract.RenterId.ToString(),
-                                    UserType = NotificationUserType.Renter,
-                                    Type = NotificationType.UpcomingPayment,
-                                    Title = "Upcoming Payment Available",
-                                    Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is now available and can be paid.\n"
-                                         + $"{daysLeft} day(s) left until the due date {paymentSchedule.DueDate:yyyy-MM-dd}."
-                                });
-                            }
-                            else if (paymentSchedule.Status == PaymentScheduleStatus.DueToday)
-                            {
-                                await notificationService.SendNotificationAsync(new NotificationRequestDto
-                                {
-                                    UserId = paymentSchedule.Contract.RenterId.ToString(),
-                                    UserType = NotificationUserType.Renter,
-                                    Type = NotificationType.PaymentArrived,
-                                    Title = "Payment Due Today",
-                                    Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is due today."
-                                });
-                            }
-                            else if (paymentSchedule.Status == PaymentScheduleStatus.Overdue)
-                            {
-                                var daysLate = (int)(today - paymentSchedule.DueDate.Date).TotalDays;
-                                await notificationService.SendNotificationAsync(new NotificationRequestDto
-                                {
-                                    UserId = paymentSchedule.Contract.RenterId.ToString(),
-                                    UserType = NotificationUserType.Renter,
-                                    Type = NotificationType.DelayedPayment,
-                                    Title = "Payment Overdue",
-                                    Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is overdue.\n"
-                                         + $"You are {daysLate} day(s) past the due date.\n\n"
-                                         + "Please complete the payment as soon as possible to avoid any service interruption or further actions in accordance with our terms.\n"
-                                         + "If you have any issues, please contact support."
+                                    UserId = payment.PaymentSchedule.Contract.Property.OwnerId.ToString(),
+                                    UserType = NotificationUserType.Owner,
+                                    Type = NotificationType.AvailableForWithdrawal,
+                                    Title = "Payment Available for Withdrawal",
+                                    Body = $"Your payment of {payment.OwnerAmount} {payment.PaymentSchedule.Currency} from contract \"{payment.PaymentSchedule.Contract.Property.Title}\"\n" +
+                                           $"that paid at {payment.PaidAt:yyyy-MM-dd} is now available for withdrawal."
                                 });
                             }
                         }

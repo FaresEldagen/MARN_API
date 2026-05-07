@@ -1,6 +1,7 @@
 using MARN_API.DTOs.Lookup;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Notification;
 using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
@@ -65,8 +66,6 @@ namespace MARN_API.Controllers
                 ServiceResultTypes = GetEnumValues<ServiceResultType>(),
                 UserActivityTypes = GetEnumValues<UserActivityType>(),
                 ContractAnchoringStatuses = GetEnumValues<ContractAnchoringStatus>(),
-                RentalPaymentStatuses = GetEnumValues<RentalPaymentStatus>(),
-                RentalTransactionStatuses = GetEnumValues<RentalTransactionStatus>(),
                 Cities = GetEnumValues<City>(),
                 Governorates = GetEnumValues<Governorate>(),
                 PropertySortByOptions = GetEnumValues<PropertySortBy>()
@@ -149,12 +148,6 @@ namespace MARN_API.Controllers
 
         [HttpGet("contract-anchoring-statuses")]
         public IActionResult GetContractAnchoringStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractAnchoringStatus>()));
-
-        [HttpGet("rental-payment-statuses")]
-        public IActionResult GetRentalPaymentStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RentalPaymentStatus>()));
-
-        [HttpGet("rental-transaction-statuses")]
-        public IActionResult GetRentalTransactionStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RentalTransactionStatus>()));
 
         [HttpGet("cities")]
         public IActionResult GetCities() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<City>()));
