@@ -24,17 +24,8 @@ namespace MARN_API.Services.Implementations
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //var interval = TimeSpan.FromHours(1);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                var now = DateTime.UtcNow;
-                var nextRun = now.Date.AddDays(1);
-                var delay = nextRun - now;
-
-                _logger.LogInformation("PaymentBackgroundService will run after {Delay}", delay);
-                await Task.Delay(delay, stoppingToken);
-
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
@@ -49,6 +40,7 @@ namespace MARN_API.Services.Implementations
                     {
                         batch = await repo.GetOnHoldPayments(skip, BatchSize);
                         var today = DateTime.UtcNow.Date;
+                        var updatedPayments = new List<Payment>();
 
                         foreach (var payment in batch)
                         {
@@ -56,7 +48,7 @@ namespace MARN_API.Services.Implementations
                                 payment.AvailableAt.Date <= today)
                             {
                                 payment.Status = PaymentStatus.Available;
-                                await repo.UpdatePayment(payment);
+                                updatedPayments.Add(payment);
 
                                 await notificationService.SendNotificationAsync(new NotificationRequestDto
                                 {
@@ -70,16 +62,38 @@ namespace MARN_API.Services.Implementations
                             }
                         }
 
+                        if (updatedPayments.Any())
+                            await repo.UpdatePayments(updatedPayments);
+
                         skip += BatchSize;
 
                     } while (batch.Count == BatchSize);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("PaymentBackgroundService is stopping.");
+                    return;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in PaymentBackgroundService.");
                 }
 
-                //await Task.Delay(interval, stoppingToken);
+                // Schedule next run at midnight UTC
+                var now = DateTime.UtcNow;
+                var nextRun = now.Date.AddDays(1);
+                var delay = nextRun - now;
+
+                _logger.LogInformation("PaymentBackgroundService next run after {Delay}", delay);
+                try
+                {
+                    await Task.Delay(delay, stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("PaymentBackgroundService is stopping.");
+                    return;
+                }
             }
         }
     }

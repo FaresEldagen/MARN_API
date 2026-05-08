@@ -25,6 +25,8 @@ namespace MARN_API.Enums.Notification
 
         PaymentReceived,
         AvailableForWithdrawal,
+        ConnectAccountSuccess,
+        ConnectAccountFailed,
         WithdrawSuccess,
         WithdrawFailed,
 

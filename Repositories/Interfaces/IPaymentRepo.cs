@@ -29,7 +29,9 @@ namespace MARN_API.Repositories.Interfaces
         public Task AddPayment (Payment payment, PaymentSchedule paymentSchedule);
         public Task<bool> PaymentExistsByIntentId(string paymentIntentId);
         public Task<List<Payment>> GetOnHoldPayments(int skip, int take);
-        public Task UpdatePayment(Payment payment);
+        public Task<List<Payment>> GetWithdrawablePayments(Guid userId);
+        public Task UpdatePayments(List<Payment> payments);
+        public Task UpdatePaymentSchedules(List<PaymentSchedule> paymentSchedules);
         #endregion
     }
 }

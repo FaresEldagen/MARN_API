@@ -57,6 +57,75 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
+        /// Creates a Stripe Connect Express account for the owner (if not already created) and returns an onboarding link.
+        /// </summary>
+        /// <response code="200">Returns the Stripe onboarding URL for the owner's Connect account.</response>
+        /// <response code="401">If the user is not authenticated, not found, or not an Owner.</response>
+        /// <response code="400">If saving the Stripe account fails.</response>
+        [Authorize(Roles = "Owner")]
+        [HttpPost("connect-account")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateConnectAccount()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
+
+            var result = await _paymentService.CreateOrGetConnectOnboardingLink(userId);
+            return HandleServiceResult(result);
+        }
+
+
+        /// <summary>
+        /// Withdraws all available (non-held) funds to the owner's connected Stripe account.
+        /// </summary>
+        /// <response code="200">Withdrawal initiated successfully.</response>
+        /// <response code="401">If the user is not authenticated or not an Owner.</response>
+        /// <response code="400">If no funds are available, Stripe account is not connected, or Stripe transfer fails.</response>
+        [Authorize(Roles = "Owner")]
+        [HttpPost("withdraw")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Withdraw()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
+
+            var result = await _paymentService.Withdraw(userId);
+            return HandleServiceResult(result);
+        }
+
+
+        /// <summary>
+        /// [TEST ONLY] Toops up the Stripe platform balance with 100000 USD (Available balance).
+        /// Use this to test withdrawals if you have insufficient funds in test mode.
+        /// </summary>
+        [Authorize(Roles = "Owner")]
+        [HttpPost("topup-test-balance")]
+        public async Task<IActionResult> TopUpTestBalance()
+        {
+            var result = await _paymentService.TopUpPlatformBalanceForTesting();
+            return HandleServiceResult(result);
+        }
+
+        /// <summary>
+        /// [TEST ONLY] Checks the Stripe balance of the platform account and the owner's connected account.
+        /// </summary>
+        [Authorize(Roles = "Owner")]
+        [HttpGet("check-balance")]
+        public async Task<IActionResult> CheckBalance()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
+
+            var result = await _paymentService.CheckBalances(userId);
+            return HandleServiceResult(result);
+        }
+
+
+        /// <summary>
         /// Stripe Webhook endpoint to handle payment events (success, failure, processing). [No thing to deal with as a frontend or flutter]
         /// </summary>
         /// <response code="200">Webhook processed successfully.</response>
@@ -67,36 +136,70 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Webhook()
         {
+            _logger.LogInformation("Incoming Stripe Webhook request received.");
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
+            Event stripeEvent;
             try
             {
-                var stripeEvent = EventUtility.ConstructEvent(
+                // Try validating with the standard webhook secret first
+                stripeEvent = EventUtility.ConstructEvent(
                     json,
                     Request.Headers["Stripe-Signature"],
                     _configuration["Stripe:WebhookSecret"]
                 );
-
-                var intent = stripeEvent.Data.Object as PaymentIntent;
-
-                if (stripeEvent.Type == "payment_intent.succeeded")
-                {
-                    await _paymentService.HandleSuccessfulPayment(intent!);
-                }
-                else if (stripeEvent.Type == "payment_intent.payment_failed")
-                {
-                    await _paymentService.HandleFailedPayment(intent!);
-                }
-                else if (stripeEvent.Type == "payment_intent.processing")
-                {
-                    _logger.LogInformation("Payment is processing...");
-                }
             }
-            catch (StripeException e)
+            catch (StripeException)
             {
-                _logger.LogError(e, "Stripe webhook signature validation failed: {Message}", e.StripeError?.Message);
-                return BadRequest();
+                try
+                {
+                    // If that fails, try the Connect webhook secret
+                    stripeEvent = EventUtility.ConstructEvent(
+                        json,
+                        Request.Headers["Stripe-Signature"],
+                        _configuration["Stripe:ConnectWebhookSecret"]
+                    );
+                }
+                catch (StripeException e)
+                {
+                    _logger.LogError(e, "Stripe webhook signature validation failed for both standard and Connect secrets: {Message}", e.StripeError?.Message);
+                    return BadRequest();
+                }
             }
+            
+            _logger.LogInformation("Stripe Webhook signature validated. Event Type: {EventType}", stripeEvent.Type);
+
+            if (stripeEvent.Type == "payment_intent.succeeded")
+            {
+                var intent = stripeEvent.Data.Object as PaymentIntent;
+                await _paymentService.HandleSuccessfulPayment(intent!);
+            }
+            else if (stripeEvent.Type == "payment_intent.payment_failed")
+            {
+                var intent = stripeEvent.Data.Object as PaymentIntent;
+                await _paymentService.HandleFailedPayment(intent!);
+            }
+            else if (stripeEvent.Type == "payment_intent.processing")
+            {
+                _logger.LogInformation("Payment is processing...");
+            }
+
+            else if (stripeEvent.Type == "account.updated")
+            {
+                var account = stripeEvent.Data.Object as Account;
+                await _paymentService.HandleConnectedAccountUpdated(account!);
+            }
+
+            else if (stripeEvent.Type == "transfer.created")
+            {
+                var transfer = stripeEvent.Data.Object as Transfer;
+                await _paymentService.HandleTransferCreated(transfer!);
+            }
+            //else if (stripeEvent.Type == "transfer.reversed")
+            //{
+            //    var transfer = stripeEvent.Data.Object as Transfer;
+            //    await _paymentService.HandleTransferReversed(transfer!);
+            //}
 
             return Ok();
         }

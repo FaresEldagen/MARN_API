@@ -205,6 +205,11 @@ namespace MARN_API.Services.Implementations
                 ReceivedPayments = receivedPayments
             };
 
+            if (user is Owner owner)
+            {
+                dashboardData.StripeAccountEnabled = owner.StripePayoutsEnabled && owner.StripeChargesEnabled;
+            }
+
 
 
             _logger.LogInformation("Get Owner Dashboard Data successful for userId: {userId}", userId);

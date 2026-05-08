@@ -24,17 +24,8 @@ namespace MARN_API.Services.Implementations
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //var interval = TimeSpan.FromHours(1);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                var now = DateTime.UtcNow;
-                var nextRun = now.Date.AddDays(1);
-                var delay = nextRun - now;
-
-                _logger.LogInformation("PaymentBackgroundService will run after {Delay}", delay);
-                await Task.Delay(delay, stoppingToken);
-
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
@@ -49,6 +40,7 @@ namespace MARN_API.Services.Implementations
                     {
                         batch = await repo.GetPendingPaymentSchedules(skip, BatchSize);
                         var today = DateTime.UtcNow.Date;
+                        var updatedSchedules = new List<PaymentSchedule>();
 
                         foreach (var paymentSchedule in batch)
                         {
@@ -79,9 +71,12 @@ namespace MARN_API.Services.Implementations
                             }
 
                             if (statusChanged)
-                                await repo.UpdatePaymentSchedule(paymentSchedule);
+                            {
+                                updatedSchedules.Add(paymentSchedule);
+                            }
 
-                            if (paymentSchedule.Status == PaymentScheduleStatus.Available)
+                            // Notifications are sent based on the (potentially updated) status
+                            if (paymentSchedule.Status == PaymentScheduleStatus.Available && statusChanged)
                             {
                                 var daysLeft = (int)(paymentSchedule.DueDate.Date - today).TotalDays;
                                 await notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -94,7 +89,7 @@ namespace MARN_API.Services.Implementations
                                          + $"{daysLeft} day(s) left until the due date {paymentSchedule.DueDate:yyyy-MM-dd}."
                                 });
                             }
-                            else if (paymentSchedule.Status == PaymentScheduleStatus.DueToday)
+                            else if (paymentSchedule.Status == PaymentScheduleStatus.DueToday && statusChanged)
                             {
                                 await notificationService.SendNotificationAsync(new NotificationRequestDto
                                 {
@@ -105,7 +100,7 @@ namespace MARN_API.Services.Implementations
                                     Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is due today."
                                 });
                             }
-                            else if (paymentSchedule.Status == PaymentScheduleStatus.Overdue)
+                            else if (paymentSchedule.Status == PaymentScheduleStatus.Overdue && statusChanged)
                             {
                                 var daysLate = (int)(today - paymentSchedule.DueDate.Date).TotalDays;
                                 await notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -122,16 +117,40 @@ namespace MARN_API.Services.Implementations
                             }
                         }
 
+                        if (updatedSchedules.Any())
+                        {
+                            await repo.UpdatePaymentSchedules(updatedSchedules);
+                        }
+
                         skip += BatchSize;
 
                     } while (batch.Count == BatchSize);
                 }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("PaymentScheduleBackgroundService is stopping.");
+                    return;
+                }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in PaymentBackgroundService.");
+                    _logger.LogError(ex, "Error occurred in PaymentScheduleBackgroundService.");
                 }
 
-                //await Task.Delay(interval, stoppingToken);
+                // Schedule next run at midnight UTC
+                var now = DateTime.UtcNow;
+                var nextRun = now.Date.AddDays(1);
+                var delay = nextRun - now;
+
+                _logger.LogInformation("PaymentScheduleBackgroundService next run after {Delay}", delay);
+                try
+                {
+                    await Task.Delay(delay, stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("PaymentScheduleBackgroundService is stopping.");
+                    return;
+                }
             }
         }
     }

@@ -196,6 +196,9 @@ namespace MARN_API.Repositories.Implementations
         public Task<List<Payment>> GetOnHoldPayments(int skip, int take)
         {
             return Context.Payments
+                .Include(p => p.PaymentSchedule)
+                    .ThenInclude(ps => ps.Contract)
+                        .ThenInclude(c => c.Property)
                 .Where(p => p.Status == PaymentStatus.OnHold)
                 .OrderBy(p => p.Id)
                 .Skip(skip)
@@ -203,9 +206,24 @@ namespace MARN_API.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public Task UpdatePayment(Payment payment)
+        public Task<List<Payment>> GetWithdrawablePayments(Guid userId)
         {
-            Context.Payments.Update(payment);
+            return Context.Payments
+                .Where(p =>
+                    p.PaymentSchedule.Contract.Property.OwnerId == userId &&
+                    p.Status == PaymentStatus.Available)
+                .ToListAsync();
+        }
+
+        public Task UpdatePayments(List<Payment> payments)
+        {
+            Context.Payments.UpdateRange(payments);
+            return Context.SaveChangesAsync();
+        }
+
+        public Task UpdatePaymentSchedules(List<PaymentSchedule> paymentSchedules)
+        {
+            Context.PaymentSchedules.UpdateRange(paymentSchedules);
             return Context.SaveChangesAsync();
         }
         #endregion

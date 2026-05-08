@@ -265,7 +265,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId", "RenterId");
 
-                    b.ToTable("BookingRequests", t =>
+                    b.ToTable("BookingRequests", null, t =>
                         {
                             t.HasCheckConstraint("CK_BookingRequest_Dates", "[EndDate] > [StartDate]");
                         });
@@ -384,7 +384,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId", "RenterId");
 
-                    b.ToTable("Contracts", t =>
+                    b.ToTable("Contracts", null, t =>
                         {
                             t.HasCheckConstraint("CK_Contract_Dates", "[LeaseEndDate] IS NULL OR [LeaseStartDate] IS NULL OR [LeaseEndDate] > [LeaseStartDate]");
                         });
@@ -537,7 +537,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
 
                     b.HasData(
                         new
@@ -605,7 +605,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
 
                     b.HasData(
                         new
@@ -811,7 +811,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PaymentScheduleId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
 
                     b.HasData(
                         new
@@ -1029,7 +1029,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("ContractId", "DueDate");
 
-                    b.ToTable("PaymentSchedules");
+                    b.ToTable("PaymentSchedules", (string)null);
 
                     b.HasData(
                         new
@@ -1407,7 +1407,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("Properties");
+                    b.ToTable("Properties", (string)null);
 
                     b.HasData(
                         new
@@ -1538,7 +1538,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyAmenities");
+                    b.ToTable("PropertyAmenities", (string)null);
 
                     b.HasData(
                         new
@@ -1654,7 +1654,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PropertyComments");
+                    b.ToTable("PropertyComments", (string)null);
 
                     b.HasData(
                         new
@@ -1705,7 +1705,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyMedia");
+                    b.ToTable("PropertyMedia", (string)null);
 
                     b.HasData(
                         new
@@ -1770,7 +1770,7 @@ namespace MARN_API.Migrations
                     b.HasIndex("PropertyId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("PropertyRatings", t =>
+                    b.ToTable("PropertyRatings", null, t =>
                         {
                             t.HasCheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
                         });
@@ -1821,7 +1821,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyRules");
+                    b.ToTable("PropertyRules", (string)null);
 
                     b.HasData(
                         new
@@ -1903,7 +1903,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reports");
+                    b.ToTable("Reports", (string)null);
 
                     b.HasData(
                         new
@@ -1971,7 +1971,7 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("RoommatePreferences", t =>
+                    b.ToTable("RoommatePreferences", null, t =>
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
                         });
@@ -2025,7 +2025,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SavedProperties");
+                    b.ToTable("SavedProperties", (string)null);
 
                     b.HasData(
                         new
@@ -2087,7 +2087,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId", "Type", "CreatedAt");
 
-                    b.ToTable("UserActivities");
+                    b.ToTable("UserActivities", (string)null);
 
                     b.HasData(
                         new
@@ -2129,7 +2129,7 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserDevices");
+                    b.ToTable("UserDevices", (string)null);
 
                     b.HasData(
                         new

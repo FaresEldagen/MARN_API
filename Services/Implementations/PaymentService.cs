@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using MARN_API.Enums.Notification;
 using MARN_API.DTOs.Notification;
 using Stripe;
+using MARN_API.DTOs.Dashboard;
 
 
 namespace MARN_API.Services.Implementations
@@ -20,6 +21,7 @@ namespace MARN_API.Services.Implementations
         private readonly IPaymentRepo _paymentRepo;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<PaymentService> _logger;
         private readonly IConfiguration _configuration;
 
@@ -27,6 +29,7 @@ namespace MARN_API.Services.Implementations
             IPaymentRepo paymentRepo,
             IMapper mapper,
             INotificationService notificationService,
+            UserManager<ApplicationUser> userManager,
             ILogger<PaymentService> logger,
             IConfiguration configuration)
 
@@ -34,6 +37,7 @@ namespace MARN_API.Services.Implementations
             _paymentRepo = paymentRepo;
             _mapper = mapper;
             _notificationService = notificationService;
+            _userManager = userManager;
             _logger = logger;
             _configuration = configuration;
         }
@@ -119,6 +123,222 @@ namespace MARN_API.Services.Implementations
             }
         }
 
+        public async Task<ServiceResult<string>> CreateOrGetConnectOnboardingLink(Guid userId)
+        {
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == userId);
+            if (owner == null)
+            {
+                _logger.LogWarning("Create Connect Account failed: Owner not found for userId: {userId}", userId);
+                return ServiceResult<string>.Fail("Owner not found", resultType: ServiceResultType.Unauthorized);
+            }
+
+            var accountService = new Stripe.AccountService();
+
+            try
+            {
+                if (string.IsNullOrEmpty(owner.StripeAccountId))
+                {
+                    var accountOptions = new AccountCreateOptions
+                    {
+                        Type = "express",
+                        Country = "EG",
+                        Email = owner.Email,
+                        Capabilities = new AccountCapabilitiesOptions
+                        {
+                            Transfers = new AccountCapabilitiesTransfersOptions
+                            {
+                                Requested = true
+                            }
+                        },
+                        TosAcceptance = new AccountTosAcceptanceOptions
+                        {
+                            ServiceAgreement = "recipient"
+                        }
+                    };
+
+                    var account = await accountService.CreateAsync(accountOptions);
+
+                    owner.StripeAccountId = account.Id;
+
+                    var updateResult = await _userManager.UpdateAsync(owner);
+                    if (!updateResult.Succeeded)
+                    {
+                        _logger.LogError("Failed to save StripeAccountId for ownerId: {OwnerId}. Errors: {Errors}",
+                            userId, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+                        return ServiceResult<string>.Fail("Failed to save Stripe account. Please try again.", resultType: ServiceResultType.BadRequest);
+                    }
+                }
+
+                // Create onboarding link
+                var accountLinkService = new AccountLinkService();
+
+                var linkOptions = new AccountLinkCreateOptions
+                {
+                    Account = owner.StripeAccountId,
+                    RefreshUrl = _configuration["Stripe:RefreshUrl"],
+                    ReturnUrl = _configuration["Stripe:ReturnUrl"],
+                    Type = "account_onboarding"
+                };
+
+                var accountLink = await accountLinkService.CreateAsync(linkOptions);
+
+                return ServiceResult<string>.Ok(
+                    accountLink.Url,
+                    "Onboarding link created successfully.",
+                    ServiceResultType.Success);
+            }
+            catch (StripeException e)
+            {
+                _logger.LogError(e, "Stripe API Error while creating Connect account or link for userId: {UserId}. Error: {Message}", userId, e.StripeError?.Message);
+                return ServiceResult<string>.Fail(e.StripeError?.Message ?? "Payment provider error.", resultType: ServiceResultType.BadRequest);
+            }
+        }
+
+        public async Task<ServiceResult<bool>> Withdraw(Guid ownerId)
+        {
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == ownerId);
+            if (owner == null)
+            {
+                _logger.LogWarning("Withdraw failed: Owner not found for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("Owner not found", resultType: ServiceResultType.Unauthorized);
+            }
+
+            if (string.IsNullOrEmpty(owner.StripeAccountId) ||
+                !owner.StripePayoutsEnabled ||
+                !owner.StripeChargesEnabled)
+            {
+                _logger.LogWarning("Withdraw failed: Stripe account not connected for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("Stripe account not connected. Please connect your Stripe account first.", resultType: ServiceResultType.BadRequest);
+            }
+
+            var withdrawablePayments = await _paymentRepo.GetWithdrawablePayments(ownerId);
+
+            if (!withdrawablePayments.Any())
+            {
+                _logger.LogWarning("Withdraw failed: No available funds for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("No funds available for withdrawal.", resultType: ServiceResultType.BadRequest);
+            }
+
+            var amount = withdrawablePayments.Sum(p => p.OwnerAmount);
+
+            // Mark payments as Withdrawn before calling Stripe to prevent double-withdraw on concurrent requests
+            foreach (var payment in withdrawablePayments)
+                payment.Status = PaymentStatus.Withdrawn;
+
+            await _paymentRepo.UpdatePayments(withdrawablePayments);
+
+            var transferService = new TransferService();
+            try
+            {
+                // Detect platform's available currency to avoid "insufficient funds" if currencies mismatch
+                var balanceService = new BalanceService();
+                var platformBalance = await balanceService.GetAsync();
+
+                var usdBalance = platformBalance.Available
+                    .FirstOrDefault(b => b.Currency.ToLower() == "usd");
+                if (usdBalance == null || usdBalance.Amount <= 0)
+                {
+                    return ServiceResult<bool>.Fail(
+                        "No USD balance available.",
+                        resultType: ServiceResultType.BadRequest);
+                }
+
+                var transferCurrency = "usd";
+                var transferAmount = amount / 50m; 
+
+                var transferOptions = new TransferCreateOptions
+                {
+                    Amount = (long)(transferAmount * 100),
+                    Currency = transferCurrency,
+                    Destination = owner.StripeAccountId,
+                    SourceType = "card",
+                };
+                var transfer = await transferService.CreateAsync(transferOptions);
+
+                _logger.LogInformation("Withdraw successful for ownerId: {ownerId}, amount: {amount} {currency}", ownerId, transferAmount, transferCurrency);
+                return ServiceResult<bool>.Ok(true, $"Withdrawal of {transferAmount} {transferCurrency.ToUpper()} initiated successfully.", ServiceResultType.Success);
+            }
+            catch (StripeException e)
+            {
+                // Revert payment statuses back to Available since Stripe transfer failed
+                foreach (var payment in withdrawablePayments)
+                    payment.Status = PaymentStatus.Available;
+
+                await _paymentRepo.UpdatePayments(withdrawablePayments);
+
+                _logger.LogError(e, "Stripe API Error while creating transfer for ownerId: {ownerId}. Payment statuses reverted.", ownerId);
+                return ServiceResult<bool>.Fail(e.StripeError?.Message ?? "Payment provider error.", resultType: ServiceResultType.BadRequest);
+            }
+        }
+
+
+        public async Task<ServiceResult<bool>> TopUpPlatformBalanceForTesting()
+        {
+            _logger.LogInformation("Top-up Platform Balance for testing attempt.");
+
+            try
+            {
+                var options = new ChargeCreateOptions
+                {
+                    Amount = 10000000, // $100,000 USD
+                    Currency = "usd",
+                    Source = "tok_bypassPending",
+                    Description = "Test Top-up (USD) for Withdrawal testing",
+                };
+                var service = new ChargeService();
+                await service.CreateAsync(options);
+
+                _logger.LogInformation("Platform balance topped up successfully with 500,000 EGP (Available).");
+                return ServiceResult<bool>.Ok(true, "Platform balance topped up successfully with 500,000 EGP (Available).", ServiceResultType.Success);
+            }
+            catch (StripeException e)
+            {
+                _logger.LogError(e, "Stripe API Error while topping up platform balance: {Message}", e.StripeError?.Message);
+                var message = e.StripeError?.Message ?? "Payment provider error.";
+                if (e.StripeError?.Code == "balance_insufficient")
+                {
+                    message += " (Test Tip: Use the 'topup-test-balance' endpoint to add available funds to your Stripe platform account for testing).";
+                }
+
+                return ServiceResult<bool>.Fail(message, resultType: ServiceResultType.BadRequest);
+            }
+        }
+
+        public async Task<ServiceResult<object>> CheckBalances(Guid ownerId)
+        {
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == ownerId);
+            if (owner == null) return ServiceResult<object>.Fail("Owner not found");
+
+            try
+            {
+                var balanceService = new BalanceService();
+                
+                // Platform balance
+                var platformBalance = await balanceService.GetAsync();
+
+                // Connected account balance
+                Balance? connectedBalance = null;
+                if (!string.IsNullOrEmpty(owner.StripeAccountId))
+                {
+                    var requestOptions = new RequestOptions { StripeAccount = owner.StripeAccountId };
+                    connectedBalance = await balanceService.GetAsync(requestOptions);
+                }
+
+                return ServiceResult<object>.Ok(new
+                {
+                    Platform = platformBalance,
+                    ConnectedAccount = connectedBalance,
+                    OwnerStripeId = owner.StripeAccountId
+                }, "Balances retrieved successfully.");
+            }
+            catch (StripeException e)
+            {
+                return ServiceResult<object>.Fail(e.Message);
+            }
+        }
+
+
+        #region Stripe Webhook Handlers
         public async Task HandleSuccessfulPayment(PaymentIntent paymentIntent)
         {
             _logger.LogInformation("Handle Successful Payment attempt for PaymentIntentId: {PaymentIntentId}", paymentIntent.Id);
@@ -177,7 +397,9 @@ namespace MARN_API.Services.Implementations
                 Title = "Payment Received",
                 Body = $"You have received a payment of {payment.OwnerAmount} {payment.Currency} for \"{paymentSchedule.Contract.Property.Title}\".\n" +
                        $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}.\n\n" +
-                       $"You can withdraw this amount after {payment.AvailableAt.ToString("yyyy-MM-dd")}."
+                       $"You can withdraw this amount after {payment.AvailableAt.ToString("yyyy-MM-dd")}.",
+
+                ActionType = NotificationActionType.OwnerDashboard
             });
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -187,7 +409,9 @@ namespace MARN_API.Services.Implementations
                 Type = NotificationType.PaymentSuccessful,
                 Title = "Payment Successful",
                 Body = $"Your payment of {payment.AmountTotal} {payment.Currency} for \"{paymentSchedule.Contract.Property.Title}\" has been successful.\n" +
-                       $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}."
+                       $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}.",
+
+                ActionType = NotificationActionType.RenterDashboard
             });
         }
 
@@ -197,7 +421,7 @@ namespace MARN_API.Services.Implementations
 
             var scheduleIdString = paymentIntent.Metadata["paymentScheduleId"];
             var errorMessage = paymentIntent.LastPaymentError?.Message ?? "Unknown payment error";
-            
+
             var paymentSchedule = await _paymentRepo.GetPaymentScheduleById(long.Parse(scheduleIdString));
             if (paymentSchedule != null)
             {
@@ -207,7 +431,9 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.Renter,
                     Type = NotificationType.PaymentFailed,
                     Title = "Payment Failed",
-                    Body = $"Your payment for \"{paymentSchedule.Contract.Property.Title}\" has failed. \n Please try again."
+                    Body = $"Your payment for \"{paymentSchedule.Contract.Property.Title}\" has failed. \n Please try again.",
+
+                    ActionType = NotificationActionType.RenterDashboard
                 });
 
                 _logger.LogInformation("Handle Failed Payment processed for paymentScheduleId: {paymentScheduleId}. Error: {Error}", scheduleIdString, errorMessage);
@@ -217,5 +443,101 @@ namespace MARN_API.Services.Implementations
                 _logger.LogError("Handle Failed Payment failed: Payment schedule not found for Id: {paymentScheduleId}", scheduleIdString);
             }
         }
+
+
+        public async Task HandleConnectedAccountUpdated(Account account)
+        {
+            _logger.LogInformation("Handle Connected Account Updated attempt for StripeAccountId: {StripeAccountId}", account.Id);
+
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.StripeAccountId == account.Id);
+            if (owner == null)
+            {
+                _logger.LogError("Handle Connected Account Updated failed: Owner not found for StripeAccountId: {StripeAccountId}", account.Id);
+                return;
+            }
+
+            owner.StripePayoutsEnabled = account.PayoutsEnabled;
+            owner.StripeChargesEnabled = account.ChargesEnabled;
+            var result = await _userManager.UpdateAsync(owner);
+
+            if (account.ChargesEnabled && account.PayoutsEnabled)
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = owner.Id.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.ConnectAccountSuccess,
+                    Title = "Connect Account Activated",
+                    Body = "Your Stripe Connect account has been activated and is now ready to withdraw your payments.",
+
+                    ActionType = NotificationActionType.OwnerDashboard
+                });
+
+                _logger.LogInformation("Handle Connected Account Updated successful: Connect account activated for ownerId: {OwnerId}", owner.Id);
+            }
+            else
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = owner.Id.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.ConnectAccountFailed,
+                    Title = "Connect Account Failed",
+                    Body = "Your Stripe Connect account is not fully activated. Please complete the onboarding process to enable charges and payouts.",
+
+                    ActionType = NotificationActionType.OwnerDashboard
+                });
+
+                _logger.LogInformation("Handle Connected Account Updated: Charges and payouts not enabled for StripeAccountId: {StripeAccountId}", account.Id);
+            }
+        }
+
+
+        public async Task HandleTransferCreated(Transfer transfer)
+        {
+            var owner = await _userManager.Users.OfType<Owner>()
+                .FirstOrDefaultAsync(o => o.StripeAccountId == transfer.DestinationId);
+
+            if (owner == null)
+            {
+                _logger.LogError("HandleTransferCreated: Owner not found for StripeAccountId: {StripeAccountId}", transfer.DestinationId);
+                return;
+            }
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = owner.Id.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.WithdrawSuccess,
+                Title = "Withdrawal Initiated",
+                Body = $"A withdrawal of {(transfer.Amount / 100m)} {transfer.Currency.ToUpper()} has been initiated to your connected account.\n" +
+                $"It should reflect in your bank account within a few business days.",
+
+                ActionType = NotificationActionType.OwnerDashboard
+            });
+        }
+
+        public async Task HandleTransferReversed(Transfer transfer)
+        {
+            var owner = await _userManager.Users.OfType<Owner>()
+                .FirstOrDefaultAsync(o => o.StripeAccountId == transfer.DestinationId);
+
+            if (owner == null)
+            {
+                _logger.LogError("HandleTransferReversed: Owner not found for StripeAccountId: {StripeAccountId}", transfer.DestinationId);
+                return;
+            }
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = owner.Id.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.WithdrawFailed,
+                Title = "Withdrawal Failed",
+                Body = $"A withdrawal of {(transfer.Amount / 100m)} {transfer.Currency.ToUpper()} to your connected account has failed. Please check your Stripe dashboard for details.",
+                ActionType = NotificationActionType.OwnerDashboard
+            });
+        }
+        #endregion
     }
 }

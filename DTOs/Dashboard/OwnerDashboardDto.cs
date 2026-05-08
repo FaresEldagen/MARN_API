@@ -30,5 +30,7 @@ namespace MARN_API.DTOs.Dashboard
 
         public AccountStatus AccountStatus { get; set; }
         public ICollection<ReceivedPaymentDto>? ReceivedPayments { get; set; }
+
+        public bool StripeAccountEnabled { get; set; }
     }
-}
+}
