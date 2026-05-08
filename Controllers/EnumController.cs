@@ -1,7 +1,9 @@
 using MARN_API.DTOs.Lookup;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Notification;
+using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 using MARN_API.Enums.RoommatePreferences;
 using MARN_API.Models;
@@ -53,7 +55,6 @@ namespace MARN_API.Controllers
                 SleepSchedules = GetEnumValues<SleepSchedule>(),
                 WorkSchedules = GetEnumValues<WorkSchedule>(),
                 ContractStatuses = GetEnumValues<ContractStatus>(),
-                PaymentStatuses = GetEnumValues<PaymentStatus>(),
                 PaymentFrequencies = GetEnumValues<PaymentFrequency>(),
                 ReportStatuses = GetEnumValues<ReportStatus>(),
                 ReportableTypes = GetEnumValues<ReportableType>(),
@@ -65,8 +66,6 @@ namespace MARN_API.Controllers
                 ServiceResultTypes = GetEnumValues<ServiceResultType>(),
                 UserActivityTypes = GetEnumValues<UserActivityType>(),
                 ContractAnchoringStatuses = GetEnumValues<ContractAnchoringStatus>(),
-                RentalPaymentStatuses = GetEnumValues<RentalPaymentStatus>(),
-                RentalTransactionStatuses = GetEnumValues<RentalTransactionStatus>(),
                 Cities = GetEnumValues<City>(),
                 Governorates = GetEnumValues<Governorate>(),
                 PropertySortByOptions = GetEnumValues<PropertySortBy>()
@@ -117,9 +116,6 @@ namespace MARN_API.Controllers
         [HttpGet("contract-statuses")]
         public IActionResult GetContractStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractStatus>()));
 
-        [HttpGet("payment-statuses")]
-        public IActionResult GetPaymentStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentStatus>()));
-
         [HttpGet("payment-frequencies")]
         public IActionResult GetPaymentFrequencies() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentFrequency>()));
 
@@ -152,12 +148,6 @@ namespace MARN_API.Controllers
 
         [HttpGet("contract-anchoring-statuses")]
         public IActionResult GetContractAnchoringStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractAnchoringStatus>()));
-
-        [HttpGet("rental-payment-statuses")]
-        public IActionResult GetRentalPaymentStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RentalPaymentStatus>()));
-
-        [HttpGet("rental-transaction-statuses")]
-        public IActionResult GetRentalTransactionStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RentalTransactionStatus>()));
 
         [HttpGet("cities")]
         public IActionResult GetCities() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<City>()));

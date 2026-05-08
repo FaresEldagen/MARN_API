@@ -1,6 +1,6 @@
 using System.Globalization;
 using MARN_API.DTOs.Contracts;
-using MARN_API.Enums;
+using MARN_API.Enums.Payment;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;

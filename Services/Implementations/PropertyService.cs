@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using MARN_API.Enums.Contract;
 
 namespace MARN_API.Services.Implementations
 {
@@ -119,6 +120,9 @@ namespace MARN_API.Services.Implementations
             {
                 foreach (var rule in dto.Rules)
                 {
+                    if (string.IsNullOrWhiteSpace(rule))
+                        continue;
+
                     await _ruleRepo.AddByPropertyIdAsync(property.Id, new PropertyRule { Rule = rule });
                 }
             }
@@ -238,7 +242,14 @@ namespace MARN_API.Services.Implementations
 
             dto.Amenities = _mapper.Map<System.Collections.Generic.List<PropertyAmenityDto>>(amenities);
             dto.Rules = _mapper.Map<System.Collections.Generic.List<PropertyRuleDto>>(rules);
-            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(media);
+            
+            // Populate individual fields
+            dto.PrimaryImageUrl = media.FirstOrDefault(m => m.IsPrimary)?.Path ?? string.Empty;
+            dto.ProofOfOwnershipUrl = property.ProofOfOwnership;
+
+            // Exclude primary image from media list
+            var galleryMedia = media.Where(m => !m.IsPrimary).ToList();
+            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(galleryMedia);
 
             return ServiceResult<PropertyEditDataDto>.Ok(dto);
         }
@@ -254,15 +265,16 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Your account must be verified to edit a property.", resultType: ServiceResultType.Unauthorized);
             }
 
-            if (dto.AddedMediaFiles != null && dto.AddedMediaFiles.Count > 10)
-            {
-                return ServiceResult<bool>.Fail("You cannot add more than 10 images at once.", resultType: ServiceResultType.BadRequest);
-            }
-
             var property = await _propertyRepo.GetByIdAsync(propertyId);
             if (property == null)
             {
                 return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            if (dto.AddedMediaFiles != null && 
+                (property.Media.Count + dto.AddedMediaFiles.Count - dto.RemovedMediaIds.Count) > 9)
+            {
+                return ServiceResult<bool>.Fail("You cannot add more than 10 images at once.", resultType: ServiceResultType.BadRequest);
             }
 
             if (property.OwnerId != userId)
@@ -406,7 +418,7 @@ namespace MARN_API.Services.Implementations
             property.IsActive = !property.IsActive;
             await _propertyRepo.UpdatePropertyAsync(property);
 
-            return ServiceResult<bool>.Ok(true, "Property activation toggled.");
+            return ServiceResult<bool>.Ok(property.IsActive, property.IsActive ? "Property activated successfully." : "Property deactivated successfully.");
         }
 
         public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId)

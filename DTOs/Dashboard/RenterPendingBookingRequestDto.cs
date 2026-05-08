@@ -1,4 +1,4 @@
-﻿using MARN_API.Enums;
+﻿using MARN_API.Enums.Payment;
 
 namespace MARN_API.DTOs.Dashboard
 {

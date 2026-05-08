@@ -3,6 +3,7 @@ using MARN_API.DTOs.Common;
 using MARN_API.DTOs.Contracts;
 using MARN_API.DTOs.Notification;
 using MARN_API.Enums;
+using MARN_API.Enums.Contract;
 using MARN_API.Enums.Notification;
 using MARN_API.Enums.Property;
 using MARN_API.Models;
@@ -201,7 +202,17 @@ namespace MARN_API.Services.Implementations
             contract.TransactionId = proofData.TransactionIds.FirstOrDefault();
             contract.MerkleRoot = proofData.MerkleRoots.FirstOrDefault();
 
-            await _repo.UpdateAsync(contract);
+            try
+            {
+                await _repo.SignContractAsync(contract);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Sign Contract failed: Could not persist contract or generate payment schedules for contractId: {contractId}", contractId);
+                return ServiceResult<ContractResponseDto>.Fail(
+                    "An error occurred while saving the contract and generating payment schedules. Please try again.",
+                    resultType: ServiceResultType.InternalError);
+            }
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {

@@ -27,6 +27,9 @@ namespace MARN_API.DTOs.Property
         public List<PropertyAmenityDto> Amenities { get; set; } = new List<PropertyAmenityDto>();
         public List<PropertyRuleDto> Rules { get; set; } = new List<PropertyRuleDto>();
         public List<PropertyMediaDto> Media { get; set; } = new List<PropertyMediaDto>();
+        public string PrimaryImageUrl { get; set; } = string.Empty;
+        public string ProofOfOwnershipUrl { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
     }
 
     public class PropertyAmenityDto
@@ -45,6 +48,5 @@ namespace MARN_API.DTOs.Property
     {
         public long Id { get; set; }
         public string Path { get; set; } = string.Empty;
-        public bool IsPrimary { get; set; }
     }
 }

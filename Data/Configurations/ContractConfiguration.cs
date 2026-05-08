@@ -15,9 +15,11 @@ namespace MARN_API.Data.Configurations
             builder.Property(c => c.LeaseEndDate).IsRequired().HasColumnType("date");
             builder.Property(c => c.PropertyId).IsRequired();
             builder.Property(c => c.RenterId).IsRequired();
+            builder.Property(c => c.TotalContractAmount).HasColumnType("decimal(18,2)");
 
             builder.Property(c => c.Status).HasConversion<int>();
             builder.Property(c => c.AnchoringStatus).HasConversion<int>();
+            builder.Property(c => c.PaymentFrequency).HasConversion<int>();
             builder.Property(c => c.CreatedAt)
                    .HasDefaultValueSql("GETUTCDATE()");
             builder.ToTable(t => t.HasCheckConstraint("CK_Contract_Dates", "[LeaseEndDate] IS NULL OR [LeaseStartDate] IS NULL OR [LeaseEndDate] > [LeaseStartDate]"));

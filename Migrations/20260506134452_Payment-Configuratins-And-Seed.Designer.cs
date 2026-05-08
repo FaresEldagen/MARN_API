@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506134452_Payment-Configuratins-And-Seed")]
+    partial class PaymentConfiguratinsAndSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -265,7 +268,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId", "RenterId");
 
-                    b.ToTable("BookingRequests", null, t =>
+                    b.ToTable("BookingRequests", t =>
                         {
                             t.HasCheckConstraint("CK_BookingRequest_Dates", "[EndDate] > [StartDate]");
                         });
@@ -384,7 +387,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId", "RenterId");
 
-                    b.ToTable("Contracts", null, t =>
+                    b.ToTable("Contracts", t =>
                         {
                             t.HasCheckConstraint("CK_Contract_Dates", "[LeaseEndDate] IS NULL OR [LeaseStartDate] IS NULL OR [LeaseEndDate] > [LeaseStartDate]");
                         });
@@ -537,7 +540,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
 
                     b.HasData(
                         new
@@ -605,7 +608,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
 
                     b.HasData(
                         new
@@ -797,9 +800,6 @@ namespace MARN_API.Migrations
                     b.Property<decimal>("PlatformFee")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
@@ -811,7 +811,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PaymentScheduleId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
 
                     b.HasData(
                         new
@@ -824,8 +824,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 1, 29, 12, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20001",
                             PaymentScheduleId = 20001L,
-                            PlatformFee = 500m,
-                            Status = 1
+                            PlatformFee = 500m
                         },
                         new
                         {
@@ -837,8 +836,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 2, 28, 10, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20002",
                             PaymentScheduleId = 20002L,
-                            PlatformFee = 500m,
-                            Status = 1
+                            PlatformFee = 500m
                         },
                         new
                         {
@@ -850,8 +848,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 4, 5, 9, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20003",
                             PaymentScheduleId = 20003L,
-                            PlatformFee = 500m,
-                            Status = 1
+                            PlatformFee = 500m
                         },
                         new
                         {
@@ -863,8 +860,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 3, 22, 14, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20010",
                             PaymentScheduleId = 20010L,
-                            PlatformFee = 2250m,
-                            Status = 1
+                            PlatformFee = 2250m
                         },
                         new
                         {
@@ -876,8 +872,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 6, 1, 8, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20020",
                             PaymentScheduleId = 20020L,
-                            PlatformFee = 4200m,
-                            Status = 1
+                            PlatformFee = 4200m
                         },
                         new
                         {
@@ -889,8 +884,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 2, 26, 11, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20030",
                             PaymentScheduleId = 20030L,
-                            PlatformFee = 1500m,
-                            Status = 1
+                            PlatformFee = 1500m
                         },
                         new
                         {
@@ -902,8 +896,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 4, 1, 9, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20031",
                             PaymentScheduleId = 20031L,
-                            PlatformFee = 1500m,
-                            Status = 1
+                            PlatformFee = 1500m
                         },
                         new
                         {
@@ -915,8 +908,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 5, 8, 16, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20032",
                             PaymentScheduleId = 20032L,
-                            PlatformFee = 1500m,
-                            Status = 1
+                            PlatformFee = 1500m
                         },
                         new
                         {
@@ -928,8 +920,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20033",
                             PaymentScheduleId = 20033L,
-                            PlatformFee = 1500m,
-                            Status = 1
+                            PlatformFee = 1500m
                         },
                         new
                         {
@@ -941,8 +932,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2025, 4, 11, 13, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20040",
                             PaymentScheduleId = 20040L,
-                            PlatformFee = 3000m,
-                            Status = 1
+                            PlatformFee = 3000m
                         },
                         new
                         {
@@ -954,8 +944,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2024, 3, 31, 10, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20050",
                             PaymentScheduleId = 20050L,
-                            PlatformFee = 900m,
-                            Status = 1
+                            PlatformFee = 900m
                         },
                         new
                         {
@@ -967,8 +956,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2024, 6, 30, 10, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20051",
                             PaymentScheduleId = 20051L,
-                            PlatformFee = 900m,
-                            Status = 1
+                            PlatformFee = 900m
                         },
                         new
                         {
@@ -980,8 +968,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2024, 10, 7, 10, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20052",
                             PaymentScheduleId = 20052L,
-                            PlatformFee = 900m,
-                            Status = 1
+                            PlatformFee = 900m
                         },
                         new
                         {
@@ -993,8 +980,7 @@ namespace MARN_API.Migrations
                             PaidAt = new DateTime(2024, 12, 25, 10, 0, 0, 0, DateTimeKind.Utc),
                             PaymentIntentId = "pi_seed_20053",
                             PaymentScheduleId = 20053L,
-                            PlatformFee = 900m,
-                            Status = 1
+                            PlatformFee = 900m
                         });
                 });
 
@@ -1029,7 +1015,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("ContractId", "DueDate");
 
-                    b.ToTable("PaymentSchedules", (string)null);
+                    b.ToTable("PaymentSchedules");
 
                     b.HasData(
                         new
@@ -1407,7 +1393,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("Properties", (string)null);
+                    b.ToTable("Properties");
 
                     b.HasData(
                         new
@@ -1538,7 +1524,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyAmenities", (string)null);
+                    b.ToTable("PropertyAmenities");
 
                     b.HasData(
                         new
@@ -1556,7 +1542,7 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 3L,
-                            Amenity = 8,
+                            Amenity = 4,
                             PropertyId = 1001L
                         },
                         new
@@ -1568,13 +1554,13 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 5L,
-                            Amenity = 4,
+                            Amenity = 7,
                             PropertyId = 1002L
                         },
                         new
                         {
                             Id = 6L,
-                            Amenity = 5,
+                            Amenity = 8,
                             PropertyId = 1002L
                         },
                         new
@@ -1586,7 +1572,7 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 8L,
-                            Amenity = 12,
+                            Amenity = 5,
                             PropertyId = 1003L
                         },
                         new
@@ -1604,13 +1590,13 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 11L,
-                            Amenity = 6,
+                            Amenity = 9,
                             PropertyId = 1004L
                         },
                         new
                         {
                             Id = 12L,
-                            Amenity = 7,
+                            Amenity = 10,
                             PropertyId = 1004L
                         },
                         new
@@ -1654,7 +1640,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PropertyComments", (string)null);
+                    b.ToTable("PropertyComments");
 
                     b.HasData(
                         new
@@ -1705,7 +1691,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyMedia", (string)null);
+                    b.ToTable("PropertyMedia");
 
                     b.HasData(
                         new
@@ -1770,7 +1756,7 @@ namespace MARN_API.Migrations
                     b.HasIndex("PropertyId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("PropertyRatings", null, t =>
+                    b.ToTable("PropertyRatings", t =>
                         {
                             t.HasCheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
                         });
@@ -1821,7 +1807,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyRules", (string)null);
+                    b.ToTable("PropertyRules");
 
                     b.HasData(
                         new
@@ -1903,7 +1889,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
 
                     b.HasData(
                         new
@@ -1971,7 +1957,7 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("RoommatePreferences", null, t =>
+                    b.ToTable("RoommatePreferences", t =>
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
                         });
@@ -2025,7 +2011,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SavedProperties", (string)null);
+                    b.ToTable("SavedProperties");
 
                     b.HasData(
                         new
@@ -2087,7 +2073,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId", "Type", "CreatedAt");
 
-                    b.ToTable("UserActivities", (string)null);
+                    b.ToTable("UserActivities");
 
                     b.HasData(
                         new
@@ -2129,7 +2115,7 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserDevices", (string)null);
+                    b.ToTable("UserDevices");
 
                     b.HasData(
                         new
@@ -2370,15 +2356,6 @@ namespace MARN_API.Migrations
                 {
                     b.HasBaseType("MARN_API.Models.ApplicationUser");
 
-                    b.Property<string>("StripeAccountId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("StripeChargesEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("StripePayoutsEnabled")
-                        .HasColumnType("bit");
-
                     b.HasDiscriminator().HasValue("Owner");
 
                     b.HasData(
@@ -2403,9 +2380,7 @@ namespace MARN_API.Migrations
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "SEED-OWNER-X-SECURITY-STAMP",
                             TwoFactorEnabled = false,
-                            UserName = "owner.x@example.com",
-                            StripeChargesEnabled = false,
-                            StripePayoutsEnabled = false
+                            UserName = "owner.x@example.com"
                         },
                         new
                         {
@@ -2428,9 +2403,7 @@ namespace MARN_API.Migrations
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "SEED-OWNER-Y-SECURITY-STAMP",
                             TwoFactorEnabled = false,
-                            UserName = "owner.y@example.com",
-                            StripeChargesEnabled = false,
-                            StripePayoutsEnabled = false
+                            UserName = "owner.y@example.com"
                         },
                         new
                         {
@@ -2453,9 +2426,7 @@ namespace MARN_API.Migrations
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "SEED-OWNER-Z-SECURITY-STAMP",
                             TwoFactorEnabled = false,
-                            UserName = "owner.z@example.com",
-                            StripeChargesEnabled = false,
-                            StripePayoutsEnabled = false
+                            UserName = "owner.z@example.com"
                         });
                 });
 
