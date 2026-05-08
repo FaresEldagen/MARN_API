@@ -418,7 +418,7 @@ namespace MARN_API.Services.Implementations
             property.IsActive = !property.IsActive;
             await _propertyRepo.UpdatePropertyAsync(property);
 
-            return ServiceResult<bool>.Ok(true, $"Property activation toggled Active = {property.IsActive}.");
+            return ServiceResult<bool>.Ok(property.IsActive, property.IsActive ? "Property activated successfully." : "Property deactivated successfully.");
         }
 
         public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId)
