@@ -36,6 +36,7 @@ namespace MARN_API.Repositories.Implementations
                     Type = p.Type,
                     Views = p.Views,
                     IsSaved = p.SavedProperty.Any(s => s.UserId == userId),
+                    IsActive = p.IsActive,
 
                     OccupiedPlaces = p.Contracts
                         .Where(c => c.Status == ContractStatus.Active)

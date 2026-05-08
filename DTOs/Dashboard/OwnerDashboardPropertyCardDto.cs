@@ -1,4 +1,4 @@
-﻿using MARN_API.Enums.Property;
+using MARN_API.Enums.Property;
 
 namespace MARN_API.DTOs.Dashboard
 {
@@ -21,6 +21,7 @@ namespace MARN_API.DTOs.Dashboard
         public float AverageRating { get; set; }
         public int Ratings { get; set; }
 
+        public bool IsActive { get; set; }
         public ICollection<OwnerPropertyContractDto>? ActiveContracts { get; set; }
     }
 }

@@ -242,7 +242,14 @@ namespace MARN_API.Services.Implementations
 
             dto.Amenities = _mapper.Map<System.Collections.Generic.List<PropertyAmenityDto>>(amenities);
             dto.Rules = _mapper.Map<System.Collections.Generic.List<PropertyRuleDto>>(rules);
-            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(media);
+            
+            // Populate individual fields
+            dto.PrimaryImageUrl = media.FirstOrDefault(m => m.IsPrimary)?.Path ?? string.Empty;
+            dto.ProofOfOwnershipUrl = property.ProofOfOwnership;
+
+            // Exclude primary image from media list
+            var galleryMedia = media.Where(m => !m.IsPrimary).ToList();
+            dto.Media = _mapper.Map<System.Collections.Generic.List<PropertyMediaDto>>(galleryMedia);
 
             return ServiceResult<PropertyEditDataDto>.Ok(dto);
         }
@@ -411,7 +418,7 @@ namespace MARN_API.Services.Implementations
             property.IsActive = !property.IsActive;
             await _propertyRepo.UpdatePropertyAsync(property);
 
-            return ServiceResult<bool>.Ok(true, "Property activation toggled.");
+            return ServiceResult<bool>.Ok(true, $"Property activation toggled Active = {property.IsActive}.");
         }
 
         public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId)
