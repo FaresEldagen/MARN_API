@@ -93,21 +93,22 @@ namespace MARN_API.Services.Implementations
             return w;
         }
 
-        private double CalculateBudgetOverlap(RoommatePreference a, RoommatePreference b)
+        private (double, double) CalculateBudgetOverlap(RoommatePreference a, RoommatePreference b)
         {
             if (!a.BudgetRangeMin.HasValue || !a.BudgetRangeMax.HasValue || !b.BudgetRangeMin.HasValue || !b.BudgetRangeMax.HasValue)
-                return 0;
+                return (0, 0);
 
             var overlapStart = Math.Max(a.BudgetRangeMin.Value, b.BudgetRangeMin.Value);
             var overlapEnd = Math.Min(a.BudgetRangeMax.Value, b.BudgetRangeMax.Value);
             
             if (overlapStart <= overlapEnd)
             {
-                double range = (double)Math.Max(1m, a.BudgetRangeMax.Value - a.BudgetRangeMin.Value);
+                double rangeA = (double)Math.Max(1m, a.BudgetRangeMax.Value - a.BudgetRangeMin.Value);
+                double rangeB = (double)Math.Max(1m, b.BudgetRangeMax.Value - b.BudgetRangeMin.Value);
                 double overlap = (double)(overlapEnd - overlapStart);
-                return Math.Min(1.0, overlap / range);
+                return (Math.Min(1.0, overlap / rangeA), Math.Min(1.0, overlap / rangeB));
             }
-            return 0;
+            return (0, 0);
         }
 
         private double CalculateWeightedCosineSimilarity(double[] vecA, double[] vecB, double[] weights, double budgetRatio, double budgetWeight)
@@ -146,13 +147,15 @@ namespace MARN_API.Services.Implementations
             var matchedResults = new List<RoommateMatchDto>();
 
             double[] baseVecA = GetProfileVector(currentUserPref);
-            double[] weights = GetWeightVector(currentUserPref);
-            double budgetWeight = (int)currentUserPref.BudgetImportance;
+            double[] weightsA = GetWeightVector(currentUserPref);
+            double budgetWeightA = (int)currentUserPref.BudgetImportance;
 
             foreach (var matchPref in potentialMatches)
             {
                 double[] vecA = (double[])baseVecA.Clone();
                 double[] vecB = GetProfileVector(matchPref);
+                double[] weightsB = GetWeightVector(matchPref);
+                double budgetWeightB = (int)matchPref.BudgetImportance;
 
                 // Handle Flexible Wildcard
                 if (currentUserPref.SleepSchedule == SleepSchedule.Flexible && matchPref.SleepSchedule != SleepSchedule.Unknown)
@@ -160,10 +163,13 @@ namespace MARN_API.Services.Implementations
                 else if (matchPref.SleepSchedule == SleepSchedule.Flexible && currentUserPref.SleepSchedule != SleepSchedule.Unknown)
                     vecB[2] = vecA[2];
 
-                double budgetRatio = CalculateBudgetOverlap(currentUserPref, matchPref);
-                double similarity = CalculateWeightedCosineSimilarity(vecA, vecB, weights, budgetRatio, budgetWeight);
+                var (budgetRatioA, budgetRatioB) = CalculateBudgetOverlap(currentUserPref, matchPref);
                 
-                double rawScore = similarity * 100.0;
+                double similarityA = CalculateWeightedCosineSimilarity(vecA, vecB, weightsA, budgetRatioA, budgetWeightA);
+                double similarityB = CalculateWeightedCosineSimilarity(vecB, vecA, weightsB, budgetRatioB, budgetWeightB);
+                
+                double mutualSimilarity = Math.Sqrt(similarityA * similarityB);
+                double rawScore = mutualSimilarity * 100.0;
                 double penalty = 0;
 
                 var matchedTraits = new List<string>();
@@ -183,6 +189,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Smoking mismatch");
                             penalty += 40; 
                         }
+                        if (matchPref.SmokingImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -199,6 +206,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Pets mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.PetsImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -227,6 +235,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Sleep Schedule mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.SleepImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -245,6 +254,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Education Level mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.EducationImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -262,6 +272,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Field of Study mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.FieldOfStudyImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -280,6 +291,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Noise Tolerance mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.NoiseToleranceImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
                 
@@ -298,6 +310,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Guests Frequency mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.GuestsFrequencyImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -315,6 +328,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Sharing Level mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.SharingLevelImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -332,6 +346,7 @@ namespace MARN_API.Services.Implementations
                             dealbreakers.Add("Work Schedule mismatch");
                             penalty += 40;
                         }
+                        if (matchPref.WorkScheduleImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                     }
                 }
 
@@ -339,8 +354,8 @@ namespace MARN_API.Services.Implementations
                 if (currentUserPref.BudgetRangeMin.HasValue && currentUserPref.BudgetRangeMax.HasValue &&
                     matchPref.BudgetRangeMin.HasValue && matchPref.BudgetRangeMax.HasValue)
                 {
-                    if (budgetRatio >= 0.5) matchedTraits.Add("Compatible Budget");
-                    else if (budgetRatio < 0.5)
+                    if (budgetRatioA >= 0.5 && budgetRatioB >= 0.5) matchedTraits.Add("Compatible Budget");
+                    else if (budgetRatioA < 0.5)
                     {
                         mismatchedTraits.Add("Budget");
                         if (currentUserPref.BudgetImportance == PreferenceImportance.Dealbreaker)
@@ -349,12 +364,16 @@ namespace MARN_API.Services.Implementations
                             penalty += 40;
                         }
                     }
+                    if (budgetRatioB < 0.5 && matchPref.BudgetImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                 }
-                else if (currentUserPref.BudgetImportance == PreferenceImportance.Dealbreaker)
+                else 
                 {
-                    // Fallback penalty if budget was required but missing
-                    dealbreakers.Add("Budget Mismatch");
-                    penalty += 40;
+                    if (currentUserPref.BudgetImportance == PreferenceImportance.Dealbreaker)
+                    {
+                        dealbreakers.Add("Budget Mismatch");
+                        penalty += 40;
+                    }
+                    if (matchPref.BudgetImportance == PreferenceImportance.Dealbreaker) penalty += 40;
                 }
 
                 // Calculate final score
@@ -377,8 +396,8 @@ namespace MARN_API.Services.Implementations
                     SearchStatus = matchPref.SearchStatus,
                     Badge = badge,
                     CompatibilityScore = Math.Round(finalScore, 1),
-                    TopMatchingTraits = matchedTraits.Take(3).ToList(),
-                    MismatchedTraits = mismatchedTraits.Take(3).ToList(),
+                    TopMatchingTraits = matchedTraits,
+                    MismatchedTraits = mismatchedTraits,
                     DealbreakersFound = dealbreakers
                 });
             }

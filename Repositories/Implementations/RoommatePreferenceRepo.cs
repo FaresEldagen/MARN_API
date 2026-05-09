@@ -16,7 +16,7 @@ namespace MARN_API.Repositories.Implementations
 
         public Task<RoommatePreference?> GetRoommatePreferences(Guid userId)
         {
-            return Context.RoommatePreferences.FirstOrDefaultAsync(r => r.UserId == userId);
+            return Context.RoommatePreferences.Include(rp => rp.User).FirstOrDefaultAsync(r => r.UserId == userId);
         }
 
         public async Task<RoommatePreference> UpdateRoommatePreferences(RoommatePreference updatedPreferences)
