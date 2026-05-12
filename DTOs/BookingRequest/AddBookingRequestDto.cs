@@ -1,4 +1,4 @@
-using MARN_API.Enums;
+using MARN_API.Enums.Payment;
 using System;
 using System.ComponentModel.DataAnnotations;
 

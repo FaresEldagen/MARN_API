@@ -1,4 +1,5 @@
-using MARN_API.Enums;
+using MARN_API.Enums.Contract;
+using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 
 namespace MARN_API.DTOs.Property
@@ -39,8 +40,18 @@ namespace MARN_API.DTOs.Property
         public List<PropertyCommentDetailsDto> Comments { get; set; } = new();
         public List<PropertyBookingRequestDto> CurrentUserBookingRequests { get; set; } = new();
 
+        public List<ActiveRenterDto> ActiveRenters { get; set; } = new();
+
         public PropertyHostedByDto HostedBy { get; set; } = new();
         public OwnerPropertyExtrasDto OwnerExtras { get; set; } = new();
+    }
+
+    public class ActiveRenterDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? ProfilePhoto { get; set; }
+        public double? MatchingPercentage { get; set; }
     }
 
     public class PropertyAmenityItemDto
@@ -96,7 +107,7 @@ namespace MARN_API.DTOs.Property
         public long BookingRequestId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public BookingRequestStatus Status { get; set; }
+        public PaymentFrequency PaymentFrequency { get; set; }
     }
 
     public class OwnerPropertyExtrasDto

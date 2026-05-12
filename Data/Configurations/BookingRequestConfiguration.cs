@@ -14,7 +14,6 @@ namespace MARN_API.Data.Configurations
             builder.Property(br => br.PropertyId).IsRequired();
             builder.Property(br => br.RenterId).IsRequired();
 
-            builder.Property(br => br.Status).HasConversion<int>();
             builder.Property(br => br.CreatedAt)
                    .HasDefaultValueSql("GETUTCDATE()");
             builder.ToTable(t => t.HasCheckConstraint("CK_BookingRequest_Dates", "[EndDate] > [StartDate]"));

@@ -14,15 +14,19 @@ namespace MARN_API.Enums.Notification
 
         ContractStarted,
         ContractCanceled,
+        ContractSigned,
         ContractCompleted,
 
-        PaymentArrived, 
         UpcomingPayment,
-        DelaiedPayment,
-        PaymentSucces,
+        PaymentArrived,
+        DelayedPayment,
+        PaymentSuccessful,
         PaymentFailed,
 
         PaymentReceived,
+        AvailableForWithdrawal,
+        ConnectAccountSuccess,
+        ConnectAccountFailed,
         WithdrawSuccess,
         WithdrawFailed,
 

@@ -1,196 +1,543 @@
-using MARN_API.DTOs.Common;
+using AutoMapper;
+using Google.Api.Gax;
+using MARN_API.DTOs.Contracts;
 using MARN_API.Enums;
+using MARN_API.Enums.Payment;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MARN_API.Enums.Notification;
+using MARN_API.DTOs.Notification;
 using Stripe;
-using Stripe.Checkout;
+using MARN_API.DTOs.Dashboard;
+
 
 namespace MARN_API.Services.Implementations
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IWorkflowPaymentRepo _paymentRepo;
-        private readonly IConfiguration _configuration;
+        private readonly IPaymentRepo _paymentRepo;
+        private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<PaymentService> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguration _configuration;
 
-        public PaymentService(IWorkflowPaymentRepo paymentRepo, IConfiguration configuration, ILogger<PaymentService> logger, IServiceProvider serviceProvider)
+        public PaymentService(
+            IPaymentRepo paymentRepo,
+            IMapper mapper,
+            INotificationService notificationService,
+            UserManager<ApplicationUser> userManager,
+            ILogger<PaymentService> logger,
+            IConfiguration configuration)
+
         {
             _paymentRepo = paymentRepo;
-            _configuration = configuration;
+            _mapper = mapper;
+            _notificationService = notificationService;
+            _userManager = userManager;
             _logger = logger;
-            _serviceProvider = serviceProvider;
-            StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+            _configuration = configuration;
         }
 
-        public async Task<(string Url, string SessionId)> CreateCheckoutSessionAsync(decimal amount, long propertyId, Guid ownerId, string ownerAccountId, Guid renterId, string? renterEmail, string successUrl, string cancelUrl, DateTime dueDate)
+
+        public async Task<ServiceResult<string>> CreatePaymentIntent(Guid userId, long paymentScheduleId)
         {
-            var feePercentage = _configuration.GetValue<decimal?>("Stripe:PlatformFeePercentage") ?? 10m;
-            var currency = (_configuration["Stripe:Currency"] ?? "egp").ToLowerInvariant();
+            _logger.LogInformation("Create Payment Intent attempt for userId: {userId}, paymentScheduleId: {paymentScheduleId}", userId, paymentScheduleId);
 
-            var amountInCents = (long)(amount * 100);
-            var platformFeeInCents = (long)(amountInCents * (feePercentage / 100m));
-            var platformFee = platformFeeInCents / 100m;
-            var ownerAmount = amount - platformFee;
-
-            var options = new SessionCreateOptions
+            var paymentSchedule = await _paymentRepo.GetPaymentScheduleById(paymentScheduleId);
+            if (paymentSchedule == null)
             {
-                PaymentMethodTypes = ["card"],
-                LineItems =
-                [
-                    new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            UnitAmount = amountInCents,
-                            Currency = currency,
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = $"Rental Payment for Property {propertyId}"
-                            }
-                        },
-                        Quantity = 1
-                    }
-                ],
-                Mode = "payment",
-                CustomerEmail = renterEmail,
-                ClientReferenceId = renterId.ToString(),
-                SuccessUrl = successUrl,
-                CancelUrl = cancelUrl
-            };
+                _logger.LogWarning("Create Payment Intent failed: Payment schedule not found for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Fail("Payment schedule not found.", resultType: ServiceResultType.NotFound);
+            }
 
-            if (!string.IsNullOrWhiteSpace(ownerAccountId) && ownerAccountId.StartsWith("acct_", StringComparison.OrdinalIgnoreCase))
+            if (paymentSchedule.Status == PaymentScheduleStatus.NotAvailableYet)
             {
-                options.PaymentIntentData = new SessionPaymentIntentDataOptions
+                _logger.LogWarning("Create Payment Intent failed: Payment can only be made within 7 days of due date for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Fail("Payment can only be made within 7 days of the due date.", resultType: ServiceResultType.BadRequest);
+            }
+
+            if (paymentSchedule.Status == PaymentScheduleStatus.PaidLate ||
+                paymentSchedule.Status == PaymentScheduleStatus.PaidOnTime ||
+                paymentSchedule.Status == PaymentScheduleStatus.PaidEarly)
+            {
+                _logger.LogWarning("Create Payment Intent failed: Payment already completed for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Fail("Payment has already been done", resultType: ServiceResultType.BadRequest);
+            }
+
+            if (paymentSchedule.Contract.RenterId != userId)
+            {
+                _logger.LogWarning("Create Payment Intent failed: Unauthorized access for userId: {userId}, paymentScheduleId: {paymentScheduleId}", userId, paymentScheduleId);
+                return ServiceResult<string>.Fail("Unauthorized access to payment schedule.", resultType: ServiceResultType.Unauthorized);
+            }
+
+            // To prevent duplicate PaymentIntents for the same schedule
+            if (!string.IsNullOrEmpty(paymentSchedule.PaymentIntentId))
+            {
+                var service = new PaymentIntentService();
+
+                var existingIntent = await service.GetAsync(paymentSchedule.PaymentIntentId);
+
+                _logger.LogInformation("Create Payment Intent successful (existing intent) for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Ok(
+                    existingIntent.ClientSecret,
+                    "Existing ClientSecret returned.",
+                    ServiceResultType.Success
+                );
+            }
+
+            try
+            {
+                var options = new PaymentIntentCreateOptions
                 {
-                    ApplicationFeeAmount = platformFeeInCents,
-                    TransferData = new SessionPaymentIntentDataTransferDataOptions
+                    Amount = (long)(paymentSchedule.Amount * 100),
+                    Currency = paymentSchedule.Currency,
+                    Metadata = new Dictionary<string, string>
                     {
-                        Destination = ownerAccountId
+                        { "paymentScheduleId", paymentScheduleId.ToString() }
                     }
                 };
+
+                // To prevent duplicate PaymentIntents for the same schedule on stripe
+                var requestOptions = new RequestOptions
+                {
+                    IdempotencyKey = $"pi_{paymentScheduleId}"
+                };
+
+                var service = new PaymentIntentService();
+                var intent = await service.CreateAsync(options, requestOptions);
+
+                paymentSchedule.PaymentIntentId = intent.Id;
+                await _paymentRepo.UpdatePaymentSchedule(paymentSchedule);
+
+                _logger.LogInformation("Create Payment Intent successful for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Ok(intent.ClientSecret, "ClientSecret created successfully.", ServiceResultType.Success);
             }
-
-            var sessionService = new SessionService();
-            var session = await sessionService.CreateAsync(options);
-
-            var payment = new Payment
+            catch (StripeException e)
             {
-                StripeSessionId = session.Id,
-                AmountTotal = amount,
-                PlatformFee = platformFee,
-                OwnerAmount = ownerAmount,
-                OwnerId = ownerId,
-                OwnerStripeAccountId = ownerAccountId,
-                PropertyId = propertyId,
-                RenterId = renterId,
-                RenterEmail = renterEmail,
-                Status = PaymentStatus.Pending,
-                DueDate = dueDate,
-                Currency = currency.ToUpperInvariant()
-            };
-
-            await _paymentRepo.CreatePaymentRecordAsync(payment);
-            return (session.Url ?? string.Empty, session.Id);
+                _logger.LogError(e, "Stripe API Error while creating PaymentIntent for ScheduleId: {ScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Fail(e.StripeError?.Message ?? "Payment provider error.", resultType: ServiceResultType.BadRequest);
+            }
         }
 
-        public Task<Payment?> GetPaymentByIdAsync(long paymentId) => _paymentRepo.GetPaymentByIdAsync(paymentId);
-        public Task<Payment?> GetPaymentBySessionIdAsync(string sessionId) => _paymentRepo.GetPaymentBySessionIdAsync(sessionId);
-        public Task<PagedResult<Payment>> GetPaymentsByUserIdAsync(Guid userId, int pageNumber, int pageSize) => _paymentRepo.GetPaymentsByUserIdAsync(userId, pageNumber, pageSize);
-        public Task<PagedResult<Payment>> GetPaymentsByPropertyIdAsync(long propertyId, int pageNumber, int pageSize) => _paymentRepo.GetPaymentsByPropertyIdAsync(propertyId, pageNumber, pageSize);
-        public Task<PagedResult<Payment>> GetAllPaymentsAsync(int pageNumber, int pageSize) => _paymentRepo.GetAllPaymentsAsync(pageNumber, pageSize);
-
-        public async Task<bool> FulfillPaymentAsync(string sessionId)
+        public async Task<ServiceResult<string>> CreateOrGetConnectOnboardingLink(Guid userId)
         {
-            var payment = await _paymentRepo.GetPaymentBySessionIdAsync(sessionId);
-            if (payment is null)
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == userId);
+            if (owner == null)
             {
-                _logger.LogWarning("Webhook received completion for unknown session {SessionId}", sessionId);
-                return false;
+                _logger.LogWarning("Create Connect Account failed: Owner not found for userId: {userId}", userId);
+                return ServiceResult<string>.Fail("Owner not found", resultType: ServiceResultType.Unauthorized);
             }
 
-            var alreadyMarkedSucceeded = payment.Status == PaymentStatus.Succeeded;
+            var accountService = new Stripe.AccountService();
 
-            if (!alreadyMarkedSucceeded)
+            try
             {
-                var sessionService = new SessionService();
-                var session = await sessionService.GetAsync(sessionId);
-                payment.PaymentIntentId = session.PaymentIntentId;
-
-                if (!string.IsNullOrWhiteSpace(session.PaymentIntentId))
+                if (string.IsNullOrEmpty(owner.StripeAccountId))
                 {
-                    var paymentIntentService = new PaymentIntentService();
-                    var paymentIntent = await paymentIntentService.GetAsync(session.PaymentIntentId);
-
-                    payment.Status = paymentIntent.Status switch
+                    var accountOptions = new AccountCreateOptions
                     {
-                        "succeeded" => PaymentStatus.Succeeded,
-                        "processing" => PaymentStatus.Pending,
-                        "canceled" => PaymentStatus.Failed,
-                        _ => PaymentStatus.Pending
+                        Type = "express",
+                        Country = "EG",
+                        Email = owner.Email,
+                        Capabilities = new AccountCapabilitiesOptions
+                        {
+                            Transfers = new AccountCapabilitiesTransfersOptions
+                            {
+                                Requested = true
+                            }
+                        },
+                        TosAcceptance = new AccountTosAcceptanceOptions
+                        {
+                            ServiceAgreement = "recipient"
+                        }
                     };
 
-                    if (!string.IsNullOrWhiteSpace(paymentIntent.LatestChargeId))
+                    var account = await accountService.CreateAsync(accountOptions);
+
+                    owner.StripeAccountId = account.Id;
+
+                    var updateResult = await _userManager.UpdateAsync(owner);
+                    if (!updateResult.Succeeded)
                     {
-                        var chargeService = new ChargeService();
-                        var charge = await chargeService.GetAsync(paymentIntent.LatestChargeId);
-                        payment.ReceiptUrl = charge.ReceiptUrl;
+                        _logger.LogError("Failed to save StripeAccountId for ownerId: {OwnerId}. Errors: {Errors}",
+                            userId, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+                        return ServiceResult<string>.Fail("Failed to save Stripe account. Please try again.", resultType: ServiceResultType.BadRequest);
                     }
                 }
-                else
+
+                // Create onboarding link
+                var accountLinkService = new AccountLinkService();
+
+                var linkOptions = new AccountLinkCreateOptions
                 {
-                    payment.Status = session.PaymentStatus == "paid" ? PaymentStatus.Succeeded : PaymentStatus.Pending;
-                }
-            }
+                    Account = owner.StripeAccountId,
+                    RefreshUrl = _configuration["Stripe:RefreshUrl"],
+                    ReturnUrl = _configuration["Stripe:ReturnUrl"],
+                    Type = "account_onboarding"
+                };
 
-            if (payment.Status != PaymentStatus.Succeeded)
+                var accountLink = await accountLinkService.CreateAsync(linkOptions);
+
+                return ServiceResult<string>.Ok(
+                    accountLink.Url,
+                    "Onboarding link created successfully.",
+                    ServiceResultType.Success);
+            }
+            catch (StripeException e)
             {
-                payment.PaidAt = null;
-                payment.AvailableAt = null;
-                await _paymentRepo.UpdatePaymentRecordAsync(payment);
-                _logger.LogInformation("Skipping lease fulfillment for session {SessionId} because payment status is {PaymentStatus}", sessionId, payment.Status);
-                return true;
+                _logger.LogError(e, "Stripe API Error while creating Connect account or link for userId: {UserId}. Error: {Message}", userId, e.StripeError?.Message);
+                return ServiceResult<string>.Fail(e.StripeError?.Message ?? "Payment provider error.", resultType: ServiceResultType.BadRequest);
             }
-
-            payment.PaidAt = DateTime.UtcNow;
-            payment.AvailableAt = DateTime.UtcNow;
-
-            await _paymentRepo.UpdatePaymentRecordAsync(payment);
-
-            using var scope = _serviceProvider.CreateScope();
-            var rentalWorkflowService = scope.ServiceProvider.GetRequiredService<IRentalWorkflowService>();
-            _logger.LogInformation(
-                "Continuing lease fulfillment for succeeded payment session {SessionId}. Existing contract id: {ContractId}",
-                sessionId,
-                payment.ContractId);
-            await rentalWorkflowService.CompleteLeaseFulfillmentAsync(sessionId, payment.PaymentIntentId, payment.ReceiptUrl);
-
-            return true;
         }
 
-        public async Task<bool> ExpirePaymentAsync(string sessionId)
+        public async Task<ServiceResult<bool>> Withdraw(Guid ownerId)
         {
-            var payment = await _paymentRepo.GetPaymentBySessionIdAsync(sessionId);
-            if (payment is null)
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == ownerId);
+            if (owner == null)
             {
-                _logger.LogWarning("Payment record not found for expiration session {SessionId}", sessionId);
-                return false;
+                _logger.LogWarning("Withdraw failed: Owner not found for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("Owner not found", resultType: ServiceResultType.Unauthorized);
             }
 
-            if (payment.Status == PaymentStatus.Succeeded)
+            if (string.IsNullOrEmpty(owner.StripeAccountId) ||
+                !owner.StripePayoutsEnabled ||
+                !owner.StripeChargesEnabled)
             {
-                return true;
+                _logger.LogWarning("Withdraw failed: Stripe account not connected for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("Stripe account not connected. Please connect your Stripe account first.", resultType: ServiceResultType.BadRequest);
             }
 
-            payment.Status = PaymentStatus.Expired;
-            await _paymentRepo.UpdatePaymentRecordAsync(payment);
+            var withdrawablePayments = await _paymentRepo.GetWithdrawablePayments(ownerId);
 
-            using var scope = _serviceProvider.CreateScope();
-            var rentalWorkflowService = scope.ServiceProvider.GetRequiredService<IRentalWorkflowService>();
-            await rentalWorkflowService.ExpireLeaseFulfillmentAsync(sessionId);
+            if (!withdrawablePayments.Any())
+            {
+                _logger.LogWarning("Withdraw failed: No available funds for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("No funds available for withdrawal.", resultType: ServiceResultType.BadRequest);
+            }
 
-            return true;
+            var amount = withdrawablePayments.Sum(p => p.OwnerAmount);
+
+            // Mark payments as Withdrawn before calling Stripe to prevent double-withdraw on concurrent requests
+            foreach (var payment in withdrawablePayments)
+                payment.Status = PaymentStatus.Withdrawn;
+
+            await _paymentRepo.UpdatePayments(withdrawablePayments);
+
+            var transferService = new TransferService();
+            try
+            {
+                // Detect platform's available currency to avoid "insufficient funds" if currencies mismatch
+                var balanceService = new BalanceService();
+                var platformBalance = await balanceService.GetAsync();
+
+                var usdBalance = platformBalance.Available
+                    .FirstOrDefault(b => b.Currency.ToLower() == "usd");
+                if (usdBalance == null || usdBalance.Amount <= 0)
+                {
+                    return ServiceResult<bool>.Fail(
+                        "No USD balance available.",
+                        resultType: ServiceResultType.BadRequest);
+                }
+
+                var transferCurrency = "usd";
+                var transferAmount = amount / 50m; 
+
+                var transferOptions = new TransferCreateOptions
+                {
+                    Amount = (long)(transferAmount * 100),
+                    Currency = transferCurrency,
+                    Destination = owner.StripeAccountId,
+                    SourceType = "card",
+                };
+                var transfer = await transferService.CreateAsync(transferOptions);
+
+                _logger.LogInformation("Withdraw successful for ownerId: {ownerId}, amount: {amount} {currency}", ownerId, transferAmount, transferCurrency);
+                return ServiceResult<bool>.Ok(true, $"Withdrawal of {transferAmount} {transferCurrency.ToUpper()} initiated successfully.", ServiceResultType.Success);
+            }
+            catch (StripeException e)
+            {
+                // Revert payment statuses back to Available since Stripe transfer failed
+                foreach (var payment in withdrawablePayments)
+                    payment.Status = PaymentStatus.Available;
+
+                await _paymentRepo.UpdatePayments(withdrawablePayments);
+
+                _logger.LogError(e, "Stripe API Error while creating transfer for ownerId: {ownerId}. Payment statuses reverted.", ownerId);
+                return ServiceResult<bool>.Fail(e.StripeError?.Message ?? "Payment provider error.", resultType: ServiceResultType.BadRequest);
+            }
         }
+
+
+        public async Task<ServiceResult<bool>> TopUpPlatformBalanceForTesting()
+        {
+            _logger.LogInformation("Top-up Platform Balance for testing attempt.");
+
+            try
+            {
+                var options = new ChargeCreateOptions
+                {
+                    Amount = 10000000, // $100,000 USD
+                    Currency = "usd",
+                    Source = "tok_bypassPending",
+                    Description = "Test Top-up (USD) for Withdrawal testing",
+                };
+                var service = new ChargeService();
+                await service.CreateAsync(options);
+
+                _logger.LogInformation("Platform balance topped up successfully with 500,000 EGP (Available).");
+                return ServiceResult<bool>.Ok(true, "Platform balance topped up successfully with 500,000 EGP (Available).", ServiceResultType.Success);
+            }
+            catch (StripeException e)
+            {
+                _logger.LogError(e, "Stripe API Error while topping up platform balance: {Message}", e.StripeError?.Message);
+                var message = e.StripeError?.Message ?? "Payment provider error.";
+                if (e.StripeError?.Code == "balance_insufficient")
+                {
+                    message += " (Test Tip: Use the 'topup-test-balance' endpoint to add available funds to your Stripe platform account for testing).";
+                }
+
+                return ServiceResult<bool>.Fail(message, resultType: ServiceResultType.BadRequest);
+            }
+        }
+
+        public async Task<ServiceResult<object>> CheckBalances(Guid ownerId)
+        {
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == ownerId);
+            if (owner == null) return ServiceResult<object>.Fail("Owner not found");
+
+            try
+            {
+                var balanceService = new BalanceService();
+                
+                // Platform balance
+                var platformBalance = await balanceService.GetAsync();
+
+                // Connected account balance
+                Balance? connectedBalance = null;
+                if (!string.IsNullOrEmpty(owner.StripeAccountId))
+                {
+                    var requestOptions = new RequestOptions { StripeAccount = owner.StripeAccountId };
+                    connectedBalance = await balanceService.GetAsync(requestOptions);
+                }
+
+                return ServiceResult<object>.Ok(new
+                {
+                    Platform = platformBalance,
+                    ConnectedAccount = connectedBalance,
+                    OwnerStripeId = owner.StripeAccountId
+                }, "Balances retrieved successfully.");
+            }
+            catch (StripeException e)
+            {
+                return ServiceResult<object>.Fail(e.Message);
+            }
+        }
+
+
+        #region Stripe Webhook Handlers
+        public async Task HandleSuccessfulPayment(PaymentIntent paymentIntent)
+        {
+            _logger.LogInformation("Handle Successful Payment attempt for PaymentIntentId: {PaymentIntentId}", paymentIntent.Id);
+
+            if (await _paymentRepo.PaymentExistsByIntentId(paymentIntent.Id))
+            {
+                _logger.LogWarning("Handle Successful Payment: PaymentIntent {PaymentIntentId} already processed. Skipping.", paymentIntent.Id);
+                return;
+            }
+
+            var scheduleIdString = paymentIntent.Metadata["paymentScheduleId"];
+            _logger.LogInformation("Handling successful payment for PaymentScheduleId: {PaymentScheduleId}", scheduleIdString);
+
+            var paymentSchedule = await _paymentRepo.GetPaymentScheduleById(long.Parse(scheduleIdString));
+
+            if (paymentSchedule == null)
+            {
+                _logger.LogError("Handle Successful Payment failed: Payment schedule not found for Id: {paymentScheduleId}", scheduleIdString);
+                return;
+            }
+
+            var platformFeePercentage = _configuration.GetValue<decimal>("Stripe:PlatformFeePercentage", 0.1m);
+            var fundHoldDays = _configuration.GetValue<int>("Stripe:FundHoldDays", 10);
+
+            Payment payment = new Payment
+            {
+                PaymentScheduleId = paymentSchedule.Id,
+                AmountTotal = paymentSchedule.Amount,
+                PlatformFee = paymentSchedule.Amount * platformFeePercentage,
+                OwnerAmount = paymentSchedule.Amount * (1 - platformFeePercentage),
+                Currency = paymentSchedule.Currency,
+                PaymentIntentId = paymentIntent.Id,
+                PaidAt = DateTime.UtcNow,
+                AvailableAt = DateTime.UtcNow.AddDays(fundHoldDays),
+            };
+
+            var today = DateTime.UtcNow.Date;
+            var dueDate = paymentSchedule.DueDate.Date;
+
+            if (today < dueDate)
+                paymentSchedule.Status = PaymentScheduleStatus.PaidEarly;
+            else if (today > dueDate)
+                paymentSchedule.Status = PaymentScheduleStatus.PaidLate;
+            else
+                paymentSchedule.Status = PaymentScheduleStatus.PaidOnTime;
+
+            await _paymentRepo.AddPayment(payment, paymentSchedule);
+
+            _logger.LogInformation("Handle Successful Payment successful for paymentScheduleId: {paymentScheduleId}", scheduleIdString);
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = paymentSchedule.Contract.Property.OwnerId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.PaymentReceived,
+                Title = "Payment Received",
+                Body = $"You have received a payment of {payment.OwnerAmount} {payment.Currency} for \"{paymentSchedule.Contract.Property.Title}\".\n" +
+                       $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}.\n\n" +
+                       $"You can withdraw this amount after {payment.AvailableAt.ToString("yyyy-MM-dd")}.",
+
+                ActionType = NotificationActionType.OwnerDashboard
+            });
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = paymentSchedule.Contract.RenterId.ToString(),
+                UserType = NotificationUserType.Renter,
+                Type = NotificationType.PaymentSuccessful,
+                Title = "Payment Successful",
+                Body = $"Your payment of {payment.AmountTotal} {payment.Currency} for \"{paymentSchedule.Contract.Property.Title}\" has been successful.\n" +
+                       $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}.",
+
+                ActionType = NotificationActionType.RenterDashboard
+            });
+        }
+
+        public async Task HandleFailedPayment(PaymentIntent paymentIntent)
+        {
+            _logger.LogInformation("Handle Failed Payment attempt for PaymentIntentId: {PaymentIntentId}", paymentIntent.Id);
+
+            var scheduleIdString = paymentIntent.Metadata["paymentScheduleId"];
+            var errorMessage = paymentIntent.LastPaymentError?.Message ?? "Unknown payment error";
+
+            var paymentSchedule = await _paymentRepo.GetPaymentScheduleById(long.Parse(scheduleIdString));
+            if (paymentSchedule != null)
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = paymentSchedule.Contract.RenterId.ToString(),
+                    UserType = NotificationUserType.Renter,
+                    Type = NotificationType.PaymentFailed,
+                    Title = "Payment Failed",
+                    Body = $"Your payment for \"{paymentSchedule.Contract.Property.Title}\" has failed. \n Please try again.",
+
+                    ActionType = NotificationActionType.RenterDashboard
+                });
+
+                _logger.LogInformation("Handle Failed Payment processed for paymentScheduleId: {paymentScheduleId}. Error: {Error}", scheduleIdString, errorMessage);
+            }
+            else
+            {
+                _logger.LogError("Handle Failed Payment failed: Payment schedule not found for Id: {paymentScheduleId}", scheduleIdString);
+            }
+        }
+
+
+        public async Task HandleConnectedAccountUpdated(Account account)
+        {
+            _logger.LogInformation("Handle Connected Account Updated attempt for StripeAccountId: {StripeAccountId}", account.Id);
+
+            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.StripeAccountId == account.Id);
+            if (owner == null)
+            {
+                _logger.LogError("Handle Connected Account Updated failed: Owner not found for StripeAccountId: {StripeAccountId}", account.Id);
+                return;
+            }
+
+            owner.StripePayoutsEnabled = account.PayoutsEnabled;
+            owner.StripeChargesEnabled = account.ChargesEnabled;
+            var result = await _userManager.UpdateAsync(owner);
+
+            if (account.ChargesEnabled && account.PayoutsEnabled)
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = owner.Id.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.ConnectAccountSuccess,
+                    Title = "Connect Account Activated",
+                    Body = "Your Stripe Connect account has been activated and is now ready to withdraw your payments.",
+
+                    ActionType = NotificationActionType.OwnerDashboard
+                });
+
+                _logger.LogInformation("Handle Connected Account Updated successful: Connect account activated for ownerId: {OwnerId}", owner.Id);
+            }
+            else
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = owner.Id.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.ConnectAccountFailed,
+                    Title = "Connect Account Failed",
+                    Body = "Your Stripe Connect account is not fully activated. Please complete the onboarding process to enable charges and payouts.",
+
+                    ActionType = NotificationActionType.OwnerDashboard
+                });
+
+                _logger.LogInformation("Handle Connected Account Updated: Charges and payouts not enabled for StripeAccountId: {StripeAccountId}", account.Id);
+            }
+        }
+
+
+        public async Task HandleTransferCreated(Transfer transfer)
+        {
+            var owner = await _userManager.Users.OfType<Owner>()
+                .FirstOrDefaultAsync(o => o.StripeAccountId == transfer.DestinationId);
+
+            if (owner == null)
+            {
+                _logger.LogError("HandleTransferCreated: Owner not found for StripeAccountId: {StripeAccountId}", transfer.DestinationId);
+                return;
+            }
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = owner.Id.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.WithdrawSuccess,
+                Title = "Withdrawal Initiated",
+                Body = $"A withdrawal of {(transfer.Amount / 100m)} {transfer.Currency.ToUpper()} has been initiated to your connected account.\n" +
+                $"It should reflect in your bank account within a few business days.",
+
+                ActionType = NotificationActionType.OwnerDashboard
+            });
+        }
+
+        public async Task HandleTransferReversed(Transfer transfer)
+        {
+            var owner = await _userManager.Users.OfType<Owner>()
+                .FirstOrDefaultAsync(o => o.StripeAccountId == transfer.DestinationId);
+
+            if (owner == null)
+            {
+                _logger.LogError("HandleTransferReversed: Owner not found for StripeAccountId: {StripeAccountId}", transfer.DestinationId);
+                return;
+            }
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = owner.Id.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.WithdrawFailed,
+                Title = "Withdrawal Failed",
+                Body = $"A withdrawal of {(transfer.Amount / 100m)} {transfer.Currency.ToUpper()} to your connected account has failed. Please check your Stripe dashboard for details.",
+                ActionType = NotificationActionType.OwnerDashboard
+            });
+        }
+        #endregion
     }
 }

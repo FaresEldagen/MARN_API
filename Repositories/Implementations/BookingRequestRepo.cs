@@ -22,12 +22,13 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.BookingRequests
                 .AsNoTracking()
-                .Where(r => r.RenterId == userId && r.Status == BookingRequestStatus.Pending)
+                .Where(r => r.RenterId == userId)
                 .Select(r => new RenterPendingBookingRequestDto
                 {
                     BookingRequestId = r.Id,
                     StartDate = r.StartDate,
                     EndDate = r.EndDate,
+                    PaymentFrequency = r.PaymentFrequency,
 
                     PropertyId = r.PropertyId,
                     PropertyTitle = r.Property.Title,
@@ -42,12 +43,13 @@ namespace MARN_API.Repositories.Implementations
         public Task<List<OwnerPendingBookingRequestDto>> GetOwnerPendingRequests(Guid userId)
         {
             return Context.BookingRequests
-                .Where(r => r.Property.Owner.Id == userId && r.Status == Enums.BookingRequestStatus.Pending)
+                .Where(r => r.Property.Owner.Id == userId)
                 .Select(r => new OwnerPendingBookingRequestDto
                 {
                     BookingRequestId = r.Id,
                     StartDate = r.StartDate,
                     EndDate = r.EndDate,
+                    PaymentFrequency = r.PaymentFrequency,
 
                     PropertyId = r.PropertyId,
                     PropertyTitle = r.Property.Title,
@@ -64,16 +66,18 @@ namespace MARN_API.Repositories.Implementations
             return Context.BookingRequests
                 .AsNoTracking()
                 .Where(r => r.Property.Owner.Id == userId
-                    && r.PropertyId == propertyId
-                    && r.Status == Enums.BookingRequestStatus.Pending)
+                    && r.PropertyId == propertyId)
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => new OwnerPendingBookingRequestDto
                 {
                     BookingRequestId = r.Id,
                     StartDate = r.StartDate,
                     EndDate = r.EndDate,
+                    PaymentFrequency = r.PaymentFrequency,
+
                     PropertyId = r.PropertyId,
                     PropertyTitle = r.Property.Title,
+
                     RenterId = r.RenterId,
                     RenterName = $"{r.Renter.FirstName} {r.Renter.LastName}",
                     RenterProfileImage = r.Renter.ProfileImage

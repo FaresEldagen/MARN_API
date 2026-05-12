@@ -35,10 +35,10 @@ namespace MARN_API.Services.Implementations
                 {
                     return ServiceResult<string>.Fail("Failed to add owner role.", roleResult.Errors.Select(e => e.Description).ToList());
                 }
-            }
 
-            await _dbContext.Database.ExecuteSqlInterpolatedAsync(
-                $"UPDATE AspNetUsers SET Discriminator = {"Owner"} WHERE Id = {id}");
+                await _dbContext.Database.ExecuteSqlInterpolatedAsync(
+                    $"UPDATE AspNetUsers SET Discriminator = {"Owner"} WHERE Id = {id}");
+            }
 
             var loginResponse = await _accountService.CreateJwtForUserAsync(user);
 

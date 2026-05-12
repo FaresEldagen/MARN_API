@@ -24,7 +24,9 @@ namespace MARN_API.Mapping
             CreateMap<Property, PropertyEditDataDto>()
                 .ForMember(dest => dest.Amenities, opt => opt.Ignore())
                 .ForMember(dest => dest.Rules, opt => opt.Ignore())
-                .ForMember(dest => dest.Media, opt => opt.Ignore());
+                .ForMember(dest => dest.Media, opt => opt.Ignore())
+                .ForMember(dest => dest.PrimaryImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.ProofOfOwnershipUrl, opt => opt.Ignore());
 
             CreateMap<PropertyAmenity, PropertyAmenityDto>();
             CreateMap<PropertyRule, PropertyRuleDto>();

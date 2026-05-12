@@ -1,242 +1,208 @@
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Mvc;
-//using MARN_API.DTOs.Common;
-//using MARN_API.DTOs.Payments;
-//using MARN_API.Models;
-//using MARN_API.Services.Interfaces;
-//using Stripe;
+using MARN_API.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
+using Stripe;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-//namespace MARN_API.Controllers
-//{
-//    [ApiController]
-//    [Route("api/payments")]
-//    public class PaymentController : BaseController
-//    {
-//        private readonly IPaymentService _paymentService;
-//        private readonly IRentalWorkflowService _rentalWorkflowService;
-//        private readonly IConfiguration _configuration;
-//        private readonly ILogger<PaymentController> _logger;
+namespace MARN_API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class PaymentController : BaseController
+    {
+        private readonly IPaymentService _paymentService;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<PaymentController> _logger;
 
-//        public PaymentController(IPaymentService paymentService, IRentalWorkflowService rentalWorkflowService, IConfiguration configuration, ILogger<PaymentController> logger)
-//        {
-//            _paymentService = paymentService;
-//            _rentalWorkflowService = rentalWorkflowService;
-//            _configuration = configuration;
-//            _logger = logger;
-//        }
+        public PaymentController(
+            IPaymentService paymentService, 
+            IConfiguration configuration,
+            ILogger<PaymentController> logger)
+        {
+            _paymentService = paymentService;
+            _configuration = configuration;
+            _logger = logger;
+        }
 
-//        /// <summary>
-//        /// Returns all payment records for testing and admin-style inspection.
-//        /// </summary>
-//        /// <response code="200">Returns a paged list of payment records.</response>
-//        [HttpGet]
-//        [ProducesResponseType(typeof(PagedResult<PaymentResponseDto>), StatusCodes.Status200OK)]
-//        public async Task<IActionResult> GetAllPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
-//        {
-//            var payments = await _paymentService.GetAllPaymentsAsync(pageNumber, pageSize);
-//            return Ok(MapPagedResult(payments));
-//        }
 
-//        /// <summary>
-//        /// Returns payment records that belong to the currently authenticated user.
-//        /// </summary>
-//        /// <response code="200">Returns a paged list of the current user's payment records.</response>
-//        /// <response code="401">If the user is not authenticated.</response>
-//        [Authorize]
-//        [HttpGet("my")]
-//        [ProducesResponseType(typeof(PagedResult<PaymentResponseDto>), StatusCodes.Status200OK)]
-//        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-//        public async Task<IActionResult> GetMyPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
-//        {
-//            if (!TryGetUserId(out var userId))
-//            {
-//                return Unauthorized("User ID not found in token");
-//            }
+        #region Payment
+        /// <summary>
+        /// Create a Stripe Payment Intent for a specific payment schedule.
+        /// </summary>
+        /// <param name="paymentScheduleId">The ID of the payment schedule to pay for.</param>
+        /// <response code="200">
+        /// Returns the Stripe client secret required to complete the payment on the frontend.
+        /// </response>
+        /// <response code="401">If the user is not authenticated or user ID is missing from token.</response>
+        /// <response code="404">If the payment schedule is not found or does not belong to the user.</response>
+        /// <response code="429">If rate limit is exceeded.</response>
+        [HttpPost("start-payment")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        public async Task<IActionResult> StartPayment(long paymentScheduleId)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
-//            var payments = await _paymentService.GetPaymentsByUserIdAsync(userId, pageNumber, pageSize);
-//            return Ok(MapPagedResult(payments));
-//        }
+            var result = await _paymentService.CreatePaymentIntent(userId, paymentScheduleId);
+            return HandleServiceResult(result);
+        }
 
-//        /// <summary>
-//        /// Returns payment records associated with a specific property.
-//        /// </summary>
-//        /// <response code="200">Returns a paged list of payments for the specified property.</response>
-//        [HttpGet("by-property/{propertyId:long}")]
-//        [ProducesResponseType(typeof(PagedResult<PaymentResponseDto>), StatusCodes.Status200OK)]
-//        public async Task<IActionResult> GetPaymentsByPropertyId(long propertyId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
-//        {
-//            var payments = await _paymentService.GetPaymentsByPropertyIdAsync(propertyId, pageNumber, pageSize);
-//            return Ok(MapPagedResult(payments));
-//        }
 
-//        /// <summary>
-//        /// Returns payment records associated with a specific user ID, whether as owner or renter.
-//        /// </summary>
-//        /// <response code="200">Returns a paged list of payments for the specified user.</response>
-//        [HttpGet("by-user/{userId:guid}")]
-//        [ProducesResponseType(typeof(PagedResult<PaymentResponseDto>), StatusCodes.Status200OK)]
-//        public async Task<IActionResult> GetPaymentsByUserId(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
-//        {
-//            var payments = await _paymentService.GetPaymentsByUserIdAsync(userId, pageNumber, pageSize);
-//            return Ok(MapPagedResult(payments));
-//        }
+        /// <summary>
+        /// Creates a Stripe Connect Express account for the owner (if not already created) and returns an onboarding link.
+        /// </summary>
+        /// <response code="200">Returns the Stripe onboarding URL for the owner's Connect account.</response>
+        /// <response code="401">If the user is not authenticated, not found, or not an Owner.</response>
+        /// <response code="400">If saving the Stripe account fails.</response>
+        [Authorize(Roles = "Owner")]
+        [HttpPost("connect-account")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateConnectAccount()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
 
-//        /// <summary>
-//        /// Returns a single payment record by its identifier.
-//        /// </summary>
-//        /// <response code="200">Returns the requested payment record.</response>
-//        /// <response code="404">If the payment record is not found.</response>
-//        [HttpGet("{paymentId:long}")]
-//        [ProducesResponseType(typeof(PaymentResponseDto), StatusCodes.Status200OK)]
-//        [ProducesResponseType(StatusCodes.Status404NotFound)]
-//        public async Task<IActionResult> GetPaymentById(long paymentId)
-//        {
-//            var payment = await _paymentService.GetPaymentByIdAsync(paymentId);
-//            if (payment is null)
-//            {
-//                return NotFound(new ProblemDetails { Title = "Payment not found", Status = 404 });
-//            }
+            var result = await _paymentService.CreateOrGetConnectOnboardingLink(userId);
+            return HandleServiceResult(result);
+        }
 
-//            return Ok(MapPayment(payment));
-//        }
 
-//        /// <summary>
-//        /// Creates a Stripe checkout session for the authenticated renter using a property ID.
-//        /// </summary>
-//        /// <response code="200">Returns the hosted Stripe checkout URL.</response>
-//        /// <response code="400">If the property or connected-account workflow preconditions are not met.</response>
-//        /// <response code="401">If the user is not authenticated.</response>
-//        [Authorize]
-//        [HttpPost("checkout")]
-//        [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
-//        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-//        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-//        public async Task<IActionResult> CreateCheckoutSession([FromBody] CheckoutRequestDto request)
-//        {
-//            if (!TryGetUserId(out var userId))
-//            {
-//                return Unauthorized("User ID not found in token");
-//            }
+        /// <summary>
+        /// Withdraws all available (non-held) funds to the owner's connected Stripe account.
+        /// </summary>
+        /// <response code="200">Withdrawal initiated successfully.</response>
+        /// <response code="401">If the user is not authenticated or not an Owner.</response>
+        /// <response code="400">If no funds are available, Stripe account is not connected, or Stripe transfer fails.</response>
+        [Authorize(Roles = "Owner")]
+        [HttpPost("withdraw")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Withdraw()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
 
-//            var domain = $"{Request.Scheme}://{Request.Host}";
-//            var successUrl = domain + (_configuration["Stripe:CheckoutSuccessPath"] ?? "/api/payments/success");
-//            var cancelUrl = domain + (_configuration["Stripe:CheckoutCancelPath"] ?? "/api/payments/cancel");
+            var result = await _paymentService.Withdraw(userId);
+            return HandleServiceResult(result);
+        }
 
-//            var url = await _rentalWorkflowService.StartCheckoutAsync(request.PropertyId, userId, successUrl, cancelUrl);
-//            return Ok(new UrlResponseDto { Url = url });
-//        }
 
-//        /// <summary>
-//        /// Receives Stripe webhook events for checkout completion and session expiration.
-//        /// </summary>
-//        /// <response code="200">If the webhook event was accepted and processed.</response>
-//        /// <response code="400">If the Stripe signature or event payload is invalid.</response>
-//        /// <response code="500">If the webhook event was valid but processing failed.</response>
-//        [HttpPost("webhooks/stripe")]
-//        [ProducesResponseType(StatusCodes.Status200OK)]
-//        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-//        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-//        public async Task<IActionResult> Webhook()
-//        {
-//            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-//            var endpointSecret = _configuration["Stripe:WebhookSecret"];
+        /// <summary>
+        /// [TEST ONLY] Toops up the Stripe platform balance with 100000 USD (Available balance).
+        /// Use this to test withdrawals if you have insufficient funds in test mode.
+        /// </summary>
+        [Authorize(Roles = "Owner")]
+        [HttpPost("topup-test-balance")]
+        public async Task<IActionResult> TopUpTestBalance()
+        {
+            var result = await _paymentService.TopUpPlatformBalanceForTesting();
+            return HandleServiceResult(result);
+        }
 
-//            try
-//            {
-//                var stripeSignature = Request.Headers["Stripe-Signature"].ToString();
-//                var stripeEvent = EventUtility.ConstructEvent(json, stripeSignature, endpointSecret);
+        /// <summary>
+        /// [TEST ONLY] Checks the Stripe balance of the platform account and the owner's connected account.
+        /// </summary>
+        [Authorize(Roles = "Owner")]
+        [HttpGet("check-balance")]
+        public async Task<IActionResult> CheckBalance()
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
 
-//                if (stripeEvent.Type == "checkout.session.completed" && stripeEvent.Data.Object is Stripe.Checkout.Session completedSession)
-//                {
-//                    await _paymentService.FulfillPaymentAsync(completedSession.Id);
-//                }
-//                else if (stripeEvent.Type == "checkout.session.expired" && stripeEvent.Data.Object is Stripe.Checkout.Session expiredSession)
-//                {
-//                    await _paymentService.ExpirePaymentAsync(expiredSession.Id);
-//                }
+            var result = await _paymentService.CheckBalances(userId);
+            return HandleServiceResult(result);
+        }
 
-//                return Ok();
-//            }
-//            catch (StripeException ex)
-//            {
-//                _logger.LogError(ex, "Stripe exception in webhook");
-//                return BadRequest(new ProblemDetails
-//                {
-//                    Title = "Stripe webhook validation failed.",
-//                    Detail = "The webhook signature or Stripe event payload could not be validated.",
-//                    Status = StatusCodes.Status400BadRequest,
-//                    Instance = HttpContext.Request.Path
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Exception in webhook");
-//                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
-//                {
-//                    Title = "Webhook processing failed.",
-//                    Detail = "The payment event was received but could not be fully processed.",
-//                    Status = StatusCodes.Status500InternalServerError,
-//                    Instance = HttpContext.Request.Path
-//                });
-//            }
-//        }
 
-//        /// <summary>
-//        /// Temporary success callback endpoint used after Stripe checkout completes.
-//        /// </summary>
-//        /// <response code="200">Returns a success confirmation message.</response>
-//        [HttpGet("success")]
-//        [ProducesResponseType(typeof(MessageResponseDto), StatusCodes.Status200OK)]
-//        public IActionResult Success()
-//        {
-//            return Ok(new MessageResponseDto { Message = "Payment successful!" });
-//        }
+        /// <summary>
+        /// Stripe Webhook endpoint to handle payment events (success, failure, processing). [No thing to deal with as a frontend or flutter]
+        /// </summary>
+        /// <response code="200">Webhook processed successfully.</response>
+        /// <response code="400">If the Stripe signature validation fails.</response>
+        [AllowAnonymous]
+        [HttpPost("webhook")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Webhook()
+        {
+            _logger.LogInformation("Incoming Stripe Webhook request received.");
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
-//        /// <summary>
-//        /// Temporary cancellation callback endpoint used when Stripe checkout is canceled.
-//        /// </summary>
-//        /// <response code="200">Returns a cancellation confirmation message.</response>
-//        [HttpGet("cancel")]
-//        [ProducesResponseType(typeof(MessageResponseDto), StatusCodes.Status200OK)]
-//        public IActionResult Cancel()
-//        {
-//            return Ok(new MessageResponseDto { Message = "Payment was canceled." });
-//        }
+            Event stripeEvent;
+            try
+            {
+                // Try validating with the standard webhook secret first
+                stripeEvent = EventUtility.ConstructEvent(
+                    json,
+                    Request.Headers["Stripe-Signature"],
+                    _configuration["Stripe:WebhookSecret"]
+                );
+            }
+            catch (StripeException)
+            {
+                try
+                {
+                    // If that fails, try the Connect webhook secret
+                    stripeEvent = EventUtility.ConstructEvent(
+                        json,
+                        Request.Headers["Stripe-Signature"],
+                        _configuration["Stripe:ConnectWebhookSecret"]
+                    );
+                }
+                catch (StripeException e)
+                {
+                    _logger.LogError(e, "Stripe webhook signature validation failed for both standard and Connect secrets: {Message}", e.StripeError?.Message);
+                    return BadRequest();
+                }
+            }
+            
+            _logger.LogInformation("Stripe Webhook signature validated. Event Type: {EventType}", stripeEvent.Type);
 
-//        private static PagedResult<PaymentResponseDto> MapPagedResult(PagedResult<Payment> pagedResult)
-//        {
-//            return new PagedResult<PaymentResponseDto>
-//            {
-//                Items = pagedResult.Items.Select(MapPayment).ToList(),
-//                PageNumber = pagedResult.PageNumber,
-//                PageSize = pagedResult.PageSize,
-//                TotalCount = pagedResult.TotalCount,
-//                TotalPages = pagedResult.TotalPages
-//            };
-//        }
+            if (stripeEvent.Type == "payment_intent.succeeded")
+            {
+                var intent = stripeEvent.Data.Object as PaymentIntent;
+                await _paymentService.HandleSuccessfulPayment(intent!);
+            }
+            else if (stripeEvent.Type == "payment_intent.payment_failed")
+            {
+                var intent = stripeEvent.Data.Object as PaymentIntent;
+                await _paymentService.HandleFailedPayment(intent!);
+            }
+            else if (stripeEvent.Type == "payment_intent.processing")
+            {
+                _logger.LogInformation("Payment is processing...");
+            }
 
-//        private static PaymentResponseDto MapPayment(Payment payment)
-//        {
-//            return new PaymentResponseDto
-//            {
-//                Id = payment.Id,
-//                ContractId = payment.ContractId,
-//                StripeSessionId = payment.StripeSessionId,
-//                AmountTotal = payment.AmountTotal,
-//                PlatformFee = payment.PlatformFee,
-//                OwnerAmount = payment.OwnerAmount,
-//                RenterId = payment.RenterId,
-//                RenterEmail = payment.RenterEmail,
-//                OwnerId = payment.OwnerId,
-//                PropertyId = payment.PropertyId,
-//                OwnerStripeAccountId = payment.OwnerStripeAccountId,
-//                PaidAt = payment.PaidAt,
-//                PaymentIntentId = payment.PaymentIntentId,
-//                ReceiptUrl = payment.ReceiptUrl,
-//                Currency = payment.Currency,
-//                Status = payment.Status,
-//                CreatedAt = payment.CreatedAt
-//            };
-//        }
-//    }
-//}
+            else if (stripeEvent.Type == "account.updated")
+            {
+                var account = stripeEvent.Data.Object as Account;
+                await _paymentService.HandleConnectedAccountUpdated(account!);
+            }
+
+            else if (stripeEvent.Type == "transfer.created")
+            {
+                var transfer = stripeEvent.Data.Object as Transfer;
+                await _paymentService.HandleTransferCreated(transfer!);
+            }
+            //else if (stripeEvent.Type == "transfer.reversed")
+            //{
+            //    var transfer = stripeEvent.Data.Object as Transfer;
+            //    await _paymentService.HandleTransferReversed(transfer!);
+            //}
+
+            return Ok();
+        }
+        #endregion
+    }
+}

@@ -1,4 +1,4 @@
-﻿namespace MARN_API.Enums
+﻿namespace MARN_API.Enums.Contract
 {
     public enum ContractStatus
     {
