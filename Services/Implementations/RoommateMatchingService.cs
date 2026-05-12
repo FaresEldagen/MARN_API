@@ -184,12 +184,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Smoking Preference");
-                        if (currentUserPref.SmokingImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.SmokingImportance == 5)
                         {
                             dealbreakers.Add("Smoking mismatch");
                             penalty += 40; 
                         }
-                        if (matchPref.SmokingImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.SmokingImportance == 5) penalty += 40;
                     }
                 }
 
@@ -201,12 +201,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Pets Preference");
-                        if (currentUserPref.PetsImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.PetsImportance == 5)
                         {
                             dealbreakers.Add("Pets mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.PetsImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.PetsImportance == 5) penalty += 40;
                     }
                 }
 
@@ -230,12 +230,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Sleep Schedule");
-                        if (currentUserPref.SleepImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.SleepImportance == 5)
                         {
                             dealbreakers.Add("Sleep Schedule mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.SleepImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.SleepImportance == 5) penalty += 40;
                     }
                 }
 
@@ -249,12 +249,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Education Level");
-                        if (currentUserPref.EducationImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.EducationImportance == 5)
                         {
                             dealbreakers.Add("Education Level mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.EducationImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.EducationImportance == 5) penalty += 40;
                     }
                 }
 
@@ -267,12 +267,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Field of Study");
-                        if (currentUserPref.FieldOfStudyImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.FieldOfStudyImportance == 5)
                         {
                             dealbreakers.Add("Field of Study mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.FieldOfStudyImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.FieldOfStudyImportance == 5) penalty += 40;
                     }
                 }
 
@@ -286,12 +286,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Noise Tolerance");
-                        if (currentUserPref.NoiseToleranceImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.NoiseToleranceImportance == 5)
                         {
                             dealbreakers.Add("Noise Tolerance mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.NoiseToleranceImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.NoiseToleranceImportance == 5) penalty += 40;
                     }
                 }
                 
@@ -305,12 +305,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Guests Frequency");
-                        if (currentUserPref.GuestsFrequencyImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.GuestsFrequencyImportance == 5)
                         {
                             dealbreakers.Add("Guests Frequency mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.GuestsFrequencyImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.GuestsFrequencyImportance == 5) penalty += 40;
                     }
                 }
 
@@ -323,12 +323,12 @@ namespace MARN_API.Services.Implementations
                     if (score < 0.5)
                     {
                         mismatchedTraits.Add("Sharing Level");
-                        if (currentUserPref.SharingLevelImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.SharingLevelImportance == 5)
                         {
                             dealbreakers.Add("Sharing Level mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.SharingLevelImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.SharingLevelImportance == 5) penalty += 40;
                     }
                 }
 
@@ -341,12 +341,12 @@ namespace MARN_API.Services.Implementations
                     else if (score < 0.5)
                     {
                         mismatchedTraits.Add("Work Schedule");
-                        if (currentUserPref.WorkScheduleImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.WorkScheduleImportance == 5)
                         {
                             dealbreakers.Add("Work Schedule mismatch");
                             penalty += 40;
                         }
-                        if (matchPref.WorkScheduleImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                        if (matchPref.WorkScheduleImportance == 5) penalty += 40;
                     }
                 }
 
@@ -358,22 +358,22 @@ namespace MARN_API.Services.Implementations
                     else if (budgetRatioA < 0.5)
                     {
                         mismatchedTraits.Add("Budget");
-                        if (currentUserPref.BudgetImportance == PreferenceImportance.Dealbreaker)
+                        if (currentUserPref.BudgetImportance == 5)
                         {
                             dealbreakers.Add("Insufficient Budget overlap");
                             penalty += 40;
                         }
                     }
-                    if (budgetRatioB < 0.5 && matchPref.BudgetImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                    if (budgetRatioB < 0.5 && matchPref.BudgetImportance == 5) penalty += 40;
                 }
                 else 
                 {
-                    if (currentUserPref.BudgetImportance == PreferenceImportance.Dealbreaker)
+                    if (currentUserPref.BudgetImportance == 5)
                     {
                         dealbreakers.Add("Budget Mismatch");
                         penalty += 40;
                     }
-                    if (matchPref.BudgetImportance == PreferenceImportance.Dealbreaker) penalty += 40;
+                    if (matchPref.BudgetImportance == 5) penalty += 40;
                 }
 
                 // Calculate final score
@@ -406,3 +406,4 @@ namespace MARN_API.Services.Implementations
         }
     }
 }
+

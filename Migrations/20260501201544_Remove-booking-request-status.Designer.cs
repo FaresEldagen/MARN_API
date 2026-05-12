@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260509052444_update_roommate_seed_2")]
-    partial class update_roommate_seed_2
+    [Migration("20260501201544_Remove-booking-request-status")]
+    partial class Removebookingrequeststatus
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -231,52 +231,6 @@ namespace MARN_API.Migrations
                             SecurityStamp = "SEED-RENTER-C-SECURITY-STAMP",
                             TwoFactorEnabled = false,
                             UserName = "renter.c@example.com"
-                        },
-                        new
-                        {
-                            Id = new Guid("77777777-7777-7777-7777-777777777777"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-RENTER-D-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "renter.d@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Renter",
-                            Gender = 1,
-                            Language = 0,
-                            LastName = "Delta",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "RENTER.D@EXAMPLE.COM",
-                            NormalizedUserName = "RENTER.D@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-RENTER-D-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "renter.d@example.com"
-                        },
-                        new
-                        {
-                            Id = new Guid("88888888-8888-8888-8888-888888888888"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 2,
-                            ConcurrencyStamp = "SEED-RENTER-E-CONCURRENCY-STAMP",
-                            Country = 1,
-                            CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "renter.e@example.com",
-                            EmailConfirmed = true,
-                            FirstName = "Renter",
-                            Gender = 1,
-                            Language = 0,
-                            LastName = "Epsilon",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "RENTER.E@EXAMPLE.COM",
-                            NormalizedUserName = "RENTER.E@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "SEED-RENTER-E-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "renter.e@example.com"
                         });
                 });
 
@@ -308,9 +262,6 @@ namespace MARN_API.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("RenterId");
@@ -331,8 +282,7 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 1,
                             PropertyId = 1002L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -342,8 +292,7 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 0,
                             PropertyId = 1002L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
+                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -353,8 +302,7 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 1,
                             PropertyId = 1003L,
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -364,43 +312,8 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 0,
                             PropertyId = 1003L,
                             RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ConnectedAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<bool>("IsOnboardingComplete")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("StripeAccountId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId")
-                        .IsUnique();
-
-                    b.HasIndex("StripeAccountId");
-
-                    b.ToTable("ConnectedAccounts");
                 });
 
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
@@ -416,12 +329,6 @@ namespace MARN_API.Migrations
 
                     b.Property<int>("AnchoringStatus")
                         .HasColumnType("int");
-
-                    b.Property<string>("CancellationReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
@@ -446,16 +353,10 @@ namespace MARN_API.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("IPAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
-
-                    b.Property<DateOnly?>("LeaseEndDate")
+                    b.Property<DateOnly>("LeaseEndDate")
                         .HasColumnType("date");
 
-                    b.Property<DateOnly?>("LeaseStartDate")
+                    b.Property<DateOnly>("LeaseStartDate")
                         .HasColumnType("date");
 
                     b.Property<string>("MerkleRoot")
@@ -463,12 +364,6 @@ namespace MARN_API.Migrations
 
                     b.Property<byte[]>("OtsFileBytes")
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OwnerSignature")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PaymentFrequency")
                         .HasColumnType("int");
@@ -479,31 +374,17 @@ namespace MARN_API.Migrations
                     b.Property<Guid>("RenterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("RenterSignature")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("SignedByOwnerAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime?>("SignedByRenterAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("SubmittedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                    b.Property<decimal>("TotalContractAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("TransactionId")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -512,7 +393,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("RenterId");
 
-                    b.HasIndex("PropertyId", "RenterId", "OwnerId");
+                    b.HasIndex("PropertyId", "RenterId");
 
                     b.ToTable("Contracts", t =>
                         {
@@ -528,18 +409,14 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1001-active-a.pdf",
                             Hash = "SEEDHASH1001ACTIVEA",
-                            IsLocked = false,
                             LeaseEndDate = new DateOnly(2026, 3, 1),
                             LeaseStartDate = new DateOnly(2025, 3, 1),
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
                             PaymentFrequency = 1,
                             PropertyId = 1001L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            SignedByOwnerAt = new DateTime(2025, 2, 27, 0, 0, 0, 0, DateTimeKind.Utc),
                             SignedByRenterAt = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 1,
-                            SubmittedAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Version = 1
+                            TotalContractAmount = 0m
                         },
                         new
                         {
@@ -549,18 +426,14 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2023, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1001-expired-b.pdf",
                             Hash = "SEEDHASH1001EXPIREDB",
-                            IsLocked = false,
                             LeaseEndDate = new DateOnly(2024, 12, 31),
                             LeaseStartDate = new DateOnly(2024, 1, 1),
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
                             PaymentFrequency = 1,
                             PropertyId = 1001L,
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            SignedByOwnerAt = new DateTime(2023, 12, 22, 0, 0, 0, 0, DateTimeKind.Utc),
                             SignedByRenterAt = new DateTime(2023, 12, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 3,
-                            SubmittedAt = new DateTime(2023, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Version = 1
+                            TotalContractAmount = 0m
                         },
                         new
                         {
@@ -570,18 +443,14 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2024, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1004-expired-a.pdf",
                             Hash = "SEEDHASH1004EXPIREDA",
-                            IsLocked = false,
                             LeaseEndDate = new DateOnly(2025, 1, 31),
                             LeaseStartDate = new DateOnly(2024, 6, 1),
-                            OwnerId = new Guid("66666666-6666-6666-6666-666666666666"),
                             PaymentFrequency = 1,
                             PropertyId = 1004L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            SignedByOwnerAt = new DateTime(2024, 5, 22, 0, 0, 0, 0, DateTimeKind.Utc),
                             SignedByRenterAt = new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 3,
-                            SubmittedAt = new DateTime(2024, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Version = 1
+                            TotalContractAmount = 0m
                         });
                 });
 
@@ -1475,60 +1344,6 @@ namespace MARN_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MARN_API.Models.RentalTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("ContractId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<long?>("PaymentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int")
-                        .HasAnnotation("Relational:JsonPropertyName", "payment_status");
-
-                    b.Property<long>("PropertyId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("RenterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StripeSessionId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractId");
-
-                    b.HasIndex("PaymentId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("StripeSessionId");
-
-                    b.HasIndex("RenterId", "PropertyId", "CreatedAt");
-
-                    b.ToTable("RentalTransactions");
-                });
-
             modelBuilder.Entity("MARN_API.Models.Report", b =>
                 {
                     b.Property<long>("Id")
@@ -1594,17 +1409,11 @@ namespace MARN_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("BudgetImportance")
-                        .HasColumnType("int");
-
                     b.Property<decimal?>("BudgetRangeMax")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("BudgetRangeMin")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("EducationImportance")
-                        .HasColumnType("int");
 
                     b.Property<int>("EducationLevel")
                         .HasColumnType("int");
@@ -1612,43 +1421,19 @@ namespace MARN_API.Migrations
                     b.Property<int>("FieldOfStudy")
                         .HasColumnType("int");
 
-                    b.Property<int>("FieldOfStudyImportance")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Governorate")
-                        .HasColumnType("int");
-
                     b.Property<int>("GuestsFrequency")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GuestsFrequencyImportance")
                         .HasColumnType("int");
 
                     b.Property<int?>("NoiseTolerance")
                         .HasColumnType("int");
 
-                    b.Property<int>("NoiseToleranceImportance")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("Pets")
                         .HasColumnType("bit");
-
-                    b.Property<int>("PetsImportance")
-                        .HasColumnType("int");
 
                     b.Property<bool>("RoommatePreferencesEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<int>("SearchStatus")
-                        .HasColumnType("int");
-
                     b.Property<int>("SharingLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SharingLevelImportance")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SleepImportance")
                         .HasColumnType("int");
 
                     b.Property<int>("SleepSchedule")
@@ -1657,16 +1442,10 @@ namespace MARN_API.Migrations
                     b.Property<bool?>("Smoking")
                         .HasColumnType("bit");
 
-                    b.Property<int>("SmokingImportance")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("WorkSchedule")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkScheduleImportance")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1683,147 +1462,36 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 1L,
-                            BudgetImportance = 3,
                             BudgetRangeMax = 6000m,
                             BudgetRangeMin = 3000m,
-                            EducationImportance = 3,
                             EducationLevel = 2,
                             FieldOfStudy = 1,
-                            FieldOfStudyImportance = 3,
-                            Governorate = 0,
                             GuestsFrequency = 2,
-                            GuestsFrequencyImportance = 3,
                             NoiseTolerance = 3,
-                            NoiseToleranceImportance = 3,
                             Pets = true,
-                            PetsImportance = 3,
                             RoommatePreferencesEnabled = true,
-                            SearchStatus = 0,
                             SharingLevel = 3,
-                            SharingLevelImportance = 3,
-                            SleepImportance = 3,
                             SleepSchedule = 1,
                             Smoking = false,
-                            SmokingImportance = 3,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            WorkSchedule = 2,
-                            WorkScheduleImportance = 3
+                            WorkSchedule = 2
                         },
                         new
                         {
                             Id = 2L,
-                            BudgetImportance = 3,
                             BudgetRangeMax = 4500m,
                             BudgetRangeMin = 2000m,
-                            EducationImportance = 3,
                             EducationLevel = 2,
                             FieldOfStudy = 5,
-                            FieldOfStudyImportance = 3,
-                            Governorate = 0,
                             GuestsFrequency = 4,
-                            GuestsFrequencyImportance = 3,
                             NoiseTolerance = 5,
-                            NoiseToleranceImportance = 3,
                             Pets = false,
-                            PetsImportance = 3,
                             RoommatePreferencesEnabled = true,
-                            SearchStatus = 0,
                             SharingLevel = 3,
-                            SharingLevelImportance = 3,
-                            SleepImportance = 3,
                             SleepSchedule = 2,
                             Smoking = true,
-                            SmokingImportance = 3,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            WorkSchedule = 5,
-                            WorkScheduleImportance = 3
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            BudgetImportance = 3,
-                            BudgetRangeMax = 3500m,
-                            BudgetRangeMin = 2000m,
-                            EducationImportance = 3,
-                            EducationLevel = 2,
-                            FieldOfStudy = 3,
-                            FieldOfStudyImportance = 3,
-                            Governorate = 0,
-                            GuestsFrequency = 4,
-                            GuestsFrequencyImportance = 3,
-                            NoiseTolerance = 2,
-                            NoiseToleranceImportance = 3,
-                            Pets = false,
-                            PetsImportance = 3,
-                            RoommatePreferencesEnabled = true,
-                            SearchStatus = 0,
-                            SharingLevel = 2,
-                            SharingLevelImportance = 3,
-                            SleepImportance = 3,
-                            SleepSchedule = 1,
-                            Smoking = false,
-                            SmokingImportance = 3,
-                            UserId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            WorkSchedule = 5,
-                            WorkScheduleImportance = 3
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            BudgetImportance = 3,
-                            BudgetRangeMax = 5500m,
-                            BudgetRangeMin = 4000m,
-                            EducationImportance = 3,
-                            EducationLevel = 3,
-                            FieldOfStudy = 1,
-                            FieldOfStudyImportance = 3,
-                            Governorate = 0,
-                            GuestsFrequency = 2,
-                            GuestsFrequencyImportance = 3,
-                            NoiseTolerance = 4,
-                            NoiseToleranceImportance = 3,
-                            Pets = true,
-                            PetsImportance = 3,
-                            RoommatePreferencesEnabled = true,
-                            SearchStatus = 1,
-                            SharingLevel = 3,
-                            SharingLevelImportance = 3,
-                            SleepImportance = 3,
-                            SleepSchedule = 3,
-                            Smoking = false,
-                            SmokingImportance = 3,
-                            UserId = new Guid("77777777-7777-7777-7777-777777777777"),
-                            WorkSchedule = 2,
-                            WorkScheduleImportance = 3
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            BudgetImportance = 3,
-                            BudgetRangeMax = 10000m,
-                            BudgetRangeMin = 7000m,
-                            EducationImportance = 3,
-                            EducationLevel = 1,
-                            FieldOfStudy = 5,
-                            FieldOfStudyImportance = 3,
-                            Governorate = 0,
-                            GuestsFrequency = 4,
-                            GuestsFrequencyImportance = 3,
-                            NoiseTolerance = 5,
-                            NoiseToleranceImportance = 3,
-                            Pets = false,
-                            PetsImportance = 3,
-                            RoommatePreferencesEnabled = true,
-                            SearchStatus = 0,
-                            SharingLevel = 1,
-                            SharingLevelImportance = 3,
-                            SleepImportance = 3,
-                            SleepSchedule = 2,
-                            Smoking = true,
-                            SmokingImportance = 3,
-                            UserId = new Guid("88888888-8888-8888-8888-888888888888"),
-                            WorkSchedule = 3,
-                            WorkScheduleImportance = 3
+                            WorkSchedule = 5
                         });
                 });
 
@@ -2104,16 +1772,6 @@ namespace MARN_API.Migrations
                         },
                         new
                         {
-                            UserId = new Guid("77777777-7777-7777-7777-777777777777"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("88888888-8888-8888-8888-888888888888"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
@@ -2287,17 +1945,6 @@ namespace MARN_API.Migrations
                     b.Navigation("Renter");
                 });
 
-            modelBuilder.Entity("MARN_API.Models.ConnectedAccount", b =>
-                {
-                    b.HasOne("MARN_API.Models.ApplicationUser", "ApplicationUser")
-                        .WithOne("ConnectedAccount")
-                        .HasForeignKey("MARN_API.Models.ConnectedAccount", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-                });
-
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
                 {
                     b.HasOne("MARN_API.Models.Property", "Property")
@@ -2355,9 +2002,9 @@ namespace MARN_API.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("Payments")
+                        .WithMany()
                         .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MARN_API.Models.ApplicationUser", "Renter")
@@ -2450,17 +2097,6 @@ namespace MARN_API.Migrations
                         .WithMany("Rules")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Property");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.RentalTransaction", b =>
-                {
-                    b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("RentalTransactions")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Property");
@@ -2582,8 +2218,6 @@ namespace MARN_API.Migrations
 
                     b.Navigation("BookingRequestsAsRenter");
 
-                    b.Navigation("ConnectedAccount");
-
                     b.Navigation("ContractsAsRenter");
 
                     b.Navigation("Notifications");
@@ -2615,13 +2249,9 @@ namespace MARN_API.Migrations
 
                     b.Navigation("Media");
 
-                    b.Navigation("Payments");
-
                     b.Navigation("PropertyComments");
 
                     b.Navigation("PropertyRatings");
-
-                    b.Navigation("RentalTransactions");
 
                     b.Navigation("Rules");
 

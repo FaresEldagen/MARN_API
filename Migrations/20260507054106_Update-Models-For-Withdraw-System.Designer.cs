@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507054106_Update-Models-For-Withdraw-System")]
+    partial class UpdateModelsForWithdrawSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -265,7 +268,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId", "RenterId");
 
-                    b.ToTable("BookingRequests", null, t =>
+                    b.ToTable("BookingRequests", t =>
                         {
                             t.HasCheckConstraint("CK_BookingRequest_Dates", "[EndDate] > [StartDate]");
                         });
@@ -384,7 +387,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId", "RenterId");
 
-                    b.ToTable("Contracts", null, t =>
+                    b.ToTable("Contracts", t =>
                         {
                             t.HasCheckConstraint("CK_Contract_Dates", "[LeaseEndDate] IS NULL OR [LeaseStartDate] IS NULL OR [LeaseEndDate] > [LeaseStartDate]");
                         });
@@ -537,7 +540,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
 
                     b.HasData(
                         new
@@ -605,7 +608,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
 
                     b.HasData(
                         new
@@ -811,7 +814,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PaymentScheduleId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
 
                     b.HasData(
                         new
@@ -1029,7 +1032,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("ContractId", "DueDate");
 
-                    b.ToTable("PaymentSchedules", (string)null);
+                    b.ToTable("PaymentSchedules");
 
                     b.HasData(
                         new
@@ -1407,7 +1410,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("Properties", (string)null);
+                    b.ToTable("Properties");
 
                     b.HasData(
                         new
@@ -1538,7 +1541,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyAmenities", (string)null);
+                    b.ToTable("PropertyAmenities");
 
                     b.HasData(
                         new
@@ -1654,7 +1657,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PropertyComments", (string)null);
+                    b.ToTable("PropertyComments");
 
                     b.HasData(
                         new
@@ -1705,7 +1708,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyMedia", (string)null);
+                    b.ToTable("PropertyMedia");
 
                     b.HasData(
                         new
@@ -1770,7 +1773,7 @@ namespace MARN_API.Migrations
                     b.HasIndex("PropertyId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("PropertyRatings", null, t =>
+                    b.ToTable("PropertyRatings", t =>
                         {
                             t.HasCheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
                         });
@@ -1821,7 +1824,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("PropertyRules", (string)null);
+                    b.ToTable("PropertyRules");
 
                     b.HasData(
                         new
@@ -1903,7 +1906,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
 
                     b.HasData(
                         new
@@ -1971,7 +1974,7 @@ namespace MARN_API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("RoommatePreferences", null, t =>
+                    b.ToTable("RoommatePreferences", t =>
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
                         });
@@ -2025,7 +2028,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SavedProperties", (string)null);
+                    b.ToTable("SavedProperties");
 
                     b.HasData(
                         new
@@ -2087,7 +2090,7 @@ namespace MARN_API.Migrations
 
                     b.HasIndex("UserId", "Type", "CreatedAt");
 
-                    b.ToTable("UserActivities", (string)null);
+                    b.ToTable("UserActivities");
 
                     b.HasData(
                         new
@@ -2129,7 +2132,7 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserDevices", (string)null);
+                    b.ToTable("UserDevices");
 
                     b.HasData(
                         new

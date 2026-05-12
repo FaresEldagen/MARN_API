@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260502094954_AddRoommateMatchingFields")]
-    partial class AddRoommateMatchingFields
+    [Migration("20260506134452_Payment-Configuratins-And-Seed")]
+    partial class PaymentConfiguratinsAndSeed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -262,9 +262,6 @@ namespace MARN_API.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("RenterId");
@@ -285,8 +282,7 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 1,
                             PropertyId = 1002L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -296,8 +292,7 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 0,
                             PropertyId = 1002L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
+                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -307,8 +302,7 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 1,
                             PropertyId = 1003L,
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -318,43 +312,8 @@ namespace MARN_API.Migrations
                             PaymentFrequency = 0,
                             PropertyId = 1003L,
                             RenterId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            StartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
-                });
-
-            modelBuilder.Entity("MARN_API.Models.ConnectedAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<bool>("IsOnboardingComplete")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("StripeAccountId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId")
-                        .IsUnique();
-
-                    b.HasIndex("StripeAccountId");
-
-                    b.ToTable("ConnectedAccounts");
                 });
 
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
@@ -370,17 +329,6 @@ namespace MARN_API.Migrations
 
                     b.Property<int>("AnchoringStatus")
                         .HasColumnType("int");
-
-                    b.Property<string>("CancellationReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ContractNumber")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -400,16 +348,10 @@ namespace MARN_API.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("IPAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
-
-                    b.Property<DateOnly?>("LeaseEndDate")
+                    b.Property<DateOnly>("LeaseEndDate")
                         .HasColumnType("date");
 
-                    b.Property<DateOnly?>("LeaseStartDate")
+                    b.Property<DateOnly>("LeaseStartDate")
                         .HasColumnType("date");
 
                     b.Property<string>("MerkleRoot")
@@ -417,12 +359,6 @@ namespace MARN_API.Migrations
 
                     b.Property<byte[]>("OtsFileBytes")
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OwnerSignature")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PaymentFrequency")
                         .HasColumnType("int");
@@ -433,40 +369,23 @@ namespace MARN_API.Migrations
                     b.Property<Guid>("RenterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("RenterSignature")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("SignedByOwnerAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime?>("SignedByRenterAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("SubmittedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                    b.Property<decimal>("TotalContractAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("TransactionId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ContractNumber")
-                        .IsUnique();
 
                     b.HasIndex("RenterId");
 
-                    b.HasIndex("PropertyId", "RenterId", "OwnerId");
+                    b.HasIndex("PropertyId", "RenterId");
 
                     b.ToTable("Contracts", t =>
                         {
@@ -476,66 +395,119 @@ namespace MARN_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 950001L,
-                            AnchoringStatus = 0,
-                            ContractNumber = "SEED-CONTRACT-1001-ACTIVE-A",
-                            CreatedAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileName = "seed-contract-1001-active-a.pdf",
-                            Hash = "SEEDHASH1001ACTIVEA",
-                            IsLocked = false,
-                            LeaseEndDate = new DateOnly(2026, 3, 1),
-                            LeaseStartDate = new DateOnly(2025, 3, 1),
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            Id = 1000001L,
+                            AnchoredAt = new DateTime(2024, 12, 29, 0, 0, 0, 0, DateTimeKind.Utc),
+                            AnchoringStatus = 1,
+                            CreatedAt = new DateTime(2024, 12, 27, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000001.pdf",
+                            Hash = "SEEDHASH1000001ACTIVEMONTHLY",
+                            LeaseEndDate = new DateOnly(2026, 1, 1),
+                            LeaseStartDate = new DateOnly(2025, 1, 1),
                             PaymentFrequency = 1,
                             PropertyId = 1001L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            SignedByOwnerAt = new DateTime(2025, 2, 27, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SignedByRenterAt = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Utc),
+                            SignedByRenterAt = new DateTime(2024, 12, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 1,
-                            SubmittedAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Version = 1
+                            TotalContractAmount = 60000m
                         },
                         new
                         {
-                            Id = 950002L,
-                            AnchoringStatus = 0,
-                            ContractNumber = "SEED-CONTRACT-1001-EXPIRED-B",
-                            CreatedAt = new DateTime(2023, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileName = "seed-contract-1001-expired-b.pdf",
-                            Hash = "SEEDHASH1001EXPIREDB",
-                            IsLocked = false,
-                            LeaseEndDate = new DateOnly(2024, 12, 31),
-                            LeaseStartDate = new DateOnly(2024, 1, 1),
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            PaymentFrequency = 1,
-                            PropertyId = 1001L,
+                            Id = 1000002L,
+                            AnchoredAt = new DateTime(2024, 12, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            AnchoringStatus = 1,
+                            CreatedAt = new DateTime(2024, 12, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000002.pdf",
+                            Hash = "SEEDHASH1000002ACTIVEQUARTERLY",
+                            LeaseEndDate = new DateOnly(2026, 1, 1),
+                            LeaseStartDate = new DateOnly(2025, 1, 1),
+                            PaymentFrequency = 2,
+                            PropertyId = 1002L,
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            SignedByOwnerAt = new DateTime(2023, 12, 22, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SignedByRenterAt = new DateTime(2023, 12, 21, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 3,
-                            SubmittedAt = new DateTime(2023, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Version = 1
+                            SignedByRenterAt = new DateTime(2024, 12, 29, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            TotalContractAmount = 90000m
                         },
                         new
                         {
-                            Id = 950003L,
-                            AnchoringStatus = 0,
-                            ContractNumber = "SEED-CONTRACT-1004-EXPIRED-A",
-                            CreatedAt = new DateTime(2024, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileName = "seed-contract-1004-expired-a.pdf",
-                            Hash = "SEEDHASH1004EXPIREDA",
-                            IsLocked = false,
-                            LeaseEndDate = new DateOnly(2025, 1, 31),
+                            Id = 1000003L,
+                            AnchoredAt = new DateTime(2024, 5, 26, 0, 0, 0, 0, DateTimeKind.Utc),
+                            AnchoringStatus = 1,
+                            CreatedAt = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000003.pdf",
+                            Hash = "SEEDHASH1000003ACTIVEYEARLY",
+                            LeaseEndDate = new DateOnly(2026, 6, 1),
                             LeaseStartDate = new DateOnly(2024, 6, 1),
-                            OwnerId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            PaymentFrequency = 3,
+                            PropertyId = 1003L,
+                            RenterId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            SignedByRenterAt = new DateTime(2024, 5, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            TotalContractAmount = 84000m
+                        },
+                        new
+                        {
+                            Id = 1000004L,
+                            AnchoredAt = new DateTime(2025, 1, 29, 0, 0, 0, 0, DateTimeKind.Utc),
+                            AnchoringStatus = 1,
+                            CreatedAt = new DateTime(2025, 1, 27, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000004.pdf",
+                            Hash = "SEEDHASH1000004OWNERZMONTHLY",
+                            LeaseEndDate = new DateOnly(2026, 2, 1),
+                            LeaseStartDate = new DateOnly(2025, 2, 1),
                             PaymentFrequency = 1,
                             PropertyId = 1004L,
                             RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            SignedByOwnerAt = new DateTime(2024, 5, 22, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SignedByRenterAt = new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            SignedByRenterAt = new DateTime(2025, 1, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            TotalContractAmount = 180000m
+                        },
+                        new
+                        {
+                            Id = 1000005L,
+                            AnchoringStatus = 0,
+                            CreatedAt = new DateTime(2025, 2, 24, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000005.pdf",
+                            Hash = "SEEDHASH1000005ONETIME",
+                            LeaseEndDate = new DateOnly(2025, 9, 1),
+                            LeaseStartDate = new DateOnly(2025, 3, 1),
+                            PaymentFrequency = 0,
+                            PropertyId = 1001L,
+                            RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            SignedByRenterAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            TotalContractAmount = 30000m
+                        },
+                        new
+                        {
+                            Id = 1000006L,
+                            AnchoredAt = new DateTime(2023, 12, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            AnchoringStatus = 1,
+                            CreatedAt = new DateTime(2023, 12, 19, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000006.pdf",
+                            Hash = "SEEDHASH1000006EXPIRED",
+                            LeaseEndDate = new DateOnly(2024, 12, 31),
+                            LeaseStartDate = new DateOnly(2024, 1, 1),
+                            PaymentFrequency = 2,
+                            PropertyId = 1002L,
+                            RenterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            SignedByRenterAt = new DateTime(2023, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 3,
-                            SubmittedAt = new DateTime(2024, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Version = 1
+                            TotalContractAmount = 36000m
+                        },
+                        new
+                        {
+                            Id = 1000007L,
+                            AnchoringStatus = 0,
+                            CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000007.pdf",
+                            Hash = "SEEDHASH1000007CANCELLED",
+                            LeaseEndDate = new DateOnly(2026, 5, 1),
+                            LeaseStartDate = new DateOnly(2025, 5, 1),
+                            PaymentFrequency = 1,
+                            PropertyId = 1004L,
+                            RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Status = 2,
+                            TotalContractAmount = 180000m
                         });
                 });
 
@@ -717,7 +689,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 4, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             Data = "{\"amount\":\"1200\", \"currency\":\"USD\"}",
                             Title = "Payment received",
-                            Type = 14,
+                            Type = 15,
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
                             UserType = 2
                         },
@@ -802,16 +774,229 @@ namespace MARN_API.Migrations
                     b.Property<decimal>("AmountTotal")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("AvailableAt")
+                    b.Property<Guid?>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AvailableAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<long?>("ContractId")
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("OwnerAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("PaymentScheduleId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<decimal>("PlatformFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("AvailableAt");
+
+                    b.HasIndex("PaymentIntentId")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentScheduleId");
+
+                    b.ToTable("Payments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 30001L,
+                            AmountTotal = 5000m,
+                            AvailableAt = new DateTime(2025, 2, 8, 12, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 4500m,
+                            PaidAt = new DateTime(2025, 1, 29, 12, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20001",
+                            PaymentScheduleId = 20001L,
+                            PlatformFee = 500m
+                        },
+                        new
+                        {
+                            Id = 30002L,
+                            AmountTotal = 5000m,
+                            AvailableAt = new DateTime(2025, 3, 10, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 4500m,
+                            PaidAt = new DateTime(2025, 2, 28, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20002",
+                            PaymentScheduleId = 20002L,
+                            PlatformFee = 500m
+                        },
+                        new
+                        {
+                            Id = 30003L,
+                            AmountTotal = 5000m,
+                            AvailableAt = new DateTime(2025, 4, 15, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 4500m,
+                            PaidAt = new DateTime(2025, 4, 5, 9, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20003",
+                            PaymentScheduleId = 20003L,
+                            PlatformFee = 500m
+                        },
+                        new
+                        {
+                            Id = 30010L,
+                            AmountTotal = 22500m,
+                            AvailableAt = new DateTime(2025, 4, 1, 14, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 20250m,
+                            PaidAt = new DateTime(2025, 3, 22, 14, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20010",
+                            PaymentScheduleId = 20010L,
+                            PlatformFee = 2250m
+                        },
+                        new
+                        {
+                            Id = 30020L,
+                            AmountTotal = 42000m,
+                            AvailableAt = new DateTime(2025, 6, 11, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 37800m,
+                            PaidAt = new DateTime(2025, 6, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20020",
+                            PaymentScheduleId = 20020L,
+                            PlatformFee = 4200m
+                        },
+                        new
+                        {
+                            Id = 30030L,
+                            AmountTotal = 15000m,
+                            AvailableAt = new DateTime(2025, 3, 8, 11, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 13500m,
+                            PaidAt = new DateTime(2025, 2, 26, 11, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20030",
+                            PaymentScheduleId = 20030L,
+                            PlatformFee = 1500m
+                        },
+                        new
+                        {
+                            Id = 30031L,
+                            AmountTotal = 15000m,
+                            AvailableAt = new DateTime(2025, 4, 11, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 13500m,
+                            PaidAt = new DateTime(2025, 4, 1, 9, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20031",
+                            PaymentScheduleId = 20031L,
+                            PlatformFee = 1500m
+                        },
+                        new
+                        {
+                            Id = 30032L,
+                            AmountTotal = 15000m,
+                            AvailableAt = new DateTime(2025, 5, 18, 16, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 13500m,
+                            PaidAt = new DateTime(2025, 5, 8, 16, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20032",
+                            PaymentScheduleId = 20032L,
+                            PlatformFee = 1500m
+                        },
+                        new
+                        {
+                            Id = 30033L,
+                            AmountTotal = 15000m,
+                            AvailableAt = new DateTime(2025, 8, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 13500m,
+                            PaidAt = new DateTime(2025, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20033",
+                            PaymentScheduleId = 20033L,
+                            PlatformFee = 1500m
+                        },
+                        new
+                        {
+                            Id = 30040L,
+                            AmountTotal = 30000m,
+                            AvailableAt = new DateTime(2025, 4, 21, 13, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 27000m,
+                            PaidAt = new DateTime(2025, 4, 11, 13, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20040",
+                            PaymentScheduleId = 20040L,
+                            PlatformFee = 3000m
+                        },
+                        new
+                        {
+                            Id = 30050L,
+                            AmountTotal = 9000m,
+                            AvailableAt = new DateTime(2024, 4, 10, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 8100m,
+                            PaidAt = new DateTime(2024, 3, 31, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20050",
+                            PaymentScheduleId = 20050L,
+                            PlatformFee = 900m
+                        },
+                        new
+                        {
+                            Id = 30051L,
+                            AmountTotal = 9000m,
+                            AvailableAt = new DateTime(2024, 7, 10, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 8100m,
+                            PaidAt = new DateTime(2024, 6, 30, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20051",
+                            PaymentScheduleId = 20051L,
+                            PlatformFee = 900m
+                        },
+                        new
+                        {
+                            Id = 30052L,
+                            AmountTotal = 9000m,
+                            AvailableAt = new DateTime(2024, 10, 17, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 8100m,
+                            PaidAt = new DateTime(2024, 10, 7, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20052",
+                            PaymentScheduleId = 20052L,
+                            PlatformFee = 900m
+                        },
+                        new
+                        {
+                            Id = 30053L,
+                            AmountTotal = 9000m,
+                            AvailableAt = new DateTime(2025, 1, 4, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 8100m,
+                            PaidAt = new DateTime(2024, 12, 25, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20053",
+                            PaymentScheduleId = 20053L,
+                            PlatformFee = 900m
+                        });
+                });
+
+            modelBuilder.Entity("MARN_API.Models.PaymentSchedule", b =>
+                {
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("ContractId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -820,60 +1005,294 @@ namespace MARN_API.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("OwnerAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OwnerStripeAccountId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("PaymentIntentId")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("PlatformFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<long>("PropertyId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ReceiptUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RenterEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("RenterId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<string>("StripeSessionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ContractId");
+                    b.HasIndex("ContractId", "DueDate");
 
-                    b.HasIndex("DueDate");
+                    b.ToTable("PaymentSchedules");
 
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("RenterId");
-
-                    b.HasIndex("StripeSessionId")
-                        .IsUnique();
-
-                    b.HasIndex("Status", "AvailableAt");
-
-                    b.ToTable("Payments");
+                    b.HasData(
+                        new
+                        {
+                            Id = 20001L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20001",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = 20002L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20002",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20003L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20003",
+                            Status = 5
+                        },
+                        new
+                        {
+                            Id = 20004L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 4, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 6
+                        },
+                        new
+                        {
+                            Id = 20005L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 5, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 2
+                        },
+                        new
+                        {
+                            Id = 20006L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 20007L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20008L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 7, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20009L,
+                            Amount = 5000m,
+                            ContractId = 1000001L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 8, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20010L,
+                            Amount = 22500m,
+                            ContractId = 1000002L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20010",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = 20011L,
+                            Amount = 22500m,
+                            ContractId = 1000002L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 3, 22, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 6
+                        },
+                        new
+                        {
+                            Id = 20012L,
+                            Amount = 22500m,
+                            ContractId = 1000002L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 20013L,
+                            Amount = 22500m,
+                            ContractId = 1000002L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 8, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20020L,
+                            Amount = 42000m,
+                            ContractId = 1000003L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20020",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20021L,
+                            Amount = 42000m,
+                            ContractId = 1000003L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2027, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20030L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20030",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = 20031L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20031",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20032L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20032",
+                            Status = 5
+                        },
+                        new
+                        {
+                            Id = 20033L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20033",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20034L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 4, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 6
+                        },
+                        new
+                        {
+                            Id = 20035L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 20036L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 6, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20037L,
+                            Amount = 15000m,
+                            ContractId = 1000004L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 7, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 20040L,
+                            Amount = 30000m,
+                            ContractId = 1000005L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20040",
+                            Status = 5
+                        },
+                        new
+                        {
+                            Id = 20050L,
+                            Amount = 9000m,
+                            ContractId = 1000006L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2024, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20050",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20051L,
+                            Amount = 9000m,
+                            ContractId = 1000006L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2024, 6, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20051",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20052L,
+                            Amount = 9000m,
+                            ContractId = 1000006L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2024, 9, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20052",
+                            Status = 5
+                        },
+                        new
+                        {
+                            Id = 20053L,
+                            Amount = 9000m,
+                            ContractId = 1000006L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2024, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20053",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = 20060L,
+                            Amount = 15000m,
+                            ContractId = 1000007L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
+                        });
                 });
 
             modelBuilder.Entity("MARN_API.Models.Property", b =>
@@ -1429,60 +1848,6 @@ namespace MARN_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MARN_API.Models.RentalTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("ContractId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<long?>("PaymentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int")
-                        .HasAnnotation("Relational:JsonPropertyName", "payment_status");
-
-                    b.Property<long>("PropertyId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("RenterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StripeSessionId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractId");
-
-                    b.HasIndex("PaymentId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("StripeSessionId");
-
-                    b.HasIndex("RenterId", "PropertyId", "CreatedAt");
-
-                    b.ToTable("RentalTransactions");
-                });
-
             modelBuilder.Entity("MARN_API.Models.Report", b =>
                 {
                     b.Property<long>("Id")
@@ -1548,17 +1913,11 @@ namespace MARN_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("BudgetImportance")
-                        .HasColumnType("int");
-
                     b.Property<decimal?>("BudgetRangeMax")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("BudgetRangeMin")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("EducationImportance")
-                        .HasColumnType("int");
 
                     b.Property<int>("EducationLevel")
                         .HasColumnType("int");
@@ -1566,43 +1925,19 @@ namespace MARN_API.Migrations
                     b.Property<int>("FieldOfStudy")
                         .HasColumnType("int");
 
-                    b.Property<int>("FieldOfStudyImportance")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Governorate")
-                        .HasColumnType("int");
-
                     b.Property<int>("GuestsFrequency")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GuestsFrequencyImportance")
                         .HasColumnType("int");
 
                     b.Property<int?>("NoiseTolerance")
                         .HasColumnType("int");
 
-                    b.Property<int>("NoiseToleranceImportance")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("Pets")
                         .HasColumnType("bit");
-
-                    b.Property<int>("PetsImportance")
-                        .HasColumnType("int");
 
                     b.Property<bool>("RoommatePreferencesEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<int>("SearchStatus")
-                        .HasColumnType("int");
-
                     b.Property<int>("SharingLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SharingLevelImportance")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SleepImportance")
                         .HasColumnType("int");
 
                     b.Property<int>("SleepSchedule")
@@ -1611,16 +1946,10 @@ namespace MARN_API.Migrations
                     b.Property<bool?>("Smoking")
                         .HasColumnType("bit");
 
-                    b.Property<int>("SmokingImportance")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("WorkSchedule")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkScheduleImportance")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1637,60 +1966,36 @@ namespace MARN_API.Migrations
                         new
                         {
                             Id = 1L,
-                            BudgetImportance = 2,
                             BudgetRangeMax = 6000m,
                             BudgetRangeMin = 3000m,
-                            EducationImportance = 2,
                             EducationLevel = 2,
                             FieldOfStudy = 1,
-                            FieldOfStudyImportance = 2,
-                            Governorate = 0,
                             GuestsFrequency = 2,
-                            GuestsFrequencyImportance = 2,
                             NoiseTolerance = 3,
-                            NoiseToleranceImportance = 2,
                             Pets = true,
-                            PetsImportance = 2,
                             RoommatePreferencesEnabled = true,
-                            SearchStatus = 0,
                             SharingLevel = 3,
-                            SharingLevelImportance = 2,
-                            SleepImportance = 2,
                             SleepSchedule = 1,
                             Smoking = false,
-                            SmokingImportance = 2,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            WorkSchedule = 2,
-                            WorkScheduleImportance = 2
+                            WorkSchedule = 2
                         },
                         new
                         {
                             Id = 2L,
-                            BudgetImportance = 2,
                             BudgetRangeMax = 4500m,
                             BudgetRangeMin = 2000m,
-                            EducationImportance = 2,
                             EducationLevel = 2,
                             FieldOfStudy = 5,
-                            FieldOfStudyImportance = 2,
-                            Governorate = 0,
                             GuestsFrequency = 4,
-                            GuestsFrequencyImportance = 2,
                             NoiseTolerance = 5,
-                            NoiseToleranceImportance = 2,
                             Pets = false,
-                            PetsImportance = 2,
                             RoommatePreferencesEnabled = true,
-                            SearchStatus = 0,
                             SharingLevel = 3,
-                            SharingLevelImportance = 2,
-                            SleepImportance = 2,
                             SleepSchedule = 2,
                             Smoking = true,
-                            SmokingImportance = 2,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            WorkSchedule = 5,
-                            WorkScheduleImportance = 2
+                            WorkSchedule = 5
                         });
                 });
 
@@ -2144,17 +2449,6 @@ namespace MARN_API.Migrations
                     b.Navigation("Renter");
                 });
 
-            modelBuilder.Entity("MARN_API.Models.ConnectedAccount", b =>
-                {
-                    b.HasOne("MARN_API.Models.ApplicationUser", "ApplicationUser")
-                        .WithOne("ConnectedAccount")
-                        .HasForeignKey("MARN_API.Models.ConnectedAccount", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-                });
-
             modelBuilder.Entity("MARN_API.Models.Contract", b =>
                 {
                     b.HasOne("MARN_API.Models.Property", "Property")
@@ -2206,28 +2500,28 @@ namespace MARN_API.Migrations
 
             modelBuilder.Entity("MARN_API.Models.Payment", b =>
                 {
-                    b.HasOne("MARN_API.Models.Contract", "Contract")
-                        .WithMany()
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("MARN_API.Models.ApplicationUser", null)
+                        .WithMany("PaymentsAsRenter")
+                        .HasForeignKey("ApplicationUserId");
 
-                    b.HasOne("MARN_API.Models.Property", "Property")
+                    b.HasOne("MARN_API.Models.PaymentSchedule", "PaymentSchedule")
                         .WithMany("Payments")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("PaymentScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MARN_API.Models.ApplicationUser", "Renter")
-                        .WithMany("PaymentsAsRenter")
-                        .HasForeignKey("RenterId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.Navigation("PaymentSchedule");
+                });
+
+            modelBuilder.Entity("MARN_API.Models.PaymentSchedule", b =>
+                {
+                    b.HasOne("MARN_API.Models.Contract", "Contract")
+                        .WithMany("PaymentSchedules")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Contract");
-
-                    b.Navigation("Property");
-
-                    b.Navigation("Renter");
                 });
 
             modelBuilder.Entity("MARN_API.Models.Property", b =>
@@ -2307,17 +2601,6 @@ namespace MARN_API.Migrations
                         .WithMany("Rules")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Property");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.RentalTransaction", b =>
-                {
-                    b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("RentalTransactions")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Property");
@@ -2439,8 +2722,6 @@ namespace MARN_API.Migrations
 
                     b.Navigation("BookingRequestsAsRenter");
 
-                    b.Navigation("ConnectedAccount");
-
                     b.Navigation("ContractsAsRenter");
 
                     b.Navigation("Notifications");
@@ -2462,6 +2743,16 @@ namespace MARN_API.Migrations
                     b.Navigation("SentMessages");
                 });
 
+            modelBuilder.Entity("MARN_API.Models.Contract", b =>
+                {
+                    b.Navigation("PaymentSchedules");
+                });
+
+            modelBuilder.Entity("MARN_API.Models.PaymentSchedule", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
             modelBuilder.Entity("MARN_API.Models.Property", b =>
                 {
                     b.Navigation("Amenities");
@@ -2472,13 +2763,9 @@ namespace MARN_API.Migrations
 
                     b.Navigation("Media");
 
-                    b.Navigation("Payments");
-
                     b.Navigation("PropertyComments");
 
                     b.Navigation("PropertyRatings");
-
-                    b.Navigation("RentalTransactions");
 
                     b.Navigation("Rules");
 

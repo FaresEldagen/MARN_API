@@ -15,39 +15,40 @@ namespace MARN_API.Models
         public RoommateSearchStatus SearchStatus { get; set; } = RoommateSearchStatus.Searching;
 
         public bool? Smoking { get; set; }
-        public PreferenceImportance SmokingImportance { get; set; } = PreferenceImportance.Important;
+        public int SmokingImportance { get; set; } = 3;
 
         public bool? Pets { get; set; }
-        public PreferenceImportance PetsImportance { get; set; } = PreferenceImportance.Important;
+        public int PetsImportance { get; set; } = 3;
 
         public SleepSchedule SleepSchedule { get; set; } = SleepSchedule.Unknown;
-        public PreferenceImportance SleepImportance { get; set; } = PreferenceImportance.Important;
+        public int SleepImportance { get; set; } = 3;
 
         public EducationLevel EducationLevel { get; set; } = EducationLevel.Unknown;
-        public PreferenceImportance EducationImportance { get; set; } = PreferenceImportance.Important;
+        public int EducationImportance { get; set; } = 3;
 
         public FieldOfStudy FieldOfStudy { get; set; } = FieldOfStudy.Unknown;
-        public PreferenceImportance FieldOfStudyImportance { get; set; } = PreferenceImportance.Important;
+        public int FieldOfStudyImportance { get; set; } = 3;
 
         public int? NoiseTolerance { get; set; }
-        public PreferenceImportance NoiseToleranceImportance { get; set; } = PreferenceImportance.Important;
+        public int NoiseToleranceImportance { get; set; } = 3;
 
         public GuestsFrequency GuestsFrequency { get; set; } = GuestsFrequency.Unknown;
-        public PreferenceImportance GuestsFrequencyImportance { get; set; } = PreferenceImportance.Important;
+        public int GuestsFrequencyImportance { get; set; } = 3;
 
         public WorkSchedule WorkSchedule { get; set; } = WorkSchedule.Unknown;
-        public PreferenceImportance WorkScheduleImportance { get; set; } = PreferenceImportance.Important;
+        public int WorkScheduleImportance { get; set; } = 3;
 
         public SharingLevel SharingLevel { get; set; } = SharingLevel.Unknown;
-        public PreferenceImportance SharingLevelImportance { get; set; } = PreferenceImportance.Important;
+        public int SharingLevelImportance { get; set; } = 3;
 
         public decimal? BudgetRangeMin { get; set; }
         public decimal? BudgetRangeMax { get; set; }
-        public PreferenceImportance BudgetImportance { get; set; } = PreferenceImportance.Important;
+        public int BudgetImportance { get; set; } = 3;
 
         public virtual ApplicationUser User { get; set; } = null!;
     }
 }
+
 
 
 
