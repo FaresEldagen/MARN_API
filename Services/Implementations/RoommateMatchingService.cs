@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MARN_API.Data;
 using MARN_API.DTOs.Roommate;
 using MARN_API.Enums.RoommatePreferences;
 using MARN_API.Models;
@@ -13,6 +11,10 @@ namespace MARN_API.Services.Implementations
 {
     public class RoommateMatchingService : IRoommateMatchingService
     {
+        private const int MinImportance = 1;
+        private const int MaxImportance = 5;
+        private const int DealbreakerImportance = 5;
+
         private readonly MARN_API.Repositories.Interfaces.IRoommatePreferenceRepo _repo;
 
         public RoommateMatchingService(MARN_API.Repositories.Interfaces.IRoommatePreferenceRepo repo)
@@ -20,118 +22,94 @@ namespace MARN_API.Services.Implementations
             _repo = repo;
         }
 
-        private double[] GetProfileVector(RoommatePreference pref)
+        private readonly record struct ScoredFeature(double Score, double Weight);
+
+        private static int ClampImportance(int importance)
         {
-            double[] vec = new double[24];
-            
-            // 0: Smoking
-            vec[0] = pref.Smoking.HasValue ? (pref.Smoking.Value ? 1.0 : -1.0) : 0.0;
-            
-            // 1: Pets
-            vec[1] = pref.Pets.HasValue ? (pref.Pets.Value ? 1.0 : -1.0) : 0.0;
-            
-            // 2: SleepSchedule
-            if (pref.SleepSchedule == SleepSchedule.EarlyBird) vec[2] = -1.0;
-            else if (pref.SleepSchedule == SleepSchedule.NightOwl) vec[2] = 1.0;
-            else vec[2] = 0.0; 
-
-            // 3: EducationLevel (HighSchool=1, Bachelor=2, Master=3, Doctorate=4)
-            if (pref.EducationLevel == EducationLevel.HighSchool) vec[3] = -1.0;
-            else if (pref.EducationLevel == EducationLevel.Bachelor) vec[3] = -0.33;
-            else if (pref.EducationLevel == EducationLevel.Master) vec[3] = 0.33;
-            else if (pref.EducationLevel == EducationLevel.Doctorate) vec[3] = 1.0;
-            else vec[3] = 0.0;
-
-            // 4: NoiseTolerance (1 to 5)
-            if (pref.NoiseTolerance.HasValue) vec[4] = (pref.NoiseTolerance.Value - 3) / 2.0;
-
-            // 5: GuestsFrequency (Never=1, Rarely=2, Sometimes=3, Often=4)
-            if (pref.GuestsFrequency == GuestsFrequency.Never) vec[5] = -1.0;
-            else if (pref.GuestsFrequency == GuestsFrequency.Rarely) vec[5] = -0.33;
-            else if (pref.GuestsFrequency == GuestsFrequency.Sometimes) vec[5] = 0.33;
-            else if (pref.GuestsFrequency == GuestsFrequency.Often) vec[5] = 1.0;
-
-            // 6: SharingLevel (Low=1, Medium=2, High=3)
-            if (pref.SharingLevel == SharingLevel.Low) vec[6] = -1.0;
-            else if (pref.SharingLevel == SharingLevel.High) vec[6] = 1.0;
-            else vec[6] = 0.0; 
-
-            // Field of Study (7 to 17)
-            if (pref.FieldOfStudy != FieldOfStudy.Unknown)
-            {
-                int fieldIndex = 7 + (pref.FieldOfStudy == FieldOfStudy.Other ? 10 : (int)pref.FieldOfStudy - 1);
-                if (fieldIndex >= 7 && fieldIndex <= 17) vec[fieldIndex] = 1.0;
-            }
-
-            // Work Schedule (18 to 23)
-            if (pref.WorkSchedule != WorkSchedule.Unknown)
-            {
-                int workIndex = 18 + (int)pref.WorkSchedule - 1;
-                if (workIndex >= 18 && workIndex <= 23) vec[workIndex] = 1.0;
-            }
-
-            return vec;
+            return Math.Clamp(importance, MinImportance, MaxImportance);
         }
 
-        private double[] GetWeightVector(RoommatePreference pref)
+        private static double CalculateMutualWeight(int importanceA, int importanceB)
         {
-            double[] w = new double[24];
-            w[0] = (int)pref.SmokingImportance;
-            w[1] = (int)pref.PetsImportance;
-            w[2] = (int)pref.SleepImportance;
-            w[3] = (int)pref.EducationImportance;
-            w[4] = (int)pref.NoiseToleranceImportance;
-            w[5] = (int)pref.GuestsFrequencyImportance;
-            w[6] = (int)pref.SharingLevelImportance;
-            
-            double fieldW = (int)pref.FieldOfStudyImportance;
-            for (int i = 7; i <= 17; i++) w[i] = fieldW;
-
-            double workW = (int)pref.WorkScheduleImportance;
-            for (int i = 18; i <= 23; i++) w[i] = workW;
-
-            return w;
+            return Math.Sqrt(ClampImportance(importanceA) * ClampImportance(importanceB));
         }
 
-        private (double, double) CalculateBudgetOverlap(RoommatePreference a, RoommatePreference b)
+        private static double CalculateOrdinalScore(int valueA, int valueB, int minValue, int maxValue)
+        {
+            int maxDifference = maxValue - minValue;
+            if (maxDifference <= 0) return 1.0;
+
+            double difference = Math.Abs(valueA - valueB);
+            return Math.Clamp(1.0 - (difference / maxDifference), 0.0, 1.0);
+        }
+
+        private static double CalculateBudgetOverlapScore(RoommatePreference a, RoommatePreference b)
         {
             if (!a.BudgetRangeMin.HasValue || !a.BudgetRangeMax.HasValue || !b.BudgetRangeMin.HasValue || !b.BudgetRangeMax.HasValue)
-                return (0, 0);
+                return 0.0;
 
-            var overlapStart = Math.Max(a.BudgetRangeMin.Value, b.BudgetRangeMin.Value);
-            var overlapEnd = Math.Min(a.BudgetRangeMax.Value, b.BudgetRangeMax.Value);
-            
-            if (overlapStart <= overlapEnd)
-            {
-                double rangeA = (double)Math.Max(1m, a.BudgetRangeMax.Value - a.BudgetRangeMin.Value);
-                double rangeB = (double)Math.Max(1m, b.BudgetRangeMax.Value - b.BudgetRangeMin.Value);
-                double overlap = (double)(overlapEnd - overlapStart);
-                return (Math.Min(1.0, overlap / rangeA), Math.Min(1.0, overlap / rangeB));
-            }
-            return (0, 0);
+            decimal overlapStart = Math.Max(a.BudgetRangeMin.Value, b.BudgetRangeMin.Value);
+            decimal overlapEnd = Math.Min(a.BudgetRangeMax.Value, b.BudgetRangeMax.Value);
+
+            if (overlapStart > overlapEnd)
+                return 0.0;
+
+            decimal rangeA = a.BudgetRangeMax.Value - a.BudgetRangeMin.Value;
+            decimal rangeB = b.BudgetRangeMax.Value - b.BudgetRangeMin.Value;
+
+            if (rangeA == 0 && rangeB == 0)
+                return a.BudgetRangeMin.Value == b.BudgetRangeMin.Value ? 1.0 : 0.0;
+
+            if (rangeA == 0)
+                return b.BudgetRangeMin.Value <= a.BudgetRangeMin.Value && a.BudgetRangeMin.Value <= b.BudgetRangeMax.Value ? 1.0 : 0.0;
+
+            if (rangeB == 0)
+                return a.BudgetRangeMin.Value <= b.BudgetRangeMin.Value && b.BudgetRangeMin.Value <= a.BudgetRangeMax.Value ? 1.0 : 0.0;
+
+            decimal overlap = overlapEnd - overlapStart;
+            decimal smallerRange = Math.Min(rangeA, rangeB);
+            return Math.Clamp((double)(overlap / smallerRange), 0.0, 1.0);
         }
 
-        private double CalculateWeightedCosineSimilarity(double[] vecA, double[] vecB, double[] weights, double budgetRatio, double budgetWeight)
+        private static void AddFeatureScore(
+            List<ScoredFeature> features,
+            List<string> matchedTraits,
+            List<string> mismatchedTraits,
+            List<string> dealbreakers,
+            double score,
+            int importanceA,
+            int importanceB,
+            string? matchedTrait,
+            string mismatchTrait,
+            string dealbreakerTrait,
+            double matchedThreshold = 1.0,
+            double mismatchThreshold = 0.5)
         {
-            double dotProduct = 0;
-            double normA = 0;
-            double normB = 0;
+            score = Math.Clamp(score, 0.0, 1.0);
+            features.Add(new ScoredFeature(score, CalculateMutualWeight(importanceA, importanceB)));
 
-            for (int i = 0; i < vecA.Length; i++)
+            if (!string.IsNullOrWhiteSpace(matchedTrait) && score >= matchedThreshold)
             {
-                dotProduct += weights[i] * vecA[i] * vecB[i];
-                normA += weights[i] * vecA[i] * vecA[i];
-                normB += weights[i] * vecB[i] * vecB[i];
+                matchedTraits.Add(matchedTrait);
             }
+            else if (score < mismatchThreshold)
+            {
+                mismatchedTraits.Add(mismatchTrait);
 
-            dotProduct += budgetWeight * budgetRatio;
-            normA += budgetWeight * 1.0; // Max possible budget ratio is 1.0
-            normB += budgetWeight * 1.0;
+                if (ClampImportance(importanceA) == DealbreakerImportance || ClampImportance(importanceB) == DealbreakerImportance)
+                {
+                    dealbreakers.Add(dealbreakerTrait);
+                }
+            }
+        }
 
-            if (normA == 0 || normB == 0) return 0;
+        private static double CalculateFinalScore(IEnumerable<ScoredFeature> features)
+        {
+            double totalWeight = features.Sum(f => f.Weight);
+            if (totalWeight <= 0) return 0.0;
 
-            double similarity = dotProduct / (Math.Sqrt(normA) * Math.Sqrt(normB));
-            return Math.Max(0, similarity); // Clamp negative similarity to 0
+            double weightedScore = features.Sum(f => f.Score * f.Weight);
+            return Math.Clamp((weightedScore / totalWeight) * 100.0, 0.0, 100.0);
         }
 
         public async Task<ServiceResult<IEnumerable<RoommateMatchDto>>> GetTopMatchesAsync(Guid currentUserId, int k = 10)
@@ -191,30 +169,7 @@ namespace MARN_API.Services.Implementations
 
         private RoommateMatchDto CalculateMatchResult(RoommatePreference currentUserPref, RoommatePreference matchPref)
         {
-            double[] baseVecA = GetProfileVector(currentUserPref);
-            double[] weightsA = GetWeightVector(currentUserPref);
-            double budgetWeightA = (int)currentUserPref.BudgetImportance;
-
-            double[] vecA = (double[])baseVecA.Clone();
-            double[] vecB = GetProfileVector(matchPref);
-            double[] weightsB = GetWeightVector(matchPref);
-            double budgetWeightB = (int)matchPref.BudgetImportance;
-
-            // Handle Flexible Wildcard
-            if (currentUserPref.SleepSchedule == SleepSchedule.Flexible && matchPref.SleepSchedule != SleepSchedule.Unknown)
-                vecA[2] = vecB[2];
-            else if (matchPref.SleepSchedule == SleepSchedule.Flexible && currentUserPref.SleepSchedule != SleepSchedule.Unknown)
-                vecB[2] = vecA[2];
-
-            var (budgetRatioA, budgetRatioB) = CalculateBudgetOverlap(currentUserPref, matchPref);
-            
-            double similarityA = CalculateWeightedCosineSimilarity(vecA, vecB, weightsA, budgetRatioA, budgetWeightA);
-            double similarityB = CalculateWeightedCosineSimilarity(vecB, vecA, weightsB, budgetRatioB, budgetWeightB);
-            
-            double mutualSimilarity = Math.Sqrt(similarityA * similarityB);
-            double rawScore = mutualSimilarity * 100.0;
-            double penalty = 0;
-
+            var features = new List<ScoredFeature>();
             var matchedTraits = new List<string>();
             var mismatchedTraits = new List<string>();
             var dealbreakers = new List<string>();
@@ -223,40 +178,40 @@ namespace MARN_API.Services.Implementations
             if (currentUserPref.Smoking.HasValue && matchPref.Smoking.HasValue)
             {
                 double score = currentUserPref.Smoking == matchPref.Smoking ? 1.0 : 0.0;
-                if (score == 1.0) matchedTraits.Add(currentUserPref.Smoking.Value ? "Both Smoke" : "Both Non-Smokers");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Smoking Preference");
-                    if (currentUserPref.SmokingImportance == 5)
-                    {
-                        dealbreakers.Add("Smoking mismatch");
-                        penalty += 20; 
-                    }
-                    if (matchPref.SmokingImportance == 5) penalty += 20;
-                }
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.SmokingImportance,
+                    matchPref.SmokingImportance,
+                    currentUserPref.Smoking.Value ? "Both Smoke" : "Both Non-Smokers",
+                    "Smoking Preference",
+                    "Smoking mismatch");
             }
 
             // Pets (Binary)
             if (currentUserPref.Pets.HasValue && matchPref.Pets.HasValue)
             {
                 double score = currentUserPref.Pets == matchPref.Pets ? 1.0 : 0.0;
-                if (score == 1.0) matchedTraits.Add(currentUserPref.Pets.Value ? "Both love pets" : "Both prefer no pets");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Pets Preference");
-                    if (currentUserPref.PetsImportance == 5)
-                    {
-                        dealbreakers.Add("Pets mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.PetsImportance == 5) penalty += 20;
-                }
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.PetsImportance,
+                    matchPref.PetsImportance,
+                    currentUserPref.Pets.Value ? "Both love pets" : "Both prefer no pets",
+                    "Pets Preference",
+                    "Pets mismatch");
             }
 
-            // Sleep Schedule (Special Ordinal)
+            // Sleep Schedule (Flexible is a wildcard, not an ordinal midpoint)
             if (currentUserPref.SleepSchedule != SleepSchedule.Unknown && matchPref.SleepSchedule != SleepSchedule.Unknown)
             {
-                double score = 0;
+                double score;
                 if (currentUserPref.SleepSchedule == matchPref.SleepSchedule || 
                     currentUserPref.SleepSchedule == SleepSchedule.Flexible || 
                     matchPref.SleepSchedule == SleepSchedule.Flexible)
@@ -265,168 +220,148 @@ namespace MARN_API.Services.Implementations
                 }
                 else
                 {
-                    int diff = Math.Abs((int)currentUserPref.SleepSchedule - (int)matchPref.SleepSchedule);
-                    score = 1.0 - diff; 
+                    score = 0.0;
                 }
 
-                if (score == 1.0) matchedTraits.Add("Compatible Sleep Schedule");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Sleep Schedule");
-                    if (currentUserPref.SleepImportance == 5)
-                    {
-                        dealbreakers.Add("Sleep Schedule mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.SleepImportance == 5) penalty += 20;
-                }
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.SleepImportance,
+                    matchPref.SleepImportance,
+                    "Compatible Sleep Schedule",
+                    "Sleep Schedule",
+                    "Sleep Schedule mismatch");
             }
 
             // Education Level (Linear Ordinal - Max Diff 3)
             if (currentUserPref.EducationLevel != EducationLevel.Unknown && matchPref.EducationLevel != EducationLevel.Unknown)
             {
-                int diff = Math.Abs((int)currentUserPref.EducationLevel - (int)matchPref.EducationLevel);
-                double score = 1.0 - (diff / 3.0); 
-
-                if (score >= 0.8) matchedTraits.Add("Similar Education Level");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Education Level");
-                    if (currentUserPref.EducationImportance == 5)
-                    {
-                        dealbreakers.Add("Education Level mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.EducationImportance == 5) penalty += 20;
-                }
+                double score = CalculateOrdinalScore((int)currentUserPref.EducationLevel, (int)matchPref.EducationLevel, (int)EducationLevel.HighSchool, (int)EducationLevel.Doctorate);
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.EducationImportance,
+                    matchPref.EducationImportance,
+                    "Similar Education Level",
+                    "Education Level",
+                    "Education Level mismatch",
+                    matchedThreshold: 0.8);
             }
 
             // Field of Study (Strict Categorical)
             if (currentUserPref.FieldOfStudy != FieldOfStudy.Unknown && matchPref.FieldOfStudy != FieldOfStudy.Unknown)
             {
                 double score = currentUserPref.FieldOfStudy == matchPref.FieldOfStudy ? 1.0 : 0.0;
-
-                if (score == 1.0) matchedTraits.Add("Same Field of Study");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Field of Study");
-                    if (currentUserPref.FieldOfStudyImportance == 5)
-                    {
-                        dealbreakers.Add("Field of Study mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.FieldOfStudyImportance == 5) penalty += 20;
-                }
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.FieldOfStudyImportance,
+                    matchPref.FieldOfStudyImportance,
+                    "Same Field of Study",
+                    "Field of Study",
+                    "Field of Study mismatch");
             }
 
             // Noise Tolerance (Linear Ordinal - Max Diff 4)
             if (currentUserPref.NoiseTolerance.HasValue && matchPref.NoiseTolerance.HasValue)
             {
-                int diff = Math.Abs(currentUserPref.NoiseTolerance.Value - matchPref.NoiseTolerance.Value);
-                double score = 1.0 - (diff / 4.0);
-                
-                if (score >= 0.75) matchedTraits.Add("Similar Noise Tolerance");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Noise Tolerance");
-                    if (currentUserPref.NoiseToleranceImportance == 5)
-                    {
-                        dealbreakers.Add("Noise Tolerance mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.NoiseToleranceImportance == 5) penalty += 20;
-                }
+                double score = CalculateOrdinalScore(currentUserPref.NoiseTolerance.Value, matchPref.NoiseTolerance.Value, 1, 5);
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.NoiseToleranceImportance,
+                    matchPref.NoiseToleranceImportance,
+                    "Similar Noise Tolerance",
+                    "Noise Tolerance",
+                    "Noise Tolerance mismatch",
+                    matchedThreshold: 0.75);
             }
             
             // Guests Frequency (Linear Ordinal - Max Diff 3)
             if (currentUserPref.GuestsFrequency != GuestsFrequency.Unknown && matchPref.GuestsFrequency != GuestsFrequency.Unknown)
             {
-                int diff = Math.Abs((int)currentUserPref.GuestsFrequency - (int)matchPref.GuestsFrequency);
-                double score = 1.0 - (diff / 3.0);
-                
-                if (score >= 0.7) matchedTraits.Add("Similar Guests Preference");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Guests Frequency");
-                    if (currentUserPref.GuestsFrequencyImportance == 5)
-                    {
-                        dealbreakers.Add("Guests Frequency mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.GuestsFrequencyImportance == 5) penalty += 20;
-                }
+                double score = CalculateOrdinalScore((int)currentUserPref.GuestsFrequency, (int)matchPref.GuestsFrequency, (int)GuestsFrequency.Never, (int)GuestsFrequency.Often);
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.GuestsFrequencyImportance,
+                    matchPref.GuestsFrequencyImportance,
+                    "Similar Guests Preference",
+                    "Guests Frequency",
+                    "Guests Frequency mismatch",
+                    matchedThreshold: 0.7);
             }
 
             // Sharing Level (Linear Ordinal - Max Diff 2)
             if (currentUserPref.SharingLevel != SharingLevel.Unknown && matchPref.SharingLevel != SharingLevel.Unknown)
             {
-                int diff = Math.Abs((int)currentUserPref.SharingLevel - (int)matchPref.SharingLevel);
-                double score = 1.0 - (diff / 2.0);
-
-                if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Sharing Level");
-                    if (currentUserPref.SharingLevelImportance == 5)
-                    {
-                        dealbreakers.Add("Sharing Level mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.SharingLevelImportance == 5) penalty += 20;
-                }
+                double score = CalculateOrdinalScore((int)currentUserPref.SharingLevel, (int)matchPref.SharingLevel, (int)SharingLevel.Low, (int)SharingLevel.High);
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.SharingLevelImportance,
+                    matchPref.SharingLevelImportance,
+                    "Similar Sharing Level",
+                    "Sharing Level",
+                    "Sharing Level mismatch",
+                    matchedThreshold: 0.75);
             }
 
             // Work Schedule (Strict Categorical)
             if (currentUserPref.WorkSchedule != WorkSchedule.Unknown && matchPref.WorkSchedule != WorkSchedule.Unknown)
             {
                 double score = currentUserPref.WorkSchedule == matchPref.WorkSchedule ? 1.0 : 0.0;
-
-                if (score == 1.0) matchedTraits.Add("Same Work Schedule");
-                else if (score < 0.5)
-                {
-                    mismatchedTraits.Add("Work Schedule");
-                    if (currentUserPref.WorkScheduleImportance == 5)
-                    {
-                        dealbreakers.Add("Work Schedule mismatch");
-                        penalty += 20;
-                    }
-                    if (matchPref.WorkScheduleImportance == 5) penalty += 20;
-                }
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.WorkScheduleImportance,
+                    matchPref.WorkScheduleImportance,
+                    "Same Work Schedule",
+                    "Work Schedule",
+                    "Work Schedule mismatch");
             }
 
             // Budget Overlap
             if (currentUserPref.BudgetRangeMin.HasValue && currentUserPref.BudgetRangeMax.HasValue &&
                 matchPref.BudgetRangeMin.HasValue && matchPref.BudgetRangeMax.HasValue)
             {
-                if (budgetRatioA >= 0.5 && budgetRatioB >= 0.5) matchedTraits.Add("Compatible Budget");
-                else if (budgetRatioA < 0.5)
-                {
-                    mismatchedTraits.Add("Budget");
-                    if (currentUserPref.BudgetImportance == 5)
-                    {
-                        dealbreakers.Add("Insufficient Budget overlap");
-                        penalty += 20;
-                    }
-                }
-                if (budgetRatioB < 0.5 && matchPref.BudgetImportance == 5) penalty += 20;
-            }
-            else 
-            {
-                if (currentUserPref.BudgetImportance == 5)
-                {
-                    dealbreakers.Add("Budget Mismatch");
-                    penalty += 20;
-                }
-                if (matchPref.BudgetImportance == 5) penalty += 20;
+                double score = CalculateBudgetOverlapScore(currentUserPref, matchPref);
+                AddFeatureScore(
+                    features,
+                    matchedTraits,
+                    mismatchedTraits,
+                    dealbreakers,
+                    score,
+                    currentUserPref.BudgetImportance,
+                    matchPref.BudgetImportance,
+                    "Compatible Budget",
+                    "Budget",
+                    "Insufficient Budget overlap",
+                    matchedThreshold: 0.5);
             }
 
-            // Calculate final score with a floor for matches
-            double finalScore = Math.Max(0, rawScore - penalty);
-            
-            if (matchedTraits.Any() && finalScore < 8.0)
-            {
-                // If there are matches, ensure at least some compatibility is shown
-                finalScore = Math.Max(rawScore * 0.1, 8.0); 
-            }
+            double finalScore = CalculateFinalScore(features);
 
             // Badge Logic
             string badge = string.Empty;
@@ -452,4 +387,3 @@ namespace MARN_API.Services.Implementations
         }
     }
 }
-
