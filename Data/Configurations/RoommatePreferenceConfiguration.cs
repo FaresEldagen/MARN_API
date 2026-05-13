@@ -15,6 +15,19 @@ namespace MARN_API.Data.Configurations
             builder.Property(rp => rp.BudgetRangeMax).HasColumnType("decimal(18,2)");
             builder.ToTable(t => t.HasCheckConstraint("CK_RoommatePreference_Budget",
                     "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]"));
+            builder.ToTable(t => t.HasCheckConstraint("CK_RoommatePreference_ImportanceRanges",
+                    "[SmokingImportance] BETWEEN 1 AND 5 AND " +
+                    "[PetsImportance] BETWEEN 1 AND 5 AND " +
+                    "[SleepImportance] BETWEEN 1 AND 5 AND " +
+                    "[EducationImportance] BETWEEN 1 AND 5 AND " +
+                    "[FieldOfStudyImportance] BETWEEN 1 AND 5 AND " +
+                    "[NoiseToleranceImportance] BETWEEN 1 AND 5 AND " +
+                    "[GuestsFrequencyImportance] BETWEEN 1 AND 5 AND " +
+                    "[WorkScheduleImportance] BETWEEN 1 AND 5 AND " +
+                    "[SharingLevelImportance] BETWEEN 1 AND 5 AND " +
+                    "[BudgetImportance] BETWEEN 1 AND 5"));
+            builder.ToTable(t => t.HasCheckConstraint("CK_RoommatePreference_NoiseTolerance",
+                    "[NoiseTolerance] IS NULL OR [NoiseTolerance] BETWEEN 1 AND 5"));
 
             builder.Property(rp => rp.EducationLevel).HasConversion<int>();
             builder.Property(rp => rp.FieldOfStudy).HasConversion<int>();

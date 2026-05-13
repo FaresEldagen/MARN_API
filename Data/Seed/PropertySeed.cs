@@ -114,6 +114,32 @@ namespace MARN_API.Data.Seed
                     IsActive = true,
                     Status = PropertyStatus.Verified,
                     CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, DateTimeKind.Utc)
+                },
+                // Shared property for roommate matching tests
+                new Property
+                {
+                    Id = 1100,
+                    OwnerId = ownerXId,
+                    Title = "Shared Seed House",
+                    Description = "A shared house seeded for testing roommate matching logic.",
+                    Type = PropertyType.House,
+                    IsShared = true,
+                    MaxOccupants = 4,
+                    Bedrooms = 3,
+                    Beds = 4,
+                    Bathrooms = 2,
+                    Views = 10,
+                    Price = 4000m,
+                    RentalUnit = RentalUnit.Monthly,
+                    Address = "555 Shared Lane, Cairo",
+                    City = "Cairo",
+                    State = "Cairo Governorate",
+                    ZipCode = "11513",
+                    Latitude = 30.0800,
+                    Longitude = 31.2600,
+                    IsActive = true,
+                    Status = PropertyStatus.Verified,
+                    CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

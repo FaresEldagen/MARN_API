@@ -170,6 +170,7 @@ namespace MARN_API
             builder.Services.AddScoped<IPropertyRatingService, PropertyRatingService>();
             builder.Services.AddScoped<IPropertyCommentService, PropertyCommentService>();
             builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
             builder.Services.AddScoped<IChatRepo, ChatRepo>();
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();

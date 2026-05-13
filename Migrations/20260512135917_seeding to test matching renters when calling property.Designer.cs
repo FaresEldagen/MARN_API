@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512135917_seeding to test matching renters when calling property")]
+    partial class seedingtotestmatchingrenterswhencallingproperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -560,7 +563,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 1, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1000008.pdf",
                             Hash = "SEEDHASH1000008SHARED",
-                            LeaseEndDate = new DateOnly(2027, 1, 15),
+                            LeaseEndDate = new DateOnly(2026, 1, 15),
                             LeaseStartDate = new DateOnly(2025, 1, 15),
                             PaymentFrequency = 1,
                             PropertyId = 1100L,
@@ -577,7 +580,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 1, 19, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1000009.pdf",
                             Hash = "SEEDHASH1000009SHARED",
-                            LeaseEndDate = new DateOnly(2027, 2, 1),
+                            LeaseEndDate = new DateOnly(2026, 2, 1),
                             LeaseStartDate = new DateOnly(2025, 2, 1),
                             PaymentFrequency = 1,
                             PropertyId = 1100L,
@@ -594,7 +597,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 1, 19, 0, 0, 0, 0, DateTimeKind.Utc),
                             FileName = "seed-contract-1000010.pdf",
                             Hash = "SEEDHASH1000010SHARED",
-                            LeaseEndDate = new DateOnly(2027, 2, 1),
+                            LeaseEndDate = new DateOnly(2026, 2, 1),
                             LeaseStartDate = new DateOnly(2025, 2, 1),
                             PaymentFrequency = 1,
                             PropertyId = 1100L,
@@ -2134,10 +2137,6 @@ namespace MARN_API.Migrations
                     b.ToTable("RoommatePreferences", t =>
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
-
-                            t.HasCheckConstraint("CK_RoommatePreference_ImportanceRanges", "[SmokingImportance] BETWEEN 1 AND 5 AND [PetsImportance] BETWEEN 1 AND 5 AND [SleepImportance] BETWEEN 1 AND 5 AND [EducationImportance] BETWEEN 1 AND 5 AND [FieldOfStudyImportance] BETWEEN 1 AND 5 AND [NoiseToleranceImportance] BETWEEN 1 AND 5 AND [GuestsFrequencyImportance] BETWEEN 1 AND 5 AND [WorkScheduleImportance] BETWEEN 1 AND 5 AND [SharingLevelImportance] BETWEEN 1 AND 5 AND [BudgetImportance] BETWEEN 1 AND 5");
-
-                            t.HasCheckConstraint("CK_RoommatePreference_NoiseTolerance", "[NoiseTolerance] IS NULL OR [NoiseTolerance] BETWEEN 1 AND 5");
                         });
 
                     b.HasData(

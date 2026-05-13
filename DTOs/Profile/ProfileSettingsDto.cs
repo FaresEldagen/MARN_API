@@ -1,6 +1,7 @@
 using MARN_API.DTOs.Property;
 using MARN_API.Enums.Account;
 using MARN_API.Enums.RoommatePreferences;
+using MARN_API.Enums.Property;
 
 namespace MARN_API.DTOs.Profile
 {
@@ -29,17 +30,40 @@ namespace MARN_API.DTOs.Profile
 
 
         // Roommate Preferences
+        public Governorate Governorate { get; set; } = Governorate.CairoGovernorate;
+        public RoommateSearchStatus SearchStatus { get; set; } = RoommateSearchStatus.Searching;
+
         public bool RoommatePreferencesEnabled { get; set; } = false;
         public bool? Smoking { get; set; } = null;
+        public int SmokingImportance { get; set; } = 3;
+
         public bool? Pets { get; set; } = null;
+        public int PetsImportance { get; set; } = 3;
+
         public string? SleepSchedule { get; set; } = null;
+        public int SleepImportance { get; set; } = 3;
+
         public EducationLevel? EducationLevel { get; set; } = null;
+        public int EducationImportance { get; set; } = 3;
+
         public FieldOfStudy? FieldOfStudy { get; set; } = null;
+        public int FieldOfStudyImportance { get; set; } = 3;
+
         public int? NoiseTolerance { get; set; } = null;
+        public int NoiseToleranceImportance { get; set; } = 3;
+
         public GuestsFrequency? GuestsFrequency { get; set; } = null;
+        public int GuestsFrequencyImportance { get; set; } = 3;
+
         public WorkSchedule? WorkSchedule { get; set; } = null;
+        public int WorkScheduleImportance { get; set; } = 3;
+
         public SharingLevel? SharingLevel { get; set; } = null;
+        public int SharingLevelImportance { get; set; } = 3;
+
         public decimal? BudgetRangeMin { get; set; } = null;
         public decimal? BudgetRangeMax { get; set; } = null;
+        public int BudgetImportance { get; set; } = 3;
     }
 }
+

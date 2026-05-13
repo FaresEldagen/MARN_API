@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512142709_hot fix seed2")]
+    partial class hotfixseed2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2134,10 +2137,6 @@ namespace MARN_API.Migrations
                     b.ToTable("RoommatePreferences", t =>
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
-
-                            t.HasCheckConstraint("CK_RoommatePreference_ImportanceRanges", "[SmokingImportance] BETWEEN 1 AND 5 AND [PetsImportance] BETWEEN 1 AND 5 AND [SleepImportance] BETWEEN 1 AND 5 AND [EducationImportance] BETWEEN 1 AND 5 AND [FieldOfStudyImportance] BETWEEN 1 AND 5 AND [NoiseToleranceImportance] BETWEEN 1 AND 5 AND [GuestsFrequencyImportance] BETWEEN 1 AND 5 AND [WorkScheduleImportance] BETWEEN 1 AND 5 AND [SharingLevelImportance] BETWEEN 1 AND 5 AND [BudgetImportance] BETWEEN 1 AND 5");
-
-                            t.HasCheckConstraint("CK_RoommatePreference_NoiseTolerance", "[NoiseTolerance] IS NULL OR [NoiseTolerance] BETWEEN 1 AND 5");
                         });
 
                     b.HasData(

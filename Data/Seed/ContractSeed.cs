@@ -168,6 +168,59 @@ namespace MARN_API.Data.Seed
                     Status = ContractStatus.Cancelled,
                     AnchoringStatus = ContractAnchoringStatus.Pending,
                     PaymentFrequency = PaymentFrequency.Monthly
+                },
+                // ── CONTRACT 1000008 ──────────────────────────────────────────────────────
+                // Active contract in a shared property: Renter B in Property 1100
+                new Contract
+                {
+                    Id = 1000008,
+                    PropertyId = 1100,
+                    RenterId = renterBId,
+                    LeaseStartDate = new DateOnly(2025, 1, 15),
+                    LeaseEndDate = new DateOnly(2027, 1, 15),
+                    TotalContractAmount = 48000m,
+                    FileName = "seed-contract-1000008.pdf",
+                    Hash = "SEEDHASH1000008SHARED",
+                    SignedByRenterAt = new DateTime(2025, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2025, 1, 9, 0, 0, 0, DateTimeKind.Utc),
+                    Status = ContractStatus.Active,
+                    AnchoringStatus = ContractAnchoringStatus.Anchored,
+                    AnchoredAt = new DateTime(2025, 1, 11, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly
+                },
+                new Contract
+                {
+                    Id = 1000009,
+                    PropertyId = 1100,
+                    RenterId = renterCId,
+                    LeaseStartDate = new DateOnly(2025, 2, 1),
+                    LeaseEndDate = new DateOnly(2027, 2, 1),
+                    TotalContractAmount = 48000m,
+                    FileName = "seed-contract-1000009.pdf",
+                    Hash = "SEEDHASH1000009SHARED",
+                    SignedByRenterAt = new DateTime(2025, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2025, 1, 19, 0, 0, 0, DateTimeKind.Utc),
+                    Status = ContractStatus.Active,
+                    AnchoringStatus = ContractAnchoringStatus.Anchored,
+                    AnchoredAt = new DateTime(2025, 1, 21, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly
+                },
+                new Contract
+                {
+                    Id = 1000010,
+                    PropertyId = 1100,
+                    RenterId = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                    LeaseStartDate = new DateOnly(2025, 2, 1),
+                    LeaseEndDate = new DateOnly(2027, 2, 1),
+                    TotalContractAmount = 48000m,
+                    FileName = "seed-contract-1000010.pdf",
+                    Hash = "SEEDHASH1000010SHARED",
+                    SignedByRenterAt = new DateTime(2025, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2025, 1, 19, 0, 0, 0, DateTimeKind.Utc),
+                    Status = ContractStatus.Active,
+                    AnchoringStatus = ContractAnchoringStatus.Anchored,
+                    AnchoredAt = new DateTime(2025, 1, 21, 0, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly
                 }
             );
         }

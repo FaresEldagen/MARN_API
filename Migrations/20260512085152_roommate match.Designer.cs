@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512085152_roommate match")]
+    partial class roommatematch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -551,57 +554,6 @@ namespace MARN_API.Migrations
                             RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Status = 2,
                             TotalContractAmount = 180000m
-                        },
-                        new
-                        {
-                            Id = 1000008L,
-                            AnchoredAt = new DateTime(2025, 1, 11, 0, 0, 0, 0, DateTimeKind.Utc),
-                            AnchoringStatus = 1,
-                            CreatedAt = new DateTime(2025, 1, 9, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileName = "seed-contract-1000008.pdf",
-                            Hash = "SEEDHASH1000008SHARED",
-                            LeaseEndDate = new DateOnly(2027, 1, 15),
-                            LeaseStartDate = new DateOnly(2025, 1, 15),
-                            PaymentFrequency = 1,
-                            PropertyId = 1100L,
-                            RenterId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            SignedByRenterAt = new DateTime(2025, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1,
-                            TotalContractAmount = 48000m
-                        },
-                        new
-                        {
-                            Id = 1000009L,
-                            AnchoredAt = new DateTime(2025, 1, 21, 0, 0, 0, 0, DateTimeKind.Utc),
-                            AnchoringStatus = 1,
-                            CreatedAt = new DateTime(2025, 1, 19, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileName = "seed-contract-1000009.pdf",
-                            Hash = "SEEDHASH1000009SHARED",
-                            LeaseEndDate = new DateOnly(2027, 2, 1),
-                            LeaseStartDate = new DateOnly(2025, 2, 1),
-                            PaymentFrequency = 1,
-                            PropertyId = 1100L,
-                            RenterId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            SignedByRenterAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1,
-                            TotalContractAmount = 48000m
-                        },
-                        new
-                        {
-                            Id = 1000010L,
-                            AnchoredAt = new DateTime(2025, 1, 21, 0, 0, 0, 0, DateTimeKind.Utc),
-                            AnchoringStatus = 1,
-                            CreatedAt = new DateTime(2025, 1, 19, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileName = "seed-contract-1000010.pdf",
-                            Hash = "SEEDHASH1000010SHARED",
-                            LeaseEndDate = new DateOnly(2027, 2, 1),
-                            LeaseStartDate = new DateOnly(2025, 2, 1),
-                            PaymentFrequency = 1,
-                            PropertyId = 1100L,
-                            RenterId = new Guid("77777777-7777-7777-7777-777777777777"),
-                            SignedByRenterAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1,
-                            TotalContractAmount = 48000m
                         });
                 });
 
@@ -1614,33 +1566,6 @@ namespace MARN_API.Migrations
                             Type = 3,
                             Views = 12,
                             ZipCode = "11835"
-                        },
-                        new
-                        {
-                            Id = 1100L,
-                            Address = "555 Shared Lane, Cairo",
-                            Bathrooms = 2,
-                            Bedrooms = 3,
-                            Beds = 4,
-                            City = "Cairo",
-                            CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "A shared house seeded for testing roommate matching logic.",
-                            IsActive = true,
-                            IsShared = true,
-                            Latitude = 30.079999999999998,
-                            Longitude = 31.260000000000002,
-                            MaxOccupants = 4,
-                            OwnerId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Price = 4000m,
-                            ProofOfOwnership = "",
-                            RentalUnit = 1,
-                            SquareMeters = 0.0,
-                            State = "Cairo Governorate",
-                            Status = 1,
-                            Title = "Shared Seed House",
-                            Type = 1,
-                            Views = 10,
-                            ZipCode = "11513"
                         });
                 });
 
@@ -2134,10 +2059,6 @@ namespace MARN_API.Migrations
                     b.ToTable("RoommatePreferences", t =>
                         {
                             t.HasCheckConstraint("CK_RoommatePreference_Budget", "[BudgetRangeMax] IS NULL OR [BudgetRangeMin] IS NULL OR [BudgetRangeMax] >= [BudgetRangeMin]");
-
-                            t.HasCheckConstraint("CK_RoommatePreference_ImportanceRanges", "[SmokingImportance] BETWEEN 1 AND 5 AND [PetsImportance] BETWEEN 1 AND 5 AND [SleepImportance] BETWEEN 1 AND 5 AND [EducationImportance] BETWEEN 1 AND 5 AND [FieldOfStudyImportance] BETWEEN 1 AND 5 AND [NoiseToleranceImportance] BETWEEN 1 AND 5 AND [GuestsFrequencyImportance] BETWEEN 1 AND 5 AND [WorkScheduleImportance] BETWEEN 1 AND 5 AND [SharingLevelImportance] BETWEEN 1 AND 5 AND [BudgetImportance] BETWEEN 1 AND 5");
-
-                            t.HasCheckConstraint("CK_RoommatePreference_NoiseTolerance", "[NoiseTolerance] IS NULL OR [NoiseTolerance] BETWEEN 1 AND 5");
                         });
 
                     b.HasData(
