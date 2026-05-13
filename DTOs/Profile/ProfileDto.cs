@@ -40,5 +40,10 @@ namespace MARN_API.DTOs.Profile
         public SharingLevel? SharingLevel { get; set; } = null;
         public decimal? BudgetRangeMin { get; set; } = null;
         public decimal? BudgetRangeMax { get; set; } = null;
+        // Roommate Matches
+        public double? MatchingPercentage { get; set; } = null;
+        public List<string>? TopMatchingTraits { get; set; } = null;
+        public List<string>? MismatchedTraits { get; set; } = null;
+        public List<string>? DealbreakersFound { get; set; } = null;
     }
 }

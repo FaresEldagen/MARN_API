@@ -37,6 +37,7 @@ namespace MARN_API.Services.Implementations
         private readonly IMapper _mapper;
         private readonly ILogger<AccountService> _logger;
         private readonly IPropertyService _propertyService;
+        private readonly IRoommateMatchingService _matchingService;
 
         public ProfileService(
             IBookingRequestRepo bookingRequestRepo,
@@ -56,7 +57,8 @@ namespace MARN_API.Services.Implementations
             IEmailService emailService,
             IMapper mapper,
             ILogger<AccountService> logger,
-            IPropertyService propertyService
+            IPropertyService propertyService,
+            IRoommateMatchingService matchingService
         )
         {
             _bookingRequestRepo = bookingRequestRepo;
@@ -77,6 +79,7 @@ namespace MARN_API.Services.Implementations
             _mapper = mapper;
             _logger = logger;
             _propertyService = propertyService;
+            _matchingService = matchingService;
         }
 
 
@@ -216,7 +219,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<OwnerDashboardDto>.Ok(dashboardData);
         }
 
-        public async Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId)
+        public async Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId, Guid? currentUserId = null)
         {
             _logger.LogInformation("Get Profile Data attempt for userId: {userId}", userId);
 
@@ -252,6 +255,31 @@ namespace MARN_API.Services.Implementations
             {
                 _mapper.Map(RoommatePreferences, profileData);
                 profileData.RoommatePreferencesEnabled = true;
+            }
+
+            if (currentUserId.HasValue && currentUserId.Value != userId && currentUserId.Value != Guid.Empty)
+            {
+                bool canMatch = false;
+                if (profileData.RoommatePreferencesEnabled)
+                {
+                    var currentUserPreferences = await _roommatePreferenceRepo.GetRoommatePreferences(currentUserId.Value);
+                    canMatch = currentUserPreferences != null;
+                }
+
+                if (canMatch)
+                {
+                    var matchResult = await _matchingService.GetMatchScoresAsync(currentUserId.Value, new List<Guid> { userId });
+                    if (matchResult.Success && matchResult.Data != null && matchResult.Data.TryGetValue(userId, out var match))
+                    {
+                        if (match.CompatibilityScore > 0 || match.TopMatchingTraits.Any())
+                        {
+                            profileData.MatchingPercentage = match.CompatibilityScore;
+                            profileData.TopMatchingTraits = match.TopMatchingTraits;
+                            profileData.MismatchedTraits = match.MismatchedTraits;
+                            profileData.DealbreakersFound = match.DealbreakersFound;
+                        }
+                    }
+                }
             }
 
             _logger.LogInformation("Get Profile Data successful for userId: {userId}", userId);

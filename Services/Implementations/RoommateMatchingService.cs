@@ -134,275 +134,321 @@ namespace MARN_API.Services.Implementations
             return Math.Max(0, similarity); // Clamp negative similarity to 0
         }
 
-        public async Task<IEnumerable<RoommateMatchDto>> GetTopMatchesAsync(Guid currentUserId, int k = 10)
+        public async Task<ServiceResult<IEnumerable<RoommateMatchDto>>> GetTopMatchesAsync(Guid currentUserId, int k = 10)
         {
             var currentUserPref = await _repo.GetRoommatePreferences(currentUserId);
 
             if (currentUserPref == null || !currentUserPref.RoommatePreferencesEnabled)
             {
-                return new List<RoommateMatchDto>();
+                return ServiceResult<IEnumerable<RoommateMatchDto>>.Ok(new List<RoommateMatchDto>(), "Roommate matching preferences not found or disabled.");
             }
 
             var potentialMatches = await _repo.GetPotentialMatchesAsync(currentUserId, currentUserPref.Governorate, currentUserPref.User.Gender);
             var matchedResults = new List<RoommateMatchDto>();
 
+            foreach (var matchPref in potentialMatches)
+            {
+                var result = CalculateMatchResult(currentUserPref, matchPref);
+                if (result != null)
+                {
+                    matchedResults.Add(result);
+                }
+            }
+
+            return ServiceResult<IEnumerable<RoommateMatchDto>>.Ok(matchedResults.OrderByDescending(x => x.CompatibilityScore).Take(k));
+        }
+
+        public async Task<ServiceResult<Dictionary<Guid, RoommateMatchDto>>> GetMatchScoresAsync(Guid currentUserId, List<Guid> targetUserIds)
+        {
+            if (targetUserIds == null || !targetUserIds.Any())
+                return ServiceResult<Dictionary<Guid, RoommateMatchDto>>.Ok(new Dictionary<Guid, RoommateMatchDto>());
+
+            var currentUserPref = await _repo.GetRoommatePreferences(currentUserId);
+            var targetPrefs = await _repo.GetPreferencesInBatchAsync(targetUserIds);
+
+            var results = new Dictionary<Guid, RoommateMatchDto>();
+
+            foreach (var targetId in targetUserIds)
+            {
+                var matchPref = targetPrefs.FirstOrDefault(p => p.UserId == targetId);
+                
+                if (currentUserPref == null || !currentUserPref.RoommatePreferencesEnabled || 
+                    matchPref == null || !matchPref.RoommatePreferencesEnabled)
+                {
+                    results[targetId] = new RoommateMatchDto { UserId = targetId, CompatibilityScore = 0 };
+                    continue;
+                }
+
+                var matchResult = CalculateMatchResult(currentUserPref, matchPref);
+                if (matchResult != null)
+                {
+                    results[targetId] = matchResult;
+                }
+            }
+
+            return ServiceResult<Dictionary<Guid, RoommateMatchDto>>.Ok(results);
+        }
+
+        private RoommateMatchDto CalculateMatchResult(RoommatePreference currentUserPref, RoommatePreference matchPref)
+        {
             double[] baseVecA = GetProfileVector(currentUserPref);
             double[] weightsA = GetWeightVector(currentUserPref);
             double budgetWeightA = (int)currentUserPref.BudgetImportance;
 
-            foreach (var matchPref in potentialMatches)
+            double[] vecA = (double[])baseVecA.Clone();
+            double[] vecB = GetProfileVector(matchPref);
+            double[] weightsB = GetWeightVector(matchPref);
+            double budgetWeightB = (int)matchPref.BudgetImportance;
+
+            // Handle Flexible Wildcard
+            if (currentUserPref.SleepSchedule == SleepSchedule.Flexible && matchPref.SleepSchedule != SleepSchedule.Unknown)
+                vecA[2] = vecB[2];
+            else if (matchPref.SleepSchedule == SleepSchedule.Flexible && currentUserPref.SleepSchedule != SleepSchedule.Unknown)
+                vecB[2] = vecA[2];
+
+            var (budgetRatioA, budgetRatioB) = CalculateBudgetOverlap(currentUserPref, matchPref);
+            
+            double similarityA = CalculateWeightedCosineSimilarity(vecA, vecB, weightsA, budgetRatioA, budgetWeightA);
+            double similarityB = CalculateWeightedCosineSimilarity(vecB, vecA, weightsB, budgetRatioB, budgetWeightB);
+            
+            double mutualSimilarity = Math.Sqrt(similarityA * similarityB);
+            double rawScore = mutualSimilarity * 100.0;
+            double penalty = 0;
+
+            var matchedTraits = new List<string>();
+            var mismatchedTraits = new List<string>();
+            var dealbreakers = new List<string>();
+
+            // Smoking (Binary)
+            if (currentUserPref.Smoking.HasValue && matchPref.Smoking.HasValue)
             {
-                double[] vecA = (double[])baseVecA.Clone();
-                double[] vecB = GetProfileVector(matchPref);
-                double[] weightsB = GetWeightVector(matchPref);
-                double budgetWeightB = (int)matchPref.BudgetImportance;
-
-                // Handle Flexible Wildcard
-                if (currentUserPref.SleepSchedule == SleepSchedule.Flexible && matchPref.SleepSchedule != SleepSchedule.Unknown)
-                    vecA[2] = vecB[2];
-                else if (matchPref.SleepSchedule == SleepSchedule.Flexible && currentUserPref.SleepSchedule != SleepSchedule.Unknown)
-                    vecB[2] = vecA[2];
-
-                var (budgetRatioA, budgetRatioB) = CalculateBudgetOverlap(currentUserPref, matchPref);
-                
-                double similarityA = CalculateWeightedCosineSimilarity(vecA, vecB, weightsA, budgetRatioA, budgetWeightA);
-                double similarityB = CalculateWeightedCosineSimilarity(vecB, vecA, weightsB, budgetRatioB, budgetWeightB);
-                
-                double mutualSimilarity = Math.Sqrt(similarityA * similarityB);
-                double rawScore = mutualSimilarity * 100.0;
-                double penalty = 0;
-
-                var matchedTraits = new List<string>();
-                var mismatchedTraits = new List<string>();
-                var dealbreakers = new List<string>();
-
-                // Smoking (Binary)
-                if (currentUserPref.Smoking.HasValue && matchPref.Smoking.HasValue)
+                double score = currentUserPref.Smoking == matchPref.Smoking ? 1.0 : 0.0;
+                if (score == 1.0) matchedTraits.Add(currentUserPref.Smoking.Value ? "Both Smoke" : "Both Non-Smokers");
+                else if (score < 0.5)
                 {
-                    double score = currentUserPref.Smoking == matchPref.Smoking ? 1.0 : 0.0;
-                    if (score == 1.0) matchedTraits.Add(currentUserPref.Smoking.Value ? "Both Smoke" : "Both Non-Smokers");
-                    else if (score < 0.5)
+                    mismatchedTraits.Add("Smoking Preference");
+                    if (currentUserPref.SmokingImportance == 5)
                     {
-                        mismatchedTraits.Add("Smoking Preference");
-                        if (currentUserPref.SmokingImportance == 5)
-                        {
-                            dealbreakers.Add("Smoking mismatch");
-                            penalty += 40; 
-                        }
-                        if (matchPref.SmokingImportance == 5) penalty += 40;
+                        dealbreakers.Add("Smoking mismatch");
+                        penalty += 20; 
                     }
+                    if (matchPref.SmokingImportance == 5) penalty += 20;
                 }
-
-                // Pets (Binary)
-                if (currentUserPref.Pets.HasValue && matchPref.Pets.HasValue)
-                {
-                    double score = currentUserPref.Pets == matchPref.Pets ? 1.0 : 0.0;
-                    if (score == 1.0) matchedTraits.Add(currentUserPref.Pets.Value ? "Both love pets" : "Both prefer no pets");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Pets Preference");
-                        if (currentUserPref.PetsImportance == 5)
-                        {
-                            dealbreakers.Add("Pets mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.PetsImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Sleep Schedule (Special Ordinal)
-                if (currentUserPref.SleepSchedule != SleepSchedule.Unknown && matchPref.SleepSchedule != SleepSchedule.Unknown)
-                {
-                    double score = 0;
-                    if (currentUserPref.SleepSchedule == matchPref.SleepSchedule || 
-                        currentUserPref.SleepSchedule == SleepSchedule.Flexible || 
-                        matchPref.SleepSchedule == SleepSchedule.Flexible)
-                    {
-                        score = 1.0;
-                    }
-                    else
-                    {
-                        int diff = Math.Abs((int)currentUserPref.SleepSchedule - (int)matchPref.SleepSchedule);
-                        score = 1.0 - diff; 
-                    }
-
-                    if (score == 1.0) matchedTraits.Add("Compatible Sleep Schedule");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Sleep Schedule");
-                        if (currentUserPref.SleepImportance == 5)
-                        {
-                            dealbreakers.Add("Sleep Schedule mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.SleepImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Education Level (Linear Ordinal - Max Diff 3)
-                if (currentUserPref.EducationLevel != EducationLevel.Unknown && matchPref.EducationLevel != EducationLevel.Unknown)
-                {
-                    int diff = Math.Abs((int)currentUserPref.EducationLevel - (int)matchPref.EducationLevel);
-                    double score = 1.0 - (diff / 3.0); 
-
-                    if (score >= 0.8) matchedTraits.Add("Similar Education Level");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Education Level");
-                        if (currentUserPref.EducationImportance == 5)
-                        {
-                            dealbreakers.Add("Education Level mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.EducationImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Field of Study (Strict Categorical)
-                if (currentUserPref.FieldOfStudy != FieldOfStudy.Unknown && matchPref.FieldOfStudy != FieldOfStudy.Unknown)
-                {
-                    double score = currentUserPref.FieldOfStudy == matchPref.FieldOfStudy ? 1.0 : 0.0;
-
-                    if (score == 1.0) matchedTraits.Add("Same Field of Study");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Field of Study");
-                        if (currentUserPref.FieldOfStudyImportance == 5)
-                        {
-                            dealbreakers.Add("Field of Study mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.FieldOfStudyImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Noise Tolerance (Linear Ordinal - Max Diff 4)
-                if (currentUserPref.NoiseTolerance.HasValue && matchPref.NoiseTolerance.HasValue)
-                {
-                    int diff = Math.Abs(currentUserPref.NoiseTolerance.Value - matchPref.NoiseTolerance.Value);
-                    double score = 1.0 - (diff / 4.0);
-                    
-                    if (score >= 0.75) matchedTraits.Add("Similar Noise Tolerance");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Noise Tolerance");
-                        if (currentUserPref.NoiseToleranceImportance == 5)
-                        {
-                            dealbreakers.Add("Noise Tolerance mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.NoiseToleranceImportance == 5) penalty += 40;
-                    }
-                }
-                
-                // Guests Frequency (Linear Ordinal - Max Diff 3)
-                if (currentUserPref.GuestsFrequency != GuestsFrequency.Unknown && matchPref.GuestsFrequency != GuestsFrequency.Unknown)
-                {
-                    int diff = Math.Abs((int)currentUserPref.GuestsFrequency - (int)matchPref.GuestsFrequency);
-                    double score = 1.0 - (diff / 3.0);
-                    
-                    if (score >= 0.7) matchedTraits.Add("Similar Guests Preference");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Guests Frequency");
-                        if (currentUserPref.GuestsFrequencyImportance == 5)
-                        {
-                            dealbreakers.Add("Guests Frequency mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.GuestsFrequencyImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Sharing Level (Linear Ordinal - Max Diff 2)
-                if (currentUserPref.SharingLevel != SharingLevel.Unknown && matchPref.SharingLevel != SharingLevel.Unknown)
-                {
-                    int diff = Math.Abs((int)currentUserPref.SharingLevel - (int)matchPref.SharingLevel);
-                    double score = 1.0 - (diff / 2.0);
-
-                    if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Sharing Level");
-                        if (currentUserPref.SharingLevelImportance == 5)
-                        {
-                            dealbreakers.Add("Sharing Level mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.SharingLevelImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Work Schedule (Strict Categorical)
-                if (currentUserPref.WorkSchedule != WorkSchedule.Unknown && matchPref.WorkSchedule != WorkSchedule.Unknown)
-                {
-                    double score = currentUserPref.WorkSchedule == matchPref.WorkSchedule ? 1.0 : 0.0;
-
-                    if (score == 1.0) matchedTraits.Add("Same Work Schedule");
-                    else if (score < 0.5)
-                    {
-                        mismatchedTraits.Add("Work Schedule");
-                        if (currentUserPref.WorkScheduleImportance == 5)
-                        {
-                            dealbreakers.Add("Work Schedule mismatch");
-                            penalty += 40;
-                        }
-                        if (matchPref.WorkScheduleImportance == 5) penalty += 40;
-                    }
-                }
-
-                // Budget Overlap
-                if (currentUserPref.BudgetRangeMin.HasValue && currentUserPref.BudgetRangeMax.HasValue &&
-                    matchPref.BudgetRangeMin.HasValue && matchPref.BudgetRangeMax.HasValue)
-                {
-                    if (budgetRatioA >= 0.5 && budgetRatioB >= 0.5) matchedTraits.Add("Compatible Budget");
-                    else if (budgetRatioA < 0.5)
-                    {
-                        mismatchedTraits.Add("Budget");
-                        if (currentUserPref.BudgetImportance == 5)
-                        {
-                            dealbreakers.Add("Insufficient Budget overlap");
-                            penalty += 40;
-                        }
-                    }
-                    if (budgetRatioB < 0.5 && matchPref.BudgetImportance == 5) penalty += 40;
-                }
-                else 
-                {
-                    if (currentUserPref.BudgetImportance == 5)
-                    {
-                        dealbreakers.Add("Budget Mismatch");
-                        penalty += 40;
-                    }
-                    if (matchPref.BudgetImportance == 5) penalty += 40;
-                }
-
-                // Calculate final score
-                double finalScore = Math.Max(0, rawScore - penalty);
-
-                // Badge Logic
-                string badge = string.Empty;
-                if (currentUserPref.SearchStatus == RoommateSearchStatus.Searching && matchPref.SearchStatus == RoommateSearchStatus.Searching)
-                    badge = "Let's Find a Place";
-                else if (currentUserPref.SearchStatus == RoommateSearchStatus.Searching && matchPref.SearchStatus == RoommateSearchStatus.Offering)
-                    badge = "Has Apartment";
-                else if (currentUserPref.SearchStatus == RoommateSearchStatus.Offering && matchPref.SearchStatus == RoommateSearchStatus.Searching)
-                    badge = "Looking for a Room";
-
-                matchedResults.Add(new RoommateMatchDto
-                {
-                    UserId = matchPref.UserId,
-                    FullName = $"{matchPref.User.FirstName} {matchPref.User.LastName}".Trim(),
-                    ProfileImage = matchPref.User.ProfileImage,
-                    SearchStatus = matchPref.SearchStatus,
-                    Badge = badge,
-                    CompatibilityScore = Math.Round(finalScore, 1),
-                    TopMatchingTraits = matchedTraits,
-                    MismatchedTraits = mismatchedTraits,
-                    DealbreakersFound = dealbreakers
-                });
             }
 
-            return matchedResults.OrderByDescending(x => x.CompatibilityScore).Take(k);
+            // Pets (Binary)
+            if (currentUserPref.Pets.HasValue && matchPref.Pets.HasValue)
+            {
+                double score = currentUserPref.Pets == matchPref.Pets ? 1.0 : 0.0;
+                if (score == 1.0) matchedTraits.Add(currentUserPref.Pets.Value ? "Both love pets" : "Both prefer no pets");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Pets Preference");
+                    if (currentUserPref.PetsImportance == 5)
+                    {
+                        dealbreakers.Add("Pets mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.PetsImportance == 5) penalty += 20;
+                }
+            }
+
+            // Sleep Schedule (Special Ordinal)
+            if (currentUserPref.SleepSchedule != SleepSchedule.Unknown && matchPref.SleepSchedule != SleepSchedule.Unknown)
+            {
+                double score = 0;
+                if (currentUserPref.SleepSchedule == matchPref.SleepSchedule || 
+                    currentUserPref.SleepSchedule == SleepSchedule.Flexible || 
+                    matchPref.SleepSchedule == SleepSchedule.Flexible)
+                {
+                    score = 1.0;
+                }
+                else
+                {
+                    int diff = Math.Abs((int)currentUserPref.SleepSchedule - (int)matchPref.SleepSchedule);
+                    score = 1.0 - diff; 
+                }
+
+                if (score == 1.0) matchedTraits.Add("Compatible Sleep Schedule");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Sleep Schedule");
+                    if (currentUserPref.SleepImportance == 5)
+                    {
+                        dealbreakers.Add("Sleep Schedule mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.SleepImportance == 5) penalty += 20;
+                }
+            }
+
+            // Education Level (Linear Ordinal - Max Diff 3)
+            if (currentUserPref.EducationLevel != EducationLevel.Unknown && matchPref.EducationLevel != EducationLevel.Unknown)
+            {
+                int diff = Math.Abs((int)currentUserPref.EducationLevel - (int)matchPref.EducationLevel);
+                double score = 1.0 - (diff / 3.0); 
+
+                if (score >= 0.8) matchedTraits.Add("Similar Education Level");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Education Level");
+                    if (currentUserPref.EducationImportance == 5)
+                    {
+                        dealbreakers.Add("Education Level mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.EducationImportance == 5) penalty += 20;
+                }
+            }
+
+            // Field of Study (Strict Categorical)
+            if (currentUserPref.FieldOfStudy != FieldOfStudy.Unknown && matchPref.FieldOfStudy != FieldOfStudy.Unknown)
+            {
+                double score = currentUserPref.FieldOfStudy == matchPref.FieldOfStudy ? 1.0 : 0.0;
+
+                if (score == 1.0) matchedTraits.Add("Same Field of Study");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Field of Study");
+                    if (currentUserPref.FieldOfStudyImportance == 5)
+                    {
+                        dealbreakers.Add("Field of Study mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.FieldOfStudyImportance == 5) penalty += 20;
+                }
+            }
+
+            // Noise Tolerance (Linear Ordinal - Max Diff 4)
+            if (currentUserPref.NoiseTolerance.HasValue && matchPref.NoiseTolerance.HasValue)
+            {
+                int diff = Math.Abs(currentUserPref.NoiseTolerance.Value - matchPref.NoiseTolerance.Value);
+                double score = 1.0 - (diff / 4.0);
+                
+                if (score >= 0.75) matchedTraits.Add("Similar Noise Tolerance");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Noise Tolerance");
+                    if (currentUserPref.NoiseToleranceImportance == 5)
+                    {
+                        dealbreakers.Add("Noise Tolerance mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.NoiseToleranceImportance == 5) penalty += 20;
+                }
+            }
+            
+            // Guests Frequency (Linear Ordinal - Max Diff 3)
+            if (currentUserPref.GuestsFrequency != GuestsFrequency.Unknown && matchPref.GuestsFrequency != GuestsFrequency.Unknown)
+            {
+                int diff = Math.Abs((int)currentUserPref.GuestsFrequency - (int)matchPref.GuestsFrequency);
+                double score = 1.0 - (diff / 3.0);
+                
+                if (score >= 0.7) matchedTraits.Add("Similar Guests Preference");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Guests Frequency");
+                    if (currentUserPref.GuestsFrequencyImportance == 5)
+                    {
+                        dealbreakers.Add("Guests Frequency mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.GuestsFrequencyImportance == 5) penalty += 20;
+                }
+            }
+
+            // Sharing Level (Linear Ordinal - Max Diff 2)
+            if (currentUserPref.SharingLevel != SharingLevel.Unknown && matchPref.SharingLevel != SharingLevel.Unknown)
+            {
+                int diff = Math.Abs((int)currentUserPref.SharingLevel - (int)matchPref.SharingLevel);
+                double score = 1.0 - (diff / 2.0);
+
+                if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Sharing Level");
+                    if (currentUserPref.SharingLevelImportance == 5)
+                    {
+                        dealbreakers.Add("Sharing Level mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.SharingLevelImportance == 5) penalty += 20;
+                }
+            }
+
+            // Work Schedule (Strict Categorical)
+            if (currentUserPref.WorkSchedule != WorkSchedule.Unknown && matchPref.WorkSchedule != WorkSchedule.Unknown)
+            {
+                double score = currentUserPref.WorkSchedule == matchPref.WorkSchedule ? 1.0 : 0.0;
+
+                if (score == 1.0) matchedTraits.Add("Same Work Schedule");
+                else if (score < 0.5)
+                {
+                    mismatchedTraits.Add("Work Schedule");
+                    if (currentUserPref.WorkScheduleImportance == 5)
+                    {
+                        dealbreakers.Add("Work Schedule mismatch");
+                        penalty += 20;
+                    }
+                    if (matchPref.WorkScheduleImportance == 5) penalty += 20;
+                }
+            }
+
+            // Budget Overlap
+            if (currentUserPref.BudgetRangeMin.HasValue && currentUserPref.BudgetRangeMax.HasValue &&
+                matchPref.BudgetRangeMin.HasValue && matchPref.BudgetRangeMax.HasValue)
+            {
+                if (budgetRatioA >= 0.5 && budgetRatioB >= 0.5) matchedTraits.Add("Compatible Budget");
+                else if (budgetRatioA < 0.5)
+                {
+                    mismatchedTraits.Add("Budget");
+                    if (currentUserPref.BudgetImportance == 5)
+                    {
+                        dealbreakers.Add("Insufficient Budget overlap");
+                        penalty += 20;
+                    }
+                }
+                if (budgetRatioB < 0.5 && matchPref.BudgetImportance == 5) penalty += 20;
+            }
+            else 
+            {
+                if (currentUserPref.BudgetImportance == 5)
+                {
+                    dealbreakers.Add("Budget Mismatch");
+                    penalty += 20;
+                }
+                if (matchPref.BudgetImportance == 5) penalty += 20;
+            }
+
+            // Calculate final score with a floor for matches
+            double finalScore = Math.Max(0, rawScore - penalty);
+            
+            if (matchedTraits.Any() && finalScore < 8.0)
+            {
+                // If there are matches, ensure at least some compatibility is shown
+                finalScore = Math.Max(rawScore * 0.1, 8.0); 
+            }
+
+            // Badge Logic
+            string badge = string.Empty;
+            if (currentUserPref.SearchStatus == RoommateSearchStatus.Searching && matchPref.SearchStatus == RoommateSearchStatus.Searching)
+                badge = "Let's Find a Place";
+            else if (currentUserPref.SearchStatus == RoommateSearchStatus.Searching && matchPref.SearchStatus == RoommateSearchStatus.Offering)
+                badge = "Has Apartment";
+            else if (currentUserPref.SearchStatus == RoommateSearchStatus.Offering && matchPref.SearchStatus == RoommateSearchStatus.Searching)
+                badge = "Looking for a Room";
+
+            return new RoommateMatchDto
+            {
+                UserId = matchPref.UserId,
+                FullName = $"{matchPref.User.FirstName} {matchPref.User.LastName}".Trim(),
+                ProfileImage = matchPref.User.ProfileImage,
+                SearchStatus = matchPref.SearchStatus,
+                Badge = badge,
+                CompatibilityScore = Math.Round(finalScore, 1),
+                TopMatchingTraits = matchedTraits,
+                MismatchedTraits = mismatchedTraits,
+                DealbreakersFound = dealbreakers
+            };
         }
     }
 }

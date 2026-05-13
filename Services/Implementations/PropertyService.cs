@@ -34,6 +34,7 @@ namespace MARN_API.Services.Implementations
         private readonly IPropertyCommentRepo _propertyCommentRepo;
         private readonly MARN_API.Data.AppDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IRoommateMatchingService _matchingService;
 
         public PropertyService(
             IPropertyRepo propertyRepo, 
@@ -50,7 +51,8 @@ namespace MARN_API.Services.Implementations
             IPropertyRatingRepo propertyRatingRepo,
             IPropertyCommentRepo propertyCommentRepo,
             MARN_API.Data.AppDbContext context,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IRoommateMatchingService matchingService)
         {
             _propertyRepo = propertyRepo;
             _userManager = userManager;
@@ -67,6 +69,7 @@ namespace MARN_API.Services.Implementations
             _propertyCommentRepo = propertyCommentRepo;
             _context = context;
             _notificationService = notificationService;
+            _matchingService = matchingService;
         }
 
         public async Task<ServiceResult<bool>> AddPropertyAsync(AddPropertyDto dto, Guid userId)
@@ -220,6 +223,50 @@ namespace MARN_API.Services.Implementations
                         })
                         .ToList()
                 };
+            }
+
+            if (dto.IsShared && dto.ActiveRenters.Any())
+            {
+                // 1. Remove duplicate humans (if a user has multiple active contracts)
+                dto.ActiveRenters = dto.ActiveRenters
+                    .GroupBy(a => a.Id)
+                    .Select(g => g.First())
+                    .ToList();
+
+                // 2. Remove the viewer from the roommate list
+                if (userId.HasValue)
+                {
+                    dto.ActiveRenters = dto.ActiveRenters
+                        .Where(a => a.Id != userId.Value)
+                        .ToList();
+                }
+
+                // 3. Batch calculate compatibility scores
+                if (userId.HasValue && userId.Value != Guid.Empty && dto.ActiveRenters.Any())
+                {
+                    var targetUserIds = dto.ActiveRenters.Select(a => a.Id).ToList();
+                    var matchResult = await _matchingService.GetMatchScoresAsync(userId.Value, targetUserIds);
+
+                    if (matchResult.Success && matchResult.Data != null)
+                    {
+                        var results = matchResult.Data;
+                        foreach (var renter in dto.ActiveRenters)
+                        {
+                            if (results.TryGetValue(renter.Id, out var match))
+                            {
+                                // Only assign score if it's > 0 (meaning both sides have matching enabled)
+                                if (match.CompatibilityScore > 0 || match.TopMatchingTraits.Any())
+                                {
+                                    renter.MatchingPercentage = match.CompatibilityScore;
+                                }
+                                else
+                                {
+                                    renter.MatchingPercentage = null;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             return ServiceResult<PropertyDetailsDto>.Ok(dto);

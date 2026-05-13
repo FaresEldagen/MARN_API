@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MARN_API.DTOs.Common;
 using MARN_API.Enums.Payment;
+using MARN_API.Enums.Contract;
 
 namespace MARN_API.Services.Implementations
 {
@@ -72,11 +73,19 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Property is not active or does not exist.", resultType: ServiceResultType.NotFound);
             }
 
-            bool hasActiveContracts = await _contractRepo.HasActiveContractsForPropertyAsync(dto.PropertyId);
-            if (hasActiveContracts)
+            int activeContractsCount = property.Contracts.Count(c => c.Status == ContractStatus.Active);
+            if (property.IsShared)
             {
-                _logger.LogWarning("Add Booking Request failed: Property has active contracts for propertyId: {propertyId}", dto.PropertyId);
-                return ServiceResult<bool>.Fail("Property is not available as it has active contracts.", resultType: ServiceResultType.Conflict);
+                if (activeContractsCount >= property.MaxOccupants)
+                {
+                    _logger.LogWarning("Add Booking Request failed: Shared property is full for propertyId: {propertyId}", dto.PropertyId);
+                    return ServiceResult<bool>.Fail("Property is full and has no available spots.", resultType: ServiceResultType.Conflict);
+                }
+            }
+            else if (activeContractsCount > 0)
+            {
+                _logger.LogWarning("Add Booking Request failed: Private property has active contracts for propertyId: {propertyId}", dto.PropertyId);
+                return ServiceResult<bool>.Fail("Property is not available as it is already occupied.", resultType: ServiceResultType.Conflict);
             }
 
             if (!IsDurationDivisible(dto.StartDate, dto.EndDate, property.RentalUnit))

@@ -481,13 +481,13 @@ namespace MARN_API.Repositories.Implementations
                             .ToList()
                         : new List<PropertyBookingRequestDto>(),
                     ActiveRenters = p.Contracts
-                        .Where(c => c.Status == ContractStatus.Active)
+                        .Where(c => c.Status == ContractStatus.Active && c.LeaseEndDate >= DateOnly.FromDateTime(DateTime.UtcNow))
                         .Select(c => new ActiveRenterDto
                         {
                             Id = c.RenterId,
-                            Name = $"{c.Renter.FirstName} {c.Renter.LastName}",
+                            Name = (c.Renter.FirstName + " " + c.Renter.LastName).Trim(),
                             ProfilePhoto = c.Renter.ProfileImage,
-                            MatchingPercentage = p.IsShared ? 85.0 : null // Dummy value for now
+                            MatchingPercentage = null // Will be calculated in the service layer
                         })
                         .ToList(),
                     Comments = p.PropertyComments

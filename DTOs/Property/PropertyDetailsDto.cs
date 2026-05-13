@@ -52,9 +52,6 @@ namespace MARN_API.DTOs.Property
         public string Name { get; set; } = string.Empty;
         public string? ProfilePhoto { get; set; }
         public double? MatchingPercentage { get; set; }
-        public List<string> TopMatchingTraits { get; set; } = new();
-        public List<string> MismatchedTraits { get; set; } = new();
-        public List<string> DealbreakersFound { get; set; } = new();
     }
 
     public class PropertyAmenityItemDto

@@ -149,7 +149,13 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetProfile(Guid userId)
         {
-            var result = await _profileService.GetProfileAsync(userId);
+            Guid? currentUserId = null;
+            if (TryGetUserId(out var loggedInUserId))
+            {
+                currentUserId = loggedInUserId;
+            }
+
+            var result = await _profileService.GetProfileAsync(userId, currentUserId);
             return HandleServiceResult<ProfileDto>(result);
         }
         #endregion

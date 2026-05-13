@@ -9,43 +9,61 @@ namespace MARN_API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class RoommateController : ControllerBase
+    public class RoommateController : BaseController
     {
         private readonly IRoommateMatchingService _matchingService;
         private readonly IProfileService _profileService;
 
-        public RoommateController(IRoommateMatchingService matchingService, IProfileService profileService)
+        public RoommateController(
+            IRoommateMatchingService matchingService, 
+            IProfileService profileService)
         {
             _matchingService = matchingService;
             _profileService = profileService;
         }
 
+        /// <summary>
+        /// Retrieves the top roommate matches for the authenticated user based on their preferences.
+        /// </summary>
+        /// <param name="limit">The maximum number of matches to return. Defaults to 10.</param>
+        /// <response code="200">Returns list of compatibility-ranked roommate profiles.</response>
+        /// <response code="401">If the user is not authenticated.</response>
         [HttpGet("matches")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetMatches([FromQuery] int limit = 10)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out Guid userId))
-                return Unauthorized(new { Message = "Invalid user token." });
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
 
-            var matches = await _matchingService.GetTopMatchesAsync(userId, limit);
-            return Ok(matches);
+            var result = await _matchingService.GetTopMatchesAsync(userId, limit);
+            return HandleServiceResult<IEnumerable<MARN_API.DTOs.Roommate.RoommateMatchDto>>(result);
         }
 
+        /// <summary>
+        /// Updates the roommate matching preferences for the authenticated user.
+        /// </summary>
+        /// <param name="dto">The updated roommate preferences.</param>
+        /// <response code="200">Returns success message if preferences are updated.</response>
+        /// <response code="400">If validation fails or user not found.</response>
+        /// <response code="401">If the user is not authenticated.</response>
         [HttpPut("preferences")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> UpdatePreferences([FromBody] UpdateRoommatePreferencesDto dto)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out Guid userId) || userId != dto.UserId)
-                return Unauthorized(new { Message = "Invalid user token or user ID mismatch." });
+            if (!TryGetUserId(out var userId))
+                return Unauthorized("User ID not found in token");
+
+            if (userId != dto.UserId)
+                return Unauthorized("User ID mismatch.");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var result = await _profileService.UpdateProfileRoommatePreferencesDataAsync(dto);
-            if (!result.Success)
-                return BadRequest(new { result.Message });
-
-            return Ok(new { Message = "Roommate preferences updated successfully." });
+            return HandleServiceResult<bool>(result);
         }
     }
 }

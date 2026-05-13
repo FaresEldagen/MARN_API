@@ -58,5 +58,13 @@ namespace MARN_API.Repositories.Implementations
                           && rp.SearchStatus != MARN_API.Enums.RoommatePreferences.RoommateSearchStatus.Found)
                 .ToListAsync();
         }
+
+        public async Task<List<RoommatePreference>> GetPreferencesInBatchAsync(List<Guid> userIds)
+        {
+            return await Context.RoommatePreferences
+                .Include(rp => rp.User)
+                .Where(rp => userIds.Contains(rp.UserId))
+                .ToListAsync();
+        }
     }
 }

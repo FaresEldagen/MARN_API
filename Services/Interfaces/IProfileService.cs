@@ -9,7 +9,7 @@ namespace MARN_API.Services.Interfaces
         #region Profile and Dashboards
         public Task<ServiceResult<RenterDashboardDto>> RenterDashboardAsync(Guid userId);
         public Task<ServiceResult<OwnerDashboardDto>> OwnerDashboardAsync(Guid userId);
-        public Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId);
+        public Task<ServiceResult<ProfileDto>> GetProfileAsync(Guid userId, Guid? currentUserId = null);
         #endregion
 
 
