@@ -60,7 +60,19 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Add Booking Request attempt for userId: {userId}, propertyId: {propertyId}", userId, dto.PropertyId);
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null || user.AccountStatus != AccountStatus.Verified)
+            if (user == null)
+            {
+                _logger.LogWarning("Add Booking Request failed: User not found for userId: {userId}", userId);
+                return ServiceResult<bool>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
+            }
+
+            if (user.AccountStatus == AccountStatus.Banned)
+            {
+                _logger.LogWarning("Add Booking Request failed: Banned user {userId}", userId);
+                return ServiceResult<bool>.Fail("Banned accounts cannot create booking requests.", resultType: ServiceResultType.Forbidden);
+            }
+
+            if (user.AccountStatus != AccountStatus.Verified)
             {
                 _logger.LogWarning("Add Booking Request failed: User not verified for userId: {userId}", userId);
                 return ServiceResult<bool>.Fail("User account must be verified to add a booking request.", resultType: ServiceResultType.Unauthorized);

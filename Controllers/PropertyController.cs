@@ -1,3 +1,4 @@
+using MARN_API.Attributes;
 using MARN_API.DTOs.Property;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -58,6 +59,7 @@ namespace MARN_API.Controllers
         /// <response code="429">If rate limit is exceeded</response>
         [Authorize]
         [HttpPost("add")]
+        [DisallowBannedUser]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

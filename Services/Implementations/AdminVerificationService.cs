@@ -1,0 +1,133 @@
+using MARN_API.DTOs.Admin;
+using MARN_API.DTOs.Common;
+using MARN_API.Enums;
+using MARN_API.Enums.Account;
+using MARN_API.Enums.Property;
+using MARN_API.Models;
+using MARN_API.Repositories.Interfaces;
+using MARN_API.Services.Interfaces;
+
+namespace MARN_API.Services.Implementations
+{
+    public class AdminVerificationService : IAdminVerificationService
+    {
+        private const int MaxPageSize = 100;
+        private readonly IAdminVerificationRepo _verificationRepo;
+        private readonly ILogger<AdminVerificationService> _logger;
+
+        public AdminVerificationService(
+            IAdminVerificationRepo verificationRepo,
+            ILogger<AdminVerificationService> logger)
+        {
+            _verificationRepo = verificationRepo;
+            _logger = logger;
+        }
+
+        public async Task<ServiceResult<PagedResult<AdminUserVerificationDto>>> GetPendingUserVerificationsAsync(AdminVerificationQueryDto query)
+        {
+            var (pageNumber, pageSize) = NormalizePaging(query);
+            var result = await _verificationRepo.GetPendingUserVerificationsAsync(pageNumber, pageSize);
+            return ServiceResult<PagedResult<AdminUserVerificationDto>>.Ok(result);
+        }
+
+        public async Task<ServiceResult<AdminUserVerificationDto>> GetUserVerificationDetailsAsync(Guid userId)
+        {
+            var user = await _verificationRepo.GetUserVerificationDetailsAsync(userId);
+            return user == null
+                ? ServiceResult<AdminUserVerificationDto>.Fail("User verification request not found.", resultType: ServiceResultType.NotFound)
+                : ServiceResult<AdminUserVerificationDto>.Ok(user);
+        }
+
+        public async Task<ServiceResult<bool>> ApproveUserVerificationAsync(Guid userId)
+        {
+            var user = await _verificationRepo.GetUserForVerificationAsync(userId);
+            if (user == null)
+                return ServiceResult<bool>.Fail("User verification request not found.", resultType: ServiceResultType.NotFound);
+
+            if (user.AccountStatus != AccountStatus.Pending)
+                return ServiceResult<bool>.Fail($"User verification cannot be approved while account status is {user.AccountStatus}.", resultType: ServiceResultType.Conflict);
+
+            user.AccountStatus = AccountStatus.Verified;
+            await _verificationRepo.SaveChangesAsync();
+
+            _logger.LogInformation("Admin approved user verification for user {UserId}", userId);
+            return ServiceResult<bool>.Ok(true, "User verification approved.");
+        }
+
+        public async Task<ServiceResult<bool>> DeclineUserVerificationAsync(Guid userId, AdminVerificationDecisionDto decision)
+        {
+            decision ??= new AdminVerificationDecisionDto();
+
+            var user = await _verificationRepo.GetUserForVerificationAsync(userId);
+            if (user == null)
+                return ServiceResult<bool>.Fail("User verification request not found.", resultType: ServiceResultType.NotFound);
+
+            if (user.AccountStatus != AccountStatus.Pending)
+                return ServiceResult<bool>.Fail($"User verification cannot be declined while account status is {user.AccountStatus}.", resultType: ServiceResultType.Conflict);
+
+            user.AccountStatus = AccountStatus.Declined;
+            await _verificationRepo.SaveChangesAsync();
+
+            _logger.LogInformation("Admin declined user verification for user {UserId}. Reason: {Reason}", userId, decision.Reason);
+            return ServiceResult<bool>.Ok(true, "User verification declined.");
+        }
+
+        public async Task<ServiceResult<PagedResult<AdminPropertyVerificationDto>>> GetPendingPropertyVerificationsAsync(AdminVerificationQueryDto query)
+        {
+            var (pageNumber, pageSize) = NormalizePaging(query);
+            var result = await _verificationRepo.GetPendingPropertyVerificationsAsync(pageNumber, pageSize);
+            return ServiceResult<PagedResult<AdminPropertyVerificationDto>>.Ok(result);
+        }
+
+        public async Task<ServiceResult<AdminPropertyVerificationDto>> GetPropertyVerificationDetailsAsync(long propertyId)
+        {
+            var property = await _verificationRepo.GetPropertyVerificationDetailsAsync(propertyId);
+            return property == null
+                ? ServiceResult<AdminPropertyVerificationDto>.Fail("Property verification request not found.", resultType: ServiceResultType.NotFound)
+                : ServiceResult<AdminPropertyVerificationDto>.Ok(property);
+        }
+
+        public async Task<ServiceResult<bool>> ApprovePropertyVerificationAsync(long propertyId)
+        {
+            var property = await _verificationRepo.GetPropertyForVerificationAsync(propertyId);
+            if (property == null)
+                return ServiceResult<bool>.Fail("Property verification request not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.Status != PropertyStatus.Pending)
+                return ServiceResult<bool>.Fail($"Property verification cannot be approved while property status is {property.Status}.", resultType: ServiceResultType.Conflict);
+
+            property.Status = PropertyStatus.Verified;
+            await _verificationRepo.SaveChangesAsync();
+
+            _logger.LogInformation("Admin approved property verification for property {PropertyId}", propertyId);
+            return ServiceResult<bool>.Ok(true, "Property verification approved.");
+        }
+
+        public async Task<ServiceResult<bool>> DeclinePropertyVerificationAsync(long propertyId, AdminVerificationDecisionDto decision)
+        {
+            decision ??= new AdminVerificationDecisionDto();
+
+            var property = await _verificationRepo.GetPropertyForVerificationAsync(propertyId);
+            if (property == null)
+                return ServiceResult<bool>.Fail("Property verification request not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.Status != PropertyStatus.Pending)
+                return ServiceResult<bool>.Fail($"Property verification cannot be declined while property status is {property.Status}.", resultType: ServiceResultType.Conflict);
+
+            property.Status = PropertyStatus.Declined;
+            await _verificationRepo.SaveChangesAsync();
+
+            _logger.LogInformation("Admin declined property verification for property {PropertyId}. Reason: {Reason}", propertyId, decision.Reason);
+            return ServiceResult<bool>.Ok(true, "Property verification declined.");
+        }
+
+        private static (int PageNumber, int PageSize) NormalizePaging(AdminVerificationQueryDto query)
+        {
+            var pageNumber = query.PageNumber < 1 ? 1 : query.PageNumber;
+            var pageSize = query.PageSize < 1 ? 20 : query.PageSize;
+            pageSize = Math.Min(pageSize, MaxPageSize);
+
+            return (pageNumber, pageSize);
+        }
+    }
+}

@@ -89,6 +89,12 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.Unauthorized);
             }
 
+            if (user.AccountStatus == AccountStatus.Banned)
+            {
+                _logger.LogWarning("AddProperty failed: Banned user {UserId}", userId);
+                return ServiceResult<bool>.Fail("Banned accounts cannot add properties.", resultType: ServiceResultType.Forbidden);
+            }
+
             if (user.AccountStatus != AccountStatus.Verified)
             {
                 _logger.LogWarning("AddProperty failed: Account not verified for user {UserId}", userId);
@@ -306,7 +312,13 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Edit property attempt {PropertyId} for user {UserId}", propertyId, userId);
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null || user.AccountStatus != AccountStatus.Verified)
+            if (user == null)
+            {
+                _logger.LogWarning("EditProperty failed: User not found for user {UserId}", userId);
+                return ServiceResult<bool>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
+            }
+
+            if (user.AccountStatus != AccountStatus.Verified)
             {
                 _logger.LogWarning("EditProperty failed: Account not verified for user {UserId}", userId);
                 return ServiceResult<bool>.Fail("Your account must be verified to edit a property.", resultType: ServiceResultType.Unauthorized);
