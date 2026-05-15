@@ -164,6 +164,7 @@ namespace MARN_API
             builder.Services.AddScoped<IReportRepo, ReportRepo>();
             builder.Services.AddScoped<IAccountRepo, AccountRepo>();
             builder.Services.AddScoped<IAdminDashboardRepo, AdminDashboardRepo>();
+            builder.Services.AddScoped<IAdminDetailedStatsRepo, AdminDetailedStatsRepo>();
             builder.Services.AddScoped<IAdminRoleManagementRepo, AdminRoleManagementRepo>();
             builder.Services.AddScoped<IAdminVerificationRepo, AdminVerificationRepo>();
             builder.Services.AddScoped<IAdminUserManagementRepo, AdminUserManagementRepo>();
@@ -172,6 +173,7 @@ namespace MARN_API
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+            builder.Services.AddScoped<IAdminDetailedStatsService, AdminDetailedStatsService>();
             builder.Services.AddScoped<IAdminRoleManagementService, AdminRoleManagementService>();
             builder.Services.AddScoped<IAdminVerificationService, AdminVerificationService>();
             builder.Services.AddScoped<IAdminUserManagementService, AdminUserManagementService>();

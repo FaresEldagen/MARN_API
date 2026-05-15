@@ -11,17 +11,20 @@ namespace MARN_API.Controllers
     public class AdminController : BaseController
     {
         private readonly IAdminDashboardService _adminDashboardService;
+        private readonly IAdminDetailedStatsService _adminDetailedStatsService;
         private readonly IAdminVerificationService _adminVerificationService;
         private readonly IAdminUserManagementService _adminUserManagementService;
         private readonly IAdminRoleManagementService _adminRoleManagementService;
 
         public AdminController(
             IAdminDashboardService adminDashboardService,
+            IAdminDetailedStatsService adminDetailedStatsService,
             IAdminVerificationService adminVerificationService,
             IAdminUserManagementService adminUserManagementService,
             IAdminRoleManagementService adminRoleManagementService)
         {
             _adminDashboardService = adminDashboardService;
+            _adminDetailedStatsService = adminDetailedStatsService;
             _adminVerificationService = adminVerificationService;
             _adminUserManagementService = adminUserManagementService;
             _adminRoleManagementService = adminRoleManagementService;
@@ -35,6 +38,50 @@ namespace MARN_API.Controllers
         {
             var result = await _adminDashboardService.GetOverviewAsync();
             return HandleServiceResult<AdminDashboardOverviewDto>(result);
+        }
+
+        [HttpGet("stats/users")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetDetailedUsersStats([FromQuery] AdminDetailedUsersQueryDto query)
+        {
+            var result = await _adminDetailedStatsService.GetUsersAsync(query);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("stats/properties")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetDetailedPropertiesStats([FromQuery] AdminDetailedPropertiesQueryDto query)
+        {
+            var result = await _adminDetailedStatsService.GetPropertiesAsync(query);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("stats/contracts")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetDetailedContractsStats([FromQuery] AdminDetailedContractsQueryDto query)
+        {
+            var result = await _adminDetailedStatsService.GetContractsAsync(query);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("stats/revenue")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetDetailedRevenueStats([FromQuery] AdminDetailedRevenueQueryDto query)
+        {
+            var result = await _adminDetailedStatsService.GetRevenueAsync(query);
+            return HandleServiceResult(result);
         }
 
         [HttpGet("verifications/users/pending")]
