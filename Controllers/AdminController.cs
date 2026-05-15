@@ -1,4 +1,5 @@
 using MARN_API.DTOs.Admin;
+using MARN_API.DTOs.Moderation;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,19 +16,22 @@ namespace MARN_API.Controllers
         private readonly IAdminVerificationService _adminVerificationService;
         private readonly IAdminUserManagementService _adminUserManagementService;
         private readonly IAdminRoleManagementService _adminRoleManagementService;
+        private readonly IAdminReportModerationService _adminReportModerationService;
 
         public AdminController(
             IAdminDashboardService adminDashboardService,
             IAdminDetailedStatsService adminDetailedStatsService,
             IAdminVerificationService adminVerificationService,
             IAdminUserManagementService adminUserManagementService,
-            IAdminRoleManagementService adminRoleManagementService)
+            IAdminRoleManagementService adminRoleManagementService,
+            IAdminReportModerationService adminReportModerationService)
         {
             _adminDashboardService = adminDashboardService;
             _adminDetailedStatsService = adminDetailedStatsService;
             _adminVerificationService = adminVerificationService;
             _adminUserManagementService = adminUserManagementService;
             _adminRoleManagementService = adminRoleManagementService;
+            _adminReportModerationService = adminReportModerationService;
         }
 
         [HttpGet("dashboard/overview")]
@@ -274,6 +278,43 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> UpdateUserRoles(Guid userId, [FromBody] AdminUpdateUserRolesDto request)
         {
             var result = await _adminRoleManagementService.UpdateUserRolesAsync(userId, request);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("reports")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetReports([FromQuery] AdminReportQueryDto query)
+        {
+            var result = await _adminReportModerationService.GetReportsAsync(query);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("reports/{reportId:long}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetReportDetails(long reportId)
+        {
+            var result = await _adminReportModerationService.GetReportDetailsAsync(reportId);
+            return HandleServiceResult(result);
+        }
+
+        [HttpPatch("reports/{reportId:long}/review")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> ReviewReport(long reportId, [FromBody] AdminReviewReportDto request)
+        {
+            if (!TryGetUserId(out var adminId))
+                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+
+            var result = await _adminReportModerationService.ReviewReportAsync(adminId, reportId, request);
             return HandleServiceResult(result);
         }
     }

@@ -16,6 +16,10 @@ namespace MARN_API.Models
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? ReadAt { get; set; }
+        public bool IsHiddenByModeration { get; set; }
+        public DateTime? HiddenAt { get; set; }
+        public Guid? HiddenByAdminId { get; set; }
+        public string? HiddenReason { get; set; }
 
         // Foreign Key for the Sender
         [Required]

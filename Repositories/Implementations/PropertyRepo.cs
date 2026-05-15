@@ -435,7 +435,7 @@ namespace MARN_API.Repositories.Implementations
                     IsSaved = hasCurrentUser && p.SavedProperty.Any(s => s.UserId == userId),
                     AverageRating = p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f,
                     RatingsCount = p.PropertyRatings.Count,
-                    CommentsCount = p.PropertyComments.Count,
+                    CommentsCount = p.PropertyComments.Count(c => !c.IsHiddenByModeration),
                     CurrentUserRating = hasCurrentUser
                         ? p.PropertyRatings
                             .Where(r => r.UserId == userId)
@@ -491,6 +491,7 @@ namespace MARN_API.Repositories.Implementations
                         })
                         .ToList(),
                     Comments = p.PropertyComments
+                        .Where(c => !c.IsHiddenByModeration)
                         .OrderByDescending(c => c.CreatedAt)
                         .Select(c => new PropertyCommentDetailsDto
                         {

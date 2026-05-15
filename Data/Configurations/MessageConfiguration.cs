@@ -8,6 +8,9 @@ namespace MARN_API.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Message> builder)
         {
+            builder.Property(m => m.HiddenReason)
+                .HasMaxLength(2000);
+
             // Configure the Sender relationship
             builder
                 .HasOne(m => m.Sender)

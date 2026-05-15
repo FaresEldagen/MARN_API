@@ -20,7 +20,7 @@ namespace MARN_API.Repositories.Implementations
         {
             var query = Context.PropertyComments
                 .AsNoTracking()
-                .Where(c => c.PropertyId == propertyId)
+                .Where(c => c.PropertyId == propertyId && !c.IsHiddenByModeration)
                 .OrderByDescending(c => c.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -52,7 +52,7 @@ namespace MARN_API.Repositories.Implementations
         public Task<PropertyComment?> GetByIdAsync(long commentId)
         {
             return Context.PropertyComments
-                .FirstOrDefaultAsync(c => c.Id == commentId);
+                .FirstOrDefaultAsync(c => c.Id == commentId && !c.IsHiddenByModeration);
         }
 
         public async Task<PropertyComment> CreateAsync(PropertyComment comment)

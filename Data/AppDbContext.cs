@@ -28,6 +28,7 @@ namespace MARN_API.Data
         public DbSet<PropertyMedia> PropertyMedia => Set<PropertyMedia>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<Report> Reports => Set<Report>();
+        public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
         public DbSet<Admin> Admins => Set<Admin>();
         public DbSet<Message> Messages { get; set; }
@@ -55,6 +56,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new PropertyMediaConfiguration());
             builder.ApplyConfiguration(new NotificationConfiguration());
             builder.ApplyConfiguration(new ReportConfiguration());
+            builder.ApplyConfiguration(new AdminActionLogConfiguration());
             builder.ApplyConfiguration(new UserActivityConfiguration());
             builder.ApplyConfiguration(new AdminConfiguration());
             builder.ApplyConfiguration(new SavedPropertyConfiguration());

@@ -175,6 +175,7 @@ namespace MARN_API
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
             builder.Services.AddScoped<IAdminDetailedStatsService, AdminDetailedStatsService>();
             builder.Services.AddScoped<IAdminRoleManagementService, AdminRoleManagementService>();
+            builder.Services.AddScoped<IAdminReportModerationService, AdminReportModerationService>();
             builder.Services.AddScoped<IAdminVerificationService, AdminVerificationService>();
             builder.Services.AddScoped<IAdminUserManagementService, AdminUserManagementService>();
             builder.Services.AddScoped<IContractService, ContractService>();
@@ -193,6 +194,7 @@ namespace MARN_API
             builder.Services.AddScoped<IBookingRequestService, BookingRequestService>();
             builder.Services.AddScoped<IHomepageService, HomepageService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             builder.Services.AddScoped<ContractPdfGenerator>();
             builder.Services.AddScoped<HashingService>();

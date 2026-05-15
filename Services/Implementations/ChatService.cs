@@ -19,6 +19,7 @@ namespace MARN_API.Services.Implementations
 {
     public class ChatService : IChatService
     {
+        private const string HiddenMessagePlaceholder = "[Message hidden by admin]";
         private readonly IChatRepo _chatRepo;
         private readonly INotificationRepo _notificationRepo;
         private readonly ConnectionTracker _tracker;
@@ -66,7 +67,9 @@ namespace MARN_API.Services.Implementations
             { 
                 user.IsOnline = _tracker.IsOnline(user.Id);
                 if (user.LastMessage != null)
-                    user.LastMessage.Content = _encryptionService.Decrypt(user.LastMessage.Content);
+                    user.LastMessage.Content = user.LastMessage.IsHiddenByModeration
+                        ? HiddenMessagePlaceholder
+                        : _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
             return ServiceResult<List<ChatUserDto>>.Ok(result);
@@ -85,7 +88,9 @@ namespace MARN_API.Services.Implementations
             {
                 user.IsOnline = _tracker.IsOnline(user.Id);
                 if (user.LastMessage != null)
-                    user.LastMessage.Content = _encryptionService.Decrypt(user.LastMessage.Content);
+                    user.LastMessage.Content = user.LastMessage.IsHiddenByModeration
+                        ? HiddenMessagePlaceholder
+                        : _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
             return ServiceResult<List<ChatUserDto>>.Ok(result);
@@ -106,9 +111,10 @@ namespace MARN_API.Services.Implementations
                 Id = m.Id,
                 SenderId = m.SenderId.ToString(),
                 ReceiverId = m.ReceiverId.ToString(),
-                Content = _encryptionService.Decrypt(m.Content), // Decrypt for the UI
+                Content = m.IsHiddenByModeration ? HiddenMessagePlaceholder : _encryptionService.Decrypt(m.Content),
                 SentAt = m.SentAt,
-                IsRead = m.ReadAt.HasValue
+                IsRead = m.ReadAt.HasValue,
+                IsHiddenByModeration = m.IsHiddenByModeration
             }).ToList();
 
             return ServiceResult<List<MessageDto>>.Ok(result);
@@ -216,7 +222,8 @@ namespace MARN_API.Services.Implementations
                 ReceiverName = $"{receiverUser.FirstName} {receiverUser.LastName}",
                 Content = content, // Return plaintext to the sender's UI
                 SentAt = message.SentAt,
-                IsRead = message.ReadAt.HasValue
+                IsRead = message.ReadAt.HasValue,
+                IsHiddenByModeration = false
             };
 
             return ServiceResult<MessageDto>.Ok(dto);
