@@ -37,6 +37,7 @@ namespace MARN_API.Repositories.Implementations
                     Views = p.Views,
                     IsSaved = p.SavedProperty.Any(s => s.UserId == userId),
                     IsActive = p.IsActive,
+                    Status = p.Status,
 
                     OccupiedPlaces = p.Contracts
                         .Where(c => c.Status == ContractStatus.Active)
@@ -476,10 +477,14 @@ namespace MARN_API.Repositories.Implementations
                                 BookingRequestId = b.Id,
                                 StartDate = b.StartDate,
                                 EndDate = b.EndDate,
-                                PaymentFrequency = b.PaymentFrequency
+                                PaymentFrequency = b.PaymentFrequency,
+                                RenterId = b.RenterId,
+                                RenterName = $"{b.Renter.FirstName} {b.Renter.LastName}",
+                                RenterProfileImage = string.IsNullOrEmpty(b.Renter.ProfileImage) ? null : b.Renter.ProfileImage
                             })
                             .ToList()
                         : new List<PropertyBookingRequestDto>(),
+
                     ActiveRenters = p.Contracts
                         .Where(c => c.Status == ContractStatus.Active && c.LeaseEndDate >= DateOnly.FromDateTime(DateTime.UtcNow))
                         .Select(c => new ActiveRenterDto
@@ -490,6 +495,7 @@ namespace MARN_API.Repositories.Implementations
                             MatchingPercentage = null // Will be calculated in the service layer
                         })
                         .ToList(),
+
                     Comments = p.PropertyComments
                         .OrderByDescending(c => c.CreatedAt)
                         .Select(c => new PropertyCommentDetailsDto
@@ -524,18 +530,20 @@ namespace MARN_API.Repositories.Implementations
                             }
                         })
                         .ToList(),
+
                     HostedBy = new PropertyHostedByDto
                     {
                         Id = p.OwnerId,
                         FullName = $"{p.Owner.FirstName} {p.Owner.LastName}",
                         ProfileImage = string.IsNullOrEmpty(p.Owner.ProfileImage) ? null : p.Owner.ProfileImage,
+                        Bio = p.Owner.Bio,
                         AverageRating = Context.Properties
                             .Where(op => op.OwnerId == p.OwnerId)
                             .SelectMany(op => op.PropertyRatings)
                             .Average(r => (float?)r.Rating) ?? 0f,
                         PropertiesCount = Context.Properties.Count(op => op.OwnerId == p.OwnerId),
-                        Bio = p.Owner.Bio
                     },
+
                     OwnerExtras = new OwnerPropertyExtrasDto()
                 })
                 .FirstOrDefaultAsync();

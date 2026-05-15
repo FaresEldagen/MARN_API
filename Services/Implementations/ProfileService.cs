@@ -254,7 +254,6 @@ namespace MARN_API.Services.Implementations
             if (RoommatePreferences != null)
             {
                 _mapper.Map(RoommatePreferences, profileData);
-                profileData.RoommatePreferencesEnabled = true;
             }
 
             if (currentUserId.HasValue && currentUserId.Value != userId && currentUserId.Value != Guid.Empty)
@@ -583,6 +582,12 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogWarning("Change Password failed: Current password is incorrect for userId: {userId}", dto.id);
                 return ServiceResult<bool>.Fail("Current password is incorrect");
+            }
+
+            if (dto.CurrentPassword == dto.NewPassword)
+            {
+                _logger.LogWarning("Change Password failed: Current password and the new password is the same for userId: {userId}", dto.id);
+                return ServiceResult<bool>.Fail("Current password and the new password is the same");
             }
 
             var result = await _userManager.ChangePasswordAsync(

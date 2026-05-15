@@ -22,6 +22,7 @@ namespace MARN_API.DTOs.Dashboard
         public int Ratings { get; set; }
 
         public bool IsActive { get; set; }
+        public PropertyStatus Status { get; set; }
         public ICollection<OwnerPropertyContractDto>? ActiveContracts { get; set; }
     }
 }

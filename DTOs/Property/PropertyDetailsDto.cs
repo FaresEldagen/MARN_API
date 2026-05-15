@@ -108,6 +108,10 @@ namespace MARN_API.DTOs.Property
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public PaymentFrequency PaymentFrequency { get; set; }
+        
+        public Guid RenterId { get; set; }
+        public string RenterName { get; set; } = string.Empty;
+        public string? RenterProfileImage { get; set; }
     }
 
     public class OwnerPropertyExtrasDto
