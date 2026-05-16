@@ -97,6 +97,11 @@ Data/
   SavedPropertyConfiguration.cs
   UserActivityConfiguration.cs
  Seed/
+  AdminDashboardScenarioContractSeed.cs
+  AdminDashboardScenarioIdentitySeed.cs
+  AdminDashboardScenarioIds.cs
+  AdminDashboardScenarioModerationSeed.cs
+  AdminDashboardScenarioPropertySeed.cs
   AdminSeed.cs
   BookingRequestSeed.cs
   ContractSeed.cs
@@ -304,6 +309,8 @@ Migrations/
  20260516063622_MakeAdminAnalyticsReportPeriodEnum.Designer.cs
  20260516063806_ChangeAdminAnalyticsReportPeriodToEnum.cs
  20260516063806_ChangeAdminAnalyticsReportPeriodToEnum.Designer.cs
+ 20260516073752_AddAdminDashboardScenarioSeeds.cs
+ 20260516073752_AddAdminDashboardScenarioSeeds.Designer.cs
  AppDbContextModelSnapshot.cs
 Models/
  Admin.cs
