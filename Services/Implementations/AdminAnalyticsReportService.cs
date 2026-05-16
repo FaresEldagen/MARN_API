@@ -297,7 +297,19 @@ namespace MARN_API.Services.Implementations
                         AccountStatus = x.AccountStatus.ToString(),
                         x.IsDeleted,
                         x.CreatedAt,
-                        Roles = string.Join(", ", x.Roles)
+                        Roles = string.Join(", ", x.Roles),
+                        x.OwnedPropertiesCount,
+                        x.ActivePropertiesCount,
+                        x.RenterContractsCount,
+                        x.OwnerContractsCount,
+                        x.ActiveContractsCount,
+                        x.CancelledContractsCount,
+                        x.PaymentsMadeCount,
+                        x.PaymentsReceivedCount,
+                        x.TotalPaidAmount,
+                        x.TotalReceivedAmount,
+                        x.ReportsSubmittedCount,
+                        x.ReportsAgainstUserCount
                     }));
                     break;
                 case AdminAnalyticsReportScope.Properties:
@@ -497,6 +509,20 @@ namespace MARN_API.Services.Implementations
                     x.CreatedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                     string.Join(", ", x.Roles)
                 }));
+
+            column.Item().Text("User Activity Metrics").SemiBold();
+            ComposeSixColumnTable(
+                column,
+                ["User", "Properties", "Contracts", "Payments", "Amounts", "Reports"],
+                users.Users.Items.Select(x => new[]
+                {
+                    x.FullName,
+                    $"Owned: {x.OwnedPropertiesCount}, Active: {x.ActivePropertiesCount}",
+                    $"Renter: {x.RenterContractsCount}, Owner: {x.OwnerContractsCount}, Active: {x.ActiveContractsCount}, Cancelled: {x.CancelledContractsCount}",
+                    $"Made: {x.PaymentsMadeCount}, Received: {x.PaymentsReceivedCount}",
+                    $"Paid: {x.TotalPaidAmount:N2}, Received: {x.TotalReceivedAmount:N2}",
+                    $"Filed: {x.ReportsSubmittedCount}, Against: {x.ReportsAgainstUserCount}"
+                }));
         }
 
         private static void ComposePropertiesSection(ColumnDescriptor column, AdminDetailedPropertiesResponseDto properties)
@@ -650,6 +676,26 @@ namespace MARN_API.Services.Implementations
             {
                 table.ColumnsDefinition(columns =>
                 {
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
+                });
+
+                AddHeaderRow(table, headers);
+                foreach (var row in rows)
+                    AddRow(table, row);
+            });
+        }
+
+        private static void ComposeSixColumnTable(ColumnDescriptor column, string[] headers, IEnumerable<string[]> rows)
+        {
+            column.Item().Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
                     columns.RelativeColumn();
                     columns.RelativeColumn();
                     columns.RelativeColumn();

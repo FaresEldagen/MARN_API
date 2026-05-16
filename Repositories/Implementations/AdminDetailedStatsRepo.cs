@@ -2,6 +2,7 @@ using System.Globalization;
 using MARN_API.Data;
 using MARN_API.DTOs.Admin;
 using MARN_API.DTOs.Common;
+using MARN_API.Enums;
 using MARN_API.Enums.Contract;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -81,7 +82,29 @@ namespace MARN_API.Repositories.Implementations
                     ProfileImage = u.ProfileImage,
                     AccountStatus = u.AccountStatus,
                     IsDeleted = u.DeletedAt != null,
-                    CreatedAt = u.CreatedAt
+                    CreatedAt = u.CreatedAt,
+                    OwnedPropertiesCount = _context.Properties.IgnoreQueryFilters().LongCount(p => p.OwnerId == u.Id),
+                    ActivePropertiesCount = _context.Properties.IgnoreQueryFilters().LongCount(p => p.OwnerId == u.Id && p.IsActive && p.DeletedAt == null),
+                    RenterContractsCount = _context.Contracts.LongCount(c => c.RenterId == u.Id),
+                    OwnerContractsCount = _context.Contracts.LongCount(c => c.Property.OwnerId == u.Id),
+                    ActiveContractsCount = _context.Contracts.LongCount(c =>
+                        c.Status == ContractStatus.Active &&
+                        (c.RenterId == u.Id || c.Property.OwnerId == u.Id)),
+                    CancelledContractsCount = _context.Contracts.LongCount(c =>
+                        c.Status == ContractStatus.Cancelled &&
+                        (c.RenterId == u.Id || c.Property.OwnerId == u.Id)),
+                    PaymentsMadeCount = _context.Payments.LongCount(p => p.PaymentSchedule.Contract.RenterId == u.Id),
+                    PaymentsReceivedCount = _context.Payments.LongCount(p => p.PaymentSchedule.Contract.Property.OwnerId == u.Id),
+                    TotalPaidAmount = _context.Payments
+                        .Where(p => p.PaymentSchedule.Contract.RenterId == u.Id)
+                        .Sum(p => (decimal?)p.AmountTotal) ?? 0m,
+                    TotalReceivedAmount = _context.Payments
+                        .Where(p => p.PaymentSchedule.Contract.Property.OwnerId == u.Id)
+                        .Sum(p => (decimal?)p.OwnerAmount) ?? 0m,
+                    ReportsSubmittedCount = _context.Reports.LongCount(r => r.ReporterId == u.Id),
+                    ReportsAgainstUserCount = _context.Reports.LongCount(r =>
+                        r.ReportableType == ReportableType.User &&
+                        r.ReportableGuidId == u.Id)
                 })
                 .ToListAsync();
 
@@ -243,19 +266,42 @@ namespace MARN_API.Repositories.Implementations
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim().ToLower();
+                var parsedContractId = long.TryParse(query.Search.Trim(), out var contractIdValue)
+                    ? contractIdValue
+                    : (long?)null;
+
                 listQuery = listQuery.Where(c =>
-                    c.Id.ToString().Contains(search) ||
+                    (parsedContractId.HasValue && c.Id == parsedContractId.Value) ||
                     c.Property.Title.ToLower().Contains(search) ||
                     (c.Property.Owner.FirstName + " " + c.Property.Owner.LastName).ToLower().Contains(search) ||
                     (c.Renter.FirstName + " " + c.Renter.LastName).ToLower().Contains(search));
             }
 
             var totalListCount = await listQuery.CountAsync();
-            var contracts = await listQuery
+            var contractRows = await listQuery
                 .OrderByDescending(c => c.CreatedAt)
                 .ThenByDescending(c => c.Id)
                 .Skip((query.PageNumber - 1) * query.PageSize)
                 .Take(query.PageSize)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Status,
+                    c.CreatedAt,
+                    c.LeaseStartDate,
+                    c.LeaseEndDate,
+                    c.TotalContractAmount,
+                    c.PaymentFrequency,
+                    c.PropertyId,
+                    PropertyTitle = c.Property.Title,
+                    OwnerId = c.Property.OwnerId,
+                    OwnerName = (c.Property.Owner.FirstName + " " + c.Property.Owner.LastName).Trim(),
+                    c.RenterId,
+                    RenterName = (c.Renter.FirstName + " " + c.Renter.LastName).Trim()
+                })
+                .ToListAsync();
+
+            var contracts = contractRows
                 .Select(c => new AdminDetailedContractListItemDto
                 {
                     ContractId = c.Id,
@@ -267,13 +313,13 @@ namespace MARN_API.Repositories.Implementations
                     TotalContractAmount = c.TotalContractAmount,
                     PaymentFrequency = c.PaymentFrequency.ToString(),
                     PropertyId = c.PropertyId,
-                    PropertyTitle = c.Property.Title,
-                    OwnerId = c.Property.OwnerId,
-                    OwnerName = (c.Property.Owner.FirstName + " " + c.Property.Owner.LastName).Trim(),
+                    PropertyTitle = c.PropertyTitle,
+                    OwnerId = c.OwnerId,
+                    OwnerName = c.OwnerName,
                     RenterId = c.RenterId,
-                    RenterName = (c.Renter.FirstName + " " + c.Renter.LastName).Trim()
+                    RenterName = c.RenterName
                 })
-                .ToListAsync();
+                .ToList();
 
             return new AdminDetailedContractsResponseDto
             {
@@ -317,9 +363,16 @@ namespace MARN_API.Repositories.Implementations
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim().ToLower();
+                var parsedPaymentId = long.TryParse(query.Search.Trim(), out var paymentIdValue)
+                    ? paymentIdValue
+                    : (long?)null;
+                var parsedContractId = long.TryParse(query.Search.Trim(), out var contractIdValue)
+                    ? contractIdValue
+                    : (long?)null;
+
                 listQuery = listQuery.Where(p =>
-                    p.Id.ToString().Contains(search) ||
-                    p.PaymentSchedule.ContractId.ToString().Contains(search) ||
+                    (parsedPaymentId.HasValue && p.Id == parsedPaymentId.Value) ||
+                    (parsedContractId.HasValue && p.PaymentSchedule.ContractId == parsedContractId.Value) ||
                     p.PaymentSchedule.Contract.Property.Title.ToLower().Contains(search) ||
                     (p.PaymentSchedule.Contract.Property.Owner.FirstName + " " + p.PaymentSchedule.Contract.Property.Owner.LastName).ToLower().Contains(search) ||
                     (p.PaymentSchedule.Contract.Renter.FirstName + " " + p.PaymentSchedule.Contract.Renter.LastName).ToLower().Contains(search));
@@ -513,62 +566,110 @@ namespace MARN_API.Repositories.Implementations
         {
             if (groupByDay)
             {
-                return await summaryQuery
+                var groupedRows = await summaryQuery
                     .GroupBy(u => u.CreatedAt.Date)
-                    .Select(g => new AdminCountTimePointDto
+                    .Select(g => new
                     {
                         PeriodStartUtc = g.Key,
-                        Label = g.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                         Count = g.LongCount()
                     })
-                    .OrderBy(x => x.PeriodStartUtc)
                     .ToListAsync();
+
+                return groupedRows
+                    .Select(x => new AdminCountTimePointDto
+                    {
+                        PeriodStartUtc = DateTime.SpecifyKind(x.PeriodStartUtc, DateTimeKind.Utc),
+                        Label = x.PeriodStartUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                        Count = x.Count
+                    })
+                    .OrderBy(x => x.PeriodStartUtc)
+                    .ToList();
             }
 
-            return await summaryQuery
+            var monthlyRows = await summaryQuery
                 .GroupBy(u => new { u.CreatedAt.Year, u.CreatedAt.Month })
-                .Select(g => new AdminCountTimePointDto
+                .Select(g => new
                 {
-                    PeriodStartUtc = new DateTime(g.Key.Year, g.Key.Month, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key.Month)} {g.Key.Year}",
+                    g.Key.Year,
+                    g.Key.Month,
                     Count = g.LongCount()
                 })
-                .OrderBy(x => x.PeriodStartUtc)
                 .ToListAsync();
+
+            return monthlyRows
+                .Select(x =>
+                {
+                    var periodStartUtc = new DateTime(x.Year, x.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                    return new AdminCountTimePointDto
+                    {
+                        PeriodStartUtc = periodStartUtc,
+                        Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
+                        Count = x.Count
+                    };
+                })
+                .OrderBy(x => x.PeriodStartUtc)
+                .ToList();
         }
 
         private async Task<List<AdminRevenueTimePointDto>> GetRevenueTimePointsAsync(IQueryable<Models.Payment> summaryQuery, bool groupByDay)
         {
             if (groupByDay)
             {
-                return await summaryQuery
+                var groupedRows = await summaryQuery
                     .GroupBy(p => p.PaidAt.Date)
-                    .Select(g => new AdminRevenueTimePointDto
+                    .Select(g => new
                     {
                         PeriodStartUtc = g.Key,
-                        Label = g.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                         Revenue = g.Sum(p => p.PlatformFee),
                         Sales = g.Sum(p => p.AmountTotal),
                         OwnerPayouts = g.Sum(p => p.OwnerAmount),
                         PaymentsCount = g.LongCount()
                     })
-                    .OrderBy(x => x.PeriodStartUtc)
                     .ToListAsync();
+
+                return groupedRows
+                    .Select(x => new AdminRevenueTimePointDto
+                    {
+                        PeriodStartUtc = DateTime.SpecifyKind(x.PeriodStartUtc, DateTimeKind.Utc),
+                        Label = x.PeriodStartUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                        Revenue = x.Revenue,
+                        Sales = x.Sales,
+                        OwnerPayouts = x.OwnerPayouts,
+                        PaymentsCount = x.PaymentsCount
+                    })
+                    .OrderBy(x => x.PeriodStartUtc)
+                    .ToList();
             }
 
-            return await summaryQuery
+            var monthlyRows = await summaryQuery
                 .GroupBy(p => new { p.PaidAt.Year, p.PaidAt.Month })
-                .Select(g => new AdminRevenueTimePointDto
+                .Select(g => new
                 {
-                    PeriodStartUtc = new DateTime(g.Key.Year, g.Key.Month, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key.Month)} {g.Key.Year}",
+                    g.Key.Year,
+                    g.Key.Month,
                     Revenue = g.Sum(p => p.PlatformFee),
                     Sales = g.Sum(p => p.AmountTotal),
                     OwnerPayouts = g.Sum(p => p.OwnerAmount),
                     PaymentsCount = g.LongCount()
                 })
-                .OrderBy(x => x.PeriodStartUtc)
                 .ToListAsync();
+
+            return monthlyRows
+                .Select(x =>
+                {
+                    var periodStartUtc = new DateTime(x.Year, x.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                    return new AdminRevenueTimePointDto
+                    {
+                        PeriodStartUtc = periodStartUtc,
+                        Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
+                        Revenue = x.Revenue,
+                        Sales = x.Sales,
+                        OwnerPayouts = x.OwnerPayouts,
+                        PaymentsCount = x.PaymentsCount
+                    };
+                })
+                .OrderBy(x => x.PeriodStartUtc)
+                .ToList();
         }
 
         private static PagedResult<T> CreatePagedResult<T>(List<T> items, int pageNumber, int pageSize, int totalCount)

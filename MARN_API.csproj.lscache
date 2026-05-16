@@ -72,6 +72,7 @@ Controllers/
  PropertyFeedbackController.cs
  ReportsController.cs
  RoommateController.cs
+ SupportController.cs
 Data/
  AppDbContext.cs
  Configurations/
@@ -150,6 +151,7 @@ DTOs/
   MessageDto.cs
  Common/
   ApiResponseDto.cs
+  ContactSupportRequestDto.cs
   MessageResponseDto.cs
   PagedResult.cs
   UrlResponseDto.cs
@@ -311,6 +313,8 @@ Migrations/
  20260516063806_ChangeAdminAnalyticsReportPeriodToEnum.Designer.cs
  20260516073752_AddAdminDashboardScenarioSeeds.cs
  20260516073752_AddAdminDashboardScenarioSeeds.Designer.cs
+ 20260516210954_getting the seed values as it was.cs
+ 20260516210954_getting the seed values as it was.Designer.cs
  AppDbContextModelSnapshot.cs
 Models/
  Admin.cs
@@ -399,6 +403,7 @@ Services/Implementations/
  AdminVerificationService.cs
  BookingRequestService.cs
  ChatService.cs
+ ContactSupportService.cs
  ContractPdfGenerator.cs
  ContractService.cs
  EmailService.cs
@@ -434,6 +439,7 @@ Services/Interfaces/
  IAdminVerificationService.cs
  IBookingRequestService.cs
  IChatService.cs
+ IContactSupportService.cs
  IContractService.cs
  IEmailService.cs
  IEncryptionService.cs

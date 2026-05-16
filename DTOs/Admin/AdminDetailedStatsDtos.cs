@@ -118,6 +118,18 @@ namespace MARN_API.DTOs.Admin
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<string> Roles { get; set; } = [];
+        public long OwnedPropertiesCount { get; set; }
+        public long ActivePropertiesCount { get; set; }
+        public long RenterContractsCount { get; set; }
+        public long OwnerContractsCount { get; set; }
+        public long ActiveContractsCount { get; set; }
+        public long CancelledContractsCount { get; set; }
+        public long PaymentsMadeCount { get; set; }
+        public long PaymentsReceivedCount { get; set; }
+        public decimal TotalPaidAmount { get; set; }
+        public decimal TotalReceivedAmount { get; set; }
+        public long ReportsSubmittedCount { get; set; }
+        public long ReportsAgainstUserCount { get; set; }
     }
 
     public class AdminDetailedPropertiesResponseDto

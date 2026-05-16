@@ -236,6 +236,12 @@ namespace MARN_API.Repositories.Implementations
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var trimmedSearch = search.Trim().ToLower();
+                var parsedReportableId = long.TryParse(search.Trim(), out var reportableIdValue)
+                    ? reportableIdValue
+                    : (long?)null;
+                var parsedReportableGuidId = Guid.TryParse(search.Trim(), out var reportableGuidIdValue)
+                    ? reportableGuidIdValue
+                    : (Guid?)null;
 
                 query = query.Where(r =>
                     r.Reason.ToLower().Contains(trimmedSearch) ||
@@ -243,8 +249,8 @@ namespace MARN_API.Repositories.Implementations
                                             (r.Reporter.Email != null && r.Reporter.Email.ToLower().Contains(trimmedSearch)))) ||
                     (r.Reviewer != null && ((r.Reviewer.FirstName + " " + r.Reviewer.LastName).ToLower().Contains(trimmedSearch) ||
                                             (r.Reviewer.Email != null && r.Reviewer.Email.ToLower().Contains(trimmedSearch)))) ||
-                    (r.ReportableId.HasValue && r.ReportableId.Value.ToString().Contains(trimmedSearch)) ||
-                    (r.ReportableGuidId.HasValue && r.ReportableGuidId.Value.ToString().Contains(trimmedSearch)) ||
+                    (parsedReportableId.HasValue && r.ReportableId == parsedReportableId.Value) ||
+                    (parsedReportableGuidId.HasValue && r.ReportableGuidId == parsedReportableGuidId.Value) ||
                     (r.ReportableType == ReportableType.User &&
                      Context.Users.IgnoreQueryFilters().Any(u =>
                          u.Id == r.ReportableGuidId &&

@@ -181,6 +181,7 @@ namespace MARN_API
             builder.Services.AddScoped<IAdminVerificationService, AdminVerificationService>();
             builder.Services.AddScoped<IAdminUserManagementService, AdminUserManagementService>();
             builder.Services.AddScoped<IContractService, ContractService>();
+            builder.Services.AddScoped<IContactSupportService, ContactSupportService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
