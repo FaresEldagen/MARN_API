@@ -157,6 +157,8 @@ namespace MARN_API.DTOs.Admin
         public string State { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public bool IsActive { get; set; }
+        public bool CanDeactivate { get; set; }
+        public bool CanRestore { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
     }

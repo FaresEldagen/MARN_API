@@ -197,6 +197,8 @@ namespace MARN_API.Repositories.Implementations
                     State = p.State,
                     Price = p.Price,
                     IsActive = p.IsActive,
+                    CanDeactivate = p.IsActive && p.DeletedAt == null,
+                    CanRestore = !p.IsActive && p.DeletedAt == null,
                     IsDeleted = p.DeletedAt != null,
                     CreatedAt = p.CreatedAt
                 })
@@ -360,6 +362,14 @@ namespace MARN_API.Repositories.Implementations
                 RevenueOverTime = revenueOverTime,
                 Payments = CreatePagedResult(payments, query.PageNumber, query.PageSize, totalListCount)
             };
+        }
+
+        public Task<Property?> GetPropertyForAdminActionAsync(long propertyId)
+        {
+            return _context.Properties
+                .IgnoreQueryFilters()
+                .Include(p => p.Owner)
+                .FirstOrDefaultAsync(p => p.Id == propertyId);
         }
 
         public Task<Contract?> GetContractForAdminActionAsync(long contractId)

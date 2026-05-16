@@ -9,6 +9,7 @@ namespace MARN_API.Repositories.Interfaces
         Task<AdminDetailedPropertiesResponseDto> GetPropertiesAsync(AdminDetailedPropertiesQueryDto query, DateTime? fromUtc, DateTime? toUtc);
         Task<AdminDetailedContractsResponseDto> GetContractsAsync(AdminDetailedContractsQueryDto query, DateTime? fromUtc, DateTime? toUtc);
         Task<AdminDetailedRevenueResponseDto> GetRevenueAsync(AdminDetailedRevenueQueryDto query, DateTime? fromUtc, DateTime? toUtc, bool groupByDay);
+        Task<Property?> GetPropertyForAdminActionAsync(long propertyId);
         Task<Contract?> GetContractForAdminActionAsync(long contractId);
         Task SaveAdminContractChangesAsync();
     }

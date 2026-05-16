@@ -50,6 +50,66 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<AdminDetailedPropertiesResponseDto>.Ok(result);
         }
 
+        public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> DeactivatePropertyAsync(long propertyId)
+        {
+            var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
+            if (property is null)
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.DeletedAt != null)
+            {
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
+                    "Deleted properties cannot be deactivated.",
+                    resultType: ServiceResultType.Conflict);
+            }
+
+            if (!property.IsActive)
+            {
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
+                    "Property is already deactivated.",
+                    resultType: ServiceResultType.Conflict);
+            }
+
+            property.IsActive = false;
+            await _detailedStatsRepo.SaveAdminContractChangesAsync();
+
+            await NotifyPropertyAvailabilityChangedAsync(property, restored: false);
+
+            return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
+                MapProperty(property),
+                "Property deactivated successfully.");
+        }
+
+        public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> RestorePropertyAsync(long propertyId)
+        {
+            var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
+            if (property is null)
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.DeletedAt != null)
+            {
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
+                    "Deleted properties cannot be restored.",
+                    resultType: ServiceResultType.Conflict);
+            }
+
+            if (property.IsActive)
+            {
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
+                    "Property is already active.",
+                    resultType: ServiceResultType.Conflict);
+            }
+
+            property.IsActive = true;
+            await _detailedStatsRepo.SaveAdminContractChangesAsync();
+
+            await NotifyPropertyAvailabilityChangedAsync(property, restored: true);
+
+            return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
+                MapProperty(property),
+                "Property restored successfully.");
+        }
+
         public async Task<ServiceResult<AdminDetailedContractsResponseDto>> GetContractsAsync(AdminDetailedContractsQueryDto query)
         {
             var period = ResolvePeriod(query);
@@ -194,6 +254,22 @@ namespace MARN_API.Services.Implementations
             });
         }
 
+        private async Task NotifyPropertyAvailabilityChangedAsync(Property property, bool restored)
+        {
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = property.OwnerId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.General,
+                Title = restored ? "Property Restored" : "Property Deactivated",
+                Body = restored
+                    ? $"An admin has restored your property \"{property.Title}\" and made it active again."
+                    : $"An admin has deactivated your property \"{property.Title}\". It is no longer publicly available.",
+                ActionType = NotificationActionType.Property,
+                ActionId = property.Id.ToString()
+            });
+        }
+
         private async Task<ServiceResult<bool>> CancelIssuedPaymentIntentsAsync(Contract contract)
         {
             var paymentIntentService = new PaymentIntentService();
@@ -259,6 +335,27 @@ namespace MARN_API.Services.Implementations
                 OwnerName = $"{contract.Property.Owner.FirstName} {contract.Property.Owner.LastName}".Trim(),
                 RenterId = contract.RenterId,
                 RenterName = $"{contract.Renter.FirstName} {contract.Renter.LastName}".Trim()
+            };
+        }
+
+        private static AdminDetailedPropertyListItemDto MapProperty(Property property)
+        {
+            return new AdminDetailedPropertyListItemDto
+            {
+                PropertyId = property.Id,
+                Title = property.Title,
+                OwnerId = property.OwnerId,
+                OwnerName = $"{property.Owner.FirstName} {property.Owner.LastName}".Trim(),
+                Status = property.Status,
+                Type = property.Type,
+                City = property.City,
+                State = property.State,
+                Price = property.Price,
+                IsActive = property.IsActive,
+                CanDeactivate = property.IsActive && property.DeletedAt == null,
+                CanRestore = !property.IsActive && property.DeletedAt == null,
+                IsDeleted = property.DeletedAt != null,
+                CreatedAt = property.CreatedAt
             };
         }
 
