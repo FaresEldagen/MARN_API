@@ -7,6 +7,9 @@ using Stripe;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MARN_API.Enums;
+using MARN_API.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace MARN_API.Controllers
 {
@@ -98,31 +101,74 @@ namespace MARN_API.Controllers
         }
 
 
-        /// <summary>
-        /// [TEST ONLY] Toops up the Stripe platform balance with 100000 USD (Available balance).
-        /// Use this to test withdrawals if you have insufficient funds in test mode.
-        /// </summary>
-        [Authorize(Roles = "Owner")]
-        [HttpPost("topup-test-balance")]
-        public async Task<IActionResult> TopUpTestBalance()
-        {
-            var result = await _paymentService.TopUpPlatformBalanceForTesting();
-            return HandleServiceResult(result);
-        }
 
         /// <summary>
         /// [TEST ONLY] Checks the Stripe balance of the platform account and the owner's connected account.
         /// </summary>
-        [Authorize(Roles = "Owner")]
         [HttpGet("check-balance")]
         public async Task<IActionResult> CheckBalance()
         {
-            if (!TryGetUserId(out var userId))
-                return Unauthorized();
+            try
+            {
+                var balanceService = new BalanceService();
+                var platformBalance = await balanceService.GetAsync();
 
-            var result = await _paymentService.CheckBalances(userId);
-            return HandleServiceResult(result);
+                var result = ServiceResult<object>.Ok(new
+                    {
+                        Platform = platformBalance,
+                    },
+                    "Balances retrieved successfully."
+                );
+                return HandleServiceResult(result);
+
+            }
+            catch (StripeException e)
+            {
+                var result = ServiceResult<object>.Fail(e.Message);
+                return HandleServiceResult(result);
+            }
         }
+
+
+        /// <summary>
+        /// [TEST ONLY] Toops up the Stripe platform balance with 100000 USD (Available balance).
+        /// Use this to test withdrawals if you have insufficient funds in test mode.
+        /// </summary>
+        [HttpPost("topup-test-balance")]
+        public async Task<IActionResult> TopUpTestBalance()
+        {
+            _logger.LogInformation("Top-up Platform Balance for testing attempt.");
+
+            try
+            {
+                var options = new ChargeCreateOptions
+                {
+                    Amount = 10000000, // $100,000 USD
+                    Currency = "usd",
+                    Source = "tok_bypassPending",
+                    Description = "Test Top-up (USD) for Withdrawal testing",
+                };
+                var service = new ChargeService();
+                await service.CreateAsync(options);
+
+                _logger.LogInformation("Platform balance topped up successfully with 500,000 EGP (Available).");
+                var result = ServiceResult<bool>.Ok(true, "Platform balance topped up successfully with 500,000 EGP (Available).", ServiceResultType.Success);
+                return HandleServiceResult(result);
+            }
+            catch (StripeException e)
+            {
+                _logger.LogError(e, "Stripe API Error while topping up platform balance: {Message}", e.StripeError?.Message);
+                var message = e.StripeError?.Message ?? "Payment provider error.";
+                if (e.StripeError?.Code == "balance_insufficient")
+                {
+                    message += " (Test Tip: Use the 'topup-test-balance' endpoint to add available funds to your Stripe platform account for testing).";
+                }
+
+                var result = ServiceResult<bool>.Fail(message, resultType: ServiceResultType.BadRequest);
+                return HandleServiceResult(result);
+            }
+        }
+
 
 
         /// <summary>

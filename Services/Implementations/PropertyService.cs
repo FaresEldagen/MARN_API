@@ -217,6 +217,8 @@ namespace MARN_API.Services.Implementations
                             BookingRequestId = r.BookingRequestId,
                             StartDate = r.StartDate,
                             EndDate = r.EndDate,
+                            PaymentFrequency = r.PaymentFrequency,
+
                             RenterId = r.RenterId,
                             RenterName = r.RenterName,
                             RenterProfileImage = r.RenterProfileImage

@@ -9,9 +9,6 @@ namespace MARN_API.Services.Interfaces
         Task<ServiceResult<string>> CreatePaymentIntent(Guid userId, long paymentScheduleId);
         Task<ServiceResult<string>> CreateOrGetConnectOnboardingLink(Guid userId);
         Task<ServiceResult<bool>> Withdraw(Guid ownerId);
-        Task<ServiceResult<bool>> TopUpPlatformBalanceForTesting();
-        Task<ServiceResult<object>> CheckBalances(Guid ownerId);
-
 
 
         #region Stripe Webhook Handlers

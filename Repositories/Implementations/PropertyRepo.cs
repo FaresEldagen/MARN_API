@@ -478,9 +478,6 @@ namespace MARN_API.Repositories.Implementations
                                 StartDate = b.StartDate,
                                 EndDate = b.EndDate,
                                 PaymentFrequency = b.PaymentFrequency,
-                                RenterId = b.RenterId,
-                                RenterName = $"{b.Renter.FirstName} {b.Renter.LastName}",
-                                RenterProfileImage = string.IsNullOrEmpty(b.Renter.ProfileImage) ? null : b.Renter.ProfileImage
                             })
                             .ToList()
                         : new List<PropertyBookingRequestDto>(),

@@ -16,7 +16,7 @@ namespace MARN_API.Services.Implementations
 {
     public class ContractService : IContractService
     {
-        private readonly IContractRepo _repo;
+        private readonly IContractRepo _contractRepo;
         private readonly HashingService _hashingService;
         private readonly OpenTimestampsService _openTimestampsService;
         private readonly OpenTimestampsProofReader _proofReader;
@@ -28,7 +28,7 @@ namespace MARN_API.Services.Implementations
         private readonly ILogger<ContractService> _logger;
 
         public ContractService(
-            IContractRepo repo,
+            IContractRepo contractRepo,
             HashingService hashingService,
             OpenTimestampsService openTimestampsService,
             OpenTimestampsProofReader proofReader,
@@ -39,7 +39,7 @@ namespace MARN_API.Services.Implementations
             INotificationService notificationService,
             ILogger<ContractService> logger)
         {
-            _repo = repo;
+            _contractRepo = contractRepo;
             _hashingService = hashingService;
             _openTimestampsService = openTimestampsService;
             _proofReader = proofReader;
@@ -86,7 +86,7 @@ namespace MARN_API.Services.Implementations
                 TotalContractAmount = totalContractAmount
             };
 
-            await _repo.AddAsync(contract);
+            await _contractRepo.AddAsync(contract);
             await _bookingRequestRepo.DeleteAsync(booking);
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -105,7 +105,7 @@ namespace MARN_API.Services.Implementations
         public async Task<ServiceResult<ContractResponseDto>> SignContractAsync(Guid userId, long contractId)
         {
             _logger.LogInformation("Sign Contract attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
-            var contract = await _repo.GetByIdAsync(contractId);
+            var contract = await _contractRepo.GetByIdAsync(contractId);
             if (contract is null)
                 return ServiceResult<ContractResponseDto>.Fail("Contract not found.", resultType: ServiceResultType.NotFound);
 
@@ -147,11 +147,26 @@ namespace MARN_API.Services.Implementations
                 },
                 Property = new PropertyInfo
                 {
+                    UnitNumber = property.Id.ToString(),
                     ListingTitle = property.Title,
                     AddressLine = property.Address,
                     City = property.City,
-                    Country = property.State,
+                    Country = "Egypt",
                     Description = property.Description,
+                    Type = property.Type.ToString(),
+                    State = property.State,
+                    ZipCode = property.ZipCode,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    Bedrooms = property.Bedrooms,
+                    Beds = property.Beds,
+                    Bathrooms = property.Bathrooms,
+                    SquareMeters = property.SquareMeters,
+                    MaxOccupants = property.MaxOccupants,
+                    IsShared = property.IsShared,
+                    Amenities = string.Join(", ", property.Amenities.Select(a => a.Amenity.ToString())),
+                    Rules = string.Join("; ", property.Rules.Select(r => r.Rule)),
+                    MediaPaths = property.Media.Select(m => m.Path).ToList(),
                 },
                 RentalTerms = new RentalTermsInfo
                 {
@@ -192,19 +207,19 @@ namespace MARN_API.Services.Implementations
             var otsFileBytes = await _openTimestampsService.SubmitHashAsync(hash);
             var proofData = _proofReader.Extract(otsFileBytes);
 
+            contract.SignedByRenterAt = DateTime.UtcNow;
+            contract.Status = ContractStatus.Active;
             contract.FileName = pdfResult.FileName;
             contract.FileBytes = pdfResult.Content;
             contract.Hash = hash;
-            contract.SignedByRenterAt = DateTime.UtcNow;
-            contract.Status = ContractStatus.Active;
-            contract.AnchoringStatus = ContractAnchoringStatus.Pending;
             contract.OtsFileBytes = otsFileBytes;
             contract.TransactionId = proofData.TransactionIds.FirstOrDefault();
             contract.MerkleRoot = proofData.MerkleRoots.FirstOrDefault();
+            contract.AnchoringStatus = ContractAnchoringStatus.Pending;
 
             try
             {
-                await _repo.SignContractAsync(contract);
+                await _contractRepo.SignContractAsync(contract);
             }
             catch (Exception ex)
             {
@@ -232,7 +247,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Get Contract Details attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
-            var contract = await _repo.GetByIdAsync(contractId);
+            var contract = await _contractRepo.GetByIdAsync(contractId);
             if (contract is null)
             {
                 _logger.LogWarning("Get Contract Details failed: Contract not found for contractId: {contractId}", contractId);
@@ -294,7 +309,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Download Contract PDF attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
-            var contract = await _repo.GetByIdAsync(contractId);
+            var contract = await _contractRepo.GetByIdAsync(contractId);
             if (contract is null || contract.FileBytes is null)
             {
                 _logger.LogWarning("Download Contract PDF failed: Contract or file not found for contractId: {contractId}", contractId);
@@ -325,7 +340,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Download OTS Proof attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
-            var contract = await _repo.GetByIdAsync(contractId);
+            var contract = await _contractRepo.GetByIdAsync(contractId);
             if (contract is null || contract.OtsFileBytes is null)
             {
                 _logger.LogWarning("Download OTS Proof failed: Proof not found for contractId: {contractId}", contractId);
@@ -356,7 +371,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Verify Contract attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
-            var record = await _repo.GetByIdAsync(contractId);
+            var record = await _contractRepo.GetByIdAsync(contractId);
             if (record is null)
             {
                 _logger.LogWarning("Verify Contract failed: Contract not found for contractId: {contractId}", contractId);
@@ -410,7 +425,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Cancel Contract attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
-            var contract = await _repo.GetByIdAsync(contractId);
+            var contract = await _contractRepo.GetByIdAsync(contractId);
             if (contract is null)
             {
                 _logger.LogWarning("Cancel Contract failed: Contract not found for contractId: {contractId}", contractId);
@@ -432,7 +447,7 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<string>.Fail("You do not have access to cancel this contract.", resultType: ServiceResultType.Forbidden);
             }
 
-            await _repo.DeleteAsync(contract);
+            await _contractRepo.DeleteAsync(contract);
 
             if (isRenter)
             {

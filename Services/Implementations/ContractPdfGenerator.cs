@@ -1,14 +1,23 @@
 using System.Globalization;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 using MARN_API.DTOs.Contracts;
 using MARN_API.Enums.Payment;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using static System.Collections.Specialized.BitVector32;
 
 namespace MARN_API.Services.Implementations
 {
     public class ContractPdfGenerator
     {
+        private readonly IWebHostEnvironment _env;
+
+        public ContractPdfGenerator(IWebHostEnvironment env)
+        {
+            _env = env;
+        }
         public GeneratedContractPdfResult Generate(ContractPdfRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -34,7 +43,7 @@ namespace MARN_API.Services.Implementations
                     page.DefaultTextStyle(style => style.FontSize(11).FontColor(Colors.Grey.Darken4));
 
                     page.Header().Element(container => ComposeHeader(container, request));
-                    page.Content().PaddingVertical(18).Element(container => ComposeContent(container, request));
+                    page.Content().PaddingVertical(18).Element(container => ComposeContent(container, request, _env.WebRootPath));
                     page.Footer().Element(ComposeFooter);
                 });
             }).GeneratePdf();
@@ -81,14 +90,14 @@ namespace MARN_API.Services.Implementations
 
                     row.RelativeItem().Column(inner =>
                     {
-                        inner.Item().Text("Property").Bold().FontColor("#12343B");
-                        inner.Item().Text(request.Property!.ListingTitle!).FontColor("#35555D");
+                        inner.Item().Text("Property ID").Bold().FontColor("#12343B");
+                        inner.Item().Text(request.Property!.UnitNumber!).FontColor("#35555D");
                     });
                 });
             });
         }
 
-        private static void ComposeContent(IContainer container, ContractPdfRequest request)
+        private static void ComposeContent(IContainer container, ContractPdfRequest request, string webRootPath)
         {
             var rentalTerms = request.RentalTerms!;
             var signature = request.ElectronicSignature!;
@@ -108,7 +117,9 @@ namespace MARN_API.Services.Implementations
                 column.Item().Row(row =>
                 {
                     row.RelativeItem().Element(card => ComposePartyCard(card, "Landlord", request.Landlord!));
+
                     row.ConstantItem(12);
+
                     row.RelativeItem().Element(card => ComposePartyCard(card, "Tenant", request.Tenant!));
                 });
 
@@ -119,7 +130,8 @@ namespace MARN_API.Services.Implementations
                         {
                             ("Rent Amount", FormatMoney(rentalTerms.RentAmount, rentalTerms.Currency!)),
                             ("Total Contract Amount", FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency!)),
-                            ("Payment Frequency", FormatPaymentFrequency(rentalTerms.PaymentFrequency))                        }));
+                            ("Payment Frequency", FormatPaymentFrequency(rentalTerms.PaymentFrequency))                        
+                        }));
 
                     row.ConstantItem(12);
 
@@ -132,14 +144,103 @@ namespace MARN_API.Services.Implementations
                         }));
                 });
 
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Element(card =>
+                        ComposeInfoCard(card, "Property Details", new[]
+                        {
+                            ("Title", request.Property!.ListingTitle ?? "N/A"),
+                            ("Type", request.Property.Type ?? "N/A"),
+                            ("Address", request.Property.AddressLine ?? "N/A"),
+                            ("City", request.Property.City ?? "N/A"),
+                            ("State", request.Property.State ?? "N/A"),
+                            ("Zip Code", request.Property.ZipCode ?? "N/A"),
+                            ("Coordinates", $"{request.Property.Latitude:F4}, {request.Property.Longitude:F4}")
+                        }));
+
+                    row.ConstantItem(12);
+
+                    row.RelativeItem().Element(card =>
+                        ComposeInfoCard(card, "Property Specifications", new[]
+                        {
+                            ("Bedrooms", request.Property.Bedrooms.ToString()),
+                            ("Beds", request.Property.Beds.ToString()),
+                            ("Bathrooms", request.Property.Bathrooms.ToString()),
+                            ("Area", $"{request.Property.SquareMeters} sqm"),
+                            ("Max Occupants", request.Property.MaxOccupants.ToString()),
+                            ("Shared Space", request.Property.IsShared ? "Yes" : "No")
+                        }));
+                });
+
+                column.Item().Element(section =>
+                    ComposeSection(section, "Property Description & Amenities", body =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(request.Property.Description))
+                        {
+                            body.Item().PaddingBottom(4).Text("Description:").SemiBold().FontColor("#12343B");
+                            body.Item().PaddingBottom(12).Text(request.Property.Description);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(request.Property.Amenities))
+                        {
+                            body.Item().PaddingBottom(4).Text("Amenities:").SemiBold().FontColor("#12343B");
+                            var amenities = request.Property.Amenities.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var amenity in amenities)
+                            {
+                                ComposeBullet(body, amenity.Trim());
+                            }
+                        }
+                    }));
+
+                if (request.Property.MediaPaths != null && request.Property.MediaPaths.Any())
+                {
+                    column.Item().Element(section =>
+                        ComposeSection(section, "Property Images", body =>
+                        {
+                            body.Item().Grid(grid =>
+                            {
+                                grid.Spacing(10);
+                                grid.Columns(3); // 3 images per row
+
+                                foreach (var relativePath in request.Property.MediaPaths)
+                                {
+                                    var cleanPath = relativePath.TrimStart('/', '\\');
+                                    var absolutePath = Path.Combine(webRootPath, cleanPath);
+
+                                    if (File.Exists(absolutePath))
+                                    {
+                                        grid.Item().Height(120).Image(absolutePath);
+                                    }
+                                }
+                            });
+                        }));
+                }
+
                 column.Item().Element(section =>
                     ComposeSection(section, "Core Obligations", body =>
                     {
                         ComposeBullet(body, "The Tenant shall pay all amounts due on time and maintain the property in good condition, ordinary wear and tear excepted.");
                         ComposeBullet(body, "The Landlord shall provide possession of the property on the lease start date in a condition reasonably fit for residential occupancy.");
-                        ComposeBullet(body, "Any material breach not cured after notice may result in termination of this agreement in accordance with applicable law.");
-                        ComposeBullet(body, "Refund requests and damage claims shall be documented through the platform workflow used by the parties.");
+                        ComposeBullet(body, "If the Tenant fails to pay rent for more than fifteen (15) days after the due date and following an official notice through the platform or approved communication channels, the Landlord may initiate appropriate legal action.");
+                        ComposeBullet(body, "The agreed rental amount includes the costs of basic property-related services including water, electricity, routine maintenance fees, and any additional services specified by the Landlord unless otherwise stated.");
+                        ComposeBullet(body, "The Tenant shall bear the costs of minor operational repairs resulting from normal use, while the Landlord shall bear major and structural repairs necessary to maintain the property in a habitable condition.");
+                        ComposeBullet(body, "Refund requests, damage claims, and requests related to early contract termination shall be submitted and documented through the platform workflow used by the parties.");
+                        ComposeBullet(body, "In the event that either party wishes to terminate this agreement before its expiration date, a request shall first be submitted through the platform for review and amicable resolution attempts between the parties. If no resolution is reached, disputes shall fall under the jurisdiction of Cairo Primary Courts.");
                     }));
+
+                if (!string.IsNullOrWhiteSpace(request.Property.Rules))
+                {
+                    column.Item().Element(section =>
+                        ComposeSection(section, "Property Rules and Additional Terms", body =>
+                            {
+                                var rules = request.Property.Rules.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var rule in rules)
+                                {
+                                    ComposeBullet(body, rule.Trim());
+                                }
+                                body.Item().PaddingBottom(8);
+                            }));
+                }
 
                 column.Item().Element(section =>
                     ComposeSection(section, "Electronic Signature and Consent", body =>
@@ -168,22 +269,11 @@ namespace MARN_API.Services.Implementations
                     block.Item().PaddingTop(12).Text(request.GoverningLawNote!).Italic().FontColor("#35555D");
                 });
 
-                if (request.AdditionalTerms is { Count: > 0 })
-                {
-                    column.Item().Element(section =>
-                        ComposeSection(section, "Additional Terms", body =>
-                        {
-                            foreach (var term in request.AdditionalTerms.Where(term => !string.IsNullOrWhiteSpace(term)))
-                            {
-                                ComposeBullet(body, term.Trim());
-                            }
-                        }));
-                }
-
                 column.Item().Element(section =>
                     ComposeSection(section, "Acknowledgement", body =>
                     {
-                        body.Item().Text("By accepting electronically, the Tenant confirms that the contract was reviewed in full, that the provided identity details are accurate, and that the digital record may be relied upon as evidence of assent.");
+                        ComposeBullet(body, "By accepting electronically, the Tenant confirms that the contract was reviewed in full, that the provided identity details are accurate, and that the digital record may be relied upon as evidence of assent.");
+                        ComposeBullet(body, "Acceptance by both parties has been electronically documented through the platform and linked to identity information and digital verification records.");
                     }));
             });
         }
@@ -213,15 +303,13 @@ namespace MARN_API.Services.Implementations
 
         private static void ComposePartyCard(IContainer container, string title, PartyInfo party)
         {
-            container.Border(1).BorderColor("#D5E3E6").Padding(16).Column(column =>
+            ComposeInfoCard(container, title, new[]
             {
-                column.Spacing(5);
-                column.Item().Text(title).FontSize(15).SemiBold().FontColor("#12343B");
-                column.Item().Text(party.FullName!).Bold();
-                column.Item().Text($"National ID: {party.NationalId}");
-                column.Item().Text($"Email: {party.Email}");
-                column.Item().Text($"Phone: {party.PhoneNumber}");
-                column.Item().Text($"Address: {party.Address}").FontColor("#4B6268");
+                ("Name", party.FullName ?? "N/A"),
+                ("National ID", party.NationalId ?? "N/A"),
+                ("Email", party.Email ?? "N/A"),
+                ("Phone", party.PhoneNumber ?? "N/A"),
+                ("Address", party.Address ?? "N/A")
             });
         }
 

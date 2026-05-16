@@ -188,6 +188,11 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Contracts
                 .Include(c => c.Property)
+                    .ThenInclude(p => p.Amenities)
+                .Include(c => c.Property)
+                    .ThenInclude(p => p.Rules)
+                .Include(c => c.Property)
+                    .ThenInclude(p => p.Media)
                 .FirstOrDefaultAsync(c => c.Id == contractId);
         }
 
