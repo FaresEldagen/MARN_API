@@ -18,6 +18,7 @@ namespace MARN_API.Controllers
         private readonly IAdminUserManagementService _adminUserManagementService;
         private readonly IAdminRoleManagementService _adminRoleManagementService;
         private readonly IAdminReportModerationService _adminReportModerationService;
+        private readonly IContractService _contractService;
 
         public AdminController(
             IAdminDashboardService adminDashboardService,
@@ -26,7 +27,8 @@ namespace MARN_API.Controllers
             IAdminVerificationService adminVerificationService,
             IAdminUserManagementService adminUserManagementService,
             IAdminRoleManagementService adminRoleManagementService,
-            IAdminReportModerationService adminReportModerationService)
+            IAdminReportModerationService adminReportModerationService,
+            IContractService contractService)
         {
             _adminDashboardService = adminDashboardService;
             _adminAnalyticsReportService = adminAnalyticsReportService;
@@ -35,6 +37,7 @@ namespace MARN_API.Controllers
             _adminUserManagementService = adminUserManagementService;
             _adminRoleManagementService = adminRoleManagementService;
             _adminReportModerationService = adminReportModerationService;
+            _contractService = contractService;
         }
 
         [HttpGet("dashboard/overview")]
@@ -151,6 +154,23 @@ namespace MARN_API.Controllers
         {
             var result = await _adminDetailedStatsService.GetContractsAsync(query);
             return HandleServiceResult(result);
+        }
+
+        [HttpGet("stats/contracts/{contractId:long}/download")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DownloadDetailedContract(long contractId)
+        {
+            if (!TryGetUserId(out var adminId))
+                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+
+            var result = await _contractService.DownloadContractAsync(adminId, contractId);
+            if (!result.Success)
+                return HandleServiceResult(result);
+
+            return File(result.Data!.FileBytes, result.Data.ContentType, result.Data.FileName);
         }
 
         [HttpPatch("stats/contracts/{contractId:long}/cancel")]

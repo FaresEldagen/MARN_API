@@ -201,6 +201,11 @@ Recommended checks:
 2. confirm it shows `Pending`
 3. cancel contract `1000101`
 4. verify it becomes `Cancelled`
+5. download a contract PDF directly from the admin endpoint:
+
+```http
+GET /api/admin/stats/contracts/{contractId}/download
+```
 
 Note: `1000101` is a good safe admin-cancel test because it does not depend on live Stripe payment intents.
 
@@ -312,4 +317,3 @@ Main seed files:
 Migration:
 
 - `Migrations/20260516073752_AddAdminDashboardScenarioSeeds.cs`
-
