@@ -367,11 +367,15 @@ namespace MARN_API.Services.Implementations
                 return;
             }
 
-            if (paymentSchedule.Contract.Status != Enums.Contract.ContractStatus.Active ||
-                paymentSchedule.Status == PaymentScheduleStatus.Cancelled)
+            var wasCancelledDuringProcessing =
+                paymentSchedule.Contract.Status != Enums.Contract.ContractStatus.Active ||
+                paymentSchedule.Status == PaymentScheduleStatus.Cancelled;
+
+            if (wasCancelledDuringProcessing)
             {
-                _logger.LogWarning("Handle Successful Payment skipped: Contract or payment schedule is cancelled for paymentScheduleId: {paymentScheduleId}", scheduleIdString);
-                return;
+                _logger.LogWarning(
+                    "Handle Successful Payment continuing for paymentScheduleId: {paymentScheduleId} even though contract/schedule is cancelled, to preserve ledger consistency.",
+                    scheduleIdString);
             }
 
             var platformFeePercentage = _configuration.GetValue<decimal>("Stripe:PlatformFeePercentage", 0.1m);

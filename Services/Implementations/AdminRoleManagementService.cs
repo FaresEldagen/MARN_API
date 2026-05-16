@@ -7,6 +7,7 @@ using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace MARN_API.Services.Implementations
 {
@@ -114,53 +115,68 @@ namespace MARN_API.Services.Implementations
                 .Concat(protectedRoles)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
-            var userIsCurrentlyAdmin = currentRoles.Any(role => string.Equals(role, AdminRoleName, StringComparison.OrdinalIgnoreCase));
-            var willRemainAdmin = normalizedRequestedRoles.Any(role => string.Equals(role, AdminRoleName, StringComparison.OrdinalIgnoreCase));
 
-            if (userIsCurrentlyAdmin && !willRemainAdmin)
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
             {
-                var adminsCount = await _roleManagementRepo.GetAdminsCountAsync();
-                if (adminsCount <= 1)
+                currentRoles = await _userManager.GetRolesAsync(user);
+                var userIsCurrentlyAdmin = currentRoles.Any(role => string.Equals(role, AdminRoleName, StringComparison.OrdinalIgnoreCase));
+                var willRemainAdmin = normalizedRequestedRoles.Any(role => string.Equals(role, AdminRoleName, StringComparison.OrdinalIgnoreCase));
+
+                if (userIsCurrentlyAdmin && !willRemainAdmin)
                 {
-                    return ServiceResult<AdminRoleUserDetailsDto>.Fail(
-                        "The last admin cannot be removed.",
-                        resultType: ServiceResultType.Conflict);
+                    var adminsCount = await _roleManagementRepo.GetAdminsCountAsync();
+                    if (adminsCount <= 1)
+                    {
+                        await transaction.RollbackAsync();
+                        return ServiceResult<AdminRoleUserDetailsDto>.Fail(
+                            "The last admin cannot be removed.",
+                            resultType: ServiceResultType.Conflict);
+                    }
                 }
+
+                var rolesToRemove = currentRoles
+                    .Where(role => !normalizedRequestedRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+                    .ToList();
+
+                var rolesToAdd = normalizedRequestedRoles
+                    .Where(role => !currentRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (rolesToRemove.Count > 0)
+                {
+                    var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                    if (!removeResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ServiceResult<AdminRoleUserDetailsDto>.Fail(
+                            "Failed to remove roles.",
+                            removeResult.Errors.Select(e => e.Description).ToList(),
+                            resultType: ServiceResultType.BadRequest);
+                    }
+                }
+
+                if (rolesToAdd.Count > 0)
+                {
+                    var addResult = await _userManager.AddToRolesAsync(user, rolesToAdd);
+                    if (!addResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ServiceResult<AdminRoleUserDetailsDto>.Fail(
+                            "Failed to add roles.",
+                            addResult.Errors.Select(e => e.Description).ToList(),
+                            resultType: ServiceResultType.BadRequest);
+                    }
+                }
+
+                await SyncOwnerDiscriminatorAsync(user.Id, normalizedRequestedRoles);
+                await transaction.CommitAsync();
             }
-
-            var rolesToRemove = currentRoles
-                .Where(role => !normalizedRequestedRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-
-            var rolesToAdd = normalizedRequestedRoles
-                .Where(role => !currentRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-
-            if (rolesToRemove.Count > 0)
+            catch
             {
-                var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
-                if (!removeResult.Succeeded)
-                {
-                    return ServiceResult<AdminRoleUserDetailsDto>.Fail(
-                        "Failed to remove roles.",
-                        removeResult.Errors.Select(e => e.Description).ToList(),
-                        resultType: ServiceResultType.BadRequest);
-                }
+                await transaction.RollbackAsync();
+                throw;
             }
-
-            if (rolesToAdd.Count > 0)
-            {
-                var addResult = await _userManager.AddToRolesAsync(user, rolesToAdd);
-                if (!addResult.Succeeded)
-                {
-                    return ServiceResult<AdminRoleUserDetailsDto>.Fail(
-                        "Failed to add roles.",
-                        addResult.Errors.Select(e => e.Description).ToList(),
-                        resultType: ServiceResultType.BadRequest);
-                }
-            }
-
-            await SyncOwnerDiscriminatorAsync(user.Id, normalizedRequestedRoles);
 
             _logger.LogInformation("Admin updated roles for user {UserId}. Roles: {Roles}", userId, string.Join(", ", normalizedRequestedRoles));
 

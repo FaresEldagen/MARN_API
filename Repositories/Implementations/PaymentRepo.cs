@@ -179,7 +179,7 @@ namespace MARN_API.Repositories.Implementations
                 if (!hasRemainingUnpaid)
                 {
                     await Context.Contracts
-                        .Where(c => c.Id == paymentSchedule.ContractId)
+                        .Where(c => c.Id == paymentSchedule.ContractId && c.Status == ContractStatus.Active)
                         .ExecuteUpdateAsync(s => s.SetProperty(c => c.Status, ContractStatus.Expired));
                 }
 

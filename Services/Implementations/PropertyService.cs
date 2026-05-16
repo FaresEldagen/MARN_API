@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using MARN_API.Enums.Contract;
+using MARN_API.Enums.Property;
 
 namespace MARN_API.Services.Implementations
 {
@@ -186,6 +187,29 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<PropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId, Guid? userId)
         {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null || property.DeletedAt != null)
+            {
+                return ServiceResult<PropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            var isOwner = userId.HasValue && property.OwnerId == userId.Value;
+            var isAdmin = false;
+
+            if (userId.HasValue && !isOwner)
+            {
+                var currentUser = await _userManager.FindByIdAsync(userId.Value.ToString());
+                if (currentUser != null)
+                {
+                    isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+                }
+            }
+
+            if (!isOwner && !isAdmin && (!property.IsActive || property.Status != PropertyStatus.Verified))
+            {
+                return ServiceResult<PropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
             var dto = await _propertyRepo.GetPropertyDetailsAsync(propertyId, userId);
             if (dto == null)
             {

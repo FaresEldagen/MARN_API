@@ -79,10 +79,13 @@ namespace MARN_API.Services.Implementations
             }
 
             var property = await _propertyRepo.GetByIdAsync(dto.PropertyId);
-            if (property == null || !property.IsActive)
+            if (property == null ||
+                property.DeletedAt != null ||
+                !property.IsActive ||
+                property.Status != PropertyStatus.Verified)
             {
                 _logger.LogWarning("Add Booking Request failed: Property not active or not found for propertyId: {propertyId}", dto.PropertyId);
-                return ServiceResult<bool>.Fail("Property is not active or does not exist.", resultType: ServiceResultType.NotFound);
+                return ServiceResult<bool>.Fail("Property is not publicly available for booking.", resultType: ServiceResultType.NotFound);
             }
 
             int activeContractsCount = property.Contracts.Count(c => c.Status == ContractStatus.Active);
