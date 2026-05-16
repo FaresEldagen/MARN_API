@@ -10,6 +10,7 @@ namespace MARN_API.Enums.Payment
         PaidOnTime,
         PaidLate,
 
-        Overdue
+        Overdue,
+        Cancelled
     }
 }

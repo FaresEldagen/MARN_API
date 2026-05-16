@@ -9,5 +9,6 @@ namespace MARN_API.Services.Interfaces
         Task<ServiceResult<AdminDetailedPropertiesResponseDto>> GetPropertiesAsync(AdminDetailedPropertiesQueryDto query);
         Task<ServiceResult<AdminDetailedContractsResponseDto>> GetContractsAsync(AdminDetailedContractsQueryDto query);
         Task<ServiceResult<AdminDetailedRevenueResponseDto>> GetRevenueAsync(AdminDetailedRevenueQueryDto query);
+        Task<ServiceResult<AdminDetailedContractListItemDto>> CancelContractAsync(long contractId);
     }
 }

@@ -1,8 +1,13 @@
 using MARN_API.DTOs.Admin;
 using MARN_API.Enums;
+using MARN_API.Enums.Contract;
+using MARN_API.Enums.Notification;
+using MARN_API.Enums.Payment;
+using MARN_API.DTOs.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
+using Stripe;
 
 namespace MARN_API.Services.Implementations
 {
@@ -10,13 +15,16 @@ namespace MARN_API.Services.Implementations
     {
         private const int MaxPageSize = 100;
         private readonly IAdminDetailedStatsRepo _detailedStatsRepo;
+        private readonly INotificationService _notificationService;
         private readonly ILogger<AdminDetailedStatsService> _logger;
 
         public AdminDetailedStatsService(
             IAdminDetailedStatsRepo detailedStatsRepo,
+            INotificationService notificationService,
             ILogger<AdminDetailedStatsService> logger)
         {
             _detailedStatsRepo = detailedStatsRepo;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -62,6 +70,44 @@ namespace MARN_API.Services.Implementations
             var result = await _detailedStatsRepo.GetRevenueAsync(query, period.Data!.FromUtc, period.Data.ToUtc, period.Data.GroupByDay);
             result.AppliedPeriod = period.Data.ToDto();
             return ServiceResult<AdminDetailedRevenueResponseDto>.Ok(result);
+        }
+
+        public async Task<ServiceResult<AdminDetailedContractListItemDto>> CancelContractAsync(long contractId)
+        {
+            var contract = await _detailedStatsRepo.GetContractForAdminActionAsync(contractId);
+            if (contract is null)
+                return ServiceResult<AdminDetailedContractListItemDto>.Fail("Contract not found.", resultType: ServiceResultType.NotFound);
+
+            if (contract.Status != ContractStatus.Pending && contract.Status != ContractStatus.Active)
+            {
+                return ServiceResult<AdminDetailedContractListItemDto>.Fail(
+                    "Only pending or active contracts can be cancelled by admin.",
+                    resultType: ServiceResultType.Conflict);
+            }
+
+            var cancelIssuedIntentsResult = await CancelIssuedPaymentIntentsAsync(contract);
+            if (!cancelIssuedIntentsResult.Success)
+            {
+                return ServiceResult<AdminDetailedContractListItemDto>.Fail(
+                    cancelIssuedIntentsResult.Message!,
+                    resultType: cancelIssuedIntentsResult.ResultType);
+            }
+
+            contract.Status = ContractStatus.Cancelled;
+
+            foreach (var schedule in contract.PaymentSchedules.Where(IsUnpaidSchedule))
+            {
+                schedule.Status = PaymentScheduleStatus.Cancelled;
+                schedule.PaymentIntentId = null;
+            }
+
+            await _detailedStatsRepo.SaveAdminContractChangesAsync();
+
+            await NotifyContractCancelledAsync(contract);
+
+            return ServiceResult<AdminDetailedContractListItemDto>.Ok(
+                MapContract(contract),
+                "Contract cancelled successfully.");
         }
 
         private ServiceResult<ResolvedPeriod> ResolvePeriod(AdminDetailedStatsPeriodQueryDto query)
@@ -116,6 +162,104 @@ namespace MARN_API.Services.Implementations
 
             if (query.PageSize > MaxPageSize)
                 query.PageSize = MaxPageSize;
+        }
+
+        private static bool IsUnpaidSchedule(PaymentSchedule schedule)
+        {
+            return schedule.Status != PaymentScheduleStatus.PaidEarly &&
+                   schedule.Status != PaymentScheduleStatus.PaidOnTime &&
+                   schedule.Status != PaymentScheduleStatus.PaidLate;
+        }
+
+        private async Task NotifyContractCancelledAsync(Contract contract)
+        {
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = contract.RenterId.ToString(),
+                UserType = NotificationUserType.Renter,
+                Type = NotificationType.ContractCanceled,
+                Title = "Contract Cancelled",
+                Body = $"An admin has cancelled contract #{contract.Id} for \"{contract.Property.Title}\".",
+                ActionType = NotificationActionType.RenterDashboard
+            });
+
+            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            {
+                UserId = contract.Property.OwnerId.ToString(),
+                UserType = NotificationUserType.Owner,
+                Type = NotificationType.ContractCanceled,
+                Title = "Contract Cancelled",
+                Body = $"An admin has cancelled contract #{contract.Id} for \"{contract.Property.Title}\".",
+                ActionType = NotificationActionType.OwnerDashboard
+            });
+        }
+
+        private async Task<ServiceResult<bool>> CancelIssuedPaymentIntentsAsync(Contract contract)
+        {
+            var paymentIntentService = new PaymentIntentService();
+
+            foreach (var schedule in contract.PaymentSchedules.Where(IsUnpaidSchedule))
+            {
+                if (string.IsNullOrWhiteSpace(schedule.PaymentIntentId))
+                    continue;
+
+                try
+                {
+                    var intent = await paymentIntentService.GetAsync(schedule.PaymentIntentId);
+
+                    if (intent.Status == "succeeded")
+                    {
+                        _logger.LogWarning(
+                            "Admin contract cancellation blocked because payment intent {PaymentIntentId} already succeeded for contract {ContractId}",
+                            schedule.PaymentIntentId,
+                            contract.Id);
+
+                        return ServiceResult<bool>.Fail(
+                            $"Cannot cancel contract #{contract.Id} because payment intent {schedule.PaymentIntentId} has already succeeded. Refresh payment state and try again.",
+                            resultType: ServiceResultType.Conflict);
+                    }
+
+                    if (intent.Status != "canceled")
+                    {
+                        await paymentIntentService.CancelAsync(schedule.PaymentIntentId);
+                    }
+                }
+                catch (StripeException ex)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Failed to cancel Stripe payment intent {PaymentIntentId} while admin was cancelling contract {ContractId}",
+                        schedule.PaymentIntentId,
+                        contract.Id);
+
+                    return ServiceResult<bool>.Fail(
+                        $"Could not cancel Stripe payment intent {schedule.PaymentIntentId}. Contract cancellation was stopped so no live payments are left behind.",
+                        resultType: ServiceResultType.Conflict);
+                }
+            }
+
+            return ServiceResult<bool>.Ok(true);
+        }
+
+        private static AdminDetailedContractListItemDto MapContract(Contract contract)
+        {
+            return new AdminDetailedContractListItemDto
+            {
+                ContractId = contract.Id,
+                Status = contract.Status,
+                CanCancel = contract.Status == ContractStatus.Pending || contract.Status == ContractStatus.Active,
+                CreatedAt = contract.CreatedAt,
+                LeaseStartDate = contract.LeaseStartDate,
+                LeaseEndDate = contract.LeaseEndDate,
+                TotalContractAmount = contract.TotalContractAmount,
+                PaymentFrequency = contract.PaymentFrequency.ToString(),
+                PropertyId = contract.PropertyId,
+                PropertyTitle = contract.Property.Title,
+                OwnerId = contract.Property.OwnerId,
+                OwnerName = $"{contract.Property.Owner.FirstName} {contract.Property.Owner.LastName}".Trim(),
+                RenterId = contract.RenterId,
+                RenterName = $"{contract.Renter.FirstName} {contract.Renter.LastName}".Trim()
+            };
         }
 
         private sealed class ResolvedPeriod

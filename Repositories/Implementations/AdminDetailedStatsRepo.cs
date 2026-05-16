@@ -5,6 +5,7 @@ using MARN_API.DTOs.Common;
 using MARN_API.Enums.Contract;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MARN_API.Models;
 
 namespace MARN_API.Repositories.Implementations
 {
@@ -257,6 +258,7 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     Status = c.Status,
+                    CanCancel = c.Status == ContractStatus.Pending || c.Status == ContractStatus.Active,
                     CreatedAt = c.CreatedAt,
                     LeaseStartDate = c.LeaseStartDate,
                     LeaseEndDate = c.LeaseEndDate,
@@ -358,6 +360,21 @@ namespace MARN_API.Repositories.Implementations
                 RevenueOverTime = revenueOverTime,
                 Payments = CreatePagedResult(payments, query.PageNumber, query.PageSize, totalListCount)
             };
+        }
+
+        public Task<Contract?> GetContractForAdminActionAsync(long contractId)
+        {
+            return _context.Contracts
+                .Include(c => c.Property)
+                    .ThenInclude(p => p.Owner)
+                .Include(c => c.Renter)
+                .Include(c => c.PaymentSchedules)
+                .FirstOrDefaultAsync(c => c.Id == contractId);
+        }
+
+        public Task SaveAdminContractChangesAsync()
+        {
+            return _context.SaveChangesAsync();
         }
 
         private IQueryable<Models.ApplicationUser> NonAdminUsers()

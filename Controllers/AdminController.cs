@@ -12,6 +12,7 @@ namespace MARN_API.Controllers
     public class AdminController : BaseController
     {
         private readonly IAdminDashboardService _adminDashboardService;
+        private readonly IAdminAnalyticsReportService _adminAnalyticsReportService;
         private readonly IAdminDetailedStatsService _adminDetailedStatsService;
         private readonly IAdminVerificationService _adminVerificationService;
         private readonly IAdminUserManagementService _adminUserManagementService;
@@ -20,6 +21,7 @@ namespace MARN_API.Controllers
 
         public AdminController(
             IAdminDashboardService adminDashboardService,
+            IAdminAnalyticsReportService adminAnalyticsReportService,
             IAdminDetailedStatsService adminDetailedStatsService,
             IAdminVerificationService adminVerificationService,
             IAdminUserManagementService adminUserManagementService,
@@ -27,6 +29,7 @@ namespace MARN_API.Controllers
             IAdminReportModerationService adminReportModerationService)
         {
             _adminDashboardService = adminDashboardService;
+            _adminAnalyticsReportService = adminAnalyticsReportService;
             _adminDetailedStatsService = adminDetailedStatsService;
             _adminVerificationService = adminVerificationService;
             _adminUserManagementService = adminUserManagementService;
@@ -42,6 +45,55 @@ namespace MARN_API.Controllers
         {
             var result = await _adminDashboardService.GetOverviewAsync();
             return HandleServiceResult<AdminDashboardOverviewDto>(result);
+        }
+
+        [HttpPost("analytics-reports/generate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GenerateAnalyticsReport([FromBody] AdminAnalyticsReportGenerateRequestDto request)
+        {
+            if (!TryGetUserId(out var adminId))
+                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+
+            var result = await _adminAnalyticsReportService.GenerateAsync(adminId, request);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("analytics-reports")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetAnalyticsReports([FromQuery] AdminAnalyticsReportQueryDto query)
+        {
+            var result = await _adminAnalyticsReportService.GetReportsAsync(query);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("analytics-reports/{reportId:long}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetAnalyticsReport(long reportId)
+        {
+            var result = await _adminAnalyticsReportService.GetReportAsync(reportId);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("analytics-reports/{reportId:long}/download")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DownloadAnalyticsReport(long reportId)
+        {
+            var result = await _adminAnalyticsReportService.DownloadAsync(reportId);
+            if (!result.Success)
+                return HandleServiceResult(result);
+
+            return File(result.Data!.FileBytes, result.Data.ContentType, result.Data.FileName);
         }
 
         [HttpGet("stats/users")]
@@ -74,6 +126,18 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetDetailedContractsStats([FromQuery] AdminDetailedContractsQueryDto query)
         {
             var result = await _adminDetailedStatsService.GetContractsAsync(query);
+            return HandleServiceResult(result);
+        }
+
+        [HttpPatch("stats/contracts/{contractId:long}/cancel")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> CancelDetailedContract(long contractId)
+        {
+            var result = await _adminDetailedStatsService.CancelContractAsync(contractId);
             return HandleServiceResult(result);
         }
 

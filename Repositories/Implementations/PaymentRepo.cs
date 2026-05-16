@@ -22,7 +22,8 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.PaymentSchedules
                 .AsNoTracking()
-                .Where(p => p.Contract.RenterId == userId && 
+                .Where(p => p.Contract.RenterId == userId &&
+                        p.Contract.Status == ContractStatus.Active &&
                         (p.Status == PaymentScheduleStatus.Available ||
                         p.Status == PaymentScheduleStatus.NotAvailableYet ||
                         p.Status == PaymentScheduleStatus.Overdue))
@@ -137,9 +138,11 @@ namespace MARN_API.Repositories.Implementations
             return Context.PaymentSchedules
                 .Include(ps => ps.Contract)
                     .ThenInclude(c => c.Property)
-                .Where(ps => ps.Status != PaymentScheduleStatus.PaidLate &&
+                .Where(ps => ps.Contract.Status == ContractStatus.Active &&
+                             ps.Status != PaymentScheduleStatus.PaidLate &&
                              ps.Status != PaymentScheduleStatus.PaidOnTime &&
-                             ps.Status != PaymentScheduleStatus.PaidEarly)
+                             ps.Status != PaymentScheduleStatus.PaidEarly &&
+                             ps.Status != PaymentScheduleStatus.Cancelled)
                 .OrderBy(ps => ps.Id)
                 .Skip(skip)
                 .Take(take)
@@ -170,7 +173,8 @@ namespace MARN_API.Repositories.Implementations
                         ps.Id != paymentSchedule.Id &&
                         ps.Status != PaymentScheduleStatus.PaidEarly &&
                         ps.Status != PaymentScheduleStatus.PaidOnTime &&
-                        ps.Status != PaymentScheduleStatus.PaidLate);
+                        ps.Status != PaymentScheduleStatus.PaidLate &&
+                        ps.Status != PaymentScheduleStatus.Cancelled);
 
                 if (!hasRemainingUnpaid)
                 {

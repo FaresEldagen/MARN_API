@@ -174,6 +174,7 @@ namespace MARN_API.DTOs.Admin
     {
         public long ContractId { get; set; }
         public ContractStatus Status { get; set; }
+        public bool CanCancel { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateOnly LeaseStartDate { get; set; }
         public DateOnly LeaseEndDate { get; set; }
