@@ -212,7 +212,7 @@ namespace MARN_API.Services.Implementations
             string senderId = userId.ToString();
             string receiverId = isRenter ? bookingRequest.Property.OwnerId.ToString() : bookingRequest.RenterId.ToString();
 
-            string content = $"Hello! I am contacting you regarding the booking request (ID: {bookingRequestId}) for the property '{bookingRequest.Property.Title}'.";
+            string content = $"Hello! I am contacting you regarding the booking request for the property '{bookingRequest.Property.Title}'.";
 
             var result = await _chatService.SendMessageAsync(senderId, receiverId, content);
             if (!result.Success)

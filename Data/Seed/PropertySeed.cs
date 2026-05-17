@@ -37,8 +37,10 @@ namespace MARN_API.Data.Seed
                     Longitude = 31.2357,
                     IsActive = true,
                     Status = PropertyStatus.Verified,
-                    CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2024, 2, 1, 0, 0, 0, DateTimeKind.Utc),
+                    ProofOfOwnership = "/images/documents/property1-POO.jpg"
                 },
+
                 new Property
                 {
                     Id = 1002,
@@ -52,8 +54,8 @@ namespace MARN_API.Data.Seed
                     Beds = 1,
                     Bathrooms = 1,
                     Views = 3,
-                    Price = 7500m,
-                    RentalUnit = RentalUnit.Monthly,
+                    Price = 90000m,
+                    RentalUnit = RentalUnit.Yearly,
                     Address = "456 Integration Avenue, Cairo",
                     City = "Cairo",
                     State = "Cairo Governorate",
@@ -62,8 +64,10 @@ namespace MARN_API.Data.Seed
                     Longitude = 31.2400,
                     IsActive = true,
                     Status = PropertyStatus.Verified,
-                    CreatedAt = new DateTime(2025, 2, 2, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2023, 2, 2, 0, 0, 0, DateTimeKind.Utc),
+                    ProofOfOwnership = "/images/documents/property2-POO.jpg"
                 },
+
                 new Property
                 {
                     Id = 1003,
@@ -87,8 +91,10 @@ namespace MARN_API.Data.Seed
                     Longitude = 31.2450,
                     IsActive = true,
                     Status = PropertyStatus.Verified,
-                    CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 2, 3, 0, 0, 0, DateTimeKind.Utc),
+                    ProofOfOwnership = "/images/documents/property3-POO.jpg"
                 },
+
                 // Property owned by Owner Z (for owner dashboard)
                 new Property
                 {
@@ -113,8 +119,10 @@ namespace MARN_API.Data.Seed
                     Longitude = 31.2500,
                     IsActive = true,
                     Status = PropertyStatus.Verified,
-                    CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 2, 4, 0, 0, 0, DateTimeKind.Utc),
+                    ProofOfOwnership = "/images/documents/property4-POO.jpg"
                 },
+
                 // Shared property for roommate matching tests
                 new Property
                 {
@@ -139,7 +147,8 @@ namespace MARN_API.Data.Seed
                     Longitude = 31.2600,
                     IsActive = true,
                     Status = PropertyStatus.Verified,
-                    CreatedAt = new DateTime(2025, 2, 5, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2024, 2, 5, 0, 0, 0, DateTimeKind.Utc),
+                    ProofOfOwnership = "/images/documents/property100-POO.jpg"
                 }
             );
         }

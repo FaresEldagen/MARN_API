@@ -12,6 +12,7 @@ using MARN_API.Enums.Notification;
 using MARN_API.DTOs.Notification;
 using Stripe;
 using MARN_API.DTOs.Dashboard;
+using MARN_API.Enums.Account;
 
 
 namespace MARN_API.Services.Implementations
@@ -24,6 +25,7 @@ namespace MARN_API.Services.Implementations
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<PaymentService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly ICurrencyExchangeService _currencyExchangeService;
 
         public PaymentService(
             IPaymentRepo paymentRepo,
@@ -31,7 +33,8 @@ namespace MARN_API.Services.Implementations
             INotificationService notificationService,
             UserManager<ApplicationUser> userManager,
             ILogger<PaymentService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ICurrencyExchangeService currencyExchangeService)
 
         {
             _paymentRepo = paymentRepo;
@@ -40,6 +43,7 @@ namespace MARN_API.Services.Implementations
             _userManager = userManager;
             _logger = logger;
             _configuration = configuration;
+            _currencyExchangeService = currencyExchangeService;
         }
 
 
@@ -218,6 +222,18 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Stripe account not connected. Please connect your Stripe account first.", resultType: ServiceResultType.BadRequest);
             }
 
+            var accountService = new Stripe.AccountService();
+            var account = await accountService.GetAsync(owner.StripeAccountId);
+            if (!account.PayoutsEnabled || !account.ChargesEnabled)
+            {
+                owner.StripePayoutsEnabled = account.PayoutsEnabled;
+                owner.StripeChargesEnabled = account.ChargesEnabled;
+                var result = await _userManager.UpdateAsync(owner);
+
+                _logger.LogWarning("Withdraw failed: Stripe account not fully activated for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("Stripe account not fully activated. Please complete the onboarding process to enable charges and payouts.", resultType: ServiceResultType.BadRequest);
+            }
+
             var withdrawablePayments = await _paymentRepo.GetWithdrawablePayments(ownerId);
 
             if (!withdrawablePayments.Any())
@@ -251,7 +267,7 @@ namespace MARN_API.Services.Implementations
                 }
 
                 var transferCurrency = "usd";
-                var transferAmount = amount / 50m; 
+                var transferAmount = await _currencyExchangeService.ConvertAsync(amount, "EGP", "USD");
 
                 var transferOptions = new TransferCreateOptions
                 {
@@ -278,71 +294,6 @@ namespace MARN_API.Services.Implementations
             }
         }
 
-
-        public async Task<ServiceResult<bool>> TopUpPlatformBalanceForTesting()
-        {
-            _logger.LogInformation("Top-up Platform Balance for testing attempt.");
-
-            try
-            {
-                var options = new ChargeCreateOptions
-                {
-                    Amount = 10000000, // $100,000 USD
-                    Currency = "usd",
-                    Source = "tok_bypassPending",
-                    Description = "Test Top-up (USD) for Withdrawal testing",
-                };
-                var service = new ChargeService();
-                await service.CreateAsync(options);
-
-                _logger.LogInformation("Platform balance topped up successfully with 500,000 EGP (Available).");
-                return ServiceResult<bool>.Ok(true, "Platform balance topped up successfully with 500,000 EGP (Available).", ServiceResultType.Success);
-            }
-            catch (StripeException e)
-            {
-                _logger.LogError(e, "Stripe API Error while topping up platform balance: {Message}", e.StripeError?.Message);
-                var message = e.StripeError?.Message ?? "Payment provider error.";
-                if (e.StripeError?.Code == "balance_insufficient")
-                {
-                    message += " (Test Tip: Use the 'topup-test-balance' endpoint to add available funds to your Stripe platform account for testing).";
-                }
-
-                return ServiceResult<bool>.Fail(message, resultType: ServiceResultType.BadRequest);
-            }
-        }
-
-        public async Task<ServiceResult<object>> CheckBalances(Guid ownerId)
-        {
-            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == ownerId);
-            if (owner == null) return ServiceResult<object>.Fail("Owner not found");
-
-            try
-            {
-                var balanceService = new BalanceService();
-                
-                // Platform balance
-                var platformBalance = await balanceService.GetAsync();
-
-                // Connected account balance
-                Balance? connectedBalance = null;
-                if (!string.IsNullOrEmpty(owner.StripeAccountId))
-                {
-                    var requestOptions = new RequestOptions { StripeAccount = owner.StripeAccountId };
-                    connectedBalance = await balanceService.GetAsync(requestOptions);
-                }
-
-                return ServiceResult<object>.Ok(new
-                {
-                    Platform = platformBalance,
-                    ConnectedAccount = connectedBalance,
-                    OwnerStripeId = owner.StripeAccountId
-                }, "Balances retrieved successfully.");
-            }
-            catch (StripeException e)
-            {
-                return ServiceResult<object>.Fail(e.Message);
-            }
-        }
 
 
         #region Stripe Webhook Handlers

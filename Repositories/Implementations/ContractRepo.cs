@@ -154,6 +154,7 @@ namespace MARN_API.Repositories.Implementations
             bool isRenterWithActiveContract = await Context.Contracts
                 .AsNoTracking()
                 .AnyAsync(c => c.RenterId == userId && c.Status == ContractStatus.Active);
+
             bool isOwnerWithActiveContract = await Context.Contracts
                 .AsNoTracking()
                 .AnyAsync(c => c.Property.OwnerId == userId && c.Status == ContractStatus.Active);
@@ -175,7 +176,9 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Contracts
                 .AsNoTracking()
-                .AnyAsync(c => c.PropertyId == propertyId && c.Status == ContractStatus.Active);
+                .AnyAsync(c => c.PropertyId == propertyId &&
+                         (c.Status == ContractStatus.Active ||
+                          c.Status == ContractStatus.Pending));
         }
         #endregion
 
@@ -191,6 +194,11 @@ namespace MARN_API.Repositories.Implementations
         {
             return Context.Contracts
                 .Include(c => c.Property)
+                    .ThenInclude(p => p.Amenities)
+                .Include(c => c.Property)
+                    .ThenInclude(p => p.Rules)
+                .Include(c => c.Property)
+                    .ThenInclude(p => p.Media)
                 .FirstOrDefaultAsync(c => c.Id == contractId);
         }
 

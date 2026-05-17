@@ -203,11 +203,13 @@ namespace MARN_API
             builder.Services.AddScoped<HashingService>();
             builder.Services.AddScoped<OpenTimestampsProofReader>();
             builder.Services.AddHttpClient<OpenTimestampsService>();
+            builder.Services.AddHttpClient<ICurrencyExchangeService, CurrencyExchangeService>();
             builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
 
             builder.Services.AddHostedService<PaymentScheduleBackgroundService>();
             builder.Services.AddHostedService<PaymentBackgroundService>();
 
+            builder.Services.AddMemoryCache();
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
             builder.Services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
             #endregion
