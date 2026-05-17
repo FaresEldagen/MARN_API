@@ -1,5 +1,6 @@
 using MARN_API.Configurations;
 using MARN_API.Data;
+using MARN_API.Filters;
 using MARN_API.Middleware;
 using MARN_API.Models;
 using MARN_API.Repositories.Implementations;
@@ -85,7 +86,10 @@ namespace MARN_API
 
 
             #region Controllers & JSON
-            builder.Services.AddControllers()
+            builder.Services.AddControllers(options =>
+                {
+                    options.Filters.Add<BannedAccountAccessFilter>();
+                })
                 .AddJsonOptions(options =>
                 {
                     // Convert Enums to string instead of int
@@ -159,10 +163,25 @@ namespace MARN_API
             builder.Services.AddScoped<ISavedPropertyRepo, SavedPropertyRepo>();
             builder.Services.AddScoped<IReportRepo, ReportRepo>();
             builder.Services.AddScoped<IAccountRepo, AccountRepo>();
+            builder.Services.AddScoped<IAdminDashboardRepo, AdminDashboardRepo>();
+            builder.Services.AddScoped<IAdminAnalyticsReportRepo, AdminAnalyticsReportRepo>();
+            builder.Services.AddScoped<IAdminDetailedStatsRepo, AdminDetailedStatsRepo>();
+            builder.Services.AddScoped<IAdminRoleManagementRepo, AdminRoleManagementRepo>();
+            builder.Services.AddScoped<IAdminVerificationRepo, AdminVerificationRepo>();
+            builder.Services.AddScoped<IAdminUserManagementRepo, AdminUserManagementRepo>();
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+            builder.Services.AddScoped<IAdminAnalyticsReportService, AdminAnalyticsReportService>();
+            builder.Services.AddScoped<IAdminDetailedStatsService, AdminDetailedStatsService>();
+            builder.Services.AddScoped<IAdminRoleManagementService, AdminRoleManagementService>();
+            builder.Services.AddScoped<IAdminReportModerationService, AdminReportModerationService>();
+            builder.Services.AddScoped<IAdminVerificationService, AdminVerificationService>();
+            builder.Services.AddScoped<IAdminUserManagementService, AdminUserManagementService>();
             builder.Services.AddScoped<IContractService, ContractService>();
+            builder.Services.AddScoped<IContactSupportService, ContactSupportService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
@@ -178,6 +197,7 @@ namespace MARN_API
             builder.Services.AddScoped<IBookingRequestService, BookingRequestService>();
             builder.Services.AddScoped<IHomepageService, HomepageService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             builder.Services.AddScoped<ContractPdfGenerator>();
             builder.Services.AddScoped<HashingService>();

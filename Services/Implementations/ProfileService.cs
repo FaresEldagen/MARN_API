@@ -359,7 +359,14 @@ namespace MARN_API.Services.Implementations
                 user.Gender != originalGender ||
                 user.Country != originalCountry)
             {
-                user.AccountStatus = AccountStatus.Pending;
+                if (user.AccountStatus == AccountStatus.Banned)
+                {
+                    user.StatusBeforeBan = AccountStatus.Pending;
+                }
+                else
+                {
+                    user.AccountStatus = AccountStatus.Pending;
+                }
             }
 
             var result = await _userManager.UpdateAsync(user);
@@ -447,7 +454,14 @@ namespace MARN_API.Services.Implementations
             }
 
             user = _mapper.Map(dto, user);
-            user.AccountStatus = AccountStatus.Pending;
+            if (user.AccountStatus == AccountStatus.Banned)
+            {
+                user.StatusBeforeBan = AccountStatus.Pending;
+            }
+            else
+            {
+                user.AccountStatus = AccountStatus.Pending;
+            }
 
             var result = await _userManager.UpdateAsync(user);
 

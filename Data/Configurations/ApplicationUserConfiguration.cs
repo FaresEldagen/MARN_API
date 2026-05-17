@@ -27,6 +27,7 @@ namespace MARN_API.Data.Configurations
                      builder.Property(u => u.Gender).HasConversion<int>();
                      builder.Property(u => u.Country).HasConversion<int>();
                      builder.Property(u => u.AccountStatus).HasConversion<int>();
+                     builder.Property(u => u.StatusBeforeBan).HasConversion<int?>();
 
                      builder.Property(u => u.CreatedAt)
                             .HasDefaultValueSql("GETUTCDATE()");

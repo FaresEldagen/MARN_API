@@ -1,3 +1,4 @@
+using MARN_API.Attributes;
 using MARN_API.DTOs.BookingRequest;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +38,7 @@ namespace MARN_API.Controllers
         /// <response code="404">If the property does not exist or is not active.</response>
         /// <response code="409">If the property already has active contracts.</response>
         [HttpPost("add")]
+        [DisallowBannedUser]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -62,6 +64,7 @@ namespace MARN_API.Controllers
         /// <response code="404">If the booking request does not exist.</response>
         /// <response code="500">If sending the initial message fails.</response>
         [HttpPost("{bookingRequestId}/start-chat")]
+        [DisallowBannedUser]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

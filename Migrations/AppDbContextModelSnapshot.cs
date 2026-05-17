@@ -22,6 +22,180 @@ namespace MARN_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("MARN_API.Models.AdminActionLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("AdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("MetadataJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<long?>("ReportId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("TargetGuidId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long?>("TargetLongId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("AdminActionLogs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 8101L,
+                            ActionType = "DeactivateProperty",
+                            AdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            CreatedAt = new DateTime(2026, 5, 8, 12, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Property deactivated until listing details are corrected.",
+                            ReportId = 9102L,
+                            TargetLongId = 1205L,
+                            TargetType = "Property"
+                        },
+                        new
+                        {
+                            Id = 8102L,
+                            ActionType = "HideMessage",
+                            AdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            CreatedAt = new DateTime(2026, 4, 13, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Hidden abusive message.",
+                            ReportId = 9103L,
+                            TargetGuidId = new Guid("00000000-0000-0000-0000-000000000101"),
+                            TargetType = "Message"
+                        },
+                        new
+                        {
+                            Id = 8103L,
+                            ActionType = "BanUser",
+                            AdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            CreatedAt = new DateTime(2026, 4, 13, 9, 1, 0, 0, DateTimeKind.Utc),
+                            Reason = "Banned sender after abusive chat message.",
+                            ReportId = 9103L,
+                            TargetGuidId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            TargetType = "Message"
+                        },
+                        new
+                        {
+                            Id = 8104L,
+                            ActionType = "HidePropertyComment",
+                            AdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            CreatedAt = new DateTime(2026, 4, 14, 12, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Hidden harassing property comment.",
+                            ReportId = 9104L,
+                            TargetLongId = 900101L,
+                            TargetType = "PropertyComment"
+                        },
+                        new
+                        {
+                            Id = 8105L,
+                            ActionType = "BanUser",
+                            AdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            CreatedAt = new DateTime(2026, 4, 14, 12, 1, 0, 0, DateTimeKind.Utc),
+                            Reason = "Banned commenter after repeated harassment.",
+                            ReportId = 9104L,
+                            TargetGuidId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            TargetType = "PropertyComment"
+                        });
+                });
+
+            modelBuilder.Entity("MARN_API.Models.AdminAnalyticsReport", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Format")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FromUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("GeneratedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Grouping")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("RequestedPeriod")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StoredFilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ToUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GeneratedAt");
+
+                    b.HasIndex("GeneratedByAdminId");
+
+                    b.HasIndex("Scope", "Format");
+
+                    b.ToTable("AdminAnalyticsReports");
+                });
+
             modelBuilder.Entity("MARN_API.Models.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -124,6 +298,9 @@ namespace MARN_API.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StatusBeforeBan")
+                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -274,6 +451,135 @@ namespace MARN_API.Migrations
                             SecurityStamp = "SEED-RENTER-E-SECURITY-STAMP",
                             TwoFactorEnabled = false,
                             UserName = "renter.e@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000001"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 1,
+                            ArabicAddress = "15 شارع التسعين، القاهرة الجديدة",
+                            ArabicFullName = "مستخدم قيد التحقق",
+                            BackIdPhoto = "/images/idCards/pending-renter-back.jpg",
+                            ConcurrencyStamp = "SCENARIO-PENDING-RENTER-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2026, 5, 2, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "pending.renter@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Pending",
+                            FrontIdPhoto = "/images/idCards/pending-renter-front.jpg",
+                            Gender = 2,
+                            Language = 1,
+                            LastName = "Renter",
+                            LockoutEnabled = false,
+                            NationalIDNumber = "34567890123456",
+                            NormalizedEmail = "PENDING.RENTER@EXAMPLE.COM",
+                            NormalizedUserName = "PENDING.RENTER@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SCENARIO-PENDING-RENTER-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "pending.renter@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000002"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 4,
+                            ArabicAddress = "22 شارع النصر، مدينة نصر",
+                            ArabicFullName = "مستخدم موقوف",
+                            BackIdPhoto = "/images/idCards/banned-renter-back.jpg",
+                            ConcurrencyStamp = "SCENARIO-BANNED-RENTER-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2026, 2, 14, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "banned.renter@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Banned",
+                            FrontIdPhoto = "/images/idCards/banned-renter-front.jpg",
+                            Gender = 1,
+                            Language = 0,
+                            LastName = "Renter",
+                            LockoutEnabled = false,
+                            NationalIDNumber = "45678901234567",
+                            NormalizedEmail = "BANNED.RENTER@EXAMPLE.COM",
+                            NormalizedUserName = "BANNED.RENTER@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SCENARIO-BANNED-RENTER-SECURITY-STAMP",
+                            StatusBeforeBan = 1,
+                            TwoFactorEnabled = false,
+                            UserName = "banned.renter@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000003"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SCENARIO-DELETED-RENTER-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2026, 3, 3, 8, 0, 0, 0, DateTimeKind.Utc),
+                            DeletedAt = new DateTime(2026, 4, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "deleted.renter@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Deleted",
+                            Gender = 1,
+                            Language = 0,
+                            LastName = "Renter",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "DELETED.RENTER@EXAMPLE.COM",
+                            NormalizedUserName = "DELETED.RENTER@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SCENARIO-DELETED-RENTER-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "deleted.renter@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000004"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            Bio = "Fresh account created to validate the dashboard new-user metrics.",
+                            ConcurrencyStamp = "SCENARIO-RECENT-RENTER-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2026, 5, 10, 14, 30, 0, 0, DateTimeKind.Utc),
+                            Email = "recent.renter@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Recent",
+                            Gender = 2,
+                            Language = 0,
+                            LastName = "Renter",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "RECENT.RENTER@EXAMPLE.COM",
+                            NormalizedUserName = "RECENT.RENTER@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SCENARIO-RECENT-RENTER-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "recent.renter@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000005"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            Bio = "Seeded moderator candidate for role-management testing.",
+                            ConcurrencyStamp = "SCENARIO-MODERATOR-USER-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2026, 4, 20, 11, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "moderator.user@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Mona",
+                            Gender = 2,
+                            Language = 0,
+                            LastName = "Moderator",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "MODERATOR.USER@EXAMPLE.COM",
+                            NormalizedUserName = "MODERATOR.USER@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SCENARIO-MODERATOR-USER-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "moderator.user@example.com"
                         });
                 });
 
@@ -602,6 +908,38 @@ namespace MARN_API.Migrations
                             SignedByRenterAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 1,
                             TotalContractAmount = 48000m
+                        },
+                        new
+                        {
+                            Id = 1000101L,
+                            AnchoringStatus = 0,
+                            CreatedAt = new DateTime(2026, 5, 8, 13, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000101.pdf",
+                            Hash = "SEEDHASH1000101PENDINGADMINDASHBOARD",
+                            LeaseEndDate = new DateOnly(2026, 7, 31),
+                            LeaseStartDate = new DateOnly(2026, 6, 1),
+                            PaymentFrequency = 1,
+                            PropertyId = 1204L,
+                            RenterId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Status = 0,
+                            TotalContractAmount = 15600m
+                        },
+                        new
+                        {
+                            Id = 1000102L,
+                            AnchoredAt = new DateTime(2025, 11, 30, 9, 0, 0, 0, DateTimeKind.Utc),
+                            AnchoringStatus = 1,
+                            CreatedAt = new DateTime(2025, 11, 28, 12, 0, 0, 0, DateTimeKind.Utc),
+                            FileName = "seed-contract-1000102.pdf",
+                            Hash = "SEEDHASH1000102REVENUEGRAPHADMINDASHBOARD",
+                            LeaseEndDate = new DateOnly(2026, 6, 30),
+                            LeaseStartDate = new DateOnly(2025, 12, 1),
+                            PaymentFrequency = 1,
+                            PropertyId = 1003L,
+                            RenterId = new Guid("88888888-8888-8888-8888-888888888888"),
+                            SignedByRenterAt = new DateTime(2025, 11, 29, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            TotalContractAmount = 42000m
                         });
                 });
 
@@ -615,6 +953,19 @@ namespace MARN_API.Migrations
                         .IsRequired()
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime?>("HiddenAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("HiddenByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("HiddenReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsHiddenByModeration")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
@@ -641,6 +992,7 @@ namespace MARN_API.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
                             Content = "XB+UQj6hKk23omCXxH8uwFxZpOCQjhe1tRbMbKMHUIKitggz1H61tTuCsIyQwnDRBEWtEIP3n24n1DyxJMAPTuWIvOprIjOmfp48oVxQa6M=",
+                            IsHiddenByModeration = false,
                             ReadAt = new DateTime(2025, 3, 20, 10, 30, 0, 0, DateTimeKind.Utc),
                             ReceiverId = new Guid("44444444-4444-4444-4444-444444444444"),
                             SenderId = new Guid("11111111-1111-1111-1111-111111111111"),
@@ -650,9 +1002,22 @@ namespace MARN_API.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             Content = "E8jOydWqRhQPRv/E1P+cXgNPhEczTZ62c8OsZm62YoKZnffb6X6KXosOMw92CvheYLt5FO58PHhnweOYeJRQ6A==",
+                            IsHiddenByModeration = false,
                             ReceiverId = new Guid("11111111-1111-1111-1111-111111111111"),
                             SenderId = new Guid("44444444-4444-4444-4444-444444444444"),
                             SentAt = new DateTime(2025, 3, 20, 11, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000101"),
+                            Content = "XB+UQj6hKk23omCXxH8uwFxZpOCQjhe1tRbMbKMHUIKitggz1H61tTuCsIyQwnDRBEWtEIP3n24n1DyxJMAPTuWIvOprIjOmfp48oVxQa6M=",
+                            HiddenAt = new DateTime(2026, 4, 13, 9, 0, 0, 0, DateTimeKind.Utc),
+                            HiddenByAdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            HiddenReason = "Seeded moderation example for admin dashboard testing.",
+                            IsHiddenByModeration = true,
+                            ReceiverId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            SenderId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            SentAt = new DateTime(2026, 4, 12, 19, 30, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -1092,6 +1457,84 @@ namespace MARN_API.Migrations
                             PaymentScheduleId = 20053L,
                             PlatformFee = 900m,
                             Status = 1
+                        },
+                        new
+                        {
+                            Id = 30101L,
+                            AmountTotal = 6000m,
+                            AvailableAt = new DateTime(2025, 12, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 5400m,
+                            PaidAt = new DateTime(2025, 12, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20101",
+                            PaymentScheduleId = 20101L,
+                            PlatformFee = 600m,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 30102L,
+                            AmountTotal = 6000m,
+                            AvailableAt = new DateTime(2026, 1, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 5400m,
+                            PaidAt = new DateTime(2026, 1, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20102",
+                            PaymentScheduleId = 20102L,
+                            PlatformFee = 600m,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 30103L,
+                            AmountTotal = 6000m,
+                            AvailableAt = new DateTime(2026, 2, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 5400m,
+                            PaidAt = new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20103",
+                            PaymentScheduleId = 20103L,
+                            PlatformFee = 600m,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 30104L,
+                            AmountTotal = 6000m,
+                            AvailableAt = new DateTime(2026, 3, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 5400m,
+                            PaidAt = new DateTime(2026, 3, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20104",
+                            PaymentScheduleId = 20104L,
+                            PlatformFee = 600m,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 30105L,
+                            AmountTotal = 6000m,
+                            AvailableAt = new DateTime(2026, 4, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 5400m,
+                            PaidAt = new DateTime(2026, 4, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20105",
+                            PaymentScheduleId = 20105L,
+                            PlatformFee = 600m,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 30106L,
+                            AmountTotal = 6000m,
+                            AvailableAt = new DateTime(2026, 5, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "egp",
+                            OwnerAmount = 5400m,
+                            PaidAt = new DateTime(2026, 5, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20106",
+                            PaymentScheduleId = 20106L,
+                            PlatformFee = 600m,
+                            Status = 1
                         });
                 });
 
@@ -1403,6 +1846,75 @@ namespace MARN_API.Migrations
                             Currency = "egp",
                             DueDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Status = 0
+                        },
+                        new
+                        {
+                            Id = 20101L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20101",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20102L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20102",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20103L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20103",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20104L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20104",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20105L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20105",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20106L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PaymentIntentId = "pi_seed_20106",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = 20107L,
+                            Amount = 6000m,
+                            ContractId = 1000102L,
+                            Currency = "egp",
+                            DueDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 0
                         });
                 });
 
@@ -1641,6 +2153,142 @@ namespace MARN_API.Migrations
                             Type = 1,
                             Views = 10,
                             ZipCode = "11513"
+                        },
+                        new
+                        {
+                            Id = 1201L,
+                            Address = "10 Tahrir Square",
+                            Bathrooms = 1,
+                            Bedrooms = 1,
+                            Beds = 1,
+                            City = "Cairo",
+                            CreatedAt = new DateTime(2026, 5, 3, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Ownership documents are uploaded and waiting for admin review.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.044,
+                            Longitude = 31.234999999999999,
+                            MaxOccupants = 2,
+                            OwnerId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            Price = 6200m,
+                            ProofOfOwnership = "/docs/properties/pending-downtown-apartment.pdf",
+                            RentalUnit = 1,
+                            SquareMeters = 85.0,
+                            State = "Cairo Governorate",
+                            Status = 0,
+                            Title = "Pending Downtown Apartment",
+                            Type = 0,
+                            Views = 0,
+                            ZipCode = "11511"
+                        },
+                        new
+                        {
+                            Id = 1202L,
+                            Address = "88 Palm Street",
+                            Bathrooms = 2,
+                            Bedrooms = 3,
+                            Beds = 4,
+                            City = "Giza",
+                            CreatedAt = new DateTime(2026, 4, 18, 12, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "A property with rejected ownership documentation for verification testing.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.010999999999999,
+                            Longitude = 31.207999999999998,
+                            MaxOccupants = 5,
+                            OwnerId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            Price = 11000m,
+                            ProofOfOwnership = "/docs/properties/declined-garden-house.pdf",
+                            RentalUnit = 1,
+                            SquareMeters = 180.0,
+                            State = "Giza Governorate",
+                            Status = 2,
+                            Title = "Declined Garden House",
+                            Type = 1,
+                            Views = 4,
+                            ZipCode = "12511"
+                        },
+                        new
+                        {
+                            Id = 1203L,
+                            Address = "34 Sunset Alley",
+                            Bathrooms = 1,
+                            Bedrooms = 1,
+                            Beds = 1,
+                            City = "Alexandria",
+                            CreatedAt = new DateTime(2026, 3, 8, 16, 0, 0, 0, DateTimeKind.Utc),
+                            DeletedAt = new DateTime(2026, 4, 4, 13, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Soft deleted property used to validate include-deleted admin filters.",
+                            IsActive = false,
+                            IsShared = false,
+                            Latitude = 31.199999999999999,
+                            Longitude = 29.918700000000001,
+                            MaxOccupants = 1,
+                            OwnerId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            Price = 4300m,
+                            ProofOfOwnership = "/docs/properties/deleted-test-studio.pdf",
+                            RentalUnit = 1,
+                            SquareMeters = 55.0,
+                            State = "Alexandria Governorate",
+                            Status = 1,
+                            Title = "Soft Deleted Test Studio",
+                            Type = 4,
+                            Views = 1,
+                            ZipCode = "21511"
+                        },
+                        new
+                        {
+                            Id = 1204L,
+                            Address = "5 Marina Walk",
+                            Bathrooms = 2,
+                            Bedrooms = 2,
+                            Beds = 2,
+                            City = "North Coast",
+                            CreatedAt = new DateTime(2026, 5, 5, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Fresh verified property created this month for dashboard trend checks.",
+                            IsActive = true,
+                            IsShared = false,
+                            Latitude = 30.899999999999999,
+                            Longitude = 28.899999999999999,
+                            MaxOccupants = 3,
+                            OwnerId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            Price = 7800m,
+                            ProofOfOwnership = "/docs/properties/recent-marina-flat.pdf",
+                            RentalUnit = 1,
+                            SquareMeters = 110.0,
+                            State = "Matrouh Governorate",
+                            Status = 1,
+                            Title = "Recent Marina Flat",
+                            Type = 0,
+                            Views = 9,
+                            ZipCode = "51711"
+                        },
+                        new
+                        {
+                            Id = 1205L,
+                            Address = "77 Corniche View",
+                            Bathrooms = 3,
+                            Bedrooms = 4,
+                            Beds = 5,
+                            City = "Luxor",
+                            CreatedAt = new DateTime(2026, 5, 7, 15, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Property already deactivated through a seeded moderation outcome.",
+                            IsActive = false,
+                            IsShared = false,
+                            Latitude = 25.687200000000001,
+                            Longitude = 32.639600000000002,
+                            MaxOccupants = 6,
+                            OwnerId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            Price = 16000m,
+                            ProofOfOwnership = "/docs/properties/moderated-riverside-villa.pdf",
+                            RentalUnit = 1,
+                            SquareMeters = 240.0,
+                            State = "Luxor Governorate",
+                            Status = 1,
+                            Title = "Moderated Riverside Villa",
+                            Type = 3,
+                            Views = 22,
+                            ZipCode = "85951"
                         });
                 });
 
@@ -1763,6 +2411,19 @@ namespace MARN_API.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<DateTime?>("HiddenAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("HiddenByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("HiddenReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsHiddenByModeration")
+                        .HasColumnType("bit");
+
                     b.Property<long>("PropertyId")
                         .HasColumnType("bigint");
 
@@ -1786,6 +2447,7 @@ namespace MARN_API.Migrations
                             Id = 900001L,
                             Content = "Great place! Very clean and quiet.",
                             CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsHiddenByModeration = false,
                             PropertyId = 1001L,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
@@ -1794,6 +2456,7 @@ namespace MARN_API.Migrations
                             Id = 900002L,
                             Content = "Awesome location, but the neighbors were a bit noisy.",
                             CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsHiddenByModeration = false,
                             PropertyId = 1001L,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
@@ -1802,8 +2465,21 @@ namespace MARN_API.Migrations
                             Id = 900003L,
                             Content = "Superb luxury villa. Highly recommend!",
                             CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsHiddenByModeration = false,
                             PropertyId = 1004L,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = 900101L,
+                            Content = "This seeded comment was hidden by moderation for admin review testing.",
+                            CreatedAt = new DateTime(2026, 4, 14, 8, 0, 0, 0, DateTimeKind.Utc),
+                            HiddenAt = new DateTime(2026, 4, 14, 12, 0, 0, 0, DateTimeKind.Utc),
+                            HiddenByAdminId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            HiddenReason = "Seeded moderation example for admin dashboard testing.",
+                            IsHiddenByModeration = true,
+                            PropertyId = 1001L,
+                            UserId = new Guid("10000000-0000-0000-0000-000000000002")
                         });
                 });
 
@@ -1994,6 +2670,9 @@ namespace MARN_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<int?>("ActionTaken")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -2003,7 +2682,10 @@ namespace MARN_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("ReportableId")
+                    b.Property<Guid?>("ReportableGuidId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long?>("ReportableId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("ReportableType")
@@ -2018,16 +2700,24 @@ namespace MARN_API.Migrations
                     b.Property<Guid?>("ReviewerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ReviewerNote")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ReportableType");
+
                     b.HasIndex("ReporterId");
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.HasIndex("Status");
+
+                    b.ToTable("Reports");
 
                     b.HasData(
                         new
@@ -2038,8 +2728,72 @@ namespace MARN_API.Migrations
                             ReportableId = 1001L,
                             ReportableType = 1,
                             ReporterId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            ReviewerId = new Guid("99999999-9999-9999-9999-999999999999"),
                             Status = 0
+                        },
+                        new
+                        {
+                            Id = 9101L,
+                            CreatedAt = new DateTime(2026, 5, 11, 9, 30, 0, 0, DateTimeKind.Utc),
+                            Reason = "Profile details look inconsistent and need manual review.",
+                            ReportableGuidId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            ReportableType = 0,
+                            ReporterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 9102L,
+                            ActionTaken = 2,
+                            CreatedAt = new DateTime(2026, 5, 8, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Listing contains misleading availability details.",
+                            ReportableId = 1205L,
+                            ReportableType = 1,
+                            ReporterId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            ReviewedAt = new DateTime(2026, 5, 8, 12, 0, 0, 0, DateTimeKind.Utc),
+                            ReviewerId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            ReviewerNote = "Property deactivated until the owner corrects the listing.",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 9103L,
+                            ActionTaken = 3,
+                            CreatedAt = new DateTime(2026, 4, 13, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Abusive language in chat.",
+                            ReportableGuidId = new Guid("00000000-0000-0000-0000-000000000101"),
+                            ReportableType = 2,
+                            ReporterId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            ReviewedAt = new DateTime(2026, 4, 13, 9, 0, 0, 0, DateTimeKind.Utc),
+                            ReviewerId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            ReviewerNote = "Message hidden and sender banned.",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 9104L,
+                            ActionTaken = 4,
+                            CreatedAt = new DateTime(2026, 4, 14, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Comment includes harassment.",
+                            ReportableId = 900101L,
+                            ReportableType = 3,
+                            ReporterId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            ReviewedAt = new DateTime(2026, 4, 14, 12, 0, 0, 0, DateTimeKind.Utc),
+                            ReviewerId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            ReviewerNote = "Comment hidden and the commenter was banned.",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 9105L,
+                            CreatedAt = new DateTime(2026, 5, 9, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Suspicious behavior, but without evidence.",
+                            ReportableGuidId = new Guid("10000000-0000-0000-0000-000000000005"),
+                            ReportableType = 0,
+                            ReporterId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            ReviewedAt = new DateTime(2026, 5, 9, 11, 0, 0, 0, DateTimeKind.Utc),
+                            ReviewerId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            ReviewerNote = "Insufficient evidence after review.",
+                            Status = 2
                         });
                 });
 
@@ -2461,6 +3215,12 @@ namespace MARN_API.Migrations
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-1111-2222-3333-444444444444"),
+                            Name = "Moderator",
+                            NormalizedName = "MODERATOR"
                         });
                 });
 
@@ -2597,6 +3357,41 @@ namespace MARN_API.Migrations
                         {
                             UserId = new Guid("99999999-9999-9999-9999-999999999999"),
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                        },
+                        new
+                        {
+                            UserId = new Guid("10000000-0000-0000-0000-000000000001"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("10000000-0000-0000-0000-000000000005"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("10000000-0000-0000-0000-000000000005"),
+                            RoleId = new Guid("aaaaaaaa-1111-2222-3333-444444444444")
+                        },
+                        new
+                        {
+                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         });
                 });
 
@@ -2626,6 +3421,29 @@ namespace MARN_API.Migrations
                     b.HasDiscriminator().HasValue("Admin");
 
                     b.HasData(
+                        new
+                        {
+                            Id = new Guid("30000000-0000-0000-0000-000000000001"),
+                            AccessFailedCount = 0,
+                            AccountStatus = 2,
+                            ConcurrencyStamp = "SCENARIO-SECOND-ADMIN-CONCURRENCY-STAMP",
+                            Country = 1,
+                            CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "assistant.admin@marn.com",
+                            EmailConfirmed = true,
+                            FirstName = "Assistant",
+                            Gender = 0,
+                            Language = 0,
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ASSISTANT.ADMIN@MARN.COM",
+                            NormalizedUserName = "ASSISTANT.ADMIN@MARN.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "SCENARIO-SECOND-ADMIN-SECURITY-STAMP",
+                            TwoFactorEnabled = false,
+                            UserName = "assistant.admin@marn.com"
+                        },
                         new
                         {
                             Id = new Guid("99999999-9999-9999-9999-999999999999"),
@@ -2742,6 +3560,35 @@ namespace MARN_API.Migrations
                             StripeChargesEnabled = false,
                             StripePayoutsEnabled = false
                         });
+                });
+
+            modelBuilder.Entity("MARN_API.Models.AdminActionLog", b =>
+                {
+                    b.HasOne("MARN_API.Models.Admin", "Admin")
+                        .WithMany("ActionLogs")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MARN_API.Models.Report", "Report")
+                        .WithMany("ActionLogs")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("Report");
+                });
+
+            modelBuilder.Entity("MARN_API.Models.AdminAnalyticsReport", b =>
+                {
+                    b.HasOne("MARN_API.Models.Admin", "GeneratedByAdmin")
+                        .WithMany()
+                        .HasForeignKey("GeneratedByAdminId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GeneratedByAdmin");
                 });
 
             modelBuilder.Entity("MARN_API.Models.BookingRequest", b =>
@@ -3086,8 +3933,15 @@ namespace MARN_API.Migrations
                     b.Navigation("SavedProperty");
                 });
 
+            modelBuilder.Entity("MARN_API.Models.Report", b =>
+                {
+                    b.Navigation("ActionLogs");
+                });
+
             modelBuilder.Entity("MARN_API.Models.Admin", b =>
                 {
+                    b.Navigation("ActionLogs");
+
                     b.Navigation("ReportsReviewed");
                 });
 

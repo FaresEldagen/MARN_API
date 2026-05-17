@@ -2,8 +2,9 @@
 {
     public enum ReportableType
     {
-        ChatRoom = 0,
+        User = 0,
         Property = 1,
-        Review = 2
+        Message = 2,
+        PropertyComment = 3
     }
 }

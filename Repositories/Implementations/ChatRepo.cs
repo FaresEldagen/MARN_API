@@ -57,7 +57,8 @@ namespace MARN_API.Repositories.Implementations
                         {
                             Content = m.Content,
                             SentAt = m.SentAt,
-                            IsMine = m.SenderId == currentUserGuid
+                            IsMine = m.SenderId == currentUserGuid,
+                            IsHiddenByModeration = m.IsHiddenByModeration
                         })
                         .FirstOrDefault()!,
                 })
@@ -108,7 +109,8 @@ namespace MARN_API.Repositories.Implementations
                         {
                             Content = m.Content,
                             SentAt = m.SentAt,
-                            IsMine = m.SenderId == currentUserGuid
+                            IsMine = m.SenderId == currentUserGuid,
+                            IsHiddenByModeration = m.IsHiddenByModeration
                         })
                         .FirstOrDefault(),
                 })
@@ -145,7 +147,8 @@ namespace MARN_API.Repositories.Implementations
                         {
                             Content = m.Content,
                             SentAt = m.SentAt,
-                            IsMine = m.SenderId == currentUserGuid
+                            IsMine = m.SenderId == currentUserGuid,
+                            IsHiddenByModeration = m.IsHiddenByModeration
                         })
                         .FirstOrDefault(),
                 })

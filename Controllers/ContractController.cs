@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MARN_API.Attributes;
 using MARN_API.DTOs.Common;
 using MARN_API.DTOs.Contracts;
 using MARN_API.Enums;
@@ -37,6 +38,7 @@ namespace MARN_API.Controllers
         /// <response code="409">If the property already has active contracts.</response>
         [Authorize(Roles = "Owner")]
         [HttpPost("create/{bookingRequestId:long}")]
+        [DisallowBannedUser]
         [ProducesResponseType(typeof(ApiResponseDto<ContractResponseDto>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -66,6 +68,7 @@ namespace MARN_API.Controllers
         /// <response code="409">If the property already has active contracts.</response>
         [Authorize]
         [HttpPost("{contractId:long}/sign")]
+        [DisallowBannedUser]
         [ProducesResponseType(typeof(ApiResponseDto<ContractResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

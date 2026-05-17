@@ -28,6 +28,8 @@ namespace MARN_API.Data
         public DbSet<PropertyMedia> PropertyMedia => Set<PropertyMedia>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<Report> Reports => Set<Report>();
+        public DbSet<AdminAnalyticsReport> AdminAnalyticsReports => Set<AdminAnalyticsReport>();
+        public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
         public DbSet<Admin> Admins => Set<Admin>();
         public DbSet<Message> Messages { get; set; }
@@ -55,6 +57,8 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new PropertyMediaConfiguration());
             builder.ApplyConfiguration(new NotificationConfiguration());
             builder.ApplyConfiguration(new ReportConfiguration());
+            builder.ApplyConfiguration(new AdminAnalyticsReportConfiguration());
+            builder.ApplyConfiguration(new AdminActionLogConfiguration());
             builder.ApplyConfiguration(new UserActivityConfiguration());
             builder.ApplyConfiguration(new AdminConfiguration());
             builder.ApplyConfiguration(new SavedPropertyConfiguration());
@@ -63,10 +67,15 @@ namespace MARN_API.Data
 
             // Seed initial data
             builder.ApplyConfiguration(new RoleSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioRoleSeed());
             builder.ApplyConfiguration(new UserSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioUserSeed());
             builder.ApplyConfiguration(new OwnerSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioAdminSeed());
             builder.ApplyConfiguration(new UserRoleSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioUserRoleSeed());
             builder.ApplyConfiguration(new PropertySeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioPropertySeed());
             builder.ApplyConfiguration(new PropertyMediaSeed());
             builder.ApplyConfiguration(new BookingRequestSeed());
             builder.ApplyConfiguration(new SavedPropertySeed());
@@ -76,14 +85,21 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new ContractSeed());
             builder.ApplyConfiguration(new PropertyRatingSeed());
             builder.ApplyConfiguration(new PropertyCommentSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioPropertyCommentSeed());
             builder.ApplyConfiguration(new PropertyAmenitySeed());
             builder.ApplyConfiguration(new PropertyRuleSeed());
             builder.ApplyConfiguration(new MessageSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioMessageSeed());
             builder.ApplyConfiguration(new ReportSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioReportSeed());
             builder.ApplyConfiguration(new UserActivitySeed());
             builder.ApplyConfiguration(new UserDeviceSeed());
             builder.ApplyConfiguration(new PaymentScheduleSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioContractSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioPaymentScheduleSeed());
             builder.ApplyConfiguration(new PaymentSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioPaymentSeed());
+            builder.ApplyConfiguration(new AdminDashboardScenarioAdminActionLogSeed());
         }
 
 

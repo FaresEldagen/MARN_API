@@ -58,6 +58,13 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<string>.Fail("Payment schedule not found.", resultType: ServiceResultType.NotFound);
             }
 
+            if (paymentSchedule.Contract.Status != Enums.Contract.ContractStatus.Active ||
+                paymentSchedule.Status == PaymentScheduleStatus.Cancelled)
+            {
+                _logger.LogWarning("Create Payment Intent failed: Contract or payment schedule is cancelled for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
+                return ServiceResult<string>.Fail("This payment is no longer available because the contract has been cancelled.", resultType: ServiceResultType.Forbidden);
+            }
+
             if (paymentSchedule.Status == PaymentScheduleStatus.NotAvailableYet)
             {
                 _logger.LogWarning("Create Payment Intent failed: Payment can only be made within 7 days of due date for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
@@ -309,6 +316,17 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogError("Handle Successful Payment failed: Payment schedule not found for Id: {paymentScheduleId}", scheduleIdString);
                 return;
+            }
+
+            var wasCancelledDuringProcessing =
+                paymentSchedule.Contract.Status != Enums.Contract.ContractStatus.Active ||
+                paymentSchedule.Status == PaymentScheduleStatus.Cancelled;
+
+            if (wasCancelledDuringProcessing)
+            {
+                _logger.LogWarning(
+                    "Handle Successful Payment continuing for paymentScheduleId: {paymentScheduleId} even though contract/schedule is cancelled, to preserve ledger consistency.",
+                    scheduleIdString);
             }
 
             var platformFeePercentage = _configuration.GetValue<decimal>("Stripe:PlatformFeePercentage", 0.1m);

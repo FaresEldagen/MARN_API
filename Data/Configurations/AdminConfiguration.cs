@@ -12,6 +12,11 @@ namespace MARN_API.Data.Configurations
                    .WithOne(r => r.Reviewer)
                    .HasForeignKey(r => r.ReviewerId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(a => a.ActionLogs)
+                   .WithOne(l => l.Admin)
+                   .HasForeignKey(l => l.AdminId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

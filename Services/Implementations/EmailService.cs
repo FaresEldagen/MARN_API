@@ -208,36 +208,56 @@ namespace MARN_API.Services.Implementations
             await SendEmailAsync(toEmail, subject, body, isBodyHtml: true);
         }
 
+        public async Task<bool> SendSupportContactEmailAsync(string supportEmail, string subject, string messageBody)
+        {
+            try
+            {
+                await SendEmailCoreAsync(supportEmail, subject, messageBody, isBodyHtml: false);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+        }
+
         private async Task SendEmailAsync(string toEmail, string subject, string body, bool isBodyHtml = false)
         {
             try
             {
-                var smtpServer = _configuration["EmailSettings:SmtpServer"];
-                var smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
-                var senderEmail = _configuration["EmailSettings:SenderEmail"];
-                var senderName = _configuration["EmailSettings:SenderName"];
-                var password = _configuration["EmailSettings:Password"];
-                using var message = new MailMessage
-                {
-                    From = new MailAddress(senderEmail!, senderName),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = isBodyHtml
-                };
-                message.To.Add(new MailAddress(toEmail));
-
-                using var client = new SmtpClient(smtpServer, smtpPort)
-                {
-                    Credentials = new NetworkCredential(senderEmail, password),
-                    EnableSsl = true
-                };
-
-                await client.SendMailAsync(message);
+                await SendEmailCoreAsync(toEmail, subject, body, isBodyHtml);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        private async Task SendEmailCoreAsync(string toEmail, string subject, string body, bool isBodyHtml)
+        {
+            var smtpServer = _configuration["EmailSettings:SmtpServer"];
+            var smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
+            var senderEmail = _configuration["EmailSettings:SenderEmail"];
+            var senderName = _configuration["EmailSettings:SenderName"];
+            var password = _configuration["EmailSettings:Password"];
+
+            using var message = new MailMessage
+            {
+                From = new MailAddress(senderEmail!, senderName),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = isBodyHtml
+            };
+            message.To.Add(new MailAddress(toEmail));
+
+            using var client = new SmtpClient(smtpServer, smtpPort)
+            {
+                Credentials = new NetworkCredential(senderEmail, password),
+                EnableSsl = true
+            };
+
+            await client.SendMailAsync(message);
         }
     }
 }
