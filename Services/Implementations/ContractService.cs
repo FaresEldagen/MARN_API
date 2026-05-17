@@ -9,6 +9,8 @@ using MARN_API.Enums.Property;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
+using System.IO;
+
 
 using Microsoft.AspNetCore.Identity;
 
@@ -389,7 +391,7 @@ namespace MARN_API.Services.Implementations
             {
                 FileBytes = contract.OtsFileBytes,
                 ContentType = "application/octet-stream",
-                FileName = $"{contract.FileName}.ots"
+                FileName = $"{Path.GetFileNameWithoutExtension(contract.FileName)}.ots"
             };
 
             _logger.LogInformation("Download OTS Proof successful for contractId: {contractId}", contractId);
