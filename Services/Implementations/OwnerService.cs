@@ -1,21 +1,17 @@
-using MARN_API.Data;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace MARN_API.Services.Implementations
 {
     public class OwnerService : IOwnerService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppDbContext _dbContext;
         private readonly IAccountService _accountService;
 
-        public OwnerService(UserManager<ApplicationUser> userManager, AppDbContext dbContext, IAccountService accountService)
+        public OwnerService(UserManager<ApplicationUser> userManager, IAccountService accountService)
         {
             _userManager = userManager;
-            _dbContext = dbContext;
             _accountService = accountService;
         }
 
@@ -35,9 +31,6 @@ namespace MARN_API.Services.Implementations
                 {
                     return ServiceResult<string>.Fail("Failed to add owner role.", roleResult.Errors.Select(e => e.Description).ToList());
                 }
-
-                await _dbContext.Database.ExecuteSqlInterpolatedAsync(
-                    $"UPDATE AspNetUsers SET Discriminator = {"Owner"} WHERE Id = {id}");
             }
 
             var loginResponse = await _accountService.CreateJwtForUserAsync(user);

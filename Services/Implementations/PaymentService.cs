@@ -136,7 +136,7 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<string>> CreateOrGetConnectOnboardingLink(Guid userId)
         {
-            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == userId);
+            var owner = await _userManager.FindByIdAsync(userId.ToString());
             if (owner == null)
             {
                 _logger.LogWarning("Create Connect Account failed: Owner not found for userId: {userId}", userId);
@@ -207,7 +207,7 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<bool>> Withdraw(Guid ownerId)
         {
-            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.Id == ownerId);
+            var owner = await _userManager.FindByIdAsync(ownerId.ToString());
             if (owner == null)
             {
                 _logger.LogWarning("Withdraw failed: Owner not found for ownerId: {ownerId}", ownerId);
@@ -418,7 +418,7 @@ namespace MARN_API.Services.Implementations
         {
             _logger.LogInformation("Handle Connected Account Updated attempt for StripeAccountId: {StripeAccountId}", account.Id);
 
-            var owner = await _userManager.Users.OfType<Owner>().FirstOrDefaultAsync(o => o.StripeAccountId == account.Id);
+            var owner = await _userManager.Users.FirstOrDefaultAsync(o => o.StripeAccountId == account.Id);
             if (owner == null)
             {
                 _logger.LogError("Handle Connected Account Updated failed: Owner not found for StripeAccountId: {StripeAccountId}", account.Id);
@@ -464,7 +464,7 @@ namespace MARN_API.Services.Implementations
 
         public async Task HandleTransferCreated(Transfer transfer)
         {
-            var owner = await _userManager.Users.OfType<Owner>()
+            var owner = await _userManager.Users
                 .FirstOrDefaultAsync(o => o.StripeAccountId == transfer.DestinationId);
 
             if (owner == null)
@@ -488,7 +488,7 @@ namespace MARN_API.Services.Implementations
 
         public async Task HandleTransferReversed(Transfer transfer)
         {
-            var owner = await _userManager.Users.OfType<Owner>()
+            var owner = await _userManager.Users
                 .FirstOrDefaultAsync(o => o.StripeAccountId == transfer.DestinationId);
 
             if (owner == null)

@@ -156,18 +156,9 @@ namespace MARN_API.Data.Seed
                     Gender = Gender.Female,
                     Language = Language.English,
                     CreatedAt = new DateTime(2026, 4, 20, 11, 0, 0, DateTimeKind.Utc)
-                });
-        }
-    }
-
-    public class AdminDashboardScenarioAdminSeed : IEntityTypeConfiguration<Admin>
-    {
-        public void Configure(EntityTypeBuilder<Admin> builder)
-        {
-            var demoPasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==";
-
-            builder.HasData(
-                new Admin
+                },
+                // Second Admin (previously seeded via AdminDashboardScenarioAdminSeed)
+                new ApplicationUser
                 {
                     Id = AdminDashboardScenarioIds.SecondAdminId,
                     UserName = "assistant.admin@marn.com",
@@ -211,3 +202,4 @@ namespace MARN_API.Data.Seed
         }
     }
 }
+

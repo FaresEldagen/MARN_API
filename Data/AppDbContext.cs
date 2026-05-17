@@ -14,7 +14,7 @@ namespace MARN_API.Data
 
 
         // DbSets for all entities
-        public DbSet<Owner> Owners => Set<Owner>();
+
         public DbSet<Property> Properties => Set<Property>();
         public DbSet<Contract> Contracts => Set<Contract>();
         public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
@@ -31,7 +31,7 @@ namespace MARN_API.Data
         public DbSet<AdminAnalyticsReport> AdminAnalyticsReports => Set<AdminAnalyticsReport>();
         public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
-        public DbSet<Admin> Admins => Set<Admin>();
+
         public DbSet<Message> Messages { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<SavedProperty> SavedProperties => Set<SavedProperty>();
@@ -43,7 +43,7 @@ namespace MARN_API.Data
 
             // Apply entity configurations
             builder.ApplyConfiguration(new ApplicationUserConfiguration());
-            builder.ApplyConfiguration(new OwnerConfiguration());
+
             builder.ApplyConfiguration(new PropertyConfiguration());
             builder.ApplyConfiguration(new ContractConfiguration());
             builder.ApplyConfiguration(new BookingRequestConfiguration());
@@ -60,7 +60,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new AdminAnalyticsReportConfiguration());
             builder.ApplyConfiguration(new AdminActionLogConfiguration());
             builder.ApplyConfiguration(new UserActivityConfiguration());
-            builder.ApplyConfiguration(new AdminConfiguration());
+
             builder.ApplyConfiguration(new SavedPropertyConfiguration());
             builder.ApplyConfiguration(new MessageConfiguration());
 
@@ -70,8 +70,8 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new AdminDashboardScenarioRoleSeed());
             builder.ApplyConfiguration(new UserSeed());
             builder.ApplyConfiguration(new AdminDashboardScenarioUserSeed());
-            builder.ApplyConfiguration(new OwnerSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioAdminSeed());
+
+
             builder.ApplyConfiguration(new UserRoleSeed());
             builder.ApplyConfiguration(new AdminDashboardScenarioUserRoleSeed());
             builder.ApplyConfiguration(new PropertySeed());
@@ -80,7 +80,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new BookingRequestSeed());
             builder.ApplyConfiguration(new SavedPropertySeed());
             builder.ApplyConfiguration(new NotificationSeed());
-            builder.ApplyConfiguration(new AdminSeed());
+
             builder.ApplyConfiguration(new RoommatePreferenceSeed());
             builder.ApplyConfiguration(new ContractSeed());
             builder.ApplyConfiguration(new PropertyRatingSeed());

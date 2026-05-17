@@ -18,6 +18,6 @@ namespace MARN_API.Models
         public long FileSizeBytes { get; set; }
         public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
 
-        public virtual Admin GeneratedByAdmin { get; set; } = null!;
+        public virtual ApplicationUser GeneratedByAdmin { get; set; } = null!;
     }
 }

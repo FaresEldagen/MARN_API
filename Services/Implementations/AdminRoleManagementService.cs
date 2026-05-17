@@ -169,7 +169,6 @@ namespace MARN_API.Services.Implementations
                     }
                 }
 
-                await SyncOwnerDiscriminatorAsync(user.Id, normalizedRequestedRoles);
                 await transaction.CommitAsync();
             }
             catch
@@ -186,15 +185,6 @@ namespace MARN_API.Services.Implementations
 
             updatedUser.AvailableRoles = availableRoles;
             return ServiceResult<AdminRoleUserDetailsDto>.Ok(updatedUser, "User roles updated successfully.");
-        }
-
-        private async Task SyncOwnerDiscriminatorAsync(Guid userId, List<string> requestedRoles)
-        {
-            var shouldBeOwner = requestedRoles.Any(role => string.Equals(role, OwnerRoleName, StringComparison.OrdinalIgnoreCase));
-            var discriminator = shouldBeOwner ? "Owner" : "Renter";
-
-            await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"UPDATE AspNetUsers SET Discriminator = {discriminator} WHERE Id = {userId}");
         }
 
         private static void NormalizePaging(AdminRoleManagementQueryDto query)

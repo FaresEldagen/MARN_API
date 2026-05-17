@@ -25,11 +25,6 @@ namespace MARN_API.Data.Configurations
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasOne(x => x.Admin)
-                .WithMany(a => a.ActionLogs)
-                .HasForeignKey(x => x.AdminId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne(x => x.Report)
                 .WithMany(r => r.ActionLogs)
                 .HasForeignKey(x => x.ReportId)
@@ -37,3 +32,4 @@ namespace MARN_API.Data.Configurations
         }
     }
 }
+

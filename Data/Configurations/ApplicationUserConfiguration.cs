@@ -12,17 +12,6 @@ namespace MARN_API.Data.Configurations
                      // Global Query Filter: exclude soft-deleted users from all queries
                      builder.HasQueryFilter(u => u.DeletedAt == null);
 
-                     // TPH for User / Owner
-                     builder
-                         .HasDiscriminator<string>("Discriminator")
-                         .HasValue<ApplicationUser>("Renter")
-                         .HasValue<Owner>("Owner")
-                         .HasValue<Admin>("Admin");
-
-                     // Explicitly set discriminator column length
-                     builder.Property("Discriminator")
-                         .HasMaxLength(21);
-
                      builder.Property(u => u.Language).HasConversion<int>();
                      builder.Property(u => u.Gender).HasConversion<int>();
                      builder.Property(u => u.Country).HasConversion<int>();
@@ -46,8 +35,23 @@ namespace MARN_API.Data.Configurations
                             .WithOne(a => a.User)
                             .HasForeignKey(a => a.UserId)
                             .OnDelete(DeleteBehavior.Cascade);
+
+                     // Owner relationships (previously in OwnerConfiguration)
+                     builder.HasMany(o => o.Properties)
+                            .WithOne(p => p.Owner)
+                            .HasForeignKey(p => p.OwnerId)
+                            .OnDelete(DeleteBehavior.Restrict);
+
+                     // Admin relationships (previously in AdminConfiguration)
+                     builder.HasMany(a => a.ReportsReviewed)
+                            .WithOne(r => r.Reviewer)
+                            .HasForeignKey(r => r.ReviewerId)
+                            .OnDelete(DeleteBehavior.Restrict);
+
+                     builder.HasMany(a => a.ActionLogs)
+                            .WithOne(l => l.Admin)
+                            .HasForeignKey(l => l.AdminId)
+                            .OnDelete(DeleteBehavior.Restrict);
               }
        }
 }
-
-

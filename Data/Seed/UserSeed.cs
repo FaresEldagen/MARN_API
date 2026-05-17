@@ -15,13 +15,18 @@ namespace MARN_API.Data.Seed
             var renterCId = Guid.Parse("33333333-3333-3333-3333-333333333333");
             var renterDId = Guid.Parse("77777777-7777-7777-7777-777777777777");
             var renterEId = Guid.Parse("88888888-8888-8888-8888-888888888888");
+            var ownerXId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+            var ownerYId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+            var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+            var adminId = Guid.Parse("99999999-9999-9999-9999-999999999999");
 
-            // All seeded renters share the same demo password:
+            // All seeded users share the same demo password:
             // Password: Password123!
             // Hash generated with ASP.NET Core Identity PasswordHasher
             var demoPasswordHash = "AQAAAAIAAYagAAAAEM0BKYvM1Frqg562lK6yise79LW/u17GHrDxW01Y9TICzOxotl6+yOY+VhgcZQowlg==";
 
             builder.HasData(
+                // ── Renters ──
                 new ApplicationUser
                 {
                     Id = renterAId,
@@ -150,9 +155,109 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
+                },
+
+                // ── Owners (role determined by AspNetUserRoles) ──
+                new ApplicationUser
+                {
+                    Id = ownerXId,
+                    UserName = "owner.x@example.com",
+                    NormalizedUserName = "OWNER.X@EXAMPLE.COM",
+                    Email = "owner.x@example.com",
+                    NormalizedEmail = "OWNER.X@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-OWNER-X-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-OWNER-X-CONCURRENCY-STAMP",
+
+                    FirstName = "Owner",
+                    LastName = "X",
+                    Language = Language.English,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ApplicationUser
+                {
+                    Id = ownerYId,
+                    UserName = "owner.y@example.com",
+                    NormalizedUserName = "OWNER.Y@EXAMPLE.COM",
+                    Email = "owner.y@example.com",
+                    NormalizedEmail = "OWNER.Y@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-OWNER-Y-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-OWNER-Y-CONCURRENCY-STAMP",
+
+                    FirstName = "Owner",
+                    LastName = "Y",
+                    Language = Language.English,
+                    Gender = Gender.Female,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
+                },
+                // Owner Z: dual-role account (Owner + Renter) with data for both dashboards
+                new ApplicationUser
+                {
+                    Id = ownerZId,
+                    UserName = "owner.z@example.com",
+                    NormalizedUserName = "OWNER.Z@EXAMPLE.COM",
+                    Email = "owner.z@example.com",
+                    NormalizedEmail = "OWNER.Z@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-OWNER-Z-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-OWNER-Z-CONCURRENCY-STAMP",
+
+                    FirstName = "Owner",
+                    LastName = "Z",
+                    Language = Language.English,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, DateTimeKind.Utc)
+                },
+
+                // ── Admin (role determined by AspNetUserRoles) ──
+                new ApplicationUser
+                {
+                    Id = adminId,
+                    UserName = "admin@marn.com",
+                    NormalizedUserName = "ADMIN@MARN.COM",
+                    Email = "admin@marn.com",
+                    NormalizedEmail = "ADMIN@MARN.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SEED-ADMIN-SECURITY-STAMP",
+                    ConcurrencyStamp = "SEED-ADMIN-CONCURRENCY-STAMP",
+
+                    FirstName = "System",
+                    LastName = "Admin",
+                    Language = Language.English,
+                    Gender = Gender.Unknown,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }
     }
 }
-

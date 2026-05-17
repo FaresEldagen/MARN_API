@@ -20,7 +20,7 @@ namespace MARN_API.Models
         public DateTime? ReviewedAt { get; set; }
 
         public virtual ApplicationUser Reporter { get; set; } = null!;
-        public virtual Admin? Reviewer { get; set; }
+        public virtual ApplicationUser? Reviewer { get; set; }
         public virtual ICollection<AdminActionLog> ActionLogs { get; set; } = new HashSet<AdminActionLog>();
     }
 }

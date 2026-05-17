@@ -6,7 +6,7 @@ using MARN_API.Enums.Account;
 
 namespace MARN_API.Models
 {
-    // Base user for Identity (Renter by default)
+    // Unified user model — roles (Renter/Owner/Admin) are determined via AspNetUserRoles
     public class ApplicationUser : IdentityUser<Guid>
     {
         public string FirstName { get; set; } = string.Empty;
@@ -28,6 +28,11 @@ namespace MARN_API.Models
 
         public AccountStatus AccountStatus { get; set; } = AccountStatus.Unverified;
         public AccountStatus? StatusBeforeBan { get; set; }
+
+        // Stripe Connect (Owner-specific, nullable for non-owners)
+        public string? StripeAccountId { get; set; }
+        public bool StripePayoutsEnabled { get; set; } = false;
+        public bool StripeChargesEnabled { get; set; } = false;
 
         // Soft delete and audit
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -52,6 +57,13 @@ namespace MARN_API.Models
 
         [InverseProperty(nameof(Message.Receiver))]
         public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+
+        // Owner navigation properties (active when user has Owner role)
+        public virtual ICollection<Property> Properties { get; set; } = new HashSet<Property>();
+
+        // Admin navigation properties (active when user has Admin role)
+        public virtual ICollection<Report> ReportsReviewed { get; set; } = new HashSet<Report>();
+        public virtual ICollection<AdminActionLog> ActionLogs { get; set; } = new HashSet<AdminActionLog>();
 
     }
 }

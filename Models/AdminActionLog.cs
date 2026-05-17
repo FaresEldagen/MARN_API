@@ -13,7 +13,7 @@ namespace MARN_API.Models
         public string? MetadataJson { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public virtual Admin Admin { get; set; } = null!;
+        public virtual ApplicationUser Admin { get; set; } = null!;
         public virtual Report? Report { get; set; }
     }
 }
