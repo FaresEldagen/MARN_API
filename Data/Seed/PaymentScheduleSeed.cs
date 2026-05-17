@@ -25,12 +25,6 @@ namespace MARN_API.Data.Seed
     ///  20008        | 1000001 | NotAvailableYet   | Due in 60 days (far future)
     ///  20009        | 1000001 | NotAvailableYet   | Due in 90 days (far future, last instalment)
     ///
-    ///  ── CONTRACT 1000002 (Active Quarterly, Renter B, Property 1002) ──────────────────────
-    ///  20010        | 1000002 | PaidEarly         | Paid 10 days before due
-    ///  20011        | 1000002 | Overdue           | Missed – 45 days past due
-    ///  20012        | 1000002 | Available         | Due in 6 days (within 7-day window)
-    ///  20013        | 1000002 | NotAvailableYet   | Due in 90 days
-    ///
     ///  ── CONTRACT 1000003 (Active One-Time, Renter A, Property 1100) ─────────────────────────
     ///  20020        | 1000003 | PaidOnTime        | Full amount paid on time
     ///
@@ -66,7 +60,7 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 1, 31, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 1, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidEarly,
                     PaymentIntentId = "pi_seed_20001"
                 },
@@ -76,7 +70,7 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 2, 28, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 2, 28, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidOnTime,
                     PaymentIntentId = "pi_seed_20002"
                 },
@@ -86,7 +80,7 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 3, 31, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 3, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidLate,
                     PaymentIntentId = "pi_seed_20003"
                 },
@@ -96,8 +90,9 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 4, 21, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.Overdue
+                    DueDate = new DateTime(2026, 4, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.PaidOnTime,
+                    PaymentIntentId = "pi_seed_20004"
                 },
                 new PaymentSchedule
                 {
@@ -105,8 +100,9 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 5, 16, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.DueToday
+                    DueDate = new DateTime(2026, 5, 31, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.PaidOnTime,
+                    PaymentIntentId = "pi_seed_20005"
                 },
                 new PaymentSchedule
                 {
@@ -114,7 +110,7 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 5, 20, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 6, 30, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.Available
                 },
                 new PaymentSchedule
@@ -123,7 +119,7 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 7, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.NotAvailableYet
                 },
                 new PaymentSchedule
@@ -132,7 +128,7 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 7, 15, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 8, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.NotAvailableYet
                 },
                 new PaymentSchedule
@@ -141,200 +137,235 @@ namespace MARN_API.Data.Seed
                     ContractId = 1000001,
                     Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 8, 15, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 9, 30, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.NotAvailableYet
                 },
-
-                // ── CONTRACT 1000002 ────────────────────────────────────────────────────────────
                 new PaymentSchedule
                 {
                     Id = 20010,
-                    ContractId = 1000002,
-                    Amount = 22500m,
+                    ContractId = 1000001,
+                    Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.PaidEarly,
-                    PaymentIntentId = "pi_seed_20010"
+                    DueDate = new DateTime(2026, 10, 31, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
                 },
                 new PaymentSchedule
                 {
                     Id = 20011,
-                    ContractId = 1000002,
-                    Amount = 22500m,
+                    ContractId = 1000001,
+                    Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 3, 22, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.Overdue
+                    DueDate = new DateTime(2026, 11, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
                 },
                 new PaymentSchedule
                 {
                     Id = 20012,
-                    ContractId = 1000002,
-                    Amount = 22500m,
+                    ContractId = 1000001,
+                    Amount = 5000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2026, 5, 12, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.Available
-                },
-                new PaymentSchedule
-                {
-                    Id = 20013,
-                    ContractId = 1000002,
-                    Amount = 22500m,
-                    Currency = "egp",
-                    DueDate = new DateTime(2026, 8, 12, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.NotAvailableYet
                 },
 
                 // ── CONTRACT 1000003 ────────────────────────────────────────────────────────────
                 new PaymentSchedule
                 {
-                    Id = 20020,
+                    Id = 20013,
                     ContractId = 1000003,
                     Amount = 96000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.PaidOnTime,
-                    PaymentIntentId = "pi_seed_20020"
+                    DueDate = new DateTime(2027, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
                 },
 
                 // ── CONTRACT 1000004 ───────────────────────────────────
                 new PaymentSchedule
                 {
-                    Id = 20030,
+                    Id = 20014,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 2, 25, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidEarly,
-                    PaymentIntentId = "pi_seed_20030"
+                    PaymentIntentId = "pi_seed_20014"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20031,
+                    Id = 20015,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 3, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidOnTime,
-                    PaymentIntentId = "pi_seed_20031"
+                    PaymentIntentId = "pi_seed_20015"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20032,
+                    Id = 20016,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidLate,
-                    PaymentIntentId = "pi_seed_20032"
+                    PaymentIntentId = "pi_seed_20016"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20033,
+                    Id = 20017,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 5, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidOnTime,
-                    PaymentIntentId = "pi_seed_20033"
+                    PaymentIntentId = "pi_seed_20017"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20034,
+                    Id = 20018,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.Overdue
-                },
-                new PaymentSchedule
-                {
-                    Id = 20035,
-                    ContractId = 1000004,
-                    Amount = 40000m,
-                    Currency = "egp",
-                    DueDate = new DateTime(2025, 7, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 6, 30, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.Available
                 },
                 new PaymentSchedule
                 {
-                    Id = 20036,
+                    Id = 20019,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 8, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2026, 7, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.NotAvailableYet
                 },
                 new PaymentSchedule
                 {
-                    Id = 20037,
+                    Id = 20020,
                     ContractId = 1000004,
-                    Amount = 40000m,
+                    Amount = 4000m,
                     Currency = "egp",
-                    DueDate = new DateTime(2025, 9, 1, 0, 0, 0, DateTimeKind.Utc),
+                    DueDate = new DateTime(2025, 8, 31, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
+                },
+                new PaymentSchedule
+                {
+                    Id = 20021,
+                    ContractId = 1000004,
+                    Amount = 4000m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2025, 9, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
+                },
+                new PaymentSchedule
+                {
+                    Id = 20022,
+                    ContractId = 1000004,
+                    Amount = 4000m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2025, 10, 31, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
+                },
+                new PaymentSchedule
+                {
+                    Id = 20023,
+                    ContractId = 1000004,
+                    Amount = 4000m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2025, 11, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.NotAvailableYet
+                },
+                new PaymentSchedule
+                {
+                    Id = 20024,
+                    ContractId = 1000004,
+                    Amount = 4000m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.NotAvailableYet
                 },
 
                 // ── CONTRACT 1000005 ────────────────────────────
                 new PaymentSchedule
                 {
-                    Id = 20040,
+                    Id = 20025,
                     ContractId = 1000005,
                     Amount = 22500m,
                     Currency = "egp",
                     DueDate = new DateTime(2024, 3, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidLate,
-                    PaymentIntentId = "pi_seed_20040"
+                    PaymentIntentId = "pi_seed_20025"
+                },
+                new PaymentSchedule
+                {
+                    Id = 20026,
+                    ContractId = 1000005,
+                    Amount = 22500m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2024, 6, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.PaidOnTime,
+                    PaymentIntentId = "pi_seed_20026"
+                }, 
+                new PaymentSchedule
+                {
+                    Id = 20027,
+                    ContractId = 1000005,
+                    Amount = 22500m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2024, 9, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.PaidLate,
+                    PaymentIntentId = "pi_seed_20027"
+                }, 
+                new PaymentSchedule
+                {
+                    Id = 20028,
+                    ContractId = 1000005,
+                    Amount = 22500m,
+                    Currency = "egp",
+                    DueDate = new DateTime(2024,12, 31, 0, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentScheduleStatus.PaidOnTime,
+                    PaymentIntentId = "pi_seed_20028"
                 },
 
                 // ── CONTRACT 1000006 ───────────────────
                 new PaymentSchedule
                 {
-                    Id = 20050,
+                    Id = 20029,
                     ContractId = 1000006,
                     Amount = 15000m,
                     Currency = "egp",
                     DueDate = new DateTime(2025, 5, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidOnTime,
-                    PaymentIntentId = "pi_seed_20050"
+                    PaymentIntentId = "pi_seed_20029"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20051,
+                    Id = 20030,
                     ContractId = 1000006,
                     Amount = 15000m,
                     Currency = "egp",
                     DueDate = new DateTime(2025, 6, 30, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidOnTime,
-                    PaymentIntentId = "pi_seed_20051"
+                    PaymentIntentId = "pi_seed_20030"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20052,
+                    Id = 20031,
                     ContractId = 1000006,
                     Amount = 15000m,
                     Currency = "egp",
                     DueDate = new DateTime(2025, 7, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidLate,
-                    PaymentIntentId = "pi_seed_20052"
+                    PaymentIntentId = "pi_seed_20031"
                 },
                 new PaymentSchedule
                 {
-                    Id = 20053,
+                    Id = 20032,
                     ContractId = 1000006,
                     Amount = 15000m,
                     Currency = "egp",
                     DueDate = new DateTime(2025, 8, 31, 0, 0, 0, DateTimeKind.Utc),
                     Status = PaymentScheduleStatus.PaidEarly,
-                    PaymentIntentId = "pi_seed_20053"
-                },
-                new PaymentSchedule
-                {
-                    Id = 20060,
-                    ContractId = 1000006,
-                    Amount = 15000m,
-                    Currency = "egp",
-                    DueDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-                    Status = PaymentScheduleStatus.NotAvailableYet
+                    PaymentIntentId = "pi_seed_20032"
                 }
             );
         }

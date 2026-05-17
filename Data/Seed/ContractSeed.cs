@@ -46,13 +46,13 @@ namespace MARN_API.Data.Seed
                     PropertyId = 1001,
                     RenterId = renterAId,
 
-                    LeaseStartDate = new DateOnly(2025, 1, 1),
-                    LeaseEndDate = new DateOnly(2026, 1, 1),
+                    LeaseStartDate = new DateOnly(2026, 1, 1),
+                    LeaseEndDate = new DateOnly(2027, 1, 1),
                     PaymentFrequency = PaymentFrequency.Monthly,
                     TotalContractAmount = 60000m,
 
-                    CreatedAt = new DateTime(2024, 12, 27, 0, 0, 0, DateTimeKind.Utc),
-                    SignedByRenterAt = new DateTime(2024, 12, 28, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2025, 12, 27, 0, 0, 0, DateTimeKind.Utc),
+                    SignedByRenterAt = new DateTime(2025, 12, 28, 0, 0, 0, DateTimeKind.Utc),
                     Status = ContractStatus.Active,
 
                     FileName = "rental-contract-1000001.pdf",
@@ -71,13 +71,13 @@ namespace MARN_API.Data.Seed
                     PropertyId = 1002,
                     RenterId = renterBId,
 
-                    LeaseStartDate = new DateOnly(2025, 1, 1),
-                    LeaseEndDate = new DateOnly(2026, 1, 1),
+                    LeaseStartDate = new DateOnly(2026, 1, 1),
+                    LeaseEndDate = new DateOnly(2027, 1, 1),
                     PaymentFrequency = PaymentFrequency.Quarterly,
                     TotalContractAmount = 90000m,
 
-                    CreatedAt = new DateTime(2024, 12, 28, 0, 0, 0, DateTimeKind.Utc),
-                    SignedByRenterAt = new DateTime(2024, 12, 29, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2025, 12, 28, 0, 0, 0, DateTimeKind.Utc),
+                    SignedByRenterAt = new DateTime(2025, 12, 29, 0, 0, 0, DateTimeKind.Utc),
                     Status = ContractStatus.Pending,
 
                     FileName = "rental-contract-1000002.pdf",
@@ -96,13 +96,13 @@ namespace MARN_API.Data.Seed
                     PropertyId = 1100,
                     RenterId = renterAId,
 
-                    LeaseStartDate = new DateOnly(2024, 6, 1),
-                    LeaseEndDate = new DateOnly(2026, 6, 1),
+                    LeaseStartDate = new DateOnly(2025, 6, 1),
+                    LeaseEndDate = new DateOnly(2027, 6, 1),
                     PaymentFrequency = PaymentFrequency.OneTime,
                     TotalContractAmount = 96000m,
 
-                    CreatedAt = new DateTime(2024, 5, 24, 0, 0, 0, DateTimeKind.Utc),
-                    SignedByRenterAt = new DateTime(2024, 5, 25, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2025, 5, 24, 0, 0, 0, DateTimeKind.Utc),
+                    SignedByRenterAt = new DateTime(2025, 5, 25, 0, 0, 0, DateTimeKind.Utc),
                     Status = ContractStatus.Active,
 
                     FileName = "rental-contract-1000003.pdf",
@@ -121,13 +121,13 @@ namespace MARN_API.Data.Seed
                     PropertyId = 1100,
                     RenterId = renterBId,
 
-                    LeaseStartDate = new DateOnly(2025, 2, 1),
-                    LeaseEndDate = new DateOnly(2026, 2, 1),
+                    LeaseStartDate = new DateOnly(2026, 2, 1),
+                    LeaseEndDate = new DateOnly(2027, 2, 1),
                     PaymentFrequency = PaymentFrequency.Monthly,
-                    TotalContractAmount = 480000m,
+                    TotalContractAmount = 48000m,
 
-                    CreatedAt = new DateTime(2025, 1, 27, 0, 0, 0, DateTimeKind.Utc),
-                    SignedByRenterAt = new DateTime(2025, 1, 28, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2026, 1, 27, 0, 0, 0, DateTimeKind.Utc),
+                    SignedByRenterAt = new DateTime(2026, 1, 28, 0, 0, 0, DateTimeKind.Utc),
                     Status = ContractStatus.Active,
 
                     FileName = "rental-contract-1000004.pdf",
@@ -171,13 +171,13 @@ namespace MARN_API.Data.Seed
                     PropertyId = 1004,
                     RenterId = renterBId,
 
-                    LeaseStartDate = new DateOnly(2025, 5, 1),
-                    LeaseEndDate = new DateOnly(2026, 5, 1),
+                    LeaseStartDate = new DateOnly(2026, 5, 1),
+                    LeaseEndDate = new DateOnly(2027, 5, 1),
                     PaymentFrequency = PaymentFrequency.Monthly,
                     TotalContractAmount = 180000m,
 
-                    CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, DateTimeKind.Utc),
-                    SignedByRenterAt = new DateTime(2025, 12, 20, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2026, 4, 20, 0, 0, 0, DateTimeKind.Utc),
+                    SignedByRenterAt = new DateTime(2026, 4, 25, 0, 0, 0, DateTimeKind.Utc),
                     Status = ContractStatus.Cancelled,
 
                     FileName = "rental-contract-1000006.pdf",
