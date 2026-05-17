@@ -15,11 +15,13 @@ namespace MARN_API.Data.Seed
                 {
                     Id = 1,
                     ReporterId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    ReviewerId = Guid.Parse("99999999-9999-9999-9999-999999999999"),
                     ReportableType = ReportableType.Property,
                     ReportableId = 1001,
+                    ReportableGuidId = null,
                     Reason = "Misleading information about the property.",
                     Status = ReportStatus.InReview,
+                    ReviewerNote = null,
+                    ActionTaken = null,
                     CreatedAt = new DateTime(2025, 3, 15, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

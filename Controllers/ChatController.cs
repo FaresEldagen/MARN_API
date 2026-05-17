@@ -1,3 +1,4 @@
+using MARN_API.Attributes;
 using MARN_API.DTOs.Chat;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
@@ -8,6 +9,7 @@ using System.Security.Claims;
 namespace MARN_API.Controllers
 {
     [Authorize]
+    [DisallowBannedUser]
     [Route("api/[controller]")]
     [ApiController]
     public class ChatController : BaseController

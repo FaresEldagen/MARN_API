@@ -27,6 +27,7 @@ namespace MARN_API.Models
         public string? NationalIDNumber { get; set; }
 
         public AccountStatus AccountStatus { get; set; } = AccountStatus.Unverified;
+        public AccountStatus? StatusBeforeBan { get; set; }
 
         // Soft delete and audit
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

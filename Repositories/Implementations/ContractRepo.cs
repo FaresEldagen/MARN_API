@@ -46,7 +46,8 @@ namespace MARN_API.Repositories.Implementations
                     NextPaymentScheduleDate = c.PaymentSchedules
                         .Where(p => p.Status != PaymentScheduleStatus.PaidEarly
                                  && p.Status != PaymentScheduleStatus.PaidOnTime
-                                 && p.Status != PaymentScheduleStatus.PaidLate)
+                                 && p.Status != PaymentScheduleStatus.PaidLate
+                                 && p.Status != PaymentScheduleStatus.Cancelled)
                         .OrderBy(p => p.DueDate)
                         .Select(p => (DateTime?)p.DueDate)
                         .FirstOrDefault(),
@@ -54,7 +55,8 @@ namespace MARN_API.Repositories.Implementations
                     NextPaymentScheduleId = c.PaymentSchedules
                         .Where(p => p.Status != PaymentScheduleStatus.PaidEarly
                                  && p.Status != PaymentScheduleStatus.PaidOnTime
-                                 && p.Status != PaymentScheduleStatus.PaidLate)
+                                 && p.Status != PaymentScheduleStatus.PaidLate
+                                 && p.Status != PaymentScheduleStatus.Cancelled)
                         .OrderBy(p => p.DueDate)
                         .Select(p => (long?)p.Id)
                         .FirstOrDefault(),
@@ -62,7 +64,8 @@ namespace MARN_API.Repositories.Implementations
                     NextPaymentScheduleStatus = c.PaymentSchedules
                         .Where(p => p.Status != PaymentScheduleStatus.PaidEarly
                                  && p.Status != PaymentScheduleStatus.PaidOnTime
-                                 && p.Status != PaymentScheduleStatus.PaidLate)
+                                 && p.Status != PaymentScheduleStatus.PaidLate
+                                 && p.Status != PaymentScheduleStatus.Cancelled)
                         .OrderBy(p => p.DueDate)
                         .Select(p => (PaymentScheduleStatus?)p.Status)
                         .FirstOrDefault(),

@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using MARN_API.Enums.Contract;
+using MARN_API.Enums.Property;
 
 namespace MARN_API.Services.Implementations
 {
@@ -87,6 +88,12 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogWarning("AddProperty failed: User not found for userId: {userId}", userId);
                 return ServiceResult<bool>.Fail("User not found", resultType: ServiceResultType.Unauthorized);
+            }
+
+            if (user.AccountStatus == AccountStatus.Banned)
+            {
+                _logger.LogWarning("AddProperty failed: Banned user {UserId}", userId);
+                return ServiceResult<bool>.Fail("Banned accounts cannot add properties.", resultType: ServiceResultType.Forbidden);
             }
 
             if (user.AccountStatus != AccountStatus.Verified)
@@ -180,6 +187,29 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<PropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId, Guid? userId)
         {
+            var property = await _propertyRepo.GetByIdAsync(propertyId);
+            if (property == null || property.DeletedAt != null)
+            {
+                return ServiceResult<PropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            var isOwner = userId.HasValue && property.OwnerId == userId.Value;
+            var isAdmin = false;
+
+            if (userId.HasValue && !isOwner)
+            {
+                var currentUser = await _userManager.FindByIdAsync(userId.Value.ToString());
+                if (currentUser != null)
+                {
+                    isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+                }
+            }
+
+            if (!isOwner && !isAdmin && (!property.IsActive || property.Status != PropertyStatus.Verified))
+            {
+                return ServiceResult<PropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
             var dto = await _propertyRepo.GetPropertyDetailsAsync(propertyId, userId);
             if (dto == null)
             {
@@ -306,7 +336,13 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Edit property attempt {PropertyId} for user {UserId}", propertyId, userId);
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null || user.AccountStatus != AccountStatus.Verified)
+            if (user == null)
+            {
+                _logger.LogWarning("EditProperty failed: User not found for user {UserId}", userId);
+                return ServiceResult<bool>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
+            }
+
+            if (user.AccountStatus != AccountStatus.Verified)
             {
                 _logger.LogWarning("EditProperty failed: Account not verified for user {UserId}", userId);
                 return ServiceResult<bool>.Fail("Your account must be verified to edit a property.", resultType: ServiceResultType.Unauthorized);

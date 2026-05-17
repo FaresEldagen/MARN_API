@@ -19,6 +19,7 @@ namespace MARN_API.Services.Implementations
 {
     public class ChatService : IChatService
     {
+        private const string HiddenMessagePlaceholder = "[Message hidden by admin]";
         private readonly IChatRepo _chatRepo;
         private readonly INotificationRepo _notificationRepo;
         private readonly ConnectionTracker _tracker;
@@ -55,6 +56,10 @@ namespace MARN_API.Services.Implementations
         #region Chats Page
         public async Task<ServiceResult<List<ChatUserDto>>> GetActiveUsersWithStatusAsync(string currentUserId)
         {
+            var accessCheck = await ValidateChatAccessAsync(currentUserId);
+            if (!accessCheck.Success)
+                return ServiceResult<List<ChatUserDto>>.Fail(accessCheck.Message!, resultType: accessCheck.ResultType);
+
             _logger.LogInformation("Fetching active chat users for {UserId}", currentUserId);
             var result = await _chatRepo.GetActiveChatUsersWithUnreadCountAsync(currentUserId);
 
@@ -62,7 +67,9 @@ namespace MARN_API.Services.Implementations
             { 
                 user.IsOnline = _tracker.IsOnline(user.Id);
                 if (user.LastMessage != null)
-                    user.LastMessage.Content = _encryptionService.Decrypt(user.LastMessage.Content);
+                    user.LastMessage.Content = user.LastMessage.IsHiddenByModeration
+                        ? HiddenMessagePlaceholder
+                        : _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
             return ServiceResult<List<ChatUserDto>>.Ok(result);
@@ -70,6 +77,10 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<List<ChatUserDto>>> SearchUsersWithStatusAsync(string currentUserId, string query, int limit)
         {
+            var accessCheck = await ValidateChatAccessAsync(currentUserId);
+            if (!accessCheck.Success)
+                return ServiceResult<List<ChatUserDto>>.Fail(accessCheck.Message!, resultType: accessCheck.ResultType);
+
             _logger.LogInformation("Searching for users with query '{Query}' for {UserId}", query, currentUserId);
             var result = await _chatRepo.SearchUsersAsync(currentUserId, query, limit);
 
@@ -77,7 +88,9 @@ namespace MARN_API.Services.Implementations
             {
                 user.IsOnline = _tracker.IsOnline(user.Id);
                 if (user.LastMessage != null)
-                    user.LastMessage.Content = _encryptionService.Decrypt(user.LastMessage.Content);
+                    user.LastMessage.Content = user.LastMessage.IsHiddenByModeration
+                        ? HiddenMessagePlaceholder
+                        : _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
             return ServiceResult<List<ChatUserDto>>.Ok(result);
@@ -85,6 +98,10 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<List<MessageDto>>> GetChatHistoryAsync(string currentUserId, string otherUserId)
         {
+            var accessCheck = await ValidateChatAccessAsync(currentUserId);
+            if (!accessCheck.Success)
+                return ServiceResult<List<MessageDto>>.Fail(accessCheck.Message!, resultType: accessCheck.ResultType);
+
             _logger.LogInformation("Fetching chat history between {UserId} and {OtherUserId}", currentUserId, otherUserId);
             
             var messages = await _chatRepo.GetMessagesBetweenUsersAsync(currentUserId, otherUserId);
@@ -94,9 +111,10 @@ namespace MARN_API.Services.Implementations
                 Id = m.Id,
                 SenderId = m.SenderId.ToString(),
                 ReceiverId = m.ReceiverId.ToString(),
-                Content = _encryptionService.Decrypt(m.Content), // Decrypt for the UI
+                Content = m.IsHiddenByModeration ? HiddenMessagePlaceholder : _encryptionService.Decrypt(m.Content),
                 SentAt = m.SentAt,
-                IsRead = m.ReadAt.HasValue
+                IsRead = m.ReadAt.HasValue,
+                IsHiddenByModeration = m.IsHiddenByModeration
             }).ToList();
 
             return ServiceResult<List<MessageDto>>.Ok(result);
@@ -108,6 +126,10 @@ namespace MARN_API.Services.Implementations
         public async Task<ServiceResult<MessageDto>> SendMessageAsync(string senderId, string receiverId, string content)
         {
             _logger.LogInformation("Sending message from {SenderId} to {ReceiverId}", senderId, receiverId);
+
+            var accessCheck = await ValidateChatAccessAsync(senderId);
+            if (!accessCheck.Success)
+                return ServiceResult<MessageDto>.Fail(accessCheck.Message!, resultType: accessCheck.ResultType);
 
             // 1. Check the input
             if (!Guid.TryParse(senderId, out var senderGuid) ||
@@ -121,7 +143,9 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<MessageDto>.Fail("Message content cannot be empty");
             }
 
-            var senderUser = await _userManager.FindByIdAsync(senderId);
+            var senderUser = await _dbContext.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == senderGuid);
             if (senderUser == null)
             {
                 _logger.LogWarning("Sender user {SenderId} not found", senderId);
@@ -135,6 +159,12 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogWarning("Receiver user {ReceiverId} not found", receiverId);
                 return ServiceResult<MessageDto>.Fail("Receiver user not found", resultType: ServiceResultType.NotFound);
+            }
+
+            if (receiverUser.AccountStatus == Enums.Account.AccountStatus.Banned)
+            {
+                _logger.LogWarning("Cannot send message to banned user {ReceiverId}", receiverId);
+                return ServiceResult<MessageDto>.Fail("Cannot send messages to a banned user.", resultType: ServiceResultType.Forbidden);
             }
 
             // Prevent sending messages to soft-deleted users
@@ -192,7 +222,8 @@ namespace MARN_API.Services.Implementations
                 ReceiverName = $"{receiverUser.FirstName} {receiverUser.LastName}",
                 Content = content, // Return plaintext to the sender's UI
                 SentAt = message.SentAt,
-                IsRead = message.ReadAt.HasValue
+                IsRead = message.ReadAt.HasValue,
+                IsHiddenByModeration = false
             };
 
             return ServiceResult<MessageDto>.Ok(dto);
@@ -200,11 +231,33 @@ namespace MARN_API.Services.Implementations
 
         public async Task<ServiceResult<bool>> MarkChatAsReadAsync(string currentUserId, string senderId)
         {
+            var accessCheck = await ValidateChatAccessAsync(currentUserId);
+            if (!accessCheck.Success)
+                return ServiceResult<bool>.Fail(accessCheck.Message!, resultType: accessCheck.ResultType);
+
             _logger.LogInformation("Marking messages from {SenderId} to {ReceiverId} as read", senderId, currentUserId);
 
             await _chatRepo.MarkMessagesAsReadAsync(senderId: senderId, receiverId: currentUserId);
             return ServiceResult<bool>.Ok(true);
         }
         #endregion
+
+        private async Task<ServiceResult<bool>> ValidateChatAccessAsync(string userId)
+        {
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return ServiceResult<bool>.Fail("Invalid userId format", resultType: ServiceResultType.BadRequest);
+
+            var user = await _dbContext.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == parsedUserId);
+
+            if (user == null || user.DeletedAt != null)
+                return ServiceResult<bool>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
+
+            if (user.AccountStatus == Enums.Account.AccountStatus.Banned)
+                return ServiceResult<bool>.Fail("Banned accounts cannot use chat.", resultType: ServiceResultType.Forbidden);
+
+            return ServiceResult<bool>.Ok(true);
+        }
     }
 }
