@@ -172,7 +172,6 @@ namespace MARN_API
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
-            builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
             builder.Services.AddScoped<IAdminAnalyticsReportService, AdminAnalyticsReportService>();
             builder.Services.AddScoped<IAdminDetailedStatsService, AdminDetailedStatsService>();
