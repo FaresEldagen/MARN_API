@@ -59,12 +59,12 @@ namespace MARN_API.Services.Implementations
             var currentUser = await _userManager.FindByIdAsync(userId.ToString());
             if (currentUser == null)
             {
-                return ServiceResult<ContractResponseDto>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
+                return ServiceResult<long>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
             }
 
             if (currentUser.AccountStatus == Enums.Account.AccountStatus.Banned)
             {
-                return ServiceResult<ContractResponseDto>.Fail("Banned accounts cannot create contracts.", resultType: ServiceResultType.Forbidden);
+                return ServiceResult<long>.Fail("Banned accounts cannot create contracts.", resultType: ServiceResultType.Forbidden);
             }
 
             var booking = await _bookingRequestRepo.GetByIdAsync(bookingRequestId);
@@ -136,12 +136,12 @@ namespace MARN_API.Services.Implementations
             var renterUser = await _userManager.FindByIdAsync(userId.ToString());
             if (renterUser == null)
             {
-                return ServiceResult<ContractResponseDto>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
+                return ServiceResult<long>.Fail("User not found.", resultType: ServiceResultType.Unauthorized);
             }
 
             if (renterUser.AccountStatus == Enums.Account.AccountStatus.Banned)
             {
-                return ServiceResult<ContractResponseDto>.Fail("Banned accounts cannot sign new contracts.", resultType: ServiceResultType.Forbidden);
+                return ServiceResult<long>.Fail("Banned accounts cannot sign new contracts.", resultType: ServiceResultType.Forbidden);
             }
 
             if (contract.Status != ContractStatus.Pending)
