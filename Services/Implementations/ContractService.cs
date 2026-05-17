@@ -28,6 +28,7 @@ namespace MARN_API.Services.Implementations
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
         private readonly ILogger<ContractService> _logger;
+        private readonly MARN_API.Data.AppDbContext _context;
 
         public ContractService(
             IContractRepo contractRepo,
@@ -39,7 +40,8 @@ namespace MARN_API.Services.Implementations
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
             INotificationService notificationService,
-            ILogger<ContractService> logger)
+            ILogger<ContractService> logger,
+            MARN_API.Data.AppDbContext context)
         {
             _contractRepo = contractRepo;
             _hashingService = hashingService;
@@ -51,6 +53,7 @@ namespace MARN_API.Services.Implementations
             _mapper = mapper;
             _notificationService = notificationService;
             _logger = logger;
+            _context = context;
         }
 
 
@@ -106,17 +109,34 @@ namespace MARN_API.Services.Implementations
                 TotalContractAmount = totalContractAmount
             };
 
-            await _contractRepo.AddAsync(contract);
-            await _bookingRequestRepo.DeleteAsync(booking);
-
-            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                UserId = contract.RenterId.ToString(),
-                UserType = NotificationUserType.Renter,
-                Type = NotificationType.ContractStarted,
-                Title = "Contract Ready for Signature",
-                Body = $"The owner of \"{property.Title}\" has generated a contract for you. Please review and sign it."
-            });
+                await _contractRepo.AddAsync(contract);
+                await _bookingRequestRepo.DeleteAsync(booking);
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            try
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = contract.RenterId.ToString(),
+                    UserType = NotificationUserType.Renter,
+                    Type = NotificationType.ContractStarted,
+                    Title = "Contract Ready for Signature",
+                    Body = $"The owner of \"{property.Title}\" has generated a contract for you. Please review and sign it."
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send notification for contractId: {contractId}", contract.Id);
+            }
 
             _logger.LogInformation("Create Contract successful for contractId: {contractId}", contract.Id);
             return ServiceResult<long>.Ok(contract.Id, "Contract created successfully.", ServiceResultType.Created);
