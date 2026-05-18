@@ -9,6 +9,7 @@ namespace MARN_API.DTOs.Property
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
         public bool IsShared { get; set; }
         public int MaxOccupants { get; set; }
         public int Bedrooms { get; set; }
@@ -16,9 +17,12 @@ namespace MARN_API.DTOs.Property
         public int Bathrooms { get; set; }
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
+        public string RentalUnitDisplayName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
+        public string CityDisplayName { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
+        public string StateDisplayName { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;
         public double SquareMeters { get; set; }
         public double Latitude { get; set; }
@@ -36,6 +40,7 @@ namespace MARN_API.DTOs.Property
     {
         public long Id { get; set; }
         public AmenityType Amenity { get; set; }
+        public string AmenityDisplayName { get; set; } = string.Empty;
     }
 
     public class PropertyRuleDto

@@ -150,6 +150,8 @@ namespace MARN_API
                         Array.Empty<string>()
                     }
                 });
+
+                options.OperationFilter<AcceptLanguageHeaderOperationFilter>();
             });
             #endregion
 
@@ -213,6 +215,7 @@ namespace MARN_API
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IAppTextLocalizer, AppTextLocalizer>();
+            builder.Services.AddScoped<IResponsePayloadLocalizer, ResponsePayloadLocalizer>();
             builder.Services.AddScoped<IUserCultureService, UserCultureService>();
             builder.Services.AddScoped<INotificationContentLocalizer, NotificationContentLocalizer>();
 

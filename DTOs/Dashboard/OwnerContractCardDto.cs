@@ -6,6 +6,7 @@ namespace MARN_API.DTOs.Dashboard
     {
         public long ContractId { get; set; }
         public ContractStatus ContractStatus { get; set; }
+        public string ContractStatusDisplayName { get; set; } = string.Empty;
         public DateTime ExpiryDate { get; set; }
 
         public Guid RenterId { get; set; }

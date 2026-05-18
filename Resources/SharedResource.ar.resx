@@ -761,4 +761,12 @@
   <data name="TEXT_CONTRACT_IS_ALREADY_SIGNED" xml:space="preserve"><value>العقد موقع بالفعل.</value></data>
   <data name="TEXT_YOU_DO_NOT_HAVE_ACCESS_TO_CANCEL_THIS_CONTRACT" xml:space="preserve"><value>ليس لديك إمكانية إلغاء هذا العقد.</value></data>
   <data name="TEXT_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve"><value>تم إلغاء العقد بنجاح.</value></data>
+  <data name="ROLE_Admin" xml:space="preserve"><value>مسؤول</value></data>
+  <data name="ROLE_Owner" xml:space="preserve"><value>مالك</value></data>
+  <data name="ROLE_Renter" xml:space="preserve"><value>مستأجر</value></data>
+  <data name="ROLE_Moderator" xml:space="preserve"><value>مشرف</value></data>
+  <data name="TEXT_DELETED_PROPERTY" xml:space="preserve"><value>[عقار محذوف]</value></data>
+  <data name="TEXT_DELETED_MESSAGE" xml:space="preserve"><value>[رسالة محذوفة]</value></data>
+  <data name="TEXT_DELETED_COMMENT" xml:space="preserve"><value>[تعليق محذوف]</value></data>
+  <data name="TEXT_MESSAGE_BETWEEN_0_AND_1" xml:space="preserve"><value>رسالة بين {0} و {1}</value></data>
 </root>

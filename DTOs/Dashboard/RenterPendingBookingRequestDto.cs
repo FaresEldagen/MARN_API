@@ -8,6 +8,7 @@ namespace MARN_API.DTOs.Dashboard
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
 
         public long PropertyId { get; set; }
         public string PropertyTitle { get; set; } = string.Empty;

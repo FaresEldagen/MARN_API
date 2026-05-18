@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using MARN_API;
 using MARN_API.Localization;
 using MARN_API.Services.Interfaces;
 using Microsoft.Extensions.Localization;
@@ -31,7 +32,9 @@ namespace MARN_API.Services.Implementations
             using var scope = CreateCultureScope(culture);
             var nonNullableArguments = arguments.Select(argument => argument ?? string.Empty).ToArray();
             var localized = arguments.Length == 0 ? _localizer[key] : _localizer[key, nonNullableArguments];
-            return localized.ResourceNotFound ? key : localized.Value;
+            return localized.ResourceNotFound
+                ? FormatForCulture(key, culture)
+                : FormatForCulture(localized.Value, culture);
         }
 
         public string GetOrFallback(string key, string fallback, CultureInfo? culture = null, params object?[] arguments)
@@ -41,7 +44,7 @@ namespace MARN_API.Services.Implementations
                 return Get(key, culture, arguments);
             }
 
-            return FormatFallback(fallback, culture, arguments);
+            return FormatForCulture(FormatFallback(fallback, culture, arguments), culture);
         }
 
         public string LocalizeLiteral(string? message, CultureInfo? culture = null)
@@ -52,7 +55,7 @@ namespace MARN_API.Services.Implementations
             }
 
             var key = $"TEXT_{BuildLiteralKey(message)}";
-            return HasTranslation(key, culture) ? Get(key, culture) : message;
+            return HasTranslation(key, culture) ? Get(key, culture) : FormatForCulture(message, culture);
         }
 
         public string LocalizeMessage(string? code, string? fallbackMessage, CultureInfo? culture = null, object?[]? arguments = null)
@@ -69,15 +72,15 @@ namespace MARN_API.Services.Implementations
                 var literalTranslation = LocalizeLiteral(fallbackMessage, culture);
                 if (!string.Equals(literalTranslation, fallbackMessage, StringComparison.Ordinal))
                 {
-                    return FormatFallback(literalTranslation, culture, arguments);
+                    return FormatForCulture(FormatFallback(literalTranslation, culture, arguments), culture);
                 }
 
-                return FormatFallback(fallbackMessage, culture, arguments);
+                return FormatForCulture(FormatFallback(fallbackMessage, culture, arguments), culture);
             }
 
             if (!string.IsNullOrWhiteSpace(code))
             {
-                return code;
+                return FormatForCulture(code, culture);
             }
 
             return string.Empty;
@@ -86,7 +89,20 @@ namespace MARN_API.Services.Implementations
         public string GetEnumDisplayName<TEnum>(TEnum value, CultureInfo? culture = null) where TEnum : struct, Enum
         {
             var key = $"ENUM_{typeof(TEnum).Name}_{value}";
-            return HasTranslation(key, culture) ? Get(key, culture) : value.ToString();
+            return HasTranslation(key, culture) ? Get(key, culture) : FormatForCulture(value.ToString(), culture);
+        }
+
+        public string GetEnumDisplayName(Type enumType, object value, CultureInfo? culture = null)
+        {
+            if (!enumType.IsEnum)
+            {
+                throw new ArgumentException("Type must be an enum.", nameof(enumType));
+            }
+
+            var key = $"ENUM_{enumType.Name}_{value}";
+            return HasTranslation(key, culture)
+                ? Get(key, culture)
+                : FormatForCulture(value.ToString() ?? string.Empty, culture);
         }
 
         private static string BuildLiteralKey(string message)
@@ -123,6 +139,11 @@ namespace MARN_API.Services.Implementations
             }
 
             return string.Format(culture ?? CultureInfo.CurrentUICulture, fallback, arguments);
+        }
+
+        private static string FormatForCulture(string text, CultureInfo? culture)
+        {
+            return BidiText.Format(text, culture);
         }
 
         private static CultureScope? CreateCultureScope(CultureInfo? culture)

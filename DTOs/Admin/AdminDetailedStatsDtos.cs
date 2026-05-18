@@ -73,18 +73,21 @@ namespace MARN_API.DTOs.Admin
     public class AdminRoleCountDto
     {
         public string RoleName { get; set; } = string.Empty;
+        public string RoleNameDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 
     public class AdminGovernorateCountDto
     {
         public string Governorate { get; set; } = string.Empty;
+        public string GovernorateDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 
     public class AdminPaymentStatusSummaryDto
     {
         public PaymentStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
         public decimal Sales { get; set; }
         public decimal Revenue { get; set; }
@@ -105,6 +108,7 @@ namespace MARN_API.DTOs.Admin
     public class AdminAccountStatusCountDto
     {
         public AccountStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 
@@ -115,9 +119,11 @@ namespace MARN_API.DTOs.Admin
         public string? Email { get; set; }
         public string? ProfileImage { get; set; }
         public AccountStatus AccountStatus { get; set; }
+        public string AccountStatusDisplayName { get; set; } = string.Empty;
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<string> Roles { get; set; } = [];
+        public List<string> RolesDisplayNames { get; set; } = [];
         public long OwnedPropertiesCount { get; set; }
         public long ActivePropertiesCount { get; set; }
         public long RenterContractsCount { get; set; }
@@ -148,12 +154,14 @@ namespace MARN_API.DTOs.Admin
     public class AdminPropertyStatusCountDto
     {
         public PropertyStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 
     public class AdminPropertyTypeCountDto
     {
         public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 
@@ -226,6 +234,7 @@ namespace MARN_API.DTOs.Admin
         public long ContractId { get; set; }
         public long PaymentScheduleId { get; set; }
         public PaymentStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public decimal AmountTotal { get; set; }
         public decimal PlatformFee { get; set; }
         public decimal OwnerAmount { get; set; }

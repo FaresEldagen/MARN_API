@@ -35,6 +35,7 @@ namespace MARN_API.Services.Implementations
             query.PageSize = query.PageSize < 1 ? 20 : Math.Min(query.PageSize, MaxPageSize);
 
             var result = await _reportRepo.GetAdminQueueAsync(query);
+            LocalizeTargetLabels(result.Reports.Items);
             return ServiceResult<AdminModerationQueueDto>.Ok(result);
         }
 
@@ -457,7 +458,7 @@ namespace MARN_API.Services.Implementations
                         Exists = true,
                         PropertyId = property.Id,
                         Title = property.Title,
-                        Subtitle = $"{property.City}, {property.State}",
+                        Subtitle = $"{GetLocationDisplayName<Enums.Property.City>(property.City)}, {GetLocationDisplayName<Enums.Property.Governorate>(property.State)}",
                         Preview = property.Description,
                         UserId = property.OwnerId,
                         IsDeletedOrInactive = property.DeletedAt != null || !property.IsActive
@@ -527,5 +528,57 @@ namespace MARN_API.Services.Implementations
 
         private string TF(string key, string fallback, params object?[] arguments)
             => _localizer.GetOrFallback(key, fallback, arguments: arguments);
+
+        private void LocalizeTargetLabels(IEnumerable<AdminModerationReportListItemDto> reports)
+        {
+            foreach (var report in reports)
+            {
+                report.TargetLabel = report.ReportableType switch
+                {
+                    ReportableType.Message => LocalizeMessageTargetLabel(report.TargetLabel),
+                    ReportableType.PropertyComment when string.Equals(report.TargetLabel, "[Deleted comment]", StringComparison.Ordinal) => T("[Deleted comment]"),
+                    ReportableType.PropertyComment => TF("TEXT_ON_PROPERTY_0", "On property: {0}", report.TargetLabel.Replace("Comment on ", string.Empty, StringComparison.Ordinal)),
+                    ReportableType.User when string.Equals(report.TargetLabel, "[Deleted user]", StringComparison.Ordinal) => T("[Deleted user]"),
+                    ReportableType.Property when string.Equals(report.TargetLabel, "[Deleted property]", StringComparison.Ordinal) => T("[Deleted property]"),
+                    _ => report.TargetLabel
+                };
+            }
+        }
+
+        private string LocalizeMessageTargetLabel(string targetLabel)
+        {
+            if (string.Equals(targetLabel, "[Deleted message]", StringComparison.Ordinal))
+            {
+                return T("[Deleted message]");
+            }
+
+            const string prefix = "Message between ";
+            var marker = " and ";
+            if (!targetLabel.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return targetLabel;
+            }
+
+            var names = targetLabel[prefix.Length..];
+            var separatorIndex = names.IndexOf(marker, StringComparison.Ordinal);
+            if (separatorIndex <= 0)
+            {
+                return targetLabel;
+            }
+
+            var firstName = names[..separatorIndex];
+            var secondName = names[(separatorIndex + marker.Length)..];
+            return TF("TEXT_MESSAGE_BETWEEN_0_AND_1", "Message between {0} and {1}", firstName, secondName);
+        }
+
+        private string GetLocationDisplayName<TEnum>(string? rawValue) where TEnum : struct, Enum
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<TEnum>(rawValue, true, out var parsed))
+            {
+                return _localizer.GetEnumDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
+        }
     }
 }

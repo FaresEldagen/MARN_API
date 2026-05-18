@@ -327,7 +327,7 @@ namespace MARN_API.Services.Implementations
                             _localizer.GetEnumDisplayName(x.AccountStatus),
                             x.IsDeleted,
                             x.CreatedAt,
-                            string.Join(", ", x.Roles),
+                            string.Join(", ", GetRoleDisplayNames(x.Roles)),
                             x.OwnedPropertiesCount,
                             x.ActivePropertiesCount,
                             x.RenterContractsCount,
@@ -591,7 +591,7 @@ namespace MARN_API.Services.Implementations
                     x.FullName,
                     _localizer.GetEnumDisplayName(x.AccountStatus),
                     x.CreatedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                    string.Join(", ", x.Roles)
+                    string.Join(", ", GetRoleDisplayNames(x.Roles))
                 }));
 
             column.Item().Text(T("User Activity Metrics")).SemiBold();
@@ -770,6 +770,17 @@ namespace MARN_API.Services.Implementations
                 foreach (var row in rows)
                     AddRow(table, row);
             });
+        }
+
+        private IEnumerable<string> GetRoleDisplayNames(IEnumerable<string> roles)
+        {
+            return roles.Select(GetRoleDisplayName);
+        }
+
+        private string GetRoleDisplayName(string role)
+        {
+            var roleKey = $"ROLE_{role.Replace(' ', '_')}";
+            return _localizer.GetOrFallback(roleKey, role);
         }
 
         private static void ComposeSixColumnTable(ColumnDescriptor column, string[] headers, IEnumerable<string[]> rows)

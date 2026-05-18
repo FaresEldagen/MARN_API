@@ -10,6 +10,7 @@ namespace MARN_API.DTOs.Property
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
         public int MaxOccupants { get; set; }
         public bool IsShared { get; set; }
         public int Bedrooms { get; set; }
@@ -19,9 +20,12 @@ namespace MARN_API.DTOs.Property
         public int ViewsCount { get; set; }
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
+        public string RentalUnitDisplayName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
+        public string CityDisplayName { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
+        public string StateDisplayName { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
@@ -58,6 +62,7 @@ namespace MARN_API.DTOs.Property
     {
         public long Id { get; set; }
         public AmenityType Amenity { get; set; }
+        public string AmenityDisplayName { get; set; } = string.Empty;
     }
 
     public class PropertyRuleItemDto
@@ -108,11 +113,13 @@ namespace MARN_API.DTOs.Property
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
     }
 
     public class OwnerPropertyExtrasDto
     {
         public PropertyStatus? PropertyStatus { get; set; }
+        public string PropertyStatusDisplayName { get; set; } = string.Empty;
         public List<OwnerPropertyContractHistoryDto> ContractsHistory { get; set; } = new();
         public List<OwnerPropertyPendingBookingRequestDto> PendingBookingRequests { get; set; } = new();
     }
@@ -121,6 +128,7 @@ namespace MARN_API.DTOs.Property
     {
         public long ContractId { get; set; }
         public ContractStatus ContractStatus { get; set; }
+        public string ContractStatusDisplayName { get; set; } = string.Empty;
         public DateTime ExpiryDate { get; set; }
         public Guid RenterId { get; set; }
         public string RenterName { get; set; } = string.Empty;
@@ -132,6 +140,7 @@ namespace MARN_API.DTOs.Property
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
 
 
         public Guid RenterId { get; set; }

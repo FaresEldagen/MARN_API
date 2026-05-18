@@ -10,5 +10,6 @@ namespace MARN_API.Services.Interfaces
         string LocalizeLiteral(string? message, CultureInfo? culture = null);
         string LocalizeMessage(string? code, string? fallbackMessage, CultureInfo? culture = null, object?[]? arguments = null);
         string GetEnumDisplayName<TEnum>(TEnum value, CultureInfo? culture = null) where TEnum : struct, Enum;
+        string GetEnumDisplayName(Type enumType, object value, CultureInfo? culture = null);
     }
 }

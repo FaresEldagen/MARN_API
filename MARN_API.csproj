@@ -11,9 +11,13 @@
 
   <ItemGroup>
     <Compile Remove="Data\Seeding Data\**" />
+    <Compile Remove="old contract pdf\**" />
     <Content Remove="Data\Seeding Data\**" />
+    <Content Remove="old contract pdf\**" />
     <EmbeddedResource Remove="Data\Seeding Data\**" />
+    <EmbeddedResource Remove="old contract pdf\**" />
     <None Remove="Data\Seeding Data\**" />
+    <None Include="old contract pdf\**" />
   </ItemGroup>
 
   <ItemGroup>

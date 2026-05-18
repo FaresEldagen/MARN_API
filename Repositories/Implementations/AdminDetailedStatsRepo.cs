@@ -603,7 +603,7 @@ namespace MARN_API.Repositories.Implementations
                     return new AdminCountTimePointDto
                     {
                         PeriodStartUtc = periodStartUtc,
-                        Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
+                        Label = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
                         Count = x.Count
                     };
                 })
@@ -661,7 +661,7 @@ namespace MARN_API.Repositories.Implementations
                     return new AdminRevenueTimePointDto
                     {
                         PeriodStartUtc = periodStartUtc,
-                        Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
+                        Label = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
                         Revenue = x.Revenue,
                         Sales = x.Sales,
                         OwnerPayouts = x.OwnerPayouts,

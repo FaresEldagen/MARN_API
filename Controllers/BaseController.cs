@@ -14,6 +14,7 @@ namespace MARN_API.Controllers
         {
             var code = result.Code ?? GetDefaultCode(result.ResultType);
             var message = Localizer.LocalizeMessage(code, result.Message, arguments: result.MessageArguments);
+            ResponsePayloadLocalizer.Localize(result.Data);
 
             return result.ResultType switch
             {
@@ -92,6 +93,7 @@ namespace MARN_API.Controllers
             => BadRequestLocalized("Webhook signature validation failed.", "INVALID_WEBHOOK_SIGNATURE");
 
         private IAppTextLocalizer Localizer => HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+        private IResponsePayloadLocalizer ResponsePayloadLocalizer => HttpContext.RequestServices.GetRequiredService<IResponsePayloadLocalizer>();
 
         private static string GetDefaultCode(ServiceResultType resultType)
         {

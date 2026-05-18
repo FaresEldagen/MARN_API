@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using MARN_API.DTOs.Contracts;
 using MARN_API.Enums.Payment;
+using MARN_API.Localization;
 using MARN_API.Services.Interfaces;
 using QuestPDF.Drawing;
 using QuestPDF.Fluent;
@@ -14,6 +16,12 @@ namespace MARN_API.Services.Implementations
 {
     public class ContractPdfGenerator
     {
+        private const string LocalizedSeparator = " / ";
+        private const string EnglishGoverningLawNote = "This document is electronically signed and intended to be legally binding under Egypt Law No. 15 of 2004.";
+        private const string ArabicGoverningLawNote = "هذا المستند موقع إلكترونيًا ويقصد به أن يكون ملزمًا قانونًا وفقًا لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004.";
+        private const string EnglishConsentFallback = "I acknowledge that this electronic signature is legally binding.";
+        private const string ArabicConsentFallback = "أقر بأن هذا التوقيع الإلكتروني ملزم قانونًا.";
+
         private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en");
         private static readonly CultureInfo ArabicCulture = CultureInfo.GetCultureInfo("ar");
         private static int _fontsRegistered;
@@ -38,24 +46,15 @@ namespace MARN_API.Services.Implementations
 
             request.IssuedAtUtc ??= DateTime.UtcNow;
             request.ContractNumber ??= $"MARN-{request.IssuedAtUtc:yyyyMMdd-HHmmss}";
-            request.GoverningLawNote ??= "This document is electronically signed and intended to be legally binding under Egypt Law No. 15 of 2004.";
+            request.GoverningLawNote ??= EnglishGoverningLawNote;
 
             EnsureFontsRegistered();
             QuestPDF.Settings.License = LicenseType.Community;
 
             var pdfBytes = Document.Create(document =>
             {
-                document.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(28);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(style => style.FontFamily("Arial").FontSize(10.5f).FontColor(Colors.Grey.Darken4));
-
-                    page.Header().Element(container => ComposeHeader(container, request));
-                    page.Content().PaddingVertical(16).Element(container => ComposeContent(container, request, _env.WebRootPath));
-                    page.Footer().Element(ComposeFooter);
-                });
+                ComposeContractPage(document, request, isArabic: false);
+                ComposeContractPage(document, request, isArabic: true);
             }).GeneratePdf();
 
             return new GeneratedContractPdfResult
@@ -67,222 +66,248 @@ namespace MARN_API.Services.Implementations
             };
         }
 
-        private void ComposeHeader(IContainer container, ContractPdfRequest request)
+        private void ComposeContractPage(IDocumentContainer document, ContractPdfRequest request, bool isArabic)
+        {
+            document.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(32);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(style => style.FontFamily("Tahoma").FontSize(11).FontColor(Colors.Grey.Darken4));
+
+                page.Header().Element(container => ComposeHeader(container, request, isArabic));
+                page.Content().PaddingVertical(18).Element(container => ComposeContent(container, request, _env.WebRootPath ?? string.Empty, isArabic));
+                page.Footer().Element(container => ComposeFooter(container, isArabic));
+            });
+        }
+
+        private void ComposeHeader(IContainer container, ContractPdfRequest request, bool isArabic)
         {
             container.Column(column =>
             {
-                column.Item().Background("#12343B").Padding(18).Column(inner =>
+                column.Item().Background("#12343B").Padding(20).Column(inner =>
                 {
-                    inner.Item().Text(Bilingual("Residential Rental Agreement", "عقد إيجار سكني"))
-                        .FontSize(20)
+                    inner.Item().AlignLeftOrRight(isArabic).Text(T(
+                            "Residential Rental Agreement",
+                            "عقد إيجار سكني",
+                            isArabic))
+                        .FontSize(24)
                         .SemiBold()
                         .FontColor(Colors.White);
 
-                    inner.Item().PaddingTop(4).Text(Bilingual(
+                    inner.Item().PaddingTop(6).AlignLeftOrRight(isArabic).Text(T(
                             "Prepared for digital acceptance and contract verification",
-                            "أُعد هذا العقد للقبول الرقمي والتحقق من صحة العقد"))
-                        .FontColor("#D7E6E8")
-                        .FontSize(10);
+                            "أعد هذا العقد للقبول الرقمي والتحقق من صحة العقد",
+                            isArabic))
+                        .FontColor("#D7E6E8");
                 });
 
-                column.Item().Background("#F2F7F7").Padding(12).Row(row =>
+                column.Item().Background("#F2F7F7").Padding(14).Row(row =>
                 {
-                    row.RelativeItem().Element(cell => ComposeMetaCell(cell, "Contract Number", "رقم العقد", request.ContractNumber!));
-                    row.RelativeItem().Element(cell => ComposeMetaCell(cell, "Issued (UTC)", "تاريخ الإصدار", $"{request.IssuedAtUtc:yyyy-MM-dd HH:mm:ss}"));
-                    row.RelativeItem().Element(cell => ComposeMetaCell(cell, "Property ID", "معرف العقار", request.Property!.UnitNumber ?? NotAvailable()));
+                    row.RelativeItem().Element(cell => ComposeMetaCell(cell, T("Contract Number", "رقم العقد", isArabic), TextValue(request.ContractNumber, isArabic), isArabic));
+                    row.RelativeItem().Element(cell => ComposeMetaCell(cell, T("Issued (UTC)", "تاريخ الإصدار (UTC)", isArabic), TextValue(FormatDateTime(request.IssuedAtUtc), isArabic), isArabic));
+                    row.RelativeItem().Element(cell => ComposeMetaCell(cell, T("Property ID", "معرف العقار", isArabic), ValueText(request.Property!.UnitNumber, isArabic), isArabic));
                 });
             });
         }
 
-        private void ComposeContent(IContainer container, ContractPdfRequest request, string webRootPath)
+        private void ComposeContent(IContainer container, ContractPdfRequest request, string webRootPath, bool isArabic)
         {
+            var property = request.Property!;
             var rentalTerms = request.RentalTerms!;
             var signature = request.ElectronicSignature!;
 
             container.Column(column =>
             {
-                column.Spacing(16);
+                column.Spacing(18);
 
                 column.Item().Element(section =>
-                    ComposeSection(section, "Agreement Overview", "نظرة عامة على الاتفاق", body =>
+                    ComposeSection(section, T("Agreement Overview", "نظرة عامة على الاتفاق", isArabic), isArabic, body =>
                     {
-                        ComposeParagraph(body,
-                            $"This Residential Rental Agreement is made between {request.Landlord!.FullName} (the \"Landlord\") and {request.Tenant!.FullName} (the \"Tenant\").",
-                            $"يُبرم عقد الإيجار السكني هذا بين {request.Landlord!.FullName} بصفته المؤجر و{request.Tenant!.FullName} بصفته المستأجر.");
+                        body.Item().AlignLeftOrRight(isArabic).Text(TextValue(
+                            isArabic
+                                ? $"يبرم عقد الإيجار السكني هذا بين {request.Landlord!.FullName} بصفته المؤجر و{request.Tenant!.FullName} بصفته المستأجر."
+                                : $"This Residential Rental Agreement is made between {request.Landlord!.FullName} (the \"Landlord\") and {request.Tenant!.FullName} (the \"Tenant\").",
+                            isArabic));
 
-                        ComposeParagraph(body,
-                            $"The Landlord agrees to rent to the Tenant the property identified as {request.Property!.ListingTitle}, located at {request.Property.AddressLine}, {request.Property.UnitNumber}, {request.Property.City}, {request.Property.Country}.",
-                            $"يوافق المؤجر على تأجير العقار المسمى {request.Property!.ListingTitle} والكائن في {request.Property.AddressLine}، {request.Property.UnitNumber}، {request.Property.City}، {request.Property.Country} إلى المستأجر.");
+                        body.Item().PaddingTop(8).AlignLeftOrRight(isArabic).Text(TextValue(
+                            isArabic
+                                ? $"يوافق المؤجر على تأجير العقار المسمى {ResolveLocalizedValue(property.ListingTitle, isArabic)} والكائن في {BuildPropertyLocation(property, isArabic)}."
+                                : $"The Landlord agrees to rent to the Tenant the property identified as {ResolveLocalizedValue(property.ListingTitle, isArabic)}, located at {BuildPropertyLocation(property, isArabic)}.",
+                            isArabic));
 
-                        if (!string.IsNullOrWhiteSpace(request.Property.Description))
+                        if (!string.IsNullOrWhiteSpace(property.Description))
                         {
-                            body.Item().PaddingTop(4).Text(Bilingual("Description", "الوصف")).SemiBold().FontColor("#12343B");
-                            body.Item().Text(request.Property.Description);
+                            body.Item().PaddingTop(8).AlignLeftOrRight(isArabic).Text(T("Description", "الوصف", isArabic)).SemiBold().FontColor("#12343B");
+                            body.Item().AlignLeftOrRight(isArabic).Text(ValueText(property.Description, isArabic));
                         }
                     }));
 
                 column.Item().Row(row =>
                 {
-                    row.RelativeItem().Element(card => ComposePartyCard(card, "Landlord", "المؤجر", request.Landlord!));
-                    row.ConstantItem(10);
-                    row.RelativeItem().Element(card => ComposePartyCard(card, "Tenant", "المستأجر", request.Tenant!));
+                    row.RelativeItem().Element(card => ComposePartyCard(card, T("Landlord", "المؤجر", isArabic), request.Landlord!, isArabic));
+                    row.ConstantItem(12);
+                    row.RelativeItem().Element(card => ComposePartyCard(card, T("Tenant", "المستأجر", isArabic), request.Tenant!, isArabic));
                 });
 
                 column.Item().Row(row =>
                 {
                     row.RelativeItem().Element(card =>
-                        ComposeInfoCard(card, "Financial Terms", "الشروط المالية", new[]
+                        ComposeInfoCard(card, T("Financial Terms", "الشروط المالية", isArabic), new[]
                         {
-                            ("Rent Amount", "قيمة الإيجار", FormatMoney(rentalTerms.RentAmount, rentalTerms.Currency!)),
-                            ("Total Contract Amount", "إجمالي قيمة العقد", FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency!)),
-                            ("Payment Frequency", "تكرار الدفع", FormatPaymentFrequency(rentalTerms.PaymentFrequency))
-                        }));
+                            (T("Rent Amount", "قيمة الإيجار", isArabic), FormatMoney(rentalTerms.RentAmount, rentalTerms.Currency, isArabic)),
+                            (T("Total Contract Amount", "إجمالي قيمة العقد", isArabic), FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency, isArabic)),
+                            (T("Payment Frequency", "تكرار الدفع", isArabic), FormatPaymentFrequency(rentalTerms.PaymentFrequency, isArabic))
+                        }, isArabic));
 
-                    row.ConstantItem(10);
+                    row.ConstantItem(12);
 
                     row.RelativeItem().Element(card =>
-                        ComposeInfoCard(card, "Term and Occupancy", "المدة والإشغال", new[]
+                        ComposeInfoCard(card, T("Term and Occupancy", "المدة والإشغال", isArabic), new[]
                         {
-                            ("Lease Start", "بداية العقد", $"{rentalTerms.LeaseStartDate:yyyy-MM-dd}"),
-                            ("Lease End", "نهاية العقد", $"{rentalTerms.LeaseEndDate:yyyy-MM-dd}"),
-                            ("Usage", "الاستخدام", Bilingual("Residential use only", "للاستخدام السكني فقط"))
-                        }));
+                            (T("Lease Start", "بداية العقد", isArabic), TextValue(FormatDate(rentalTerms.LeaseStartDate), isArabic)),
+                            (T("Lease End", "نهاية العقد", isArabic), TextValue(FormatDate(rentalTerms.LeaseEndDate), isArabic)),
+                            (T("Usage", "الاستخدام", isArabic), T("Residential use only", "للاستخدام السكني فقط", isArabic))
+                        }, isArabic));
                 });
 
                 column.Item().Row(row =>
                 {
                     row.RelativeItem().Element(card =>
-                        ComposeInfoCard(card, "Property Details", "تفاصيل العقار", new[]
+                        ComposeInfoCard(card, T("Property Details", "تفاصيل العقار", isArabic), new[]
                         {
-                            ("Title", "العنوان", request.Property!.ListingTitle ?? NotAvailable()),
-                            ("Type", "النوع", request.Property.Type ?? NotAvailable()),
-                            ("Address", "العنوان التفصيلي", request.Property.AddressLine ?? NotAvailable()),
-                            ("City", "المدينة", request.Property.City ?? NotAvailable()),
-                            ("State", "المحافظة", request.Property.State ?? NotAvailable()),
-                            ("Zip Code", "الرمز البريدي", request.Property.ZipCode ?? NotAvailable()),
-                            ("Coordinates", "الإحداثيات", $"{request.Property.Latitude:F4}, {request.Property.Longitude:F4}")
-                        }));
+                            (T("Title", "العنوان", isArabic), ValueText(property.ListingTitle, isArabic)),
+                            (T("Type", "النوع", isArabic), ValueText(property.Type, isArabic)),
+                            (T("Address", "العنوان", isArabic), ValueText(property.AddressLine, isArabic)),
+                            (T("City", "المدينة", isArabic), ValueText(property.City, isArabic)),
+                            (T("State", "المحافظة", isArabic), ValueText(property.State, isArabic)),
+                            (T("Zip Code", "الرمز البريدي", isArabic), ValueText(property.ZipCode, isArabic)),
+                            (T("Coordinates", "الإحداثيات", isArabic), TextValue($"{property.Latitude:F4}, {property.Longitude:F4}", isArabic))
+                        }, isArabic));
 
-                    row.ConstantItem(10);
+                    row.ConstantItem(12);
 
                     row.RelativeItem().Element(card =>
-                        ComposeInfoCard(card, "Property Specifications", "مواصفات العقار", new[]
+                        ComposeInfoCard(card, T("Property Specifications", "مواصفات العقار", isArabic), new[]
                         {
-                            ("Bedrooms", "غرف النوم", request.Property.Bedrooms.ToString(CultureInfo.InvariantCulture)),
-                            ("Beds", "الأسرة", request.Property.Beds.ToString(CultureInfo.InvariantCulture)),
-                            ("Bathrooms", "الحمامات", request.Property.Bathrooms.ToString(CultureInfo.InvariantCulture)),
-                            ("Area", "المساحة", $"{request.Property.SquareMeters} sqm / متر مربع"),
-                            ("Max Occupants", "الحد الأقصى للشاغلين", request.Property.MaxOccupants.ToString(CultureInfo.InvariantCulture)),
-                            ("Shared Space", "سكن مشترك", request.Property.IsShared ? Bilingual("Yes", "نعم") : Bilingual("No", "لا"))
-                        }));
+                            (T("Bedrooms", "غرف النوم", isArabic), TextValue(property.Bedrooms.ToString(CultureInfo.InvariantCulture), isArabic)),
+                            (T("Beds", "الأسرة", isArabic), TextValue(property.Beds.ToString(CultureInfo.InvariantCulture), isArabic)),
+                            (T("Bathrooms", "الحمامات", isArabic), TextValue(property.Bathrooms.ToString(CultureInfo.InvariantCulture), isArabic)),
+                            (T("Area", "المساحة", isArabic), TextValue(isArabic ? $"{property.SquareMeters} متر مربع" : $"{property.SquareMeters} sqm", isArabic)),
+                            (T("Max Occupants", "الحد الأقصى للشاغلين", isArabic), TextValue(property.MaxOccupants.ToString(CultureInfo.InvariantCulture), isArabic)),
+                            (T("Shared Space", "سكن مشترك", isArabic), T(property.IsShared ? "Yes" : "No", property.IsShared ? "نعم" : "لا", isArabic))
+                        }, isArabic));
                 });
 
                 column.Item().Element(section =>
-                    ComposeSection(section, "Property Description and Amenities", "وصف العقار والمرافق", body =>
+                    ComposeSection(section, T("Property Description & Amenities", "وصف العقار والمرافق", isArabic), isArabic, body =>
                     {
-                        if (!string.IsNullOrWhiteSpace(request.Property.Description))
+                        if (!string.IsNullOrWhiteSpace(property.Description))
                         {
-                            body.Item().Text(Bilingual("Description", "الوصف")).SemiBold().FontColor("#12343B");
-                            body.Item().PaddingBottom(8).Text(request.Property.Description);
+                            body.Item().PaddingBottom(4).AlignLeftOrRight(isArabic).Text(T("Description:", "الوصف:", isArabic)).SemiBold().FontColor("#12343B");
+                            body.Item().PaddingBottom(12).AlignLeftOrRight(isArabic).Text(ValueText(property.Description, isArabic));
                         }
 
-                        if (!string.IsNullOrWhiteSpace(request.Property.Amenities))
+                        var amenities = SplitLocalizedList(property.Amenities, isArabic).ToList();
+                        if (amenities.Count > 0)
                         {
-                            body.Item().Text(Bilingual("Amenities", "المرافق")).SemiBold().FontColor("#12343B");
-                            var amenities = request.Property.Amenities.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                            body.Item().PaddingBottom(4).AlignLeftOrRight(isArabic).Text(T("Amenities:", "المرافق:", isArabic)).SemiBold().FontColor("#12343B");
                             foreach (var amenity in amenities)
                             {
-                                ComposeBullet(body, amenity.Trim());
+                                ComposeBullet(body, amenity, isArabic);
                             }
                         }
                     }));
 
-                if (request.Property.MediaPaths != null && request.Property.MediaPaths.Any())
+                var mediaEntries = (property.MediaPaths ?? [])
+                    .Where(path => !string.IsNullOrWhiteSpace(path))
+                    .Select(relativePath =>
+                    {
+                        var cleanPath = relativePath.Trim();
+                        var absolutePath = Path.Combine(webRootPath, cleanPath.TrimStart('/', '\\'));
+                        return new
+                        {
+                            RelativePath = cleanPath,
+                            AbsolutePath = absolutePath,
+                            Exists = File.Exists(absolutePath)
+                        };
+                    })
+                    .ToList();
+
+                if (mediaEntries.Count > 0)
                 {
                     column.Item().Element(section =>
-                        ComposeSection(section, "Property Images", "صور العقار", body =>
+                        ComposeSection(section, T("Property Images", "صور العقار", isArabic), isArabic, body =>
                         {
                             body.Item().Grid(grid =>
                             {
-                                grid.Spacing(8);
+                                grid.Spacing(10);
                                 grid.Columns(3);
 
-                                foreach (var relativePath in request.Property.MediaPaths)
+                                foreach (var mediaEntry in mediaEntries)
                                 {
-                                    var cleanPath = relativePath.TrimStart('/', '\\');
-                                    var absolutePath = Path.Combine(webRootPath, cleanPath);
-
-                                    if (File.Exists(absolutePath))
+                                    if (mediaEntry.Exists)
                                     {
-                                        grid.Item().Height(110).Image(absolutePath);
+                                        grid.Item().Height(120).Image(mediaEntry.AbsolutePath);
+                                        continue;
                                     }
+
+                                    grid.Item().Height(120).Border(1).BorderColor("#D5E3E6").Background("#F6FAFA").Padding(10).Column(card =>
+                                    {
+                                        card.Item().AlignCenter().Text(T("Image unavailable", "الصورة غير متاحة", isArabic))
+                                            .FontColor("#5E777D")
+                                            .FontSize(9)
+                                            .SemiBold();
+
+                                        card.Item().PaddingTop(8).AlignCenter().Text(TextValue(Path.GetFileName(mediaEntry.RelativePath), isArabic))
+                                            .FontColor("#35555D")
+                                            .FontSize(8.5f);
+                                    });
                                 }
                             });
                         }));
                 }
 
                 column.Item().Element(section =>
-                    ComposeSection(section, "Core Obligations", "الالتزامات الأساسية", body =>
+                    ComposeSection(section, T("Core Obligations", "الالتزامات الأساسية", isArabic), isArabic, body =>
                     {
-                        ComposeBullet(body, Bilingual(
-                            "The Tenant shall pay all amounts due on time and maintain the property in good condition, ordinary wear and tear excepted.",
-                            "يلتزم المستأجر بسداد جميع المبالغ المستحقة في مواعيدها والمحافظة على العقار بحالة جيدة مع استثناء الاستهلاك المعتاد."));
-                        ComposeBullet(body, Bilingual(
-                            "The Landlord shall provide possession of the property on the lease start date in a condition reasonably fit for residential occupancy.",
-                            "يلتزم المؤجر بتسليم العقار في تاريخ بدء العقد بحالة مناسبة بصورة معقولة للسكن."));
-                        ComposeBullet(body, Bilingual(
-                            "The agreed rental amount includes the basic services and charges expressly specified by the Landlord unless otherwise stated.",
-                            "يشمل مبلغ الإيجار المتفق عليه الخدمات الأساسية والرسوم التي يحددها المؤجر صراحة ما لم يُنص على خلاف ذلك."));
-                        ComposeBullet(body, Bilingual(
-                            "Requests related to refunds, damages, or early termination must be submitted through the platform workflow used by both parties.",
-                            "يجب تقديم الطلبات المتعلقة برد المبالغ أو الأضرار أو إنهاء العقد مبكرًا من خلال إجراءات المنصة المعتمدة بين الطرفين."));
-                        ComposeBullet(body, Bilingual(
-                            "If no amicable resolution is reached, disputes shall fall under the jurisdiction of Cairo Primary Courts.",
-                            "وفي حال عدم التوصل إلى تسوية ودية، تخضع النزاعات لاختصاص محاكم القاهرة الابتدائية."));
+                        foreach (var obligation in GetCoreObligations(isArabic))
+                        {
+                            ComposeBullet(body, obligation, isArabic);
+                        }
                     }));
 
-                if (!string.IsNullOrWhiteSpace(request.Property.Rules) || (request.AdditionalTerms?.Any() ?? false))
+                var rulesAndTerms = SplitLocalizedList(property.Rules, isArabic)
+                    .Concat((request.AdditionalTerms ?? []).Select(term => ResolveLocalizedValue(term, isArabic)).Where(term => !string.IsNullOrWhiteSpace(term)))
+                    .ToList();
+
+                if (rulesAndTerms.Count > 0)
                 {
                     column.Item().Element(section =>
-                        ComposeSection(section, "Property Rules and Additional Terms", "قواعد العقار والشروط الإضافية", body =>
+                        ComposeSection(section, T("Property Rules and Additional Terms", "قواعد العقار والشروط الإضافية", isArabic), isArabic, body =>
                         {
-                            if (!string.IsNullOrWhiteSpace(request.Property.Rules))
+                            foreach (var entry in rulesAndTerms)
                             {
-                                var rules = request.Property.Rules.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (var rule in rules)
-                                {
-                                    ComposeBullet(body, rule.Trim());
-                                }
-                            }
-
-                            if (request.AdditionalTerms != null)
-                            {
-                                foreach (var term in request.AdditionalTerms.Where(term => !string.IsNullOrWhiteSpace(term)))
-                                {
-                                    ComposeBullet(body, term.Trim());
-                                }
+                                ComposeBullet(body, entry, isArabic);
                             }
                         }));
                 }
 
                 column.Item().Element(section =>
-                    ComposeSection(section, "Electronic Signature and Consent", "التوقيع الإلكتروني والموافقة", body =>
+                    ComposeSection(section, T("Electronic Signature and Consent", "التوقيع الإلكتروني والموافقة", isArabic), isArabic, body =>
                     {
-                        var consentStatement = signature.ConsentStatement ??
-                            "I acknowledge that this electronic signature is legally binding.";
-
-                        body.Item().Text(consentStatement);
-                        ComposeParagraph(body,
-                            "The parties acknowledge that pressing the platform acceptance button and completing identity verification together form the electronic act of signature for this agreement.",
-                            "يقر الطرفان بأن الضغط على زر قبول العقد داخل المنصة مع إتمام التحقق من الهوية يشكلان معًا التوقيع الإلكتروني لهذا العقد.");
+                        body.Item().AlignLeftOrRight(isArabic).Text(TextValue(ResolveConsentStatement(signature.ConsentStatement, isArabic), isArabic));
+                        body.Item().PaddingTop(8).AlignLeftOrRight(isArabic).Text(TextValue(
+                            isArabic
+                                ? "يقر الطرفان بأن الضغط على زر قبول العقد داخل المنصة واستكمال التحقق من الهوية يشكلان الفعل الإلكتروني المعتبر توقيعًا لهذا الاتفاق."
+                                : "The parties acknowledge that pressing the platform acceptance button and completing identity verification together form the electronic act of signature for this agreement.",
+                            isArabic));
                     }));
 
                 column.Item().Border(1).BorderColor("#D5E3E6").Background("#F6FAFA").Padding(16).Column(block =>
                 {
-                    block.Spacing(8);
-                    block.Item().Text(Bilingual("Digital Verification Block", "كتلة التحقق الرقمي")).FontSize(14).SemiBold().FontColor("#12343B");
-
-                    block.Item().Table(table =>
+                    block.Item().AlignLeftOrRight(isArabic).Text(T("Digital Verification Block", "قسم التحقق الرقمي", isArabic)).FontSize(15).SemiBold().FontColor("#12343B");
+                    block.Item().PaddingTop(10).Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
                         {
@@ -290,129 +315,288 @@ namespace MARN_API.Services.Implementations
                             columns.RelativeColumn();
                         });
 
-                        table.Cell().PaddingRight(6).PaddingBottom(8).Element(cell =>
-                            ComposeVerificationCell(cell, "Digitally Signed By", "الموقع رقميًا", signature.SignerName ?? NotAvailable()));
-                        table.Cell().PaddingLeft(6).PaddingBottom(8).Element(cell =>
-                            ComposeVerificationCell(cell, "National ID", "الرقم القومي", signature.SignerNationalId ?? NotAvailable()));
-                        table.Cell().PaddingRight(6).PaddingBottom(8).Element(cell =>
-                            ComposeVerificationCell(cell, "Timestamp", "الختم الزمني", $"{signature.SignedAtUtc:yyyy-MM-dd HH:mm:ss} UTC"));
-                        table.Cell().PaddingLeft(6).PaddingBottom(8).Element(cell =>
-                            ComposeVerificationCell(cell, "Total Amount", "إجمالي المبلغ", FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency!)));
+                        table.Cell().PaddingRight(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, T("Digitally Signed By", "التوقيع الرقمي باسم", isArabic), ValueText(signature.SignerName, isArabic), isArabic));
+                        table.Cell().PaddingLeft(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, T("National ID", "الرقم القومي", isArabic), ValueText(signature.SignerNationalId, isArabic), isArabic));
+                        table.Cell().PaddingRight(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, T("Timestamp", "الختم الزمني", isArabic), TextValue($"{signature.SignedAtUtc:yyyy-MM-dd HH:mm:ss} UTC", isArabic), isArabic));
+                        table.Cell().PaddingLeft(8).PaddingBottom(10).Element(cell => ComposeVerificationCell(cell, T("Total Amount", "إجمالي المبلغ", isArabic), FormatMoney(rentalTerms.TotalContractAmount, rentalTerms.Currency, isArabic), isArabic));
                     });
 
-                    block.Item().PaddingTop(6).Text(Bilingual(
-                            request.GoverningLawNote!,
-                            "تم توقيع هذا المستند إلكترونيًا ويُقصد به أن يكون ملزمًا قانونًا بموجب القانون المصري رقم 15 لسنة 2004."))
-                        .Italic()
-                        .FontColor("#35555D");
+                    block.Item().PaddingTop(12).AlignLeftOrRight(isArabic).Text(TextValue(ResolveGoverningLawNote(request.GoverningLawNote, isArabic), isArabic)).Italic().FontColor("#35555D");
                 });
 
                 column.Item().Element(section =>
-                    ComposeSection(section, "Acknowledgement", "الإقرار", body =>
+                    ComposeSection(section, T("Acknowledgement", "الإقرار", isArabic), isArabic, body =>
                     {
-                        ComposeBullet(body, Bilingual(
-                            "By accepting electronically, the Tenant confirms that the contract was reviewed in full and that the provided identity details are accurate.",
-                            "بموجب القبول الإلكتروني، يؤكد المستأجر أنه راجع العقد بالكامل وأن بيانات الهوية المقدمة صحيحة."));
-                        ComposeBullet(body, Bilingual(
-                            "Acceptance by both parties has been electronically documented through the platform and linked to identity information and verification records.",
-                            "تم توثيق قبول الطرفين إلكترونيًا عبر المنصة وربطه ببيانات الهوية وسجلات التحقق."));
+                        foreach (var acknowledgement in GetAcknowledgements(isArabic))
+                        {
+                            ComposeBullet(body, acknowledgement, isArabic);
+                        }
                     }));
             });
         }
 
-        private static void ComposeFooter(IContainer container)
+        private void ComposeFooter(IContainer container, bool isArabic)
         {
             container.PaddingTop(8).BorderTop(1).BorderColor("#D5E3E6").Row(row =>
             {
-                row.RelativeItem().Text(Bilingual("Generated by the rental contract API", "تم إنشاء هذا العقد بواسطة واجهة عقود الإيجار"))
-                    .FontSize(8.5f)
+                row.RelativeItem().AlignLeftOrRight(isArabic).Text(T(
+                        "Generated by the rental contract API",
+                        "تم إنشاء هذا المستند بواسطة خدمة عقود الإيجار",
+                        isArabic))
+                    .FontSize(9)
                     .FontColor(Colors.Grey.Darken1);
 
-                row.ConstantItem(70).AlignRight().Text(text =>
+                row.ConstantItem(90).AlignRightOrLeft(isArabic).Text(text =>
                 {
-                    text.Span(Bilingual("Page", "صفحة") + " ").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
-                    text.CurrentPageNumber().FontSize(8.5f).SemiBold();
+                    text.Span(T("Page ", "الصفحة ", isArabic)).FontSize(9).FontColor(Colors.Grey.Darken1);
+                    text.CurrentPageNumber().FontSize(9).SemiBold();
                 });
             });
         }
 
-        private void ComposeSection(IContainer container, string englishTitle, string arabicTitle, Action<ColumnDescriptor> content)
+        private void ComposeSection(IContainer container, string title, bool isArabic, Action<ColumnDescriptor> content)
         {
             container.Column(column =>
             {
-                column.Item().Text(Bilingual(englishTitle, arabicTitle)).FontSize(14).SemiBold().FontColor("#12343B");
-                column.Item().PaddingTop(6).BorderTop(2).BorderColor("#D5E3E6");
-                column.Item().PaddingTop(8).Column(content);
+                column.Item().AlignLeftOrRight(isArabic).Text(title).FontSize(16).SemiBold().FontColor("#12343B");
+                column.Item().PaddingTop(8).BorderTop(2).BorderColor("#D5E3E6");
+                column.Item().PaddingTop(10).Column(content);
             });
         }
 
-        private void ComposePartyCard(IContainer container, string englishTitle, string arabicTitle, PartyInfo party)
+        private void ComposePartyCard(IContainer container, string title, PartyInfo party, bool isArabic)
         {
-            ComposeInfoCard(container, englishTitle, arabicTitle, new[]
+            ComposeInfoCard(container, title, new[]
             {
-                ("Name", "الاسم", party.FullName ?? NotAvailable()),
-                ("National ID", "الرقم القومي", party.NationalId ?? NotAvailable()),
-                ("Email", "البريد الإلكتروني", party.Email ?? NotAvailable()),
-                ("Phone", "الهاتف", party.PhoneNumber ?? NotAvailable()),
-                ("Address", "العنوان", party.Address ?? NotAvailable())
-            });
+                (T("Name", "الاسم", isArabic), ValueText(party.FullName, isArabic)),
+                (T("National ID", "الرقم القومي", isArabic), ValueText(party.NationalId, isArabic)),
+                (T("Email", "البريد الإلكتروني", isArabic), ValueText(party.Email, isArabic)),
+                (T("Phone", "الهاتف", isArabic), ValueText(party.PhoneNumber, isArabic)),
+                (T("Address", "العنوان", isArabic), ValueText(party.Address, isArabic))
+            }, isArabic);
         }
 
-        private void ComposeInfoCard(IContainer container, string englishTitle, string arabicTitle, IEnumerable<(string EnLabel, string ArLabel, string Value)> items)
+        private void ComposeInfoCard(IContainer container, string title, IEnumerable<(string Label, string Value)> items, bool isArabic)
         {
-            container.Border(1).BorderColor("#D5E3E6").Padding(14).Column(column =>
+            container.Border(1).BorderColor("#D5E3E6").Padding(16).Column(column =>
             {
-                column.Spacing(5);
-                column.Item().Text(Bilingual(englishTitle, arabicTitle)).FontSize(13).SemiBold().FontColor("#12343B");
+                column.Spacing(6);
+                column.Item().AlignLeftOrRight(isArabic).Text(title).FontSize(15).SemiBold().FontColor("#12343B");
 
                 foreach (var item in items)
                 {
                     column.Item().Row(row =>
                     {
-                        row.RelativeItem().Text(Bilingual(item.EnLabel, item.ArLabel)).FontColor("#4B6268").FontSize(9.5f);
-                        row.RelativeItem().AlignRight().Text(item.Value).SemiBold().FontSize(9.5f);
+                        if (isArabic)
+                        {
+                            row.RelativeItem().AlignRight().Text(item.Value).SemiBold();
+                            row.RelativeItem().AlignRight().Text(item.Label).FontColor("#4B6268");
+                        }
+                        else
+                        {
+                            row.RelativeItem().Text(item.Label).FontColor("#4B6268");
+                            row.RelativeItem().AlignRight().Text(item.Value).SemiBold();
+                        }
                     });
                 }
             });
         }
 
-        private static void ComposeParagraph(ColumnDescriptor column, string english, string arabic)
+        private void ComposeMetaCell(IContainer container, string label, string value, bool isArabic)
         {
-            column.Item().Text(Bilingual(english, arabic));
+            container.Column(column =>
+            {
+                column.Item().AlignLeftOrRight(isArabic).Text(label).Bold().FontColor("#12343B");
+                column.Item().AlignLeftOrRight(isArabic).Text(value).FontColor("#35555D");
+            });
         }
 
-        private static void ComposeBullet(ColumnDescriptor column, string text)
+        private void ComposeBullet(ColumnDescriptor column, string text, bool isArabic)
         {
             column.Item().Row(row =>
             {
-                row.ConstantItem(14).Text("•").FontColor("#12343B");
-                row.RelativeItem().Text(text);
+                if (isArabic)
+                {
+                    row.RelativeItem().AlignRight().Text(text);
+                    row.ConstantItem(14).AlignRight().Text("•").FontColor("#12343B");
+                }
+                else
+                {
+                    row.ConstantItem(14).Text("•").FontColor("#12343B");
+                    row.RelativeItem().Text(text);
+                }
             });
         }
 
-        private static void ComposeMetaCell(IContainer container, string englishLabel, string arabicLabel, string value)
+        private void ComposeVerificationCell(IContainer container, string label, string value, bool isArabic)
         {
             container.Column(column =>
             {
-                column.Item().Text(Bilingual(englishLabel, arabicLabel)).Bold().FontColor("#12343B").FontSize(9.5f);
-                column.Item().Text(value).FontColor("#35555D").FontSize(9.5f);
+                column.Item().AlignLeftOrRight(isArabic).Text(label).FontSize(9).SemiBold().FontColor("#5E777D");
+                column.Item().PaddingTop(2).AlignLeftOrRight(isArabic).Text(value).SemiBold().FontColor("#12343B");
             });
         }
 
-        private static void ComposeVerificationCell(IContainer container, string englishLabel, string arabicLabel, string value)
+        private string BuildPropertyLocation(PropertyInfo property, bool isArabic)
         {
-            container.Column(column =>
+            var segments = new[]
             {
-                column.Item().Text(Bilingual(englishLabel, arabicLabel)).FontSize(8.5f).SemiBold().FontColor("#5E777D");
-                column.Item().PaddingTop(2).Text(value).SemiBold().FontColor("#12343B").FontSize(9.5f);
-            });
+                ResolveLocalizedValue(property.AddressLine, isArabic),
+                ResolveLocalizedValue(property.UnitNumber, isArabic),
+                ResolveLocalizedValue(property.City, isArabic),
+                ResolveLocalizedValue(property.Country, isArabic)
+            }
+            .Where(segment => !string.IsNullOrWhiteSpace(segment))
+            .Select(segment => TextValue(segment, isArabic))
+            .ToList();
+
+            return string.Join(isArabic ? "، " : ", ", segments);
         }
 
-        private string FormatPaymentFrequency(PaymentFrequency frequency)
+        private IEnumerable<string> GetCoreObligations(bool isArabic)
         {
-            var english = _localizer.GetEnumDisplayName(frequency, EnglishCulture);
-            var arabic = _localizer.GetEnumDisplayName(frequency, ArabicCulture);
-            return Bilingual(english, arabic);
+            var obligations = isArabic
+                ? new[]
+                {
+                    "يلتزم المستأجر بسداد جميع المبالغ المستحقة في مواعيدها والمحافظة على العقار بحالة جيدة، مع استثناء الاستهلاك المعتاد.",
+                    "يلتزم المؤجر بتسليم العقار في تاريخ بدء العقد بحالة مناسبة للسكن.",
+                    "إذا تأخر المستأجر عن سداد الإيجار لأكثر من خمسة عشر (15) يومًا بعد تاريخ الاستحقاق وبعد توجيه إشعار رسمي عبر المنصة أو قنوات الاتصال المعتمدة، جاز للمؤجر اتخاذ الإجراءات القانونية المناسبة.",
+                    "يشمل مبلغ الإيجار تكاليف الخدمات الأساسية المتعلقة بالعقار، مثل المياه والكهرباء ورسوم الصيانة الدورية وأي خدمات إضافية يحددها المؤجر صراحة ما لم ينص على خلاف ذلك.",
+                    "يتحمل المستأجر تكاليف الإصلاحات التشغيلية البسيطة الناتجة عن الاستخدام المعتاد، بينما يتحمل المؤجر الإصلاحات الجوهرية والهيكلية اللازمة للحفاظ على العقار صالحًا للسكن.",
+                    "تقدم طلبات الاسترداد أو المطالبات بالتعويض أو إنهاء العقد المبكر عبر مسار العمل المعتمد داخل المنصة بين الطرفين.",
+                    "إذا رغب أي من الطرفين في إنهاء هذا العقد قبل تاريخ انتهائه، يقدم الطلب أولًا عبر المنصة لمحاولة التسوية الودية. وعند تعذر التسوية، تختص محاكم القاهرة الابتدائية بنظر النزاع."
+                }
+                : new[]
+                {
+                    "The Tenant shall pay all amounts due on time and maintain the property in good condition, ordinary wear and tear excepted.",
+                    "The Landlord shall provide possession of the property on the lease start date in a condition reasonably fit for residential occupancy.",
+                    "If the Tenant fails to pay rent for more than fifteen (15) days after the due date and following an official notice through the platform or approved communication channels, the Landlord may initiate appropriate legal action.",
+                    "The agreed rental amount includes the costs of basic property-related services including water, electricity, routine maintenance fees, and any additional services specified by the Landlord unless otherwise stated.",
+                    "The Tenant shall bear the costs of minor operational repairs resulting from normal use, while the Landlord shall bear major and structural repairs necessary to maintain the property in a habitable condition.",
+                    "Refund requests, damage claims, and requests related to early contract termination shall be submitted and documented through the platform workflow used by the parties.",
+                    "In the event that either party wishes to terminate this agreement before its expiration date, a request shall first be submitted through the platform for review and amicable resolution attempts between the parties. If no resolution is reached, disputes shall fall under the jurisdiction of Cairo Primary Courts."
+                };
+
+            return obligations.Select(item => TextValue(item, isArabic));
+        }
+
+        private IEnumerable<string> GetAcknowledgements(bool isArabic)
+        {
+            var entries = isArabic
+                ? new[]
+                {
+                    "بقبوله الإلكتروني، يقر المستأجر بأنه راجع العقد كاملًا وأن بيانات الهوية المقدمة صحيحة ويمكن الاعتماد على السجل الرقمي بوصفه دليلًا على القبول.",
+                    "جرى توثيق قبول الطرفين إلكترونيًا عبر المنصة وربطه ببيانات الهوية وسجلات التحقق الرقمي."
+                }
+                : new[]
+                {
+                    "By accepting electronically, the Tenant confirms that the contract was reviewed in full, that the provided identity details are accurate, and that the digital record may be relied upon as evidence of assent.",
+                    "Acceptance by both parties has been electronically documented through the platform and linked to identity information and digital verification records."
+                };
+
+            return entries.Select(item => TextValue(item, isArabic));
+        }
+
+        private string ResolveConsentStatement(string? rawValue, bool isArabic)
+        {
+            return ResolveLocalizedValue(
+                rawValue,
+                isArabic,
+                englishFallback: EnglishConsentFallback,
+                arabicFallback: ArabicConsentFallback);
+        }
+
+        private string ResolveGoverningLawNote(string? rawValue, bool isArabic)
+        {
+            return ResolveLocalizedValue(
+                rawValue,
+                isArabic,
+                englishFallback: EnglishGoverningLawNote,
+                arabicFallback: ArabicGoverningLawNote);
+        }
+
+        private string FormatPaymentFrequency(PaymentFrequency frequency, bool isArabic)
+        {
+            return _localizer.GetEnumDisplayName(frequency, isArabic ? ArabicCulture : EnglishCulture);
+        }
+
+        private string FormatMoney(decimal amount, string? currency, bool isArabic)
+        {
+            var resolvedCurrency = string.IsNullOrWhiteSpace(currency) ? "EGP" : currency.Trim();
+            var formattedAmount = amount.ToString("N2", CultureInfo.InvariantCulture);
+            var text = isArabic
+                ? $"{resolvedCurrency} {formattedAmount}"
+                : $"{formattedAmount} {resolvedCurrency}";
+
+            return TextValue(text, isArabic);
+        }
+
+        private static string FormatDate(DateOnly? value)
+        {
+            return value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "N/A";
+        }
+
+        private static string FormatDateTime(DateTime? value)
+        {
+            return value?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? "N/A";
+        }
+
+        private string ValueText(string? rawValue, bool isArabic)
+        {
+            return TextValue(ResolveLocalizedValue(rawValue, isArabic), isArabic);
+        }
+
+        private string TextValue(string? rawValue, bool isArabic)
+        {
+            return BidiText.Format(rawValue, isArabic ? ArabicCulture : EnglishCulture);
+        }
+
+        private string ResolveLocalizedValue(string? rawValue, bool isArabic, string? englishFallback = null, string? arabicFallback = null)
+        {
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return isArabic
+                    ? arabicFallback ?? "غير متاح"
+                    : englishFallback ?? "N/A";
+            }
+
+            var trimmedValue = rawValue.Trim();
+            var localizedParts = trimmedValue.Split(LocalizedSeparator, 2, StringSplitOptions.None);
+            if (localizedParts.Length == 2)
+            {
+                return (isArabic ? localizedParts[1] : localizedParts[0]).Trim();
+            }
+
+            if (isArabic && !string.IsNullOrWhiteSpace(englishFallback) && string.Equals(trimmedValue, englishFallback, StringComparison.Ordinal))
+            {
+                return arabicFallback ?? trimmedValue;
+            }
+
+            if (!isArabic && !string.IsNullOrWhiteSpace(arabicFallback) && string.Equals(trimmedValue, arabicFallback, StringComparison.Ordinal))
+            {
+                return englishFallback ?? trimmedValue;
+            }
+
+            return trimmedValue;
+        }
+
+        private IEnumerable<string> SplitLocalizedList(string? rawValue, bool isArabic)
+        {
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return [];
+            }
+
+            return rawValue
+                .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(item => ResolveLocalizedValue(item, isArabic))
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .Select(item => TextValue(item, isArabic));
+        }
+
+        private string T(string english, string arabic, bool isArabic)
+        {
+            return TextValue(isArabic ? arabic : english, isArabic);
         }
 
         private static string SanitizeFilePart(string value)
@@ -428,17 +612,6 @@ namespace MARN_API.Services.Implementations
             return new string(sanitized);
         }
 
-        private static string FormatMoney(decimal amount, string currency)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{0:N2} {1}", amount, currency);
-        }
-
-        private static string Bilingual(string english, string arabic)
-            => $"{english} / {arabic}";
-
-        private static string NotAvailable()
-            => Bilingual("N/A", "غير متاح");
-
         private static void EnsureFontsRegistered()
         {
             if (Interlocked.Exchange(ref _fontsRegistered, 1) == 1)
@@ -449,12 +622,12 @@ namespace MARN_API.Services.Implementations
             var fontsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
             var fontFiles = new[]
             {
+                "tahoma.ttf",
+                "tahomabd.ttf",
                 "arial.ttf",
                 "arialbd.ttf",
                 "ariali.ttf",
-                "arialbi.ttf",
-                "tahoma.ttf",
-                "tahomabd.ttf"
+                "arialbi.ttf"
             };
 
             foreach (var fileName in fontFiles)
@@ -468,6 +641,19 @@ namespace MARN_API.Services.Implementations
                 using var stream = File.OpenRead(path);
                 FontManager.RegisterFont(stream);
             }
+        }
+    }
+
+    internal static class ContractPdfContainerExtensions
+    {
+        public static IContainer AlignLeftOrRight(this IContainer container, bool isArabic)
+        {
+            return isArabic ? container.AlignRight() : container.AlignLeft();
+        }
+
+        public static IContainer AlignRightOrLeft(this IContainer container, bool isArabic)
+        {
+            return isArabic ? container.AlignLeft() : container.AlignRight();
         }
     }
 }

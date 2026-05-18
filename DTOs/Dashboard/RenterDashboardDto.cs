@@ -11,6 +11,7 @@ namespace MARN_API.DTOs.Dashboard
         public int SavedPropertiesCount { get; set; }
         public int UnreadNotificationsCount { get; set; }
         public AccountStatus AccountStatus { get; set; }
+        public string AccountStatusDisplayName { get; set; } = string.Empty;
         public ICollection<ActiveRentalCardDto>? ActiveRentals { get; set; }
         public ICollection<RenterPendingBookingRequestDto>? PendingBookingRequests { get; set; }
         public ICollection<PropertyCardDto>? SavedProperties { get; set; }

@@ -761,4 +761,12 @@ that paid at {3} is now available for withdrawal.</value></data>
   <data name="TEXT_CONTRACT_IS_ALREADY_SIGNED" xml:space="preserve"><value>Contract is already signed.</value></data>
   <data name="TEXT_YOU_DO_NOT_HAVE_ACCESS_TO_CANCEL_THIS_CONTRACT" xml:space="preserve"><value>You do not have access to cancel this contract.</value></data>
   <data name="TEXT_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve"><value>Contract cancelled successfully.</value></data>
+  <data name="ROLE_Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="ROLE_Owner" xml:space="preserve"><value>Owner</value></data>
+  <data name="ROLE_Renter" xml:space="preserve"><value>Renter</value></data>
+  <data name="ROLE_Moderator" xml:space="preserve"><value>Moderator</value></data>
+  <data name="TEXT_DELETED_PROPERTY" xml:space="preserve"><value>[Deleted property]</value></data>
+  <data name="TEXT_DELETED_MESSAGE" xml:space="preserve"><value>[Deleted message]</value></data>
+  <data name="TEXT_DELETED_COMMENT" xml:space="preserve"><value>[Deleted comment]</value></data>
+  <data name="TEXT_MESSAGE_BETWEEN_0_AND_1" xml:space="preserve"><value>Message between {0} and {1}</value></data>
 </root>
