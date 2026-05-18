@@ -180,10 +180,141 @@ namespace MARN_API.DTOs.Admin
         public string State { get; set; } = string.Empty;
         public string StateDisplayName { get; set; } = string.Empty;
         public decimal Price { get; set; }
+        public float AverageRating { get; set; }
+        public int CommentsCount { get; set; }
         public bool IsActive { get; set; }
         public bool CanDeactivate { get; set; }
         public bool CanRestore { get; set; }
         public bool IsDeleted { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class AdminPropertyDetailsDto
+    {
+        public long PropertyId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public Guid OwnerId { get; set; }
+        public string OwnerName { get; set; } = string.Empty;
+        public string? OwnerEmail { get; set; }
+        public string? OwnerPhoneNumber { get; set; }
+        public string? OwnerProfileImage { get; set; }
+        public PropertyStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
+        public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
+        public RentalUnit RentalUnit { get; set; }
+        public string RentalUnitDisplayName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string CityDisplayName { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+        public string StateDisplayName { get; set; } = string.Empty;
+        public string ZipCode { get; set; } = string.Empty;
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public int MaxOccupants { get; set; }
+        public bool IsShared { get; set; }
+        public int Bedrooms { get; set; }
+        public int Beds { get; set; }
+        public int Bathrooms { get; set; }
+        public double SquareMeters { get; set; }
+        public int ViewsCount { get; set; }
+        public decimal Price { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? ProofOfOwnership { get; set; }
+        public float AverageRating { get; set; }
+        public int RatingsCount { get; set; }
+        public int CommentsCount { get; set; }
+        public int SavedByUsersCount { get; set; }
+        public int BookingRequestsCount { get; set; }
+        public List<AdminPropertyAmenityDto> Amenities { get; set; } = [];
+        public List<AdminPropertyRuleDto> Rules { get; set; } = [];
+        public List<AdminPropertyMediaDto> Media { get; set; } = [];
+        public List<AdminPropertyCommentDto> Comments { get; set; } = [];
+        public List<AdminPropertyRatingDto> Ratings { get; set; } = [];
+        public List<AdminPropertyContractDto> Contracts { get; set; } = [];
+        public List<AdminPropertyBookingRequestDto> BookingRequests { get; set; } = [];
+    }
+
+    public class AdminPropertyAmenityDto
+    {
+        public long AmenityId { get; set; }
+        public AmenityType Amenity { get; set; }
+        public string AmenityDisplayName { get; set; } = string.Empty;
+    }
+
+    public class AdminPropertyRuleDto
+    {
+        public long RuleId { get; set; }
+        public string Text { get; set; } = string.Empty;
+    }
+
+    public class AdminPropertyMediaDto
+    {
+        public long MediaId { get; set; }
+        public string Path { get; set; } = string.Empty;
+        public bool IsPrimary { get; set; }
+    }
+
+    public class AdminPropertyCommentDto
+    {
+        public long CommentId { get; set; }
+        public Guid UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string? UserProfileImage { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public int? Rating { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public bool IsHiddenByModeration { get; set; }
+        public DateTime? HiddenAt { get; set; }
+        public Guid? HiddenByAdminId { get; set; }
+        public string? HiddenReason { get; set; }
+    }
+
+    public class AdminPropertyRatingDto
+    {
+        public long RatingId { get; set; }
+        public Guid UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string? UserProfileImage { get; set; }
+        public int Rating { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
+
+    public class AdminPropertyContractDto
+    {
+        public long ContractId { get; set; }
+        public ContractStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
+        public ContractAnchoringStatus AnchoringStatus { get; set; }
+        public string AnchoringStatusDisplayName { get; set; } = string.Empty;
+        public Guid RenterId { get; set; }
+        public string RenterName { get; set; } = string.Empty;
+        public string? RenterProfileImage { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateOnly LeaseStartDate { get; set; }
+        public DateOnly LeaseEndDate { get; set; }
+        public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
+        public decimal TotalContractAmount { get; set; }
+        public DateTime? SignedByRenterAt { get; set; }
+    }
+
+    public class AdminPropertyBookingRequestDto
+    {
+        public long BookingRequestId { get; set; }
+        public Guid RenterId { get; set; }
+        public string RenterName { get; set; } = string.Empty;
+        public string? RenterProfileImage { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
 

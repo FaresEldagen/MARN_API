@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 using MARN_API;
 using MARN_API.Localization;
 using MARN_API.Services.Interfaces;
@@ -54,7 +53,7 @@ namespace MARN_API.Services.Implementations
                 return string.Empty;
             }
 
-            var key = $"TEXT_{BuildLiteralKey(message)}";
+            var key = $"TEXT_{LocalizationKeyBuilder.BuildLiteralKey(message)}";
             return HasTranslation(key, culture) ? Get(key, culture) : FormatForCulture(message, culture);
         }
 
@@ -103,32 +102,6 @@ namespace MARN_API.Services.Implementations
             return HasTranslation(key, culture)
                 ? Get(key, culture)
                 : FormatForCulture(value.ToString() ?? string.Empty, culture);
-        }
-
-        private static string BuildLiteralKey(string message)
-        {
-            var builder = new StringBuilder(message.Length);
-            var previousWasSeparator = false;
-
-            foreach (var character in message.ToUpperInvariant())
-            {
-                if (char.IsLetterOrDigit(character))
-                {
-                    builder.Append(character);
-                    previousWasSeparator = false;
-                    continue;
-                }
-
-                if (previousWasSeparator)
-                {
-                    continue;
-                }
-
-                builder.Append('_');
-                previousWasSeparator = true;
-            }
-
-            return builder.ToString().Trim('_');
         }
 
         private static string FormatFallback(string fallback, CultureInfo? culture, object?[] arguments)

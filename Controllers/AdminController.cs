@@ -208,6 +208,22 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
+        /// Returns a deep admin view of a single property, including owner info, media, amenities,
+        /// comments, ratings, contracts, and booking requests.
+        /// </summary>
+        /// <param name="propertyId">The property identifier.</param>
+        [HttpGet("stats/properties/{propertyId:long}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDetailedProperty(long propertyId)
+        {
+            var result = await _adminDetailedStatsService.GetPropertyDetailsAsync(propertyId);
+            return HandleServiceResult(result);
+        }
+
+        /// <summary>
         /// Deactivates a property from the detailed properties admin area.
         /// </summary>
         /// <param name="propertyId">The property identifier.</param>

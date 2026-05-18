@@ -55,6 +55,18 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<AdminDetailedPropertiesResponseDto>.Ok(result);
         }
 
+        public async Task<ServiceResult<AdminPropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId)
+        {
+            var result = await _detailedStatsRepo.GetPropertyDetailsAsync(propertyId);
+            if (result == null)
+            {
+                return ServiceResult<AdminPropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            LocalizePropertyDetails(result);
+            return ServiceResult<AdminPropertyDetailsDto>.Ok(result);
+        }
+
         public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> DeactivatePropertyAsync(long propertyId)
         {
             var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
@@ -372,6 +384,10 @@ namespace MARN_API.Services.Implementations
                 State = property.State,
                 StateDisplayName = GetLocationDisplayName<Governorate>(property.State),
                 Price = property.Price,
+                AverageRating = property.PropertyRatings.Any()
+                    ? property.PropertyRatings.Average(rating => (float?)rating.Rating) ?? 0f
+                    : 0f,
+                CommentsCount = property.PropertyComments.Count(comment => !comment.IsHiddenByModeration),
                 IsActive = property.IsActive,
                 CanDeactivate = property.IsActive && property.DeletedAt == null,
                 CanRestore = !property.IsActive && property.DeletedAt == null,
@@ -388,6 +404,32 @@ namespace MARN_API.Services.Implementations
                 item.TypeDisplayName = _localizer.GetEnumDisplayName(item.Type);
                 item.CityDisplayName = GetLocationDisplayName<City>(item.City);
                 item.StateDisplayName = GetLocationDisplayName<Governorate>(item.State);
+            }
+        }
+
+        private void LocalizePropertyDetails(AdminPropertyDetailsDto property)
+        {
+            property.StatusDisplayName = _localizer.GetEnumDisplayName(property.Status);
+            property.TypeDisplayName = _localizer.GetEnumDisplayName(property.Type);
+            property.RentalUnitDisplayName = _localizer.GetEnumDisplayName(property.RentalUnit);
+            property.CityDisplayName = GetLocationDisplayName<City>(property.City);
+            property.StateDisplayName = GetLocationDisplayName<Governorate>(property.State);
+
+            foreach (var amenity in property.Amenities)
+            {
+                amenity.AmenityDisplayName = _localizer.GetEnumDisplayName(amenity.Amenity);
+            }
+
+            foreach (var contract in property.Contracts)
+            {
+                contract.StatusDisplayName = _localizer.GetEnumDisplayName(contract.Status);
+                contract.AnchoringStatusDisplayName = _localizer.GetEnumDisplayName(contract.AnchoringStatus);
+                contract.PaymentFrequencyDisplayName = _localizer.GetEnumDisplayName(contract.PaymentFrequency);
+            }
+
+            foreach (var bookingRequest in property.BookingRequests)
+            {
+                bookingRequest.PaymentFrequencyDisplayName = _localizer.GetEnumDisplayName(bookingRequest.PaymentFrequency);
             }
         }
 

@@ -769,4 +769,86 @@
   <data name="TEXT_DELETED_MESSAGE" xml:space="preserve"><value>[رسالة محذوفة]</value></data>
   <data name="TEXT_DELETED_COMMENT" xml:space="preserve"><value>[تعليق محذوف]</value></data>
   <data name="TEXT_MESSAGE_BETWEEN_0_AND_1" xml:space="preserve"><value>رسالة بين {0} و {1}</value></data>
+  <data name="AUTHENTICATION_REQUIRED" xml:space="preserve"><value>المصادقة مطلوبة للوصول إلى هذا المسار.</value></data>
+  <data name="ACCESS_TOKEN_INVALID" xml:space="preserve"><value>رمز الوصول غير صالح أو بصيغة غير صحيحة.</value></data>
+  <data name="ACCESS_TOKEN_EXPIRED" xml:space="preserve"><value>انتهت صلاحية رمز الوصول. يرجى تسجيل الدخول مرة أخرى.</value></data>
+  <data name="ACCESS_FORBIDDEN" xml:space="preserve"><value>ليست لديك صلاحية الوصول إلى هذا المسار.</value></data>
+  <data name="ACCOUNT_BANNED_ACCESS_DENIED" xml:space="preserve"><value>الحسابات المحظورة لا يمكنها الوصول إلى هذا المسار.</value></data>
+  <data name="VALIDATION_FIELD_REQUIRED" xml:space="preserve"><value>حقل {0} مطلوب.</value></data>
+  <data name="VALIDATION_EMAIL_ADDRESS" xml:space="preserve"><value>يجب أن يكون {0} عنوان بريد إلكتروني صالحًا.</value></data>
+  <data name="VALIDATION_PHONE_NUMBER" xml:space="preserve"><value>يجب أن يكون {0} رقم هاتف صالحًا.</value></data>
+  <data name="VALIDATION_STRING_LENGTH_MAX" xml:space="preserve"><value>لا يمكن أن يتجاوز {0} عدد {1} حرفًا.</value></data>
+  <data name="VALIDATION_STRING_LENGTH_RANGE" xml:space="preserve"><value>يجب أن يكون {0} بين {1} و {2} حرفًا.</value></data>
+  <data name="VALIDATION_RANGE_BETWEEN" xml:space="preserve"><value>يجب أن تكون قيمة {0} بين {1} و {2}.</value></data>
+  <data name="VALIDATION_VALUE_INVALID" xml:space="preserve"><value>قيمة {0} غير صالحة.</value></data>
+  <data name="FIELD_PHONE_NUMBER" xml:space="preserve"><value>رقم الهاتف</value></data>
+  <data name="FIELD_FULL_NAME" xml:space="preserve"><value>الاسم الكامل</value></data>
+  <data name="FIELD_EMAIL_ADDRESS" xml:space="preserve"><value>البريد الإلكتروني</value></data>
+  <data name="FIELD_SUBJECT" xml:space="preserve"><value>الموضوع</value></data>
+  <data name="FIELD_MESSAGE" xml:space="preserve"><value>الرسالة</value></data>
+  <data name="FIELD_CURRENT_PASSWORD" xml:space="preserve"><value>كلمة المرور الحالية</value></data>
+  <data name="FIELD_NEW_PASSWORD" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>
+  <data name="FIELD_CONFIRM_NEW_PASSWORD" xml:space="preserve"><value>تأكيد كلمة المرور الجديدة</value></data>
+  <data name="FIELD_YEAR" xml:space="preserve"><value>السنة</value></data>
+  <data name="FIELD_MONTH" xml:space="preserve"><value>الشهر</value></data>
+  <data name="TEXT_INVALID_EMAIL_OR_PASSWORD" xml:space="preserve"><value>البريد الإلكتروني أو كلمة المرور غير صحيحة.</value></data>
+  <data name="TEXT_EMAIL_NOT_CONFIRMED_PLEASE_CHECK_YOUR_EMAIL_FOR_CONFIRMATION_INSTRUCTIONS" xml:space="preserve"><value>لم يتم تأكيد البريد الإلكتروني بعد. يرجى مراجعة بريدك الإلكتروني للحصول على تعليمات التأكيد.</value></data>
+  <data name="TEXT_ACCOUNT_HAS_BEEN_BANNED_CONTACT_SUPPORT_FOR_ASSISTANCE" xml:space="preserve"><value>تم حظر الحساب. يرجى التواصل مع الدعم للمساعدة.</value></data>
+  <data name="TEXT_ACCOUNT_HAS_BEEN_DELETED_CONTACT_SUPPORT_FOR_ASSISTANCE" xml:space="preserve"><value>تم حذف الحساب. يرجى التواصل مع الدعم للمساعدة.</value></data>
+  <data name="TEXT_USER_CREATION_FAILED" xml:space="preserve"><value>فشل إنشاء المستخدم.</value></data>
+  <data name="TEXT_EXTERNAL_LOGIN_FAILED" xml:space="preserve"><value>فشل تسجيل الدخول الخارجي.</value></data>
+  <data name="TEXT_SUPPORT_EMAIL_IS_NOT_CONFIGURED" xml:space="preserve"><value>بريد الدعم غير مهيأ.</value></data>
+  <data name="TEXT_FAILED_TO_SEND_YOUR_SUPPORT_REQUEST_AT_THE_MOMENT_PLEASE_TRY_AGAIN_LATER" xml:space="preserve"><value>تعذر إرسال طلب الدعم حاليًا. يرجى المحاولة مرة أخرى لاحقًا.</value></data>
+  <data name="TEXT_USER_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على المستخدم.</value></data>
+  <data name="TEXT_CONTRACT_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على العقد.</value></data>
+  <data name="TEXT_FULL_NAME_IS_REQUIRED" xml:space="preserve"><value>الاسم الكامل مطلوب.</value></data>
+  <data name="TEXT_FULL_NAME_CANNOT_EXCEED_150_CHARACTERS" xml:space="preserve"><value>لا يمكن أن يتجاوز الاسم الكامل 150 حرفًا.</value></data>
+  <data name="TEXT_PHONE_NUMBER_IS_REQUIRED" xml:space="preserve"><value>رقم الهاتف مطلوب.</value></data>
+  <data name="TEXT_PHONE_NUMBER_IS_NOT_VALID" xml:space="preserve"><value>رقم الهاتف غير صالح.</value></data>
+  <data name="TEXT_PHONE_NUMBER_CANNOT_EXCEED_30_CHARACTERS" xml:space="preserve"><value>لا يمكن أن يتجاوز رقم الهاتف 30 حرفًا.</value></data>
+  <data name="TEXT_SUBJECT_IS_REQUIRED" xml:space="preserve"><value>الموضوع مطلوب.</value></data>
+  <data name="TEXT_SUBJECT_CANNOT_EXCEED_200_CHARACTERS" xml:space="preserve"><value>لا يمكن أن يتجاوز الموضوع 200 حرف.</value></data>
+  <data name="TEXT_MESSAGE_IS_REQUIRED" xml:space="preserve"><value>الرسالة مطلوبة.</value></data>
+  <data name="TEXT_MESSAGE_CANNOT_EXCEED_4000_CHARACTERS" xml:space="preserve"><value>لا يمكن أن تتجاوز الرسالة 4000 حرف.</value></data>
+  <data name="TEXT_CURRENT_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>كلمة المرور الحالية مطلوبة.</value></data>
+  <data name="TEXT_NEW_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>كلمة المرور الجديدة مطلوبة.</value></data>
+  <data name="TEXT_CONFIRM_NEW_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>تأكيد كلمة المرور الجديدة مطلوب.</value></data>
+  <data name="TEXT_YEAR_MUST_BE_BETWEEN_1_AND_9999" xml:space="preserve"><value>يجب أن تكون السنة بين 1 و 9999.</value></data>
+  <data name="TEXT_MONTH_MUST_BE_BETWEEN_1_AND_12" xml:space="preserve"><value>يجب أن يكون الشهر بين 1 و 12.</value></data>
+  <data name="TEXT_REPORT_TARGET_IS_REQUIRED" xml:space="preserve"><value>هدف البلاغ مطلوب.</value></data>
+  <data name="TEXT_REPORT_REASON_IS_REQUIRED" xml:space="preserve"><value>سبب البلاغ مطلوب.</value></data>
+  <data name="TEXT_REPORT_REASON_MUST_BE_BETWEEN_5_AND_2000_CHARACTERS" xml:space="preserve"><value>يجب أن يكون سبب البلاغ بين 5 و 2000 حرف.</value></data>
+  <data name="TEXT_REVIEW_NOTE_CANNOT_EXCEED_2000_CHARACTERS" xml:space="preserve"><value>لا يمكن أن تتجاوز ملاحظة المراجعة 2000 حرف.</value></data>
+  <data name="TEXT_0_REPORTS_REQUIRE_A_VALID_GUID_TARGET_ID" xml:space="preserve"><value>تتطلب بلاغات {0} معرف هدف GUID صالحًا.</value></data>
+  <data name="TEXT_0_REPORTS_REQUIRE_A_VALID_POSITIVE_NUMERIC_TARGET_ID" xml:space="preserve"><value>تتطلب بلاغات {0} معرف هدف رقميًا موجبًا صالحًا.</value></data>
+  <data name="TEXT_ARABIC_ADDRESS_IS_REQUIRED" xml:space="preserve"><value>العنوان العربي مطلوب.</value></data>
+  <data name="TEXT_ARABIC_ADDRESS_MUST_BE_BETWEEN_10_AND_200_CHARACTERS" xml:space="preserve"><value>يجب أن يكون العنوان العربي بين 10 و 200 حرف.</value></data>
+  <data name="TEXT_ARABIC_FULL_NAME_IS_REQUIRED" xml:space="preserve"><value>الاسم العربي الكامل مطلوب.</value></data>
+  <data name="TEXT_ARABIC_FULL_NAME_MUST_BE_BETWEEN_10_AND_100_CHARACTERS" xml:space="preserve"><value>يجب أن يكون الاسم العربي الكامل بين 10 و 100 حرف.</value></data>
+  <data name="TEXT_COMMENT_CONTENT_MUST_BE_BETWEEN_1_AND_1000_CHARACTERS" xml:space="preserve"><value>يجب أن يكون محتوى التعليق بين 1 و 1000 حرف.</value></data>
+  <data name="TEXT_CONFIRM_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>تأكيد كلمة المرور مطلوب.</value></data>
+  <data name="TEXT_CONTRACT_GENERATION_FAILED_MISSING_REQUIRED_DATA_0" xml:space="preserve"><value>فشل إنشاء العقد: البيانات المطلوبة مفقودة ({0}).</value></data>
+  <data name="TEXT_CONTRACT_IS_IN_0_STATUS_ONLY_PENDING_CONTRACTS_CAN_BE_SIGNED" xml:space="preserve"><value>العقد في حالة {0}. يمكن توقيع العقود المعلقة فقط.</value></data>
+  <data name="TEXT_DELETED_PROPERTIES_CANNOT_BE_DEACTIVATED" xml:space="preserve"><value>لا يمكن تعطيل العقارات المحذوفة.</value></data>
+  <data name="TEXT_DELETED_PROPERTIES_CANNOT_BE_RESTORED" xml:space="preserve"><value>لا يمكن استعادة العقارات المحذوفة.</value></data>
+  <data name="TEXT_FOR_DAILY_RENTALS_ONLY_0_PAYMENT_FREQUENCY_IS_ALLOWED" xml:space="preserve"><value>بالنسبة للإيجارات اليومية، يُسمح فقط بتكرار الدفع '{0}'.</value></data>
+  <data name="TEXT_FOR_MONTHLY_RENTALS_ONLY_0_OR_1_PAYMENT_FREQUENCIES_ARE_ALLOWED" xml:space="preserve"><value>بالنسبة للإيجارات الشهرية، يُسمح فقط بتكرار الدفع '{0}' أو '{1}'.</value></data>
+  <data name="TEXT_INVALID_PERIOD_SUPPORTED_VALUES_ARE_ALLTIME_THISMONTH_THISYEAR_AND_CUSTOM" xml:space="preserve"><value>الفترة غير صالحة. القيم المدعومة هي allTime و thisMonth و thisYear و custom.</value></data>
+  <data name="TEXT_NATIONAL_ID_NUMBER_IS_REQUIRED" xml:space="preserve"><value>رقم الهوية الوطنية مطلوب.</value></data>
+  <data name="TEXT_NATIONAL_ID_NUMBER_MUST_BE_14_CHARACTERS" xml:space="preserve"><value>يجب أن يتكون رقم الهوية الوطنية من 14 رقمًا.</value></data>
+  <data name="TEXT_ONLY_PENDING_OR_ACTIVE_CONTRACTS_CAN_BE_CANCELLED_BY_ADMIN" xml:space="preserve"><value>يمكن للمسؤول إلغاء العقود المعلقة أو النشطة فقط.</value></data>
+  <data name="TEXT_PAGENUMBER_AND_PAGESIZE_MUST_BE_GREATER_THAN_0" xml:space="preserve"><value>يجب أن يكون كل من pageNumber و pageSize أكبر من 0.</value></data>
+  <data name="TEXT_PASSWORD_CANNOT_EXCEED_100_CHARACTERS" xml:space="preserve"><value>لا يمكن أن تتجاوز كلمة المرور 100 حرف.</value></data>
+  <data name="TEXT_PASSWORD_MUST_BE_AT_LEAST_6_CHARACTERS" xml:space="preserve"><value>يجب أن تكون كلمة المرور 6 أحرف على الأقل.</value></data>
+  <data name="TEXT_PASSWORDS_DO_NOT_MATCH" xml:space="preserve"><value>كلمتا المرور غير متطابقتين.</value></data>
+  <data name="TEXT_PROPERTY_IS_ALREADY_ACTIVE" xml:space="preserve"><value>العقار نشط بالفعل.</value></data>
+  <data name="TEXT_PROPERTY_IS_ALREADY_DEACTIVATED" xml:space="preserve"><value>العقار معطل بالفعل.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_CANNOT_BE_APPROVED_WHILE_PROPERTY_STATUS_IS_0" xml:space="preserve"><value>لا يمكن الموافقة على توثيق العقار بينما حالة العقار هي {0}.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_CANNOT_BE_DECLINED_WHILE_PROPERTY_STATUS_IS_0" xml:space="preserve"><value>لا يمكن رفض توثيق العقار بينما حالة العقار هي {0}.</value></data>
+  <data name="TEXT_RATING_MUST_BE_BETWEEN_1_AND_5" xml:space="preserve"><value>يجب أن يكون التقييم بين 1 و 5.</value></data>
+  <data name="TEXT_UNKNOWN_OR_PROTECTED_ROLE_S_0" xml:space="preserve"><value>هناك أدوار غير معروفة أو محمية: {0}.</value></data>
+  <data name="TEXT_USER_IS_ALREADY_VERIFIED" xml:space="preserve"><value>المستخدم موثق بالفعل.</value></data>
+  <data name="TEXT_USER_VERIFICATION_CANNOT_BE_APPROVED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>لا يمكن الموافقة على توثيق المستخدم بينما حالة الحساب هي {0}.</value></data>
+  <data name="TEXT_USER_VERIFICATION_CANNOT_BE_DECLINED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>لا يمكن رفض توثيق المستخدم بينما حالة الحساب هي {0}.</value></data>
+  <data name="TEXT_WEBHOOK_SIGNATURE_VALIDATION_FAILED" xml:space="preserve"><value>فشل التحقق من توقيع Webhook.</value></data>
 </root>

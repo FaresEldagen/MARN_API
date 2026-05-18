@@ -21,6 +21,7 @@ using MARN_API.Hubs;
 using MARN_API.Localization;
 using Microsoft.AspNetCore.Localization;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace MARN_API
 {
@@ -66,7 +67,7 @@ namespace MARN_API
                                     var message = string.IsNullOrWhiteSpace(error.ErrorMessage)
                                         ? "The provided value is invalid."
                                         : error.ErrorMessage;
-                                    return localizer.LocalizeMessage(null, message);
+                                    return ValidationMessageLocalizer.Localize(entry.Key, message, localizer);
                                 })
                                 .ToArray());
 
@@ -354,6 +355,38 @@ namespace MARN_API
                             context.Token = accessToken;
                         }
                         return Task.CompletedTask;
+                    },
+                    OnChallenge = async context =>
+                    {
+                        if (context.Response.HasStarted)
+                            return;
+
+                        context.HandleResponse();
+
+                        var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+                        var (code, fallbackMessage) = ResolveAuthenticationChallenge(context);
+                        var response = CreateFrameworkErrorResponse(context.HttpContext, localizer, StatusCodes.Status401Unauthorized, code, fallbackMessage);
+
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions), context.HttpContext.RequestAborted);
+                    },
+                    OnForbidden = async context =>
+                    {
+                        if (context.Response.HasStarted)
+                            return;
+
+                        var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+                        var response = CreateFrameworkErrorResponse(
+                            context.HttpContext,
+                            localizer,
+                            StatusCodes.Status403Forbidden,
+                            "ACCESS_FORBIDDEN",
+                            "You do not have permission to access this endpoint.");
+
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions), context.HttpContext.RequestAborted);
                     }
                 };
             });
@@ -404,11 +437,17 @@ namespace MARN_API
                 // On Rejected
                 options.OnRejected = async (context, token) =>
                 {
-                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                     var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
-                    await context.HttpContext.Response.WriteAsync(
-                        localizer.LocalizeMessage("RATE_LIMIT_EXCEEDED", "Rate limit exceeded. Please try again later."),
-                        token);
+                    var response = CreateFrameworkErrorResponse(
+                        context.HttpContext,
+                        localizer,
+                        StatusCodes.Status429TooManyRequests,
+                        "RATE_LIMIT_EXCEEDED",
+                        "Rate limit exceeded. Please try again later.");
+
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    context.HttpContext.Response.ContentType = "application/json";
+                    await context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions), token);
                 };
             });
             #endregion
@@ -489,6 +528,44 @@ namespace MARN_API
 
 
             await app.RunAsync();
+        }
+
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
+        private static (string Code, string Message) ResolveAuthenticationChallenge(JwtBearerChallengeContext context)
+        {
+            if (context.AuthenticateFailure is SecurityTokenExpiredException)
+            {
+                return ("ACCESS_TOKEN_EXPIRED", "The access token has expired. Please sign in again.");
+            }
+
+            if (string.IsNullOrWhiteSpace(context.Request.Headers.Authorization))
+            {
+                return ("AUTHENTICATION_REQUIRED", "Authentication is required to access this endpoint.");
+            }
+
+            return ("ACCESS_TOKEN_INVALID", "The access token is invalid or malformed.");
+        }
+
+        private static ErrorResponse CreateFrameworkErrorResponse(
+            HttpContext context,
+            IAppTextLocalizer localizer,
+            int statusCode,
+            string code,
+            string fallbackMessage)
+        {
+            return new ErrorResponse
+            {
+                Code = code,
+                Message = localizer.LocalizeMessage(code, fallbackMessage),
+                StatusCode = statusCode,
+                Path = context.Request.Path,
+                TraceId = context.TraceIdentifier,
+                Timestamp = DateTime.UtcNow
+            };
         }
     }
 }

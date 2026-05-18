@@ -1,5 +1,6 @@
 using MARN_API.DTOs.Common;
 using MARN_API.Enums;
+using MARN_API.Localization;
 using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -12,8 +13,13 @@ namespace MARN_API.Controllers
     {
         protected ActionResult HandleServiceResult<T>(ServiceResult<T> result)
         {
-            var code = result.Code ?? GetDefaultCode(result.ResultType);
-            var message = Localizer.LocalizeMessage(code, result.Message, arguments: result.MessageArguments);
+            var code = result.Success
+                ? result.Code ?? GetDefaultCode(result.ResultType)
+                : LocalizationKeyBuilder.BuildErrorCode(result.Code, result.Message, result.Errors, GetDefaultCode(result.ResultType));
+            var primaryMessage = result.Success
+                ? result.Message
+                : LocalizationKeyBuilder.ResolvePrimaryMessage(result.Message, result.Errors, "An error occurred.");
+            var message = Localizer.LocalizeMessage(code, primaryMessage, arguments: result.MessageArguments);
             ResponsePayloadLocalizer.Localize(result.Data);
 
             return result.ResultType switch
@@ -44,12 +50,13 @@ namespace MARN_API.Controllers
             string? code = null,
             object?[]? messageArguments = null)
         {
-            var resolvedCode = code ?? GetDefaultCode(statusCode);
+            var primaryMessage = LocalizationKeyBuilder.ResolvePrimaryMessage(message, errors, "An error occurred.");
+            var resolvedCode = LocalizationKeyBuilder.BuildErrorCode(code, primaryMessage, errors, GetDefaultCode(statusCode));
 
             return new ErrorResponse
             {
                 Code = resolvedCode,
-                Message = Localizer.LocalizeMessage(resolvedCode, message ?? "An error occurred.", arguments: messageArguments),
+                Message = Localizer.LocalizeMessage(resolvedCode, primaryMessage, arguments: messageArguments),
                 Action = action,
                 StatusCode = statusCode,
                 Path = HttpContext.Request.Path,

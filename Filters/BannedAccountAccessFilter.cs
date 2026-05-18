@@ -2,7 +2,9 @@ using System.Security.Claims;
 using MARN_API.Attributes;
 using MARN_API.Data;
 using MARN_API.Enums.Account;
+using MARN_API.Localization;
 using MARN_API.Models;
+using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -48,10 +50,14 @@ namespace MARN_API.Filters
             }
 
             _logger.LogWarning("Blocked banned user {UserId} from accessing {Path}", userId, context.HttpContext.Request.Path);
+            var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+            var code = "ACCOUNT_BANNED_ACCESS_DENIED";
+            var message = "Banned accounts cannot access this endpoint.";
 
             context.Result = new ObjectResult(new ErrorResponse
             {
-                Message = "Banned accounts cannot access this endpoint.",
+                Code = code,
+                Message = localizer.LocalizeMessage(code, message),
                 StatusCode = StatusCodes.Status403Forbidden,
                 Path = context.HttpContext.Request.Path,
                 TraceId = context.HttpContext.TraceIdentifier,

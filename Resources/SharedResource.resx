@@ -769,4 +769,86 @@ that paid at {3} is now available for withdrawal.</value></data>
   <data name="TEXT_DELETED_MESSAGE" xml:space="preserve"><value>[Deleted message]</value></data>
   <data name="TEXT_DELETED_COMMENT" xml:space="preserve"><value>[Deleted comment]</value></data>
   <data name="TEXT_MESSAGE_BETWEEN_0_AND_1" xml:space="preserve"><value>Message between {0} and {1}</value></data>
+  <data name="AUTHENTICATION_REQUIRED" xml:space="preserve"><value>Authentication is required to access this endpoint.</value></data>
+  <data name="ACCESS_TOKEN_INVALID" xml:space="preserve"><value>The access token is invalid or malformed.</value></data>
+  <data name="ACCESS_TOKEN_EXPIRED" xml:space="preserve"><value>The access token has expired. Please sign in again.</value></data>
+  <data name="ACCESS_FORBIDDEN" xml:space="preserve"><value>You do not have permission to access this endpoint.</value></data>
+  <data name="ACCOUNT_BANNED_ACCESS_DENIED" xml:space="preserve"><value>Banned accounts cannot access this endpoint.</value></data>
+  <data name="VALIDATION_FIELD_REQUIRED" xml:space="preserve"><value>{0} is required.</value></data>
+  <data name="VALIDATION_EMAIL_ADDRESS" xml:space="preserve"><value>{0} must be a valid email address.</value></data>
+  <data name="VALIDATION_PHONE_NUMBER" xml:space="preserve"><value>{0} must be a valid phone number.</value></data>
+  <data name="VALIDATION_STRING_LENGTH_MAX" xml:space="preserve"><value>{0} cannot exceed {1} characters.</value></data>
+  <data name="VALIDATION_STRING_LENGTH_RANGE" xml:space="preserve"><value>{0} must be between {1} and {2} characters.</value></data>
+  <data name="VALIDATION_RANGE_BETWEEN" xml:space="preserve"><value>{0} must be between {1} and {2}.</value></data>
+  <data name="VALIDATION_VALUE_INVALID" xml:space="preserve"><value>{0} is invalid.</value></data>
+  <data name="FIELD_PHONE_NUMBER" xml:space="preserve"><value>Phone number</value></data>
+  <data name="FIELD_FULL_NAME" xml:space="preserve"><value>Full name</value></data>
+  <data name="FIELD_EMAIL_ADDRESS" xml:space="preserve"><value>Email address</value></data>
+  <data name="FIELD_SUBJECT" xml:space="preserve"><value>Subject</value></data>
+  <data name="FIELD_MESSAGE" xml:space="preserve"><value>Message</value></data>
+  <data name="FIELD_CURRENT_PASSWORD" xml:space="preserve"><value>Current password</value></data>
+  <data name="FIELD_NEW_PASSWORD" xml:space="preserve"><value>New password</value></data>
+  <data name="FIELD_CONFIRM_NEW_PASSWORD" xml:space="preserve"><value>Confirm new password</value></data>
+  <data name="FIELD_YEAR" xml:space="preserve"><value>Year</value></data>
+  <data name="FIELD_MONTH" xml:space="preserve"><value>Month</value></data>
+  <data name="TEXT_INVALID_EMAIL_OR_PASSWORD" xml:space="preserve"><value>Invalid email or password</value></data>
+  <data name="TEXT_EMAIL_NOT_CONFIRMED_PLEASE_CHECK_YOUR_EMAIL_FOR_CONFIRMATION_INSTRUCTIONS" xml:space="preserve"><value>Email not confirmed. Please check your email for confirmation instructions.</value></data>
+  <data name="TEXT_ACCOUNT_HAS_BEEN_BANNED_CONTACT_SUPPORT_FOR_ASSISTANCE" xml:space="preserve"><value>Account has been banned. Contact support for assistance.</value></data>
+  <data name="TEXT_ACCOUNT_HAS_BEEN_DELETED_CONTACT_SUPPORT_FOR_ASSISTANCE" xml:space="preserve"><value>Account has been deleted. Contact support for assistance.</value></data>
+  <data name="TEXT_USER_CREATION_FAILED" xml:space="preserve"><value>User creation failed</value></data>
+  <data name="TEXT_EXTERNAL_LOGIN_FAILED" xml:space="preserve"><value>External login failed.</value></data>
+  <data name="TEXT_SUPPORT_EMAIL_IS_NOT_CONFIGURED" xml:space="preserve"><value>Support email is not configured.</value></data>
+  <data name="TEXT_FAILED_TO_SEND_YOUR_SUPPORT_REQUEST_AT_THE_MOMENT_PLEASE_TRY_AGAIN_LATER" xml:space="preserve"><value>Failed to send your support request at the moment. Please try again later.</value></data>
+  <data name="TEXT_USER_NOT_FOUND" xml:space="preserve"><value>User not found.</value></data>
+  <data name="TEXT_CONTRACT_NOT_FOUND" xml:space="preserve"><value>Contract not found.</value></data>
+  <data name="TEXT_FULL_NAME_IS_REQUIRED" xml:space="preserve"><value>Full name is required.</value></data>
+  <data name="TEXT_FULL_NAME_CANNOT_EXCEED_150_CHARACTERS" xml:space="preserve"><value>Full name cannot exceed 150 characters.</value></data>
+  <data name="TEXT_PHONE_NUMBER_IS_REQUIRED" xml:space="preserve"><value>Phone number is required.</value></data>
+  <data name="TEXT_PHONE_NUMBER_IS_NOT_VALID" xml:space="preserve"><value>Phone number is not valid.</value></data>
+  <data name="TEXT_PHONE_NUMBER_CANNOT_EXCEED_30_CHARACTERS" xml:space="preserve"><value>Phone number cannot exceed 30 characters.</value></data>
+  <data name="TEXT_SUBJECT_IS_REQUIRED" xml:space="preserve"><value>Subject is required.</value></data>
+  <data name="TEXT_SUBJECT_CANNOT_EXCEED_200_CHARACTERS" xml:space="preserve"><value>Subject cannot exceed 200 characters.</value></data>
+  <data name="TEXT_MESSAGE_IS_REQUIRED" xml:space="preserve"><value>Message is required.</value></data>
+  <data name="TEXT_MESSAGE_CANNOT_EXCEED_4000_CHARACTERS" xml:space="preserve"><value>Message cannot exceed 4000 characters.</value></data>
+  <data name="TEXT_CURRENT_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>Current password is required.</value></data>
+  <data name="TEXT_NEW_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>New password is required.</value></data>
+  <data name="TEXT_CONFIRM_NEW_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>Confirm new password is required.</value></data>
+  <data name="TEXT_YEAR_MUST_BE_BETWEEN_1_AND_9999" xml:space="preserve"><value>Year must be between 1 and 9999.</value></data>
+  <data name="TEXT_MONTH_MUST_BE_BETWEEN_1_AND_12" xml:space="preserve"><value>Month must be between 1 and 12.</value></data>
+  <data name="TEXT_REPORT_TARGET_IS_REQUIRED" xml:space="preserve"><value>Report target is required.</value></data>
+  <data name="TEXT_REPORT_REASON_IS_REQUIRED" xml:space="preserve"><value>Report reason is required.</value></data>
+  <data name="TEXT_REPORT_REASON_MUST_BE_BETWEEN_5_AND_2000_CHARACTERS" xml:space="preserve"><value>Report reason must be between 5 and 2000 characters.</value></data>
+  <data name="TEXT_REVIEW_NOTE_CANNOT_EXCEED_2000_CHARACTERS" xml:space="preserve"><value>Review note cannot exceed 2000 characters.</value></data>
+  <data name="TEXT_0_REPORTS_REQUIRE_A_VALID_GUID_TARGET_ID" xml:space="preserve"><value>{0} reports require a valid GUID target ID.</value></data>
+  <data name="TEXT_0_REPORTS_REQUIRE_A_VALID_POSITIVE_NUMERIC_TARGET_ID" xml:space="preserve"><value>{0} reports require a valid positive numeric target ID.</value></data>
+  <data name="TEXT_ARABIC_ADDRESS_IS_REQUIRED" xml:space="preserve"><value>Arabic address is required.</value></data>
+  <data name="TEXT_ARABIC_ADDRESS_MUST_BE_BETWEEN_10_AND_200_CHARACTERS" xml:space="preserve"><value>Arabic address must be between 10 and 200 characters.</value></data>
+  <data name="TEXT_ARABIC_FULL_NAME_IS_REQUIRED" xml:space="preserve"><value>Arabic Full Name is required.</value></data>
+  <data name="TEXT_ARABIC_FULL_NAME_MUST_BE_BETWEEN_10_AND_100_CHARACTERS" xml:space="preserve"><value>Arabic Full Name must be between 10 and 100 characters.</value></data>
+  <data name="TEXT_COMMENT_CONTENT_MUST_BE_BETWEEN_1_AND_1000_CHARACTERS" xml:space="preserve"><value>Comment content must be between 1 and 1000 characters.</value></data>
+  <data name="TEXT_CONFIRM_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>Confirm password is required.</value></data>
+  <data name="TEXT_CONTRACT_GENERATION_FAILED_MISSING_REQUIRED_DATA_0" xml:space="preserve"><value>Contract generation failed: Missing required data ({0}).</value></data>
+  <data name="TEXT_CONTRACT_IS_IN_0_STATUS_ONLY_PENDING_CONTRACTS_CAN_BE_SIGNED" xml:space="preserve"><value>Contract is in {0} status. Only Pending contracts can be signed.</value></data>
+  <data name="TEXT_DELETED_PROPERTIES_CANNOT_BE_DEACTIVATED" xml:space="preserve"><value>Deleted properties cannot be deactivated.</value></data>
+  <data name="TEXT_DELETED_PROPERTIES_CANNOT_BE_RESTORED" xml:space="preserve"><value>Deleted properties cannot be restored.</value></data>
+  <data name="TEXT_FOR_DAILY_RENTALS_ONLY_0_PAYMENT_FREQUENCY_IS_ALLOWED" xml:space="preserve"><value>For daily rentals, only '{0}' payment frequency is allowed.</value></data>
+  <data name="TEXT_FOR_MONTHLY_RENTALS_ONLY_0_OR_1_PAYMENT_FREQUENCIES_ARE_ALLOWED" xml:space="preserve"><value>For monthly rentals, only '{0}' or '{1}' payment frequencies are allowed.</value></data>
+  <data name="TEXT_INVALID_PERIOD_SUPPORTED_VALUES_ARE_ALLTIME_THISMONTH_THISYEAR_AND_CUSTOM" xml:space="preserve"><value>Invalid period. Supported values are allTime, thisMonth, thisYear, and custom.</value></data>
+  <data name="TEXT_NATIONAL_ID_NUMBER_IS_REQUIRED" xml:space="preserve"><value>National ID Number is required.</value></data>
+  <data name="TEXT_NATIONAL_ID_NUMBER_MUST_BE_14_CHARACTERS" xml:space="preserve"><value>National ID Number must be 14 characters.</value></data>
+  <data name="TEXT_ONLY_PENDING_OR_ACTIVE_CONTRACTS_CAN_BE_CANCELLED_BY_ADMIN" xml:space="preserve"><value>Only pending or active contracts can be cancelled by admin.</value></data>
+  <data name="TEXT_PAGENUMBER_AND_PAGESIZE_MUST_BE_GREATER_THAN_0" xml:space="preserve"><value>pageNumber and pageSize must be greater than 0.</value></data>
+  <data name="TEXT_PASSWORD_CANNOT_EXCEED_100_CHARACTERS" xml:space="preserve"><value>Password cannot exceed 100 characters.</value></data>
+  <data name="TEXT_PASSWORD_MUST_BE_AT_LEAST_6_CHARACTERS" xml:space="preserve"><value>Password must be at least 6 characters.</value></data>
+  <data name="TEXT_PASSWORDS_DO_NOT_MATCH" xml:space="preserve"><value>Passwords do not match.</value></data>
+  <data name="TEXT_PROPERTY_IS_ALREADY_ACTIVE" xml:space="preserve"><value>Property is already active.</value></data>
+  <data name="TEXT_PROPERTY_IS_ALREADY_DEACTIVATED" xml:space="preserve"><value>Property is already deactivated.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_CANNOT_BE_APPROVED_WHILE_PROPERTY_STATUS_IS_0" xml:space="preserve"><value>Property verification cannot be approved while property status is {0}.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_CANNOT_BE_DECLINED_WHILE_PROPERTY_STATUS_IS_0" xml:space="preserve"><value>Property verification cannot be declined while property status is {0}.</value></data>
+  <data name="TEXT_RATING_MUST_BE_BETWEEN_1_AND_5" xml:space="preserve"><value>Rating must be between 1 and 5.</value></data>
+  <data name="TEXT_UNKNOWN_OR_PROTECTED_ROLE_S_0" xml:space="preserve"><value>Unknown or protected role(s): {0}.</value></data>
+  <data name="TEXT_USER_IS_ALREADY_VERIFIED" xml:space="preserve"><value>User is already verified.</value></data>
+  <data name="TEXT_USER_VERIFICATION_CANNOT_BE_APPROVED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>User verification cannot be approved while account status is {0}.</value></data>
+  <data name="TEXT_USER_VERIFICATION_CANNOT_BE_DECLINED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>User verification cannot be declined while account status is {0}.</value></data>
+  <data name="TEXT_WEBHOOK_SIGNATURE_VALIDATION_FAILED" xml:space="preserve"><value>Webhook signature validation failed.</value></data>
 </root>

@@ -2,6 +2,7 @@ using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using System.Net;
 using System.Text.Json;
+using MARN_API.Localization;
 
 namespace MARN_API.Middleware
 {
@@ -50,25 +51,24 @@ namespace MARN_API.Middleware
             {
                 case UnauthorizedAccessException:
                     statusCode = HttpStatusCode.Unauthorized;
-                    code = "UNAUTHORIZED";
+                    code = "ACCESS_FORBIDDEN";
                     message = "You are not authorized to perform this action.";
                     break;
 
                 case ArgumentException argEx:
                     statusCode = HttpStatusCode.BadRequest;
-                    code = "BAD_REQUEST";
                     message = argEx.Message;
                     break;
 
                 case KeyNotFoundException:
                     statusCode = HttpStatusCode.NotFound;
-                    code = "NOT_FOUND";
-                    message = "The requested resource was not found.";
+                    message = string.IsNullOrWhiteSpace(exception.Message) || exception.Message.StartsWith("The given key", StringComparison.Ordinal)
+                        ? "The requested resource was not found."
+                        : exception.Message;
                     break;
 
                 case InvalidOperationException:
                     statusCode = HttpStatusCode.BadRequest;
-                    code = "BAD_REQUEST";
                     message = exception.Message;
                     break;
 
@@ -87,6 +87,8 @@ namespace MARN_API.Middleware
                     }
                     break;
             }
+
+            code = LocalizationKeyBuilder.BuildErrorCode(code == "INTERNAL_ERROR" || code == "ACCESS_FORBIDDEN" || code == "REQUEST_TIMEOUT" ? code : null, message, null, code);
 
             var errorResponse = new ErrorResponse
             {
