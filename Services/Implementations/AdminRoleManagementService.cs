@@ -105,8 +105,10 @@ namespace MARN_API.Services.Implementations
             if (invalidRoles.Count > 0)
             {
                 return ServiceResult<AdminRoleUserDetailsDto>.Fail(
-                    $"Unknown or protected role(s): {string.Join(", ", invalidRoles)}.",
-                    resultType: ServiceResultType.BadRequest);
+                    "Unknown or protected role(s): {0}.",
+                    resultType: ServiceResultType.BadRequest,
+                    code: "ADMIN_ROLE_UNKNOWN_OR_PROTECTED",
+                    messageArguments: [string.Join(", ", invalidRoles)]);
             }
 
             var normalizedRequestedRoles = requestedManagedRoles

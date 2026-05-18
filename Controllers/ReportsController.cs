@@ -53,7 +53,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> SubmitReport([FromBody] SubmitReportDto request)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _reportService.SubmitReportAsync(userId, request);
             return HandleServiceResult(result);

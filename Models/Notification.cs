@@ -11,6 +11,9 @@ namespace MARN_API.Models
         public NotificationUserType UserType { get; set; }
         public NotificationType Type { get; set; }
 
+        public string? TitleKey { get; set; }
+        public string? BodyKey { get; set; }
+        public string? LocalizationArgumentsJson { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Body { get; set; } = string.Empty;
         public string? Data { get; set; } = null;

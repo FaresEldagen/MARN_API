@@ -2,9 +2,15 @@ using MARN_API.DTOs.Contracts;
 using MARN_API.Services.Implementations;
 using Microsoft.AspNetCore.Mvc;
 using MARN_API.Data;
+using MARN_API.Enums;
+using MARN_API.Enums.Account;
+using MARN_API.Enums.Payment;
+using MARN_API.Enums.Property;
 using MARN_API.Models;
+using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace MARN_API.Controllers
 {
@@ -12,12 +18,15 @@ namespace MARN_API.Controllers
     [Route("api/[controller]")]
     public class TempGenController : ControllerBase
     {
+        private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en");
+        private static readonly CultureInfo ArabicCulture = CultureInfo.GetCultureInfo("ar");
         private readonly ContractPdfGenerator _contractPdfGenerator;
         private readonly HashingService _hashingService;
         private readonly OpenTimestampsService _openTimestampsService;
         private readonly OpenTimestampsProofReader _proofReader;
         private readonly IWebHostEnvironment _env;
         private readonly AppDbContext _dbContext;
+        private readonly IAppTextLocalizer _localizer;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public TempGenController(
@@ -27,6 +36,7 @@ namespace MARN_API.Controllers
             OpenTimestampsProofReader proofReader,
             IWebHostEnvironment env,
             AppDbContext dbContext,
+            IAppTextLocalizer localizer,
             UserManager<ApplicationUser> userManager)
         {
             _contractPdfGenerator = contractPdfGenerator;
@@ -35,6 +45,7 @@ namespace MARN_API.Controllers
             _proofReader = proofReader;
             _env = env;
             _dbContext = dbContext;
+            _localizer = localizer;
             _userManager = userManager;
         }
 
@@ -192,6 +203,179 @@ namespace MARN_API.Controllers
             await _dbContext.SaveChangesAsync();
 
             return Ok(results);
+        }
+
+        /// <summary>
+        /// [TEST ONLY] Generates a preview contract PDF using seeded property and user data.
+        /// </summary>
+        [HttpGet("preview-contract")]
+        public async Task<IActionResult> PreviewContract([FromQuery] long? propertyId = null, [FromQuery] Guid? renterId = null)
+        {
+            IQueryable<Property> propertyQuery = _dbContext.Properties
+                .Include(p => p.Media)
+                .Include(p => p.Amenities)
+                .Include(p => p.Rules)
+                .Where(p => p.OwnerId != Guid.Empty);
+
+            if (propertyId.HasValue)
+            {
+                propertyQuery = propertyQuery.Where(p => p.Id == propertyId.Value);
+            }
+
+            var property = await propertyQuery
+                .OrderBy(p => p.Id)
+                .FirstOrDefaultAsync();
+
+            if (property == null)
+            {
+                return NotFound("No seeded property was found for contract preview.");
+            }
+
+            var owner = await _userManager.FindByIdAsync(property.OwnerId.ToString());
+            if (owner == null)
+            {
+                return NotFound($"Owner not found for property {property.Id}.");
+            }
+
+            IQueryable<ApplicationUser> renterQuery = _dbContext.Users
+                .IgnoreQueryFilters()
+                .Where(u => u.Id != property.OwnerId && u.DeletedAt == null);
+
+            if (renterId.HasValue)
+            {
+                renterQuery = renterQuery.Where(u => u.Id == renterId.Value);
+            }
+
+            var renter = await renterQuery
+                .OrderBy(u => u.Id)
+                .FirstOrDefaultAsync();
+
+            if (renter == null)
+            {
+                return NotFound("No seeded renter was found for contract preview.");
+            }
+
+            var (leaseStart, leaseEnd, paymentFrequency) = GetPreviewTerms(property.RentalUnit);
+            var totalContractAmount = CalculateTotalAmount(property.Price, property.RentalUnit, leaseStart, leaseEnd);
+
+            var request = new ContractPdfRequest
+            {
+                ContractNumber = $"PREVIEW-{property.Id}-{renter.Id.ToString()[..8]}",
+                IssuedAtUtc = DateTime.UtcNow,
+                Landlord = new PartyInfo
+                {
+                    FullName = $"{owner.FirstName} {owner.LastName}".Trim(),
+                    NationalId = owner.NationalIDNumber,
+                    Email = owner.Email,
+                    PhoneNumber = owner.PhoneNumber,
+                    Address = owner.ArabicAddress
+                },
+                Tenant = new PartyInfo
+                {
+                    FullName = $"{renter.FirstName} {renter.LastName}".Trim(),
+                    NationalId = renter.NationalIDNumber,
+                    Email = renter.Email,
+                    PhoneNumber = renter.PhoneNumber,
+                    Address = renter.ArabicAddress
+                },
+                Property = new PropertyInfo
+                {
+                    UnitNumber = property.Id.ToString(),
+                    ListingTitle = property.Title,
+                    AddressLine = property.Address,
+                    City = GetLocationBilingualDisplayName<City>(property.City),
+                    Country = GetEnumBilingualDisplayName(Country.Egypt),
+                    Description = property.Description,
+                    Type = GetEnumBilingualDisplayName(property.Type),
+                    State = GetLocationBilingualDisplayName<Governorate>(property.State),
+                    ZipCode = property.ZipCode,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    Bedrooms = property.Bedrooms,
+                    Beds = property.Beds,
+                    Bathrooms = property.Bathrooms,
+                    SquareMeters = property.SquareMeters,
+                    MaxOccupants = property.MaxOccupants,
+                    IsShared = property.IsShared,
+                    Amenities = string.Join(", ", property.Amenities.Select(a => GetEnumBilingualDisplayName(a.Amenity))),
+                    Rules = string.Join("; ", property.Rules.Select(r => r.Rule)),
+                    MediaPaths = property.Media.Select(m => m.Path).ToList()
+                },
+                RentalTerms = new RentalTermsInfo
+                {
+                    RentAmount = property.Price,
+                    TotalContractAmount = totalContractAmount,
+                    PaymentFrequency = paymentFrequency,
+                    Currency = "EGP",
+                    LeaseStartDate = leaseStart,
+                    LeaseEndDate = leaseEnd
+                },
+                ElectronicSignature = new ElectronicSignatureInfo
+                {
+                    SignerName = $"{renter.FirstName} {renter.LastName}".Trim(),
+                    SignerNationalId = renter.NationalIDNumber,
+                    SignedAtUtc = DateTime.UtcNow
+                }
+            };
+
+            var pdfResult = _contractPdfGenerator.Generate(request);
+
+            Response.Headers["X-Preview-PropertyId"] = property.Id.ToString();
+            Response.Headers["X-Preview-OwnerId"] = owner.Id.ToString();
+            Response.Headers["X-Preview-RenterId"] = renter.Id.ToString();
+
+            return File(pdfResult.Content, "application/pdf", pdfResult.FileName);
+        }
+
+        private static (DateOnly Start, DateOnly End, PaymentFrequency PaymentFrequency) GetPreviewTerms(Enums.Property.RentalUnit rentalUnit)
+        {
+            var start = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
+
+            return rentalUnit switch
+            {
+                Enums.Property.RentalUnit.Daily => (start, start.AddDays(7), PaymentFrequency.OneTime),
+                Enums.Property.RentalUnit.Monthly => (start, start.AddMonths(6), PaymentFrequency.Monthly),
+                Enums.Property.RentalUnit.Yearly => (start, start.AddYears(1), PaymentFrequency.Quarterly),
+                _ => (start, start.AddMonths(1), PaymentFrequency.OneTime)
+            };
+        }
+
+        private static decimal CalculateTotalAmount(decimal propertyPrice, Enums.Property.RentalUnit rentalUnit, DateOnly leaseStart, DateOnly leaseEnd)
+        {
+            return rentalUnit switch
+            {
+                Enums.Property.RentalUnit.Daily => propertyPrice * (leaseEnd.DayNumber - leaseStart.DayNumber),
+                Enums.Property.RentalUnit.Monthly => propertyPrice * MonthsBetween(leaseStart, leaseEnd),
+                Enums.Property.RentalUnit.Yearly => propertyPrice * YearsBetween(leaseStart, leaseEnd),
+                _ => propertyPrice
+            };
+        }
+
+        private static int MonthsBetween(DateOnly start, DateOnly end)
+        {
+            var months = (end.Year - start.Year) * 12 + (end.Month - start.Month);
+            return months < 1 ? 1 : months;
+        }
+
+        private static int YearsBetween(DateOnly start, DateOnly end)
+        {
+            var years = end.Year - start.Year;
+            return years < 1 ? 1 : years;
+        }
+
+        private string GetLocationBilingualDisplayName<TEnum>(string? rawValue) where TEnum : struct, Enum
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<TEnum>(rawValue, true, out var parsed))
+            {
+                return GetEnumBilingualDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
+        }
+
+        private string GetEnumBilingualDisplayName<TEnum>(TEnum value) where TEnum : struct, Enum
+        {
+            return $"{_localizer.GetEnumDisplayName(value, EnglishCulture)} / {_localizer.GetEnumDisplayName(value, ArabicCulture)}";
         }
     }
 }

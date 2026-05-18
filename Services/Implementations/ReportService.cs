@@ -9,13 +9,16 @@ namespace MARN_API.Services.Implementations
     public class ReportService : IReportService
     {
         private readonly IReportRepo _reportRepo;
+        private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<ReportService> _logger;
 
         public ReportService(
             IReportRepo reportRepo,
+            IAppTextLocalizer localizer,
             ILogger<ReportService> logger)
         {
             _reportRepo = reportRepo;
+            _localizer = localizer;
             _logger = logger;
         }
 
@@ -176,10 +179,12 @@ namespace MARN_API.Services.Implementations
             return null;
         }
 
-        private static (bool Success, long? LongId, Guid? GuidId, ServiceResult<ReportSubmissionResultDto>? Error) ParseTargetId(
+        private (bool Success, long? LongId, Guid? GuidId, ServiceResult<ReportSubmissionResultDto>? Error) ParseTargetId(
             ReportableType reportableType,
             string targetId)
         {
+            var reportableTypeDisplayName = _localizer.GetEnumDisplayName(reportableType);
+
             switch (reportableType)
             {
                 case ReportableType.User:
@@ -188,8 +193,10 @@ namespace MARN_API.Services.Implementations
                         return (true, null, parsedGuid, null);
 
                     return (false, null, null, ServiceResult<ReportSubmissionResultDto>.Fail(
-                        $"{reportableType} reports require a valid GUID target ID.",
-                        resultType: ServiceResultType.BadRequest));
+                        "{0} reports require a valid GUID target ID.",
+                        resultType: ServiceResultType.BadRequest,
+                        code: "REPORT_GUID_TARGET_ID_REQUIRED",
+                        messageArguments: [reportableTypeDisplayName]));
 
                 case ReportableType.Property:
                 case ReportableType.PropertyComment:
@@ -197,8 +204,10 @@ namespace MARN_API.Services.Implementations
                         return (true, parsedLong, null, null);
 
                     return (false, null, null, ServiceResult<ReportSubmissionResultDto>.Fail(
-                        $"{reportableType} reports require a valid positive numeric target ID.",
-                        resultType: ServiceResultType.BadRequest));
+                        "{0} reports require a valid positive numeric target ID.",
+                        resultType: ServiceResultType.BadRequest,
+                        code: "REPORT_NUMERIC_TARGET_ID_REQUIRED",
+                        messageArguments: [reportableTypeDisplayName]));
 
                 default:
                     return (false, null, null, ServiceResult<ReportSubmissionResultDto>.Fail(

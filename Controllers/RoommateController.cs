@@ -29,7 +29,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetMatches([FromQuery] int limit = 10)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _matchingService.GetTopMatchesAsync(userId, limit);
             return HandleServiceResult<IEnumerable<MARN_API.DTOs.Roommate.RoommateMatchDto>>(result);

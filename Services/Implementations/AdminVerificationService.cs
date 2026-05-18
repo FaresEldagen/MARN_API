@@ -13,13 +13,16 @@ namespace MARN_API.Services.Implementations
     {
         private const int MaxPageSize = 100;
         private readonly IAdminVerificationRepo _verificationRepo;
+        private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<AdminVerificationService> _logger;
 
         public AdminVerificationService(
             IAdminVerificationRepo verificationRepo,
+            IAppTextLocalizer localizer,
             ILogger<AdminVerificationService> logger)
         {
             _verificationRepo = verificationRepo;
+            _localizer = localizer;
             _logger = logger;
         }
 
@@ -45,7 +48,11 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("User verification request not found.", resultType: ServiceResultType.NotFound);
 
             if (user.AccountStatus != AccountStatus.Pending)
-                return ServiceResult<bool>.Fail($"User verification cannot be approved while account status is {user.AccountStatus}.", resultType: ServiceResultType.Conflict);
+                return ServiceResult<bool>.Fail(
+                    "User verification cannot be approved while account status is {0}.",
+                    resultType: ServiceResultType.Conflict,
+                    code: "USER_VERIFICATION_APPROVAL_STATUS_CONFLICT",
+                    messageArguments: [_localizer.GetEnumDisplayName(user.AccountStatus)]);
 
             user.AccountStatus = AccountStatus.Verified;
             await _verificationRepo.SaveChangesAsync();
@@ -63,7 +70,11 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("User verification request not found.", resultType: ServiceResultType.NotFound);
 
             if (user.AccountStatus != AccountStatus.Pending)
-                return ServiceResult<bool>.Fail($"User verification cannot be declined while account status is {user.AccountStatus}.", resultType: ServiceResultType.Conflict);
+                return ServiceResult<bool>.Fail(
+                    "User verification cannot be declined while account status is {0}.",
+                    resultType: ServiceResultType.Conflict,
+                    code: "USER_VERIFICATION_DECLINE_STATUS_CONFLICT",
+                    messageArguments: [_localizer.GetEnumDisplayName(user.AccountStatus)]);
 
             user.AccountStatus = AccountStatus.Declined;
             await _verificationRepo.SaveChangesAsync();
@@ -94,7 +105,11 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Property verification request not found.", resultType: ServiceResultType.NotFound);
 
             if (property.Status != PropertyStatus.Pending)
-                return ServiceResult<bool>.Fail($"Property verification cannot be approved while property status is {property.Status}.", resultType: ServiceResultType.Conflict);
+                return ServiceResult<bool>.Fail(
+                    "Property verification cannot be approved while property status is {0}.",
+                    resultType: ServiceResultType.Conflict,
+                    code: "PROPERTY_VERIFICATION_APPROVAL_STATUS_CONFLICT",
+                    messageArguments: [_localizer.GetEnumDisplayName(property.Status)]);
 
             property.Status = PropertyStatus.Verified;
             await _verificationRepo.SaveChangesAsync();
@@ -112,7 +127,11 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Property verification request not found.", resultType: ServiceResultType.NotFound);
 
             if (property.Status != PropertyStatus.Pending)
-                return ServiceResult<bool>.Fail($"Property verification cannot be declined while property status is {property.Status}.", resultType: ServiceResultType.Conflict);
+                return ServiceResult<bool>.Fail(
+                    "Property verification cannot be declined while property status is {0}.",
+                    resultType: ServiceResultType.Conflict,
+                    code: "PROPERTY_VERIFICATION_DECLINE_STATUS_CONFLICT",
+                    messageArguments: [_localizer.GetEnumDisplayName(property.Status)]);
 
             property.Status = PropertyStatus.Declined;
             await _verificationRepo.SaveChangesAsync();

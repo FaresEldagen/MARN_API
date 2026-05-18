@@ -164,9 +164,13 @@ namespace MARN_API.DTOs.Admin
         public string OwnerName { get; set; } = string.Empty;
         public Guid OwnerId { get; set; }
         public PropertyStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
+        public string CityDisplayName { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
+        public string StateDisplayName { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public bool IsActive { get; set; }
         public bool CanDeactivate { get; set; }
@@ -188,12 +192,14 @@ namespace MARN_API.DTOs.Admin
     {
         public long ContractId { get; set; }
         public ContractStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public bool CanCancel { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateOnly LeaseStartDate { get; set; }
         public DateOnly LeaseEndDate { get; set; }
         public decimal TotalContractAmount { get; set; }
         public string PaymentFrequency { get; set; } = string.Empty;
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
         public long PropertyId { get; set; }
         public string PropertyTitle { get; set; } = string.Empty;
         public Guid OwnerId { get; set; }

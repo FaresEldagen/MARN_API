@@ -5,6 +5,7 @@ namespace MARN_API.DTOs.Contracts
     public class ContractDetailsDto
     {
         public ContractStatus ContractStatus { get; set; }
+        public string ContractStatusDisplayName { get; set; } = string.Empty;
         public long ContractId { get; set; }
         public string Duration { get; set; } = string.Empty;
         public DateOnly? StartDate { get; set; }
@@ -22,8 +23,11 @@ namespace MARN_API.DTOs.Contracts
         public string Name { get; set; } = string.Empty;
         public string StreetAddress { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
+        public string CityDisplayName { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
+        public string StateDisplayName { get; set; } = string.Empty;
         public string RentalDuration { get; set; } = string.Empty;
+        public string RentalDurationDisplayName { get; set; } = string.Empty;
         public decimal Price { get; set; }
     }
 

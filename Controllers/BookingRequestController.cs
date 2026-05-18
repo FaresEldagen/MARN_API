@@ -47,7 +47,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> AddBookingRequest([FromBody] AddBookingRequestDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _bookingRequestService.AddBookingRequestAsync(userId, dto);
             return HandleServiceResult(result);
@@ -73,7 +73,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> StartChat(long bookingRequestId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _bookingRequestService.StartChatAsync(userId, bookingRequestId);
             return HandleServiceResult(result);
@@ -96,7 +96,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> CancelBookingRequest(long bookingRequestId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _bookingRequestService.CancelBookingRequestAsync(userId, bookingRequestId);
             return HandleServiceResult(result);

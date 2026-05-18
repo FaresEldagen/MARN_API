@@ -20,6 +20,7 @@ namespace MARN_API.Services.Implementations
         private readonly IAdminDashboardService _dashboardService;
         private readonly IAdminDetailedStatsRepo _detailedStatsRepo;
         private readonly IWebHostEnvironment _environment;
+        private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<AdminAnalyticsReportService> _logger;
 
         public AdminAnalyticsReportService(
@@ -27,12 +28,14 @@ namespace MARN_API.Services.Implementations
             IAdminDashboardService dashboardService,
             IAdminDetailedStatsRepo detailedStatsRepo,
             IWebHostEnvironment environment,
+            IAppTextLocalizer localizer,
             ILogger<AdminAnalyticsReportService> logger)
         {
             _analyticsReportRepo = analyticsReportRepo;
             _dashboardService = dashboardService;
             _detailedStatsRepo = detailedStatsRepo;
             _environment = environment;
+            _localizer = localizer;
             _logger = logger;
 
             QuestPDF.Settings.License = LicenseType.Community;
@@ -136,6 +139,7 @@ namespace MARN_API.Services.Implementations
                 query.PageSize = MaxHistoryPageSize;
 
             var reports = await _analyticsReportRepo.GetReportsAsync(query);
+            LocalizeReportItems(reports.Items);
             return ServiceResult<PagedResult<AdminAnalyticsReportListItemDto>>.Ok(reports);
         }
 
@@ -286,87 +290,166 @@ namespace MARN_API.Services.Implementations
             switch (scope)
             {
                 case AdminAnalyticsReportScope.Overview:
-                    csv.WriteRecords(BuildOverviewCsvRows(bundle));
+                    WriteCsv(
+                        csv,
+                        [T("Metric"), T("Value")],
+                        BuildOverviewCsvRows(bundle).Select(row => new object?[] { row.Metric, row.Value }));
                     break;
                 case AdminAnalyticsReportScope.Users:
-                    csv.WriteRecords(bundle.Users!.Users.Items.Select(x => new
-                    {
-                        x.UserId,
-                        x.FullName,
-                        x.Email,
-                        AccountStatus = x.AccountStatus.ToString(),
-                        x.IsDeleted,
-                        x.CreatedAt,
-                        Roles = string.Join(", ", x.Roles),
-                        x.OwnedPropertiesCount,
-                        x.ActivePropertiesCount,
-                        x.RenterContractsCount,
-                        x.OwnerContractsCount,
-                        x.ActiveContractsCount,
-                        x.CancelledContractsCount,
-                        x.PaymentsMadeCount,
-                        x.PaymentsReceivedCount,
-                        x.TotalPaidAmount,
-                        x.TotalReceivedAmount,
-                        x.ReportsSubmittedCount,
-                        x.ReportsAgainstUserCount
-                    }));
+                    WriteCsv(
+                        csv,
+                        [
+                            T("User ID"),
+                            T("Full Name"),
+                            T("Email"),
+                            T("Account Status"),
+                            T("Is Deleted"),
+                            T("Created At"),
+                            T("Roles"),
+                            T("Owned Properties Count"),
+                            T("Active Properties Count"),
+                            T("Renter Contracts Count"),
+                            T("Owner Contracts Count"),
+                            T("Active Contracts Count"),
+                            T("Cancelled Contracts Count"),
+                            T("Payments Made Count"),
+                            T("Payments Received Count"),
+                            T("Total Paid Amount"),
+                            T("Total Received Amount"),
+                            T("Reports Submitted Count"),
+                            T("Reports Against User Count")
+                        ],
+                        bundle.Users!.Users.Items.Select(x => new object?[]
+                        {
+                            x.UserId,
+                            x.FullName,
+                            x.Email,
+                            _localizer.GetEnumDisplayName(x.AccountStatus),
+                            x.IsDeleted,
+                            x.CreatedAt,
+                            string.Join(", ", x.Roles),
+                            x.OwnedPropertiesCount,
+                            x.ActivePropertiesCount,
+                            x.RenterContractsCount,
+                            x.OwnerContractsCount,
+                            x.ActiveContractsCount,
+                            x.CancelledContractsCount,
+                            x.PaymentsMadeCount,
+                            x.PaymentsReceivedCount,
+                            x.TotalPaidAmount,
+                            x.TotalReceivedAmount,
+                            x.ReportsSubmittedCount,
+                            x.ReportsAgainstUserCount
+                        }));
                     break;
                 case AdminAnalyticsReportScope.Properties:
-                    csv.WriteRecords(bundle.Properties!.Properties.Items.Select(x => new
-                    {
-                        x.PropertyId,
-                        x.Title,
-                        x.OwnerId,
-                        x.OwnerName,
-                        Status = x.Status.ToString(),
-                        Type = x.Type.ToString(),
-                        x.City,
-                        x.State,
-                        x.Price,
-                        x.IsActive,
-                        x.IsDeleted,
-                        x.CreatedAt
-                    }));
+                    WriteCsv(
+                        csv,
+                        [
+                            T("Property ID"),
+                            T("Title"),
+                            T("Owner ID"),
+                            T("Owner Name"),
+                            T("Status"),
+                            T("Type"),
+                            T("City"),
+                            T("State"),
+                            T("Price"),
+                            T("Is Active"),
+                            T("Is Deleted"),
+                            T("Created At")
+                        ],
+                        bundle.Properties!.Properties.Items.Select(x => new object?[]
+                        {
+                            x.PropertyId,
+                            x.Title,
+                            x.OwnerId,
+                            x.OwnerName,
+                            _localizer.GetEnumDisplayName(x.Status),
+                            _localizer.GetEnumDisplayName(x.Type),
+                            GetLocationDisplayName<Enums.Property.City>(x.City),
+                            GetLocationDisplayName<Enums.Property.Governorate>(x.State),
+                            x.Price,
+                            x.IsActive,
+                            x.IsDeleted,
+                            x.CreatedAt
+                        }));
                     break;
                 case AdminAnalyticsReportScope.Contracts:
-                    csv.WriteRecords(bundle.Contracts!.Contracts.Items.Select(x => new
-                    {
-                        x.ContractId,
-                        Status = x.Status.ToString(),
-                        x.CreatedAt,
-                        x.LeaseStartDate,
-                        x.LeaseEndDate,
-                        x.TotalContractAmount,
-                        x.PaymentFrequency,
-                        x.PropertyId,
-                        x.PropertyTitle,
-                        x.OwnerId,
-                        x.OwnerName,
-                        x.RenterId,
-                        x.RenterName
-                    }));
+                    WriteCsv(
+                        csv,
+                        [
+                            T("Contract ID"),
+                            T("Status"),
+                            T("Created At"),
+                            T("Lease Start Date"),
+                            T("Lease End Date"),
+                            T("Total Contract Amount"),
+                            T("Payment Frequency"),
+                            T("Property ID"),
+                            T("Property Title"),
+                            T("Owner ID"),
+                            T("Owner Name"),
+                            T("Renter ID"),
+                            T("Renter Name")
+                        ],
+                        bundle.Contracts!.Contracts.Items.Select(x => new object?[]
+                        {
+                            x.ContractId,
+                            _localizer.GetEnumDisplayName(x.Status),
+                            x.CreatedAt,
+                            x.LeaseStartDate,
+                            x.LeaseEndDate,
+                            x.TotalContractAmount,
+                            GetPaymentFrequencyDisplayName(x.PaymentFrequency),
+                            x.PropertyId,
+                            x.PropertyTitle,
+                            x.OwnerId,
+                            x.OwnerName,
+                            x.RenterId,
+                            x.RenterName
+                        }));
                     break;
                 case AdminAnalyticsReportScope.Revenue:
-                    csv.WriteRecords(bundle.Revenue!.Payments.Items.Select(x => new
-                    {
-                        x.PaymentId,
-                        x.ContractId,
-                        x.PaymentScheduleId,
-                        Status = x.Status.ToString(),
-                        x.AmountTotal,
-                        x.PlatformFee,
-                        x.OwnerAmount,
-                        x.PaidAt,
-                        x.AvailableAt,
-                        x.Currency,
-                        x.PropertyId,
-                        x.PropertyTitle,
-                        x.OwnerId,
-                        x.OwnerName,
-                        x.RenterId,
-                        x.RenterName
-                    }));
+                    WriteCsv(
+                        csv,
+                        [
+                            T("Payment ID"),
+                            T("Contract ID"),
+                            T("Payment Schedule ID"),
+                            T("Status"),
+                            T("Amount Total"),
+                            T("Platform Fee"),
+                            T("Owner Amount"),
+                            T("Paid At"),
+                            T("Available At"),
+                            T("Currency"),
+                            T("Property ID"),
+                            T("Property Title"),
+                            T("Owner ID"),
+                            T("Owner Name"),
+                            T("Renter ID"),
+                            T("Renter Name")
+                        ],
+                        bundle.Revenue!.Payments.Items.Select(x => new object?[]
+                        {
+                            x.PaymentId,
+                            x.ContractId,
+                            x.PaymentScheduleId,
+                            _localizer.GetEnumDisplayName(x.Status),
+                            x.AmountTotal,
+                            x.PlatformFee,
+                            x.OwnerAmount,
+                            x.PaidAt,
+                            x.AvailableAt,
+                            x.Currency,
+                            x.PropertyId,
+                            x.PropertyTitle,
+                            x.OwnerId,
+                            x.OwnerName,
+                            x.RenterId,
+                            x.RenterName
+                        }));
                     break;
             }
 
@@ -414,7 +497,7 @@ namespace MARN_API.Services.Implementations
             return document.GeneratePdf();
         }
 
-        private static void ConfigurePage(
+        private void ConfigurePage(
             PageDescriptor page,
             AdminAnalyticsReportScope scope,
             ResolvedPeriod period,
@@ -425,29 +508,30 @@ namespace MARN_API.Services.Implementations
             page.DefaultTextStyle(x => x.FontSize(10));
             page.Header().Column(column =>
             {
-                column.Item().Text($"Admin {scope} Report")
+                column.Item().Text(T("Admin {0} Report", _localizer.GetEnumDisplayName(scope)))
                     .SemiBold()
                     .FontSize(20);
-                column.Item().Text($"Period: {FormatPeriod(period)}");
-                column.Item().Text($"Generated at: {generatedAt:u}");
-                column.Item().Text($"Generated by: {adminUser.FirstName} {adminUser.LastName}".Trim());
+                column.Item().Text(T("Period: {0}", FormatPeriod(period)));
+                column.Item().Text(T("Generated at: {0}", generatedAt.ToString("u", CultureInfo.InvariantCulture)));
+                column.Item().Text(T("Generated by: {0}", $"{adminUser.FirstName} {adminUser.LastName}".Trim()));
             });
 
             page.Footer().AlignCenter().Text(text =>
             {
-                text.Span("Page ");
+                text.Span(T("Page"));
+                text.Span(" ");
                 text.CurrentPageNumber();
                 text.Span(" / ");
                 text.TotalPages();
             });
         }
 
-        private static void ComposeExecutiveSnapshot(ColumnDescriptor column, AnalyticsExportBundle bundle)
+        private void ComposeExecutiveSnapshot(ColumnDescriptor column, AnalyticsExportBundle bundle)
         {
             if (bundle.Overview == null)
                 return;
 
-            column.Item().Text("Executive Snapshot").SemiBold().FontSize(14);
+            column.Item().Text(T("Executive Snapshot")).SemiBold().FontSize(14);
             column.Item().Table(table =>
             {
                 table.ColumnsDefinition(columns =>
@@ -456,25 +540,25 @@ namespace MARN_API.Services.Implementations
                     columns.RelativeColumn();
                 });
 
-                AddKeyValueRow(table, "Total Users", bundle.Overview.TotalUsers.Value.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Total Properties", bundle.Overview.TotalProperties.Value.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Pending Verifications", bundle.Overview.PendingVerifications.Value.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Total Contracts", bundle.Overview.TotalContracts.Value.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Total Revenue", bundle.Overview.RevenueSummary.TotalRevenue.ToString("N2", CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Total Sales", bundle.Overview.RevenueSummary.TotalSales.ToString("N2", CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Active Contracts", bundle.Overview.RevenueSummary.ActiveContracts.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "New Users This Month", bundle.Overview.RevenueSummary.NewUsersThisMonth.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Users"), bundle.Overview.TotalUsers.Value.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Properties"), bundle.Overview.TotalProperties.Value.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Pending Verifications"), bundle.Overview.PendingVerifications.Value.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Contracts"), bundle.Overview.TotalContracts.Value.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Revenue"), bundle.Overview.RevenueSummary.TotalRevenue.ToString("N2", CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Sales"), bundle.Overview.RevenueSummary.TotalSales.ToString("N2", CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Active Contracts"), bundle.Overview.RevenueSummary.ActiveContracts.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("New Users This Month"), bundle.Overview.RevenueSummary.NewUsersThisMonth.ToString(CultureInfo.InvariantCulture));
             });
         }
 
-        private static void ComposeOverviewPeriodNote(ColumnDescriptor column, ResolvedPeriod period)
+        private void ComposeOverviewPeriodNote(ColumnDescriptor column, ResolvedPeriod period)
         {
-            column.Item().Text($"This report reflects the current admin snapshot and the selected period context: {FormatPeriod(period)}.");
+            column.Item().Text(T("This report reflects the current admin snapshot and the selected period context: {0}.", FormatPeriod(period)));
         }
 
-        private static void ComposeUsersSection(ColumnDescriptor column, AdminDetailedUsersResponseDto users)
+        private void ComposeUsersSection(ColumnDescriptor column, AdminDetailedUsersResponseDto users)
         {
-            column.Item().Text("Users").SemiBold().FontSize(14);
+            column.Item().Text(T("Users")).SemiBold().FontSize(14);
             column.Item().Table(table =>
             {
                 table.ColumnsDefinition(columns =>
@@ -483,51 +567,51 @@ namespace MARN_API.Services.Implementations
                     columns.RelativeColumn();
                 });
 
-                AddKeyValueRow(table, "Total Users", users.TotalUsers.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Deleted Users", users.DeletedUsers.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Users"), users.TotalUsers.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Deleted Users"), users.DeletedUsers.ToString(CultureInfo.InvariantCulture));
             });
 
-            column.Item().Text("Status Breakdown").SemiBold();
+            column.Item().Text(T("Status Breakdown")).SemiBold();
             ComposeThreeColumnTable(
                 column,
-                ["Status", "Count", "Share"],
+                [T("Status"), T("Count"), T("Share")],
                 users.StatusBreakdown.Select(x => new[]
                 {
-                    x.Status.ToString(),
+                    _localizer.GetEnumDisplayName(x.Status),
                     x.Count.ToString(CultureInfo.InvariantCulture),
                     users.TotalUsers == 0 ? "0%" : $"{(x.Count * 100m / users.TotalUsers):N1}%"
                 }));
 
-            column.Item().Text("Latest Users").SemiBold();
+            column.Item().Text(T("Latest Users")).SemiBold();
             ComposeFourColumnTable(
                 column,
-                ["User", "Status", "Created", "Roles"],
+                [T("User"), T("Status"), T("Created"), T("Roles")],
                 users.Users.Items.Select(x => new[]
                 {
                     x.FullName,
-                    x.AccountStatus.ToString(),
+                    _localizer.GetEnumDisplayName(x.AccountStatus),
                     x.CreatedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                     string.Join(", ", x.Roles)
                 }));
 
-            column.Item().Text("User Activity Metrics").SemiBold();
+            column.Item().Text(T("User Activity Metrics")).SemiBold();
             ComposeSixColumnTable(
                 column,
-                ["User", "Properties", "Contracts", "Payments", "Amounts", "Reports"],
+                [T("User"), T("Properties"), T("Contracts"), T("Payments"), T("Amounts"), T("Reports")],
                 users.Users.Items.Select(x => new[]
                 {
                     x.FullName,
-                    $"Owned: {x.OwnedPropertiesCount}, Active: {x.ActivePropertiesCount}",
-                    $"Renter: {x.RenterContractsCount}, Owner: {x.OwnerContractsCount}, Active: {x.ActiveContractsCount}, Cancelled: {x.CancelledContractsCount}",
-                    $"Made: {x.PaymentsMadeCount}, Received: {x.PaymentsReceivedCount}",
-                    $"Paid: {x.TotalPaidAmount:N2}, Received: {x.TotalReceivedAmount:N2}",
-                    $"Filed: {x.ReportsSubmittedCount}, Against: {x.ReportsAgainstUserCount}"
+                    T("Owned: {0}, Active: {1}", x.OwnedPropertiesCount, x.ActivePropertiesCount),
+                    T("Renter: {0}, Owner: {1}, Active: {2}, Cancelled: {3}", x.RenterContractsCount, x.OwnerContractsCount, x.ActiveContractsCount, x.CancelledContractsCount),
+                    T("Made: {0}, Received: {1}", x.PaymentsMadeCount, x.PaymentsReceivedCount),
+                    T("Paid: {0}, Received: {1}", x.TotalPaidAmount.ToString("N2", CultureInfo.InvariantCulture), x.TotalReceivedAmount.ToString("N2", CultureInfo.InvariantCulture)),
+                    T("Filed: {0}, Against: {1}", x.ReportsSubmittedCount, x.ReportsAgainstUserCount)
                 }));
         }
 
-        private static void ComposePropertiesSection(ColumnDescriptor column, AdminDetailedPropertiesResponseDto properties)
+        private void ComposePropertiesSection(ColumnDescriptor column, AdminDetailedPropertiesResponseDto properties)
         {
-            column.Item().Text("Properties").SemiBold().FontSize(14);
+            column.Item().Text(T("Properties")).SemiBold().FontSize(14);
             column.Item().Table(table =>
             {
                 table.ColumnsDefinition(columns =>
@@ -536,35 +620,35 @@ namespace MARN_API.Services.Implementations
                     columns.RelativeColumn();
                 });
 
-                AddKeyValueRow(table, "Total Properties", properties.TotalProperties.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Active Properties", properties.ActiveProperties.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Inactive Properties", properties.InactiveProperties.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Deleted Properties", properties.DeletedProperties.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Properties"), properties.TotalProperties.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Active Properties"), properties.ActiveProperties.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Inactive Properties"), properties.InactiveProperties.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Deleted Properties"), properties.DeletedProperties.ToString(CultureInfo.InvariantCulture));
             });
 
-            column.Item().Text("Status Breakdown").SemiBold();
-            ComposeTwoColumnTable(column, ["Status", "Count"], properties.StatusBreakdown.Select(x => new[]
+            column.Item().Text(T("Status Breakdown")).SemiBold();
+            ComposeTwoColumnTable(column, [T("Status"), T("Count")], properties.StatusBreakdown.Select(x => new[]
             {
-                x.Status.ToString(),
+                _localizer.GetEnumDisplayName(x.Status),
                 x.Count.ToString(CultureInfo.InvariantCulture)
             }));
 
-            column.Item().Text("Latest Properties").SemiBold();
+            column.Item().Text(T("Latest Properties")).SemiBold();
             ComposeFourColumnTable(
                 column,
-                ["Property", "Owner", "Status", "Location"],
+                [T("Property"), T("Owner"), T("Status"), T("Location")],
                 properties.Properties.Items.Select(x => new[]
                 {
                     x.Title,
                     x.OwnerName,
-                    x.Status.ToString(),
-                    $"{x.City}, {x.State}"
+                    _localizer.GetEnumDisplayName(x.Status),
+                    $"{GetLocationDisplayName<Enums.Property.City>(x.City)}, {GetLocationDisplayName<Enums.Property.Governorate>(x.State)}"
                 }));
         }
 
-        private static void ComposeContractsSection(ColumnDescriptor column, AdminDetailedContractsResponseDto contracts)
+        private void ComposeContractsSection(ColumnDescriptor column, AdminDetailedContractsResponseDto contracts)
         {
-            column.Item().Text("Contracts").SemiBold().FontSize(14);
+            column.Item().Text(T("Contracts")).SemiBold().FontSize(14);
             column.Item().Table(table =>
             {
                 table.ColumnsDefinition(columns =>
@@ -573,21 +657,21 @@ namespace MARN_API.Services.Implementations
                     columns.RelativeColumn();
                 });
 
-                AddKeyValueRow(table, "Total Contracts", contracts.TotalContracts.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Total Contract Value", contracts.TotalContractValue.ToString("N2", CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Contracts"), contracts.TotalContracts.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Contract Value"), contracts.TotalContractValue.ToString("N2", CultureInfo.InvariantCulture));
             });
 
-            column.Item().Text("Status Breakdown").SemiBold();
-            ComposeTwoColumnTable(column, ["Status", "Count"], contracts.StatusBreakdown.Select(x => new[]
+            column.Item().Text(T("Status Breakdown")).SemiBold();
+            ComposeTwoColumnTable(column, [T("Status"), T("Count")], contracts.StatusBreakdown.Select(x => new[]
             {
-                x.Status.ToString(),
+                _localizer.GetEnumDisplayName(x.Status),
                 x.Count.ToString(CultureInfo.InvariantCulture)
             }));
 
-            column.Item().Text("Latest Contracts").SemiBold();
+            column.Item().Text(T("Latest Contracts")).SemiBold();
             ComposeFourColumnTable(
                 column,
-                ["Contract", "Property", "Owner", "Renter"],
+                [T("Contract"), T("Property"), T("Owner"), T("Renter")],
                 contracts.Contracts.Items.Select(x => new[]
                 {
                     x.ContractId.ToString(CultureInfo.InvariantCulture),
@@ -597,9 +681,9 @@ namespace MARN_API.Services.Implementations
                 }));
         }
 
-        private static void ComposeRevenueSection(ColumnDescriptor column, AdminDetailedRevenueResponseDto revenue)
+        private void ComposeRevenueSection(ColumnDescriptor column, AdminDetailedRevenueResponseDto revenue)
         {
-            column.Item().Text("Revenue").SemiBold().FontSize(14);
+            column.Item().Text(T("Revenue")).SemiBold().FontSize(14);
             column.Item().Table(table =>
             {
                 table.ColumnsDefinition(columns =>
@@ -608,27 +692,27 @@ namespace MARN_API.Services.Implementations
                     columns.RelativeColumn();
                 });
 
-                AddKeyValueRow(table, "Total Payments", revenue.TotalPayments.ToString(CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Total Sales", revenue.TotalSales.ToString("N2", CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Platform Revenue", revenue.TotalRevenue.ToString("N2", CultureInfo.InvariantCulture));
-                AddKeyValueRow(table, "Owner Payouts", revenue.TotalOwnerPayouts.ToString("N2", CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Payments"), revenue.TotalPayments.ToString(CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Total Sales"), revenue.TotalSales.ToString("N2", CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Platform Revenue"), revenue.TotalRevenue.ToString("N2", CultureInfo.InvariantCulture));
+                AddKeyValueRow(table, T("Owner Payouts"), revenue.TotalOwnerPayouts.ToString("N2", CultureInfo.InvariantCulture));
             });
 
-            column.Item().Text("Payment Status Breakdown").SemiBold();
+            column.Item().Text(T("Payment Status Breakdown")).SemiBold();
             ComposeThreeColumnTable(
                 column,
-                ["Status", "Count", "Revenue"],
+                [T("Status"), T("Count"), T("Revenue")],
                 revenue.StatusBreakdown.Select(x => new[]
                 {
-                    x.Status.ToString(),
+                    _localizer.GetEnumDisplayName(x.Status),
                     x.Count.ToString(CultureInfo.InvariantCulture),
                     x.Revenue.ToString("N2", CultureInfo.InvariantCulture)
                 }));
 
-            column.Item().Text("Revenue Over Time").SemiBold();
+            column.Item().Text(T("Revenue Over Time")).SemiBold();
             ComposeThreeColumnTable(
                 column,
-                ["Period", "Revenue", "Sales"],
+                [T("Period"), T("Revenue"), T("Sales")],
                 revenue.RevenueOverTime.Select(x => new[]
                 {
                     x.Label,
@@ -745,21 +829,21 @@ namespace MARN_API.Services.Implementations
                 .Padding(4);
         }
 
-        private static List<OverviewMetricCsvRow> BuildOverviewCsvRows(AnalyticsExportBundle bundle)
+        private List<OverviewMetricCsvRow> BuildOverviewCsvRows(AnalyticsExportBundle bundle)
         {
             if (bundle.Overview == null)
                 return [];
 
             return
             [
-                new OverviewMetricCsvRow("Total Users", bundle.Overview.TotalUsers.Value.ToString(CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("Total Properties", bundle.Overview.TotalProperties.Value.ToString(CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("Pending Verifications", bundle.Overview.PendingVerifications.Value.ToString(CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("Total Contracts", bundle.Overview.TotalContracts.Value.ToString(CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("Total Revenue", bundle.Overview.RevenueSummary.TotalRevenue.ToString("N2", CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("Total Sales", bundle.Overview.RevenueSummary.TotalSales.ToString("N2", CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("New Users This Month", bundle.Overview.RevenueSummary.NewUsersThisMonth.ToString(CultureInfo.InvariantCulture)),
-                new OverviewMetricCsvRow("Active Contracts", bundle.Overview.RevenueSummary.ActiveContracts.ToString(CultureInfo.InvariantCulture))
+                new OverviewMetricCsvRow(T("Total Users"), bundle.Overview.TotalUsers.Value.ToString(CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("Total Properties"), bundle.Overview.TotalProperties.Value.ToString(CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("Pending Verifications"), bundle.Overview.PendingVerifications.Value.ToString(CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("Total Contracts"), bundle.Overview.TotalContracts.Value.ToString(CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("Total Revenue"), bundle.Overview.RevenueSummary.TotalRevenue.ToString("N2", CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("Total Sales"), bundle.Overview.RevenueSummary.TotalSales.ToString("N2", CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("New Users This Month"), bundle.Overview.RevenueSummary.NewUsersThisMonth.ToString(CultureInfo.InvariantCulture)),
+                new OverviewMetricCsvRow(T("Active Contracts"), bundle.Overview.RevenueSummary.ActiveContracts.ToString(CultureInfo.InvariantCulture))
             ];
         }
 
@@ -773,11 +857,11 @@ namespace MARN_API.Services.Implementations
             return $"admin-{scope.ToString().ToLowerInvariant()}-{periodToken}-{generatedAt:yyyyMMddHHmmss}.{extension}";
         }
 
-        private static string FormatPeriod(ResolvedPeriod period)
+        private string FormatPeriod(ResolvedPeriod period)
         {
             return period.Period == AdminAnalyticsReportPeriod.Custom && period.FromUtc.HasValue && period.ToUtc.HasValue
-                ? $"{period.FromUtc:yyyy-MM-dd} to {period.ToUtc:yyyy-MM-dd}"
-                : period.Period.ToString();
+                ? T("{0} to {1}", period.FromUtc.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), period.ToUtc.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
+                : _localizer.GetEnumDisplayName(period.Period);
         }
 
         private static string ToDetailedStatsPeriodValue(AdminAnalyticsReportPeriod period)
@@ -834,8 +918,11 @@ namespace MARN_API.Services.Implementations
             {
                 ReportId = report.Id,
                 Scope = report.Scope,
+                ScopeDisplayName = _localizer.GetEnumDisplayName(report.Scope),
                 Format = report.Format,
+                FormatDisplayName = _localizer.GetEnumDisplayName(report.Format),
                 RequestedPeriod = report.RequestedPeriod,
+                RequestedPeriodDisplayName = _localizer.GetEnumDisplayName(report.RequestedPeriod),
                 FromUtc = report.FromUtc,
                 ToUtc = report.ToUtc,
                 Grouping = report.Grouping,
@@ -847,6 +934,66 @@ namespace MARN_API.Services.Implementations
                 ContentType = report.ContentType,
                 DownloadUrl = $"/api/admin/analytics-reports/{report.Id}/download"
             };
+        }
+
+        private void LocalizeReportItems(IEnumerable<AdminAnalyticsReportListItemDto> items)
+        {
+            foreach (var item in items)
+            {
+                item.ScopeDisplayName = _localizer.GetEnumDisplayName(item.Scope);
+                item.FormatDisplayName = _localizer.GetEnumDisplayName(item.Format);
+                item.RequestedPeriodDisplayName = _localizer.GetEnumDisplayName(item.RequestedPeriod);
+            }
+        }
+
+        private void WriteCsv(CsvWriter csv, IReadOnlyList<string> headers, IEnumerable<object?[]> rows)
+        {
+            foreach (var header in headers)
+            {
+                csv.WriteField(header);
+            }
+
+            csv.NextRecord();
+
+            foreach (var row in rows)
+            {
+                foreach (var cell in row)
+                {
+                    csv.WriteField(cell);
+                }
+
+                csv.NextRecord();
+            }
+        }
+
+        private string T(string fallback)
+        {
+            return _localizer.LocalizeMessage(null, fallback);
+        }
+
+        private string T(string fallback, params object?[] args)
+        {
+            return _localizer.LocalizeMessage(null, fallback, null, args);
+        }
+
+        private string GetPaymentFrequencyDisplayName(string? rawValue)
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<Enums.Payment.PaymentFrequency>(rawValue, true, out var parsed))
+            {
+                return _localizer.GetEnumDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
+        }
+
+        private string GetLocationDisplayName<TEnum>(string? rawValue) where TEnum : struct, Enum
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<TEnum>(rawValue, true, out var parsed))
+            {
+                return _localizer.GetEnumDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
         }
 
         private string GetAbsoluteReportsFolderPath()

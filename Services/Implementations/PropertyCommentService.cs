@@ -85,6 +85,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.NewReview,
 
+                TitleKey = "NOTIFICATION_NEW_COMMENT_TITLE",
+                BodyKey = "NOTIFICATION_NEW_COMMENT_BODY",
+                LocalizationArguments = new() { property.Title },
                 Title = "New Comment on Your Property",
                 Body = $"A user has left a new comment on your property \"{property.Title}\".",
 
@@ -146,6 +149,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.NewReview,
 
+                TitleKey = "NOTIFICATION_COMMENT_UPDATED_TITLE",
+                BodyKey = "NOTIFICATION_COMMENT_UPDATED_BODY",
+                LocalizationArguments = new() { property.Title },
                 Title = "Comment Updated on Your Property",
                 Body = $"A user has updated their comment on your property \"{property.Title}\".",
 

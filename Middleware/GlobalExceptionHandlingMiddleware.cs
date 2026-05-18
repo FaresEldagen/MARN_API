@@ -1,4 +1,5 @@
 using MARN_API.Models;
+using MARN_API.Services.Interfaces;
 using System.Net;
 using System.Text.Json;
 
@@ -38,7 +39,9 @@ namespace MARN_API.Middleware
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            var localizer = context.RequestServices.GetRequiredService<IAppTextLocalizer>();
             var statusCode = HttpStatusCode.InternalServerError;
+            var code = "INTERNAL_ERROR";
             var message = "An unexpected error occurred. Please try again later.";
             var details = (string?)null;
 
@@ -47,26 +50,31 @@ namespace MARN_API.Middleware
             {
                 case UnauthorizedAccessException:
                     statusCode = HttpStatusCode.Unauthorized;
+                    code = "UNAUTHORIZED";
                     message = "You are not authorized to perform this action.";
                     break;
 
                 case ArgumentException argEx:
                     statusCode = HttpStatusCode.BadRequest;
+                    code = "BAD_REQUEST";
                     message = argEx.Message;
                     break;
 
                 case KeyNotFoundException:
                     statusCode = HttpStatusCode.NotFound;
+                    code = "NOT_FOUND";
                     message = "The requested resource was not found.";
                     break;
 
                 case InvalidOperationException:
                     statusCode = HttpStatusCode.BadRequest;
+                    code = "BAD_REQUEST";
                     message = exception.Message;
                     break;
 
                 case TimeoutException:
                     statusCode = HttpStatusCode.RequestTimeout;
+                    code = "REQUEST_TIMEOUT";
                     message = "The request timed out. Please try again.";
                     break;
 
@@ -82,7 +90,8 @@ namespace MARN_API.Middleware
 
             var errorResponse = new ErrorResponse
             {
-                Message = message,
+                Code = code,
+                Message = localizer.LocalizeMessage(code, message),
                 Details = details,
                 StatusCode = (int)statusCode,
                 Path = context.Request.Path,

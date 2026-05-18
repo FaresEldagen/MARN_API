@@ -93,7 +93,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GenerateAnalyticsReport([FromBody] AdminAnalyticsReportGenerateRequestDto request)
         {
             if (!TryGetUserId(out var adminId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _adminAnalyticsReportService.GenerateAsync(adminId, request);
             return HandleServiceResult(result);
@@ -284,7 +284,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DownloadDetailedContract(long contractId)
         {
             if (!TryGetUserId(out var adminId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.DownloadContractAsync(adminId, contractId);
             if (!result.Success)
@@ -704,7 +704,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> ReviewReport(long reportId, [FromBody] AdminReviewReportDto request)
         {
             if (!TryGetUserId(out var adminId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _adminReportModerationService.ReviewReportAsync(adminId, reportId, request);
             return HandleServiceResult(result);

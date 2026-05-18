@@ -84,6 +84,16 @@ namespace MARN_API.Services.Implementations
                                     UserId = paymentSchedule.Contract.RenterId.ToString(),
                                     UserType = NotificationUserType.Renter,
                                     Type = NotificationType.UpcomingPayment,
+                                    TitleKey = "NOTIFICATION_UPCOMING_PAYMENT_TITLE",
+                                    BodyKey = "NOTIFICATION_UPCOMING_PAYMENT_BODY",
+                                    LocalizationArguments = new()
+                                    {
+                                        paymentSchedule.Amount.ToString(),
+                                        paymentSchedule.Currency,
+                                        paymentSchedule.Contract.Property.Title,
+                                        daysLeft.ToString(),
+                                        paymentSchedule.DueDate.ToString("yyyy-MM-dd")
+                                    },
                                     Title = "Upcoming Payment Available",
                                     Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is now available and can be paid.\n"
                                          + $"{daysLeft} day(s) left until the due date {paymentSchedule.DueDate:yyyy-MM-dd}."
@@ -96,6 +106,14 @@ namespace MARN_API.Services.Implementations
                                     UserId = paymentSchedule.Contract.RenterId.ToString(),
                                     UserType = NotificationUserType.Renter,
                                     Type = NotificationType.PaymentArrived,
+                                    TitleKey = "NOTIFICATION_PAYMENT_DUE_TODAY_TITLE",
+                                    BodyKey = "NOTIFICATION_PAYMENT_DUE_TODAY_BODY",
+                                    LocalizationArguments = new()
+                                    {
+                                        paymentSchedule.Amount.ToString(),
+                                        paymentSchedule.Currency,
+                                        paymentSchedule.Contract.Property.Title
+                                    },
                                     Title = "Payment Due Today",
                                     Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is due today."
                                 });
@@ -108,6 +126,15 @@ namespace MARN_API.Services.Implementations
                                     UserId = paymentSchedule.Contract.RenterId.ToString(),
                                     UserType = NotificationUserType.Renter,
                                     Type = NotificationType.DelayedPayment,
+                                    TitleKey = "NOTIFICATION_PAYMENT_OVERDUE_TITLE",
+                                    BodyKey = "NOTIFICATION_PAYMENT_OVERDUE_BODY",
+                                    LocalizationArguments = new()
+                                    {
+                                        paymentSchedule.Amount.ToString(),
+                                        paymentSchedule.Currency,
+                                        paymentSchedule.Contract.Property.Title,
+                                        daysLate.ToString()
+                                    },
                                     Title = "Payment Overdue",
                                     Body = $"Your payment of {paymentSchedule.Amount} {paymentSchedule.Currency} for \"{paymentSchedule.Contract.Property.Title}\" is overdue.\n"
                                          + $"You are {daysLate} day(s) past the due date.\n\n"

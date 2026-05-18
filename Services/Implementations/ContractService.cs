@@ -10,6 +10,7 @@ using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using System.IO;
+using System.Globalization;
 
 
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +19,8 @@ namespace MARN_API.Services.Implementations
 {
     public class ContractService : IContractService
     {
+        private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en");
+        private static readonly CultureInfo ArabicCulture = CultureInfo.GetCultureInfo("ar");
         private readonly IContractRepo _contractRepo;
         private readonly HashingService _hashingService;
         private readonly OpenTimestampsService _openTimestampsService;
@@ -27,6 +30,7 @@ namespace MARN_API.Services.Implementations
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
+        private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<ContractService> _logger;
 
         public ContractService(
@@ -39,6 +43,7 @@ namespace MARN_API.Services.Implementations
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
             INotificationService notificationService,
+            IAppTextLocalizer localizer,
             ILogger<ContractService> logger)
         {
             _contractRepo = contractRepo;
@@ -50,6 +55,7 @@ namespace MARN_API.Services.Implementations
             _userManager = userManager;
             _mapper = mapper;
             _notificationService = notificationService;
+            _localizer = localizer;
             _logger = logger;
         }
 
@@ -114,6 +120,9 @@ namespace MARN_API.Services.Implementations
                 UserId = contract.RenterId.ToString(),
                 UserType = NotificationUserType.Renter,
                 Type = NotificationType.ContractStarted,
+                TitleKey = "NOTIFICATION_CONTRACT_READY_TITLE",
+                BodyKey = "NOTIFICATION_CONTRACT_READY_BODY",
+                LocalizationArguments = new() { property.Title },
                 Title = "Contract Ready for Signature",
                 Body = $"The owner of \"{property.Title}\" has generated a contract for you. Please review and sign it."
             });
@@ -149,7 +158,11 @@ namespace MARN_API.Services.Implementations
             if (contract.Status != ContractStatus.Pending)
             {
                 _logger.LogWarning("Sign Contract failed: Contract {contractId} is in {status} status", contractId, contract.Status);
-                return ServiceResult<long>.Fail($"Contract is in {contract.Status} status. Only Pending contracts can be signed.", resultType: ServiceResultType.BadRequest);
+                return ServiceResult<long>.Fail(
+                    "Contract is in {0} status. Only Pending contracts can be signed.",
+                    resultType: ServiceResultType.BadRequest,
+                    code: "CONTRACT_SIGN_STATUS_INVALID",
+                    messageArguments: [_localizer.GetEnumDisplayName(contract.Status)]);
             }
 
             var property = contract.Property;
@@ -181,11 +194,11 @@ namespace MARN_API.Services.Implementations
                     UnitNumber = property.Id.ToString(),
                     ListingTitle = property.Title,
                     AddressLine = property.Address,
-                    City = property.City,
-                    Country = "Egypt",
+                    City = GetLocationBilingualDisplayName<City>(property.City),
+                    Country = BilingualValue("Egypt", "مصر"),
                     Description = property.Description,
-                    Type = property.Type.ToString(),
-                    State = property.State,
+                    Type = GetEnumBilingualDisplayName(property.Type),
+                    State = GetLocationBilingualDisplayName<Governorate>(property.State),
                     ZipCode = property.ZipCode,
                     Latitude = property.Latitude,
                     Longitude = property.Longitude,
@@ -195,7 +208,7 @@ namespace MARN_API.Services.Implementations
                     SquareMeters = property.SquareMeters,
                     MaxOccupants = property.MaxOccupants,
                     IsShared = property.IsShared,
-                    Amenities = string.Join(", ", property.Amenities.Select(a => a.Amenity.ToString())),
+                    Amenities = string.Join(", ", property.Amenities.Select(a => GetEnumBilingualDisplayName(a.Amenity))),
                     Rules = string.Join("; ", property.Rules.Select(r => r.Rule)),
                     MediaPaths = property.Media.Select(m => m.Path).ToList(),
                 },
@@ -224,7 +237,11 @@ namespace MARN_API.Services.Implementations
             catch (ArgumentNullException ex)
             {
                 _logger.LogWarning("Sign Contract failed: Missing data for PDF generation: {param}", ex.ParamName);
-                return ServiceResult<long>.Fail($"Contract generation failed: Missing required data ({ex.ParamName}).", resultType: ServiceResultType.BadRequest);
+                return ServiceResult<long>.Fail(
+                    "Contract generation failed: Missing required data ({0}).",
+                    resultType: ServiceResultType.BadRequest,
+                    code: "CONTRACT_PDF_REQUIRED_DATA_MISSING",
+                    messageArguments: [ex.ParamName ?? "unknown"]);
             }
             catch (Exception ex)
             {
@@ -265,6 +282,9 @@ namespace MARN_API.Services.Implementations
                 UserId = contract.Property.OwnerId.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.ContractSigned,
+                TitleKey = "NOTIFICATION_CONTRACT_SIGNED_TITLE",
+                BodyKey = "NOTIFICATION_CONTRACT_SIGNED_BODY",
+                LocalizationArguments = new() { $"{renter!.FirstName} {renter.LastName}", property.Title },
                 Title = "Contract Signed",
                 Body = $"The renter {renter!.FirstName} {renter.LastName} has signed the contract for \"{property.Title}\"."
             });
@@ -301,6 +321,7 @@ namespace MARN_API.Services.Implementations
             var dto = new ContractDetailsDto
             {
                 ContractStatus = contract.Status,
+                ContractStatusDisplayName = _localizer.GetEnumDisplayName(contract.Status),
                 ContractId = contract.Id,
                 Duration = FormatDuration(contract.LeaseStartDate, contract.LeaseEndDate, property.RentalUnit),
                 StartDate = contract.LeaseStartDate,
@@ -311,9 +332,12 @@ namespace MARN_API.Services.Implementations
                     Id = property.Id,
                     Name = property.Title,
                     StreetAddress = property.Address,
-                    City = property.City.ToString(),
-                    State = property.State.ToString(),
+                    City = property.City,
+                    CityDisplayName = GetLocationDisplayName<City>(property.City),
+                    State = property.State,
+                    StateDisplayName = GetLocationDisplayName<Governorate>(property.State),
                     RentalDuration = property.RentalUnit.ToString(),
+                    RentalDurationDisplayName = _localizer.GetEnumDisplayName(property.RentalUnit),
                     Price = property.Price
                 },
                 OwnerInfo = new ContractUserInfo
@@ -466,7 +490,7 @@ namespace MARN_API.Services.Implementations
             if (contract.Status != ContractStatus.Pending)
             {
                 _logger.LogWarning("Cancel Contract failed: Contract {contractId} is already in state {status}", contractId, contract.Status);
-                return ServiceResult<bool>.Fail("Contract is allready signed.", resultType: ServiceResultType.Forbidden);
+                return ServiceResult<bool>.Fail("Contract is already signed.", resultType: ServiceResultType.Forbidden);
             }
 
             bool isRenter = contract.RenterId == userId;
@@ -487,6 +511,9 @@ namespace MARN_API.Services.Implementations
                     UserId = contract.Property.OwnerId.ToString(),
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.ContractCanceled,
+                    TitleKey = "NOTIFICATION_CONTRACT_CANCELLED_TITLE",
+                    BodyKey = "NOTIFICATION_CONTRACT_CANCELLED_BY_RENTER_BODY",
+                    LocalizationArguments = new() { contract.Property.Title },
                     Title = "Contract Cancelled",
                     Body = $"The renter has cancelled the pending contract for \"{contract.Property.Title}\"."
                 });
@@ -498,6 +525,9 @@ namespace MARN_API.Services.Implementations
                     UserId = contract.RenterId.ToString(),
                     UserType = NotificationUserType.Renter,
                     Type = NotificationType.ContractCanceled,
+                    TitleKey = "NOTIFICATION_CONTRACT_CANCELLED_TITLE",
+                    BodyKey = "NOTIFICATION_CONTRACT_CANCELLED_BY_OWNER_BODY",
+                    LocalizationArguments = new() { contract.Property.Title },
                     Title = "Contract Cancelled",
                     Body = $"The owner has cancelled the pending contract for \"{contract.Property.Title}\"."
                 });
@@ -543,6 +573,38 @@ namespace MARN_API.Services.Implementations
         {
             var years = end.Year - start.Year;
             return years < 1 ? 1 : years;
+        }
+
+        private string GetLocationDisplayName<TEnum>(string? rawValue) where TEnum : struct, Enum
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<TEnum>(rawValue, true, out var parsed))
+            {
+                return _localizer.GetEnumDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
+        }
+
+        private string GetLocationBilingualDisplayName<TEnum>(string? rawValue) where TEnum : struct, Enum
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<TEnum>(rawValue, true, out var parsed))
+            {
+                return GetEnumBilingualDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
+        }
+
+        private string GetEnumBilingualDisplayName<TEnum>(TEnum value) where TEnum : struct, Enum
+        {
+            return BilingualValue(
+                _localizer.GetEnumDisplayName(value, EnglishCulture),
+                _localizer.GetEnumDisplayName(value, ArabicCulture));
+        }
+
+        private static string BilingualValue(string english, string arabic)
+        {
+            return $"{english} / {arabic}";
         }
         #endregion
     }

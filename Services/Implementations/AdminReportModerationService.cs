@@ -13,15 +13,18 @@ namespace MARN_API.Services.Implementations
         private const string HiddenMessagePlaceholder = "[Message hidden by admin]";
         private readonly IReportRepo _reportRepo;
         private readonly IEncryptionService _encryptionService;
+        private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<AdminReportModerationService> _logger;
 
         public AdminReportModerationService(
             IReportRepo reportRepo,
             IEncryptionService encryptionService,
+            IAppTextLocalizer localizer,
             ILogger<AdminReportModerationService> logger)
         {
             _reportRepo = reportRepo;
             _encryptionService = encryptionService;
+            _localizer = localizer;
             _logger = logger;
         }
 
@@ -317,7 +320,7 @@ namespace MARN_API.Services.Implementations
                 ReviewedAt = report.ReviewedAt,
                 ReporterId = report.ReporterId,
                 ReporterName = report.Reporter == null
-                    ? "[Deleted user]"
+                    ? T("[Deleted user]")
                     : $"{report.Reporter.FirstName} {report.Reporter.LastName}".Trim(),
                 ReviewerId = report.ReviewerId,
                 ReviewerName = report.Reviewer == null
@@ -475,9 +478,9 @@ namespace MARN_API.Services.Implementations
                         Exists = true,
                         MessageId = message.Id,
                         Title = $"{message.Sender.FirstName} {message.Sender.LastName}".Trim(),
-                        Subtitle = $"To {message.Receiver.FirstName} {message.Receiver.LastName}".Trim(),
+                        Subtitle = TF("TEXT_TO_0", "To {0}", $"{message.Receiver.FirstName} {message.Receiver.LastName}".Trim()),
                         Preview = message.IsHiddenByModeration
-                            ? HiddenMessagePlaceholder
+                            ? T(HiddenMessagePlaceholder)
                             : _encryptionService.Decrypt(message.Content),
                         UserId = message.SenderId,
                         IsHidden = message.IsHiddenByModeration
@@ -500,7 +503,7 @@ namespace MARN_API.Services.Implementations
                         PropertyId = comment.PropertyId,
                         UserId = comment.UserId,
                         Title = $"{comment.User.FirstName} {comment.User.LastName}".Trim(),
-                        Subtitle = $"On property: {comment.Property.Title}",
+                        Subtitle = TF("TEXT_ON_PROPERTY_0", "On property: {0}", comment.Property.Title),
                         Preview = comment.Content,
                         IsHidden = comment.IsHiddenByModeration
                     };
@@ -511,13 +514,18 @@ namespace MARN_API.Services.Implementations
             }
         }
 
-        private static AdminModerationTargetDetailsDto MissingTarget()
+        private AdminModerationTargetDetailsDto MissingTarget()
         {
             return new AdminModerationTargetDetailsDto
             {
                 Exists = false,
-                Title = "[Target not found]"
+                Title = T("[Target not found]")
             };
         }
+
+        private string T(string literal) => _localizer.LocalizeLiteral(literal);
+
+        private string TF(string key, string fallback, params object?[] arguments)
+            => _localizer.GetOrFallback(key, fallback, arguments: arguments);
     }
 }

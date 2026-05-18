@@ -50,7 +50,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetChatUsers()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             _logger.LogInformation("User {UserId} requested active chat users", userId);
 
@@ -84,10 +84,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> SearchUsers([FromQuery] string q, [FromQuery] int limit = 10)
         {
             if (string.IsNullOrWhiteSpace(q))
-                return BadRequest("Empty search query");
+                return BadRequestEmptySearchQuery();
 
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             _logger.LogInformation("User {UserId} searching for users with query: {Query}", userId, q);
 
@@ -113,10 +113,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetChatHistory(string otherUserId)
         {
             if (string.IsNullOrEmpty(otherUserId))
-                return BadRequest("Other User ID is required.");
+                return BadRequestOtherUserIdRequired();
 
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             _logger.LogInformation("User {UserId} requested history with {OtherUserId}", userId, otherUserId);
 

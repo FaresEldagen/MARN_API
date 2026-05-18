@@ -1,5 +1,4 @@
 ﻿using MARN_API.Data;
-using MARN_API.DTOs.Dashboard;
 using MARN_API.Enums.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
@@ -32,7 +31,7 @@ namespace MARN_API.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public Task<List<NotificationMiniCardDto>> GetRenterDashboardNotifications(Guid userId)
+        public Task<List<Notification>> GetRenterDashboardNotifications(Guid userId)
         {
             return Context.Notifications
                 .AsNoTracking()
@@ -40,19 +39,10 @@ namespace MARN_API.Repositories.Implementations
                     (n.UserType == NotificationUserType.Renter || 
                     n.UserType == NotificationUserType.General))
                 .OrderByDescending(n => n.CreatedAt)
-                .Select(n => new NotificationMiniCardDto
-                {
-                    Id = n.Id,
-
-                    Title = n.Title,
-
-                    IsRead = n.ReadAt.HasValue,
-                    CreatedAt = n.CreatedAt
-                })
                 .ToListAsync();
         }
 
-        public Task<List<NotificationMiniCardDto>> GetOwnerDashboardNotifications(Guid userId)
+        public Task<List<Notification>> GetOwnerDashboardNotifications(Guid userId)
         {
             return Context.Notifications
                 .AsNoTracking()
@@ -60,15 +50,6 @@ namespace MARN_API.Repositories.Implementations
                     (n.UserType == NotificationUserType.Owner || 
                     n.UserType == NotificationUserType.General))
                 .OrderByDescending(n => n.CreatedAt)
-                .Select(n => new NotificationMiniCardDto
-                {
-                    Id = n.Id,
-
-                    Title = n.Title,
-
-                    IsRead = n.ReadAt.HasValue,
-                    CreatedAt = n.CreatedAt
-                })
                 .ToListAsync();
         }
 

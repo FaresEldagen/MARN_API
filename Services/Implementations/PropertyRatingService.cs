@@ -75,6 +75,9 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.NewReview,
 
+                    TitleKey = "NOTIFICATION_RATING_UPDATED_TITLE",
+                    BodyKey = "NOTIFICATION_RATING_UPDATED_BODY",
+                    LocalizationArguments = new() { dto.Rating.ToString(), property.Title },
                     Title = "Rating Updated on Your Property",
                     Body = $"A user has updated their rating to {dto.Rating} stars on your property \"{property.Title}\".",
 
@@ -102,6 +105,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.NewReview,
 
+                TitleKey = "NOTIFICATION_NEW_RATING_TITLE",
+                BodyKey = "NOTIFICATION_NEW_RATING_BODY",
+                LocalizationArguments = new() { dto.Rating.ToString(), property.Title },
                 Title = "New Rating on Your Property",
                 Body = $"A user has rated your property with {dto.Rating} stars: \"{property.Title}\".",
 
@@ -148,6 +154,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.NewReview,
 
+                TitleKey = "NOTIFICATION_RATING_UPDATED_TITLE",
+                BodyKey = "NOTIFICATION_RATING_UPDATED_BODY",
+                LocalizationArguments = new() { dto.Rating.ToString(), property.Title },
                 Title = "Rating Updated on Your Property",
                 Body = $"A user has updated their rating to {dto.Rating} stars on your property \"{property.Title}\".",
 

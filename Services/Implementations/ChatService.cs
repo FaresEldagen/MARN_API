@@ -26,6 +26,7 @@ namespace MARN_API.Services.Implementations
         private readonly IEncryptionService _encryptionService;
         private readonly IFirebaseNotificationService _fcmService;
         private readonly INotificationService _notificationService;
+        private readonly IAppTextLocalizer _localizer;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _dbContext;
         private readonly ILogger<ChatService> _logger;
@@ -37,6 +38,7 @@ namespace MARN_API.Services.Implementations
             IEncryptionService encryptionService, 
             IFirebaseNotificationService fcmService,
             INotificationService notificationService,
+            IAppTextLocalizer localizer,
             UserManager<ApplicationUser> userManager,
             AppDbContext dbContext,
             ILogger<ChatService> logger)
@@ -47,6 +49,7 @@ namespace MARN_API.Services.Implementations
             _encryptionService = encryptionService;
             _fcmService = fcmService;
             _notificationService = notificationService;
+            _localizer = localizer;
             _userManager = userManager;
             _dbContext = dbContext;
             _logger = logger;
@@ -68,7 +71,7 @@ namespace MARN_API.Services.Implementations
                 user.IsOnline = _tracker.IsOnline(user.Id);
                 if (user.LastMessage != null)
                     user.LastMessage.Content = user.LastMessage.IsHiddenByModeration
-                        ? HiddenMessagePlaceholder
+                        ? T(HiddenMessagePlaceholder)
                         : _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
@@ -89,7 +92,7 @@ namespace MARN_API.Services.Implementations
                 user.IsOnline = _tracker.IsOnline(user.Id);
                 if (user.LastMessage != null)
                     user.LastMessage.Content = user.LastMessage.IsHiddenByModeration
-                        ? HiddenMessagePlaceholder
+                        ? T(HiddenMessagePlaceholder)
                         : _encryptionService.Decrypt(user.LastMessage.Content);
             }
 
@@ -111,7 +114,7 @@ namespace MARN_API.Services.Implementations
                 Id = m.Id,
                 SenderId = m.SenderId.ToString(),
                 ReceiverId = m.ReceiverId.ToString(),
-                Content = m.IsHiddenByModeration ? HiddenMessagePlaceholder : _encryptionService.Decrypt(m.Content),
+                Content = m.IsHiddenByModeration ? T(HiddenMessagePlaceholder) : _encryptionService.Decrypt(m.Content),
                 SentAt = m.SentAt,
                 IsRead = m.ReadAt.HasValue,
                 IsHiddenByModeration = m.IsHiddenByModeration
@@ -197,6 +200,9 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.General,
                     Type = NotificationType.NewMessage,
 
+                    TitleKey = "NOTIFICATION_NEW_MESSAGE_TITLE",
+                    BodyKey = "NOTIFICATION_NEW_MESSAGE_BODY",
+                    LocalizationArguments = new() { $"{senderUser.FirstName} {senderUser.LastName}" },
                     Title = "New Message",
                     Body = $"You have a new message from {senderUser.FirstName} {senderUser.LastName}",
                     Data = new Dictionary<string, string>
@@ -259,5 +265,7 @@ namespace MARN_API.Services.Implementations
 
             return ServiceResult<bool>.Ok(true);
         }
+
+        private string T(string literal) => _localizer.LocalizeLiteral(literal);
     }
 }

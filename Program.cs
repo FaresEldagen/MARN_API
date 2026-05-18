@@ -18,7 +18,9 @@ using System.Text.Json.Serialization;
 using System.Text;
 using System.Threading.RateLimiting;
 using MARN_API.Hubs;
-
+using MARN_API.Localization;
+using Microsoft.AspNetCore.Localization;
+using System.Security.Claims;
 
 namespace MARN_API
 {
@@ -27,6 +29,9 @@ namespace MARN_API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+            builder.Services.AddHttpContextAccessor();
 
 
             #region Logging Configuration
@@ -46,6 +51,8 @@ namespace MARN_API
                 {
                     var logger = context.HttpContext.RequestServices
                         .GetRequiredService<ILogger<Program>>();
+                    var localizer = context.HttpContext.RequestServices
+                        .GetRequiredService<IAppTextLocalizer>();
 
                     logger.LogWarning("Model validation failed for path {Path}", context.HttpContext.Request.Path);
 
@@ -54,12 +61,19 @@ namespace MARN_API
                         .ToDictionary(
                             entry => entry.Key,
                             entry => entry.Value!.Errors
-                                .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "The provided value is invalid." : error.ErrorMessage)
+                                .Select(error =>
+                                {
+                                    var message = string.IsNullOrWhiteSpace(error.ErrorMessage)
+                                        ? "The provided value is invalid."
+                                        : error.ErrorMessage;
+                                    return localizer.LocalizeMessage(null, message);
+                                })
                                 .ToArray());
 
                     return new BadRequestObjectResult(new ErrorResponse
                     {
-                        Message = "The request payload is invalid.",
+                        Code = "VALIDATION_FAILED",
+                        Message = localizer.LocalizeMessage("VALIDATION_FAILED", "The request payload is invalid."),
                         StatusCode = StatusCodes.Status400BadRequest,
                         Path = context.HttpContext.Request.Path,
                         TraceId = context.HttpContext.TraceIdentifier,
@@ -90,6 +104,7 @@ namespace MARN_API
                 {
                     options.Filters.Add<BannedAccountAccessFilter>();
                 })
+                .AddDataAnnotationsLocalization()
                 .AddJsonOptions(options =>
                 {
                     // Convert Enums to string instead of int
@@ -197,6 +212,9 @@ namespace MARN_API
             builder.Services.AddScoped<IHomepageService, HomepageService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IAppTextLocalizer, AppTextLocalizer>();
+            builder.Services.AddScoped<IUserCultureService, UserCultureService>();
+            builder.Services.AddScoped<INotificationContentLocalizer, NotificationContentLocalizer>();
 
             builder.Services.AddScoped<ContractPdfGenerator>();
             builder.Services.AddScoped<HashingService>();
@@ -384,17 +402,52 @@ namespace MARN_API
                 options.OnRejected = async (context, token) =>
                 {
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
                     await context.HttpContext.Response.WriteAsync(
-                        "Rate limit exceeded. Please try again later.", token);
+                        localizer.LocalizeMessage("RATE_LIMIT_EXCEEDED", "Rate limit exceeded. Please try again later."),
+                        token);
                 };
             });
             #endregion
 
 
             var app = builder.Build();
+            var requestLocalizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(LocalizationConstants.DefaultCulture),
+                SupportedCultures = LocalizationConstants.SupportedCultures.ToList(),
+                SupportedUICultures = LocalizationConstants.SupportedCultures.ToList()
+            };
+
+            requestLocalizationOptions.RequestCultureProviders = new List<IRequestCultureProvider>
+            {
+                new CustomRequestCultureProvider(async context =>
+                {
+                    var acceptLanguageHeader = context.Request.Headers.AcceptLanguage.ToString();
+                    if (!string.IsNullOrWhiteSpace(acceptLanguageHeader))
+                    {
+                        var requestedCulture = acceptLanguageHeader
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(value => value.Split(';', StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+
+                        if (!string.IsNullOrWhiteSpace(requestedCulture))
+                        {
+                            return new ProviderCultureResult(LocalizationConstants.NormalizeCultureName(requestedCulture));
+                        }
+                    }
+
+                    var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userCultureService = context.RequestServices.GetRequiredService<IUserCultureService>();
+                    var culture = await userCultureService.ResolveUserCultureAsync(userId);
+                    return new ProviderCultureResult(culture.Name);
+                })
+            };
 
 
             #region Middleware Pipeline
+            app.UseRequestLocalization(requestLocalizationOptions);
+
             // Global Exception Handling
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 

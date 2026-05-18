@@ -363,6 +363,16 @@ namespace MARN_API.Services.Implementations
                 UserId = paymentSchedule.Contract.Property.OwnerId.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.PaymentReceived,
+                TitleKey = "NOTIFICATION_PAYMENT_RECEIVED_TITLE",
+                BodyKey = "NOTIFICATION_PAYMENT_RECEIVED_BODY",
+                LocalizationArguments = new()
+                {
+                    payment.OwnerAmount.ToString(),
+                    payment.Currency,
+                    paymentSchedule.Contract.Property.Title,
+                    paymentSchedule.DueDate.ToString("yyyy-MM-dd"),
+                    payment.AvailableAt.ToString("yyyy-MM-dd")
+                },
                 Title = "Payment Received",
                 Body = $"You have received a payment of {payment.OwnerAmount} {payment.Currency} for \"{paymentSchedule.Contract.Property.Title}\".\n" +
                        $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}.\n\n" +
@@ -376,6 +386,15 @@ namespace MARN_API.Services.Implementations
                 UserId = paymentSchedule.Contract.RenterId.ToString(),
                 UserType = NotificationUserType.Renter,
                 Type = NotificationType.PaymentSuccessful,
+                TitleKey = "NOTIFICATION_PAYMENT_SUCCESSFUL_TITLE",
+                BodyKey = "NOTIFICATION_PAYMENT_SUCCESSFUL_BODY",
+                LocalizationArguments = new()
+                {
+                    payment.AmountTotal.ToString(),
+                    payment.Currency,
+                    paymentSchedule.Contract.Property.Title,
+                    paymentSchedule.DueDate.ToString("yyyy-MM-dd")
+                },
                 Title = "Payment Successful",
                 Body = $"Your payment of {payment.AmountTotal} {payment.Currency} for \"{paymentSchedule.Contract.Property.Title}\" has been successful.\n" +
                        $"This payment is for the due date {paymentSchedule.DueDate:yyyy-MM-dd}.",
@@ -399,6 +418,9 @@ namespace MARN_API.Services.Implementations
                     UserId = paymentSchedule.Contract.RenterId.ToString(),
                     UserType = NotificationUserType.Renter,
                     Type = NotificationType.PaymentFailed,
+                    TitleKey = "NOTIFICATION_PAYMENT_FAILED_TITLE",
+                    BodyKey = "NOTIFICATION_PAYMENT_FAILED_BODY",
+                    LocalizationArguments = new() { paymentSchedule.Contract.Property.Title },
                     Title = "Payment Failed",
                     Body = $"Your payment for \"{paymentSchedule.Contract.Property.Title}\" has failed. \n Please try again.",
 
@@ -436,6 +458,8 @@ namespace MARN_API.Services.Implementations
                     UserId = owner.Id.ToString(),
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.ConnectAccountSuccess,
+                    TitleKey = "NOTIFICATION_CONNECT_SUCCESS_TITLE",
+                    BodyKey = "NOTIFICATION_CONNECT_SUCCESS_BODY",
                     Title = "Connect Account Activated",
                     Body = "Your Stripe Connect account has been activated and is now ready to withdraw your payments.",
 
@@ -451,6 +475,8 @@ namespace MARN_API.Services.Implementations
                     UserId = owner.Id.ToString(),
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.ConnectAccountFailed,
+                    TitleKey = "NOTIFICATION_CONNECT_FAILED_TITLE",
+                    BodyKey = "NOTIFICATION_CONNECT_FAILED_BODY",
                     Title = "Connect Account Failed",
                     Body = "Your Stripe Connect account is not fully activated. Please complete the onboarding process to enable charges and payouts.",
 
@@ -478,6 +504,13 @@ namespace MARN_API.Services.Implementations
                 UserId = owner.Id.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.WithdrawSuccess,
+                TitleKey = "NOTIFICATION_WITHDRAW_SUCCESS_TITLE",
+                BodyKey = "NOTIFICATION_WITHDRAW_SUCCESS_BODY",
+                LocalizationArguments = new()
+                {
+                    (transfer.Amount / 100m).ToString(),
+                    transfer.Currency.ToUpperInvariant()
+                },
                 Title = "Withdrawal Initiated",
                 Body = $"A withdrawal of {(transfer.Amount / 100m)} {transfer.Currency.ToUpper()} has been initiated to your connected account.\n" +
                 $"It should reflect in your bank account within a few business days.",
@@ -502,6 +535,13 @@ namespace MARN_API.Services.Implementations
                 UserId = owner.Id.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.WithdrawFailed,
+                TitleKey = "NOTIFICATION_WITHDRAW_FAILED_TITLE",
+                BodyKey = "NOTIFICATION_WITHDRAW_FAILED_BODY",
+                LocalizationArguments = new()
+                {
+                    (transfer.Amount / 100m).ToString(),
+                    transfer.Currency.ToUpperInvariant()
+                },
                 Title = "Withdrawal Failed",
                 Body = $"A withdrawal of {(transfer.Amount / 100m)} {transfer.Currency.ToUpper()} to your connected account has failed. Please check your Stripe dashboard for details.",
                 ActionType = NotificationActionType.OwnerDashboard

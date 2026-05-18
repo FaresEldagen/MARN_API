@@ -16,10 +16,14 @@ namespace MARN_API.Services.Implementations
         private const int DealbreakerImportance = 5;
 
         private readonly MARN_API.Repositories.Interfaces.IRoommatePreferenceRepo _repo;
+        private readonly IAppTextLocalizer _localizer;
 
-        public RoommateMatchingService(MARN_API.Repositories.Interfaces.IRoommatePreferenceRepo repo)
+        public RoommateMatchingService(
+            MARN_API.Repositories.Interfaces.IRoommatePreferenceRepo repo,
+            IAppTextLocalizer localizer)
         {
             _repo = repo;
+            _localizer = localizer;
         }
 
         private readonly record struct ScoredFeature(double Score, double Weight);
@@ -186,9 +190,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.SmokingImportance,
                     matchPref.SmokingImportance,
-                    currentUserPref.Smoking.Value ? "Both Smoke" : "Both Non-Smokers",
-                    "Smoking Preference",
-                    "Smoking mismatch");
+                    currentUserPref.Smoking.Value ? T("Both Smoke") : T("Both Non-Smokers"),
+                    T("Smoking Preference"),
+                    T("Smoking mismatch"));
             }
 
             // Pets (Binary)
@@ -203,9 +207,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.PetsImportance,
                     matchPref.PetsImportance,
-                    currentUserPref.Pets.Value ? "Both love pets" : "Both prefer no pets",
-                    "Pets Preference",
-                    "Pets mismatch");
+                    currentUserPref.Pets.Value ? T("Both love pets") : T("Both prefer no pets"),
+                    T("Pets Preference"),
+                    T("Pets mismatch"));
             }
 
             // Sleep Schedule (Flexible is a wildcard, not an ordinal midpoint)
@@ -231,9 +235,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.SleepImportance,
                     matchPref.SleepImportance,
-                    "Compatible Sleep Schedule",
-                    "Sleep Schedule",
-                    "Sleep Schedule mismatch");
+                    T("Compatible Sleep Schedule"),
+                    T("Sleep Schedule"),
+                    T("Sleep Schedule mismatch"));
             }
 
             // Education Level (Linear Ordinal - Max Diff 3)
@@ -248,9 +252,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.EducationImportance,
                     matchPref.EducationImportance,
-                    "Similar Education Level",
-                    "Education Level",
-                    "Education Level mismatch",
+                    T("Similar Education Level"),
+                    T("Education Level"),
+                    T("Education Level mismatch"),
                     matchedThreshold: 0.8);
             }
 
@@ -266,9 +270,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.FieldOfStudyImportance,
                     matchPref.FieldOfStudyImportance,
-                    "Same Field of Study",
-                    "Field of Study",
-                    "Field of Study mismatch");
+                    T("Same Field of Study"),
+                    T("Field of Study"),
+                    T("Field of Study mismatch"));
             }
 
             // Noise Tolerance (Linear Ordinal - Max Diff 4)
@@ -283,9 +287,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.NoiseToleranceImportance,
                     matchPref.NoiseToleranceImportance,
-                    "Similar Noise Tolerance",
-                    "Noise Tolerance",
-                    "Noise Tolerance mismatch",
+                    T("Similar Noise Tolerance"),
+                    T("Noise Tolerance"),
+                    T("Noise Tolerance mismatch"),
                     matchedThreshold: 0.75);
             }
             
@@ -301,9 +305,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.GuestsFrequencyImportance,
                     matchPref.GuestsFrequencyImportance,
-                    "Similar Guests Preference",
-                    "Guests Frequency",
-                    "Guests Frequency mismatch",
+                    T("Similar Guests Preference"),
+                    T("Guests Frequency"),
+                    T("Guests Frequency mismatch"),
                     matchedThreshold: 0.7);
             }
 
@@ -319,9 +323,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.SharingLevelImportance,
                     matchPref.SharingLevelImportance,
-                    "Similar Sharing Level",
-                    "Sharing Level",
-                    "Sharing Level mismatch",
+                    T("Similar Sharing Level"),
+                    T("Sharing Level"),
+                    T("Sharing Level mismatch"),
                     matchedThreshold: 0.75);
             }
 
@@ -337,9 +341,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.WorkScheduleImportance,
                     matchPref.WorkScheduleImportance,
-                    "Same Work Schedule",
-                    "Work Schedule",
-                    "Work Schedule mismatch");
+                    T("Same Work Schedule"),
+                    T("Work Schedule"),
+                    T("Work Schedule mismatch"));
             }
 
             // Budget Overlap
@@ -355,9 +359,9 @@ namespace MARN_API.Services.Implementations
                     score,
                     currentUserPref.BudgetImportance,
                     matchPref.BudgetImportance,
-                    "Compatible Budget",
-                    "Budget",
-                    "Insufficient Budget overlap",
+                    T("Compatible Budget"),
+                    T("Budget"),
+                    T("Insufficient Budget overlap"),
                     matchedThreshold: 0.5);
             }
 
@@ -366,11 +370,11 @@ namespace MARN_API.Services.Implementations
             // Badge Logic
             string badge = string.Empty;
             if (currentUserPref.SearchStatus == RoommateSearchStatus.Searching && matchPref.SearchStatus == RoommateSearchStatus.Searching)
-                badge = "Let's Find a Place";
+                badge = T("Let's Find a Place");
             else if (currentUserPref.SearchStatus == RoommateSearchStatus.Searching && matchPref.SearchStatus == RoommateSearchStatus.Offering)
-                badge = "Has Apartment";
+                badge = T("Has Apartment");
             else if (currentUserPref.SearchStatus == RoommateSearchStatus.Offering && matchPref.SearchStatus == RoommateSearchStatus.Searching)
-                badge = "Looking for a Room";
+                badge = T("Looking for a Room");
 
             return new RoommateMatchDto
             {
@@ -378,6 +382,7 @@ namespace MARN_API.Services.Implementations
                 FullName = $"{matchPref.User.FirstName} {matchPref.User.LastName}".Trim(),
                 ProfileImage = matchPref.User.ProfileImage,
                 SearchStatus = matchPref.SearchStatus,
+                SearchStatusDisplayName = _localizer.GetEnumDisplayName(matchPref.SearchStatus),
                 Badge = badge,
                 CompatibilityScore = Math.Round(finalScore, 1),
                 TopMatchingTraits = matchedTraits,
@@ -385,5 +390,7 @@ namespace MARN_API.Services.Implementations
                 DealbreakersFound = dealbreakers
             };
         }
+
+        private string T(string literal) => _localizer.LocalizeLiteral(literal);
     }
 }

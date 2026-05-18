@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SUCCESS" xml:space="preserve"><value>Success.</value></data>
+  <data name="CREATED" xml:space="preserve"><value>Created successfully.</value></data>
+  <data name="REQUIRES_TWO_FACTOR" xml:space="preserve"><value>Two-factor verification is required.</value></data>
+  <data name="UNAUTHORIZED" xml:space="preserve"><value>You are not authorized to perform this action.</value></data>
+  <data name="FORBIDDEN" xml:space="preserve"><value>You do not have permission to perform this action.</value></data>
+  <data name="NOT_FOUND" xml:space="preserve"><value>The requested resource was not found.</value></data>
+  <data name="CONFLICT" xml:space="preserve"><value>This request conflicts with the current state of the resource.</value></data>
+  <data name="BAD_REQUEST" xml:space="preserve"><value>The request could not be processed.</value></data>
+  <data name="INTERNAL_ERROR" xml:space="preserve"><value>An unexpected error occurred. Please try again later.</value></data>
+  <data name="VALIDATION_FAILED" xml:space="preserve"><value>The request payload is invalid.</value></data>
+  <data name="RATE_LIMIT_EXCEEDED" xml:space="preserve"><value>Rate limit exceeded. Please try again later.</value></data>
+  <data name="REQUEST_TIMEOUT" xml:space="preserve"><value>The request timed out. Please try again.</value></data>
+
+  <data name="TEXT_THE_PROVIDED_VALUE_IS_INVALID" xml:space="preserve"><value>The provided value is invalid.</value></data>
+  <data name="TEXT_USER_ID_NOT_FOUND_IN_TOKEN" xml:space="preserve"><value>User ID not found in token.</value></data>
+  <data name="TEXT_USER_ID_AND_TOKEN_ARE_REQUIRED" xml:space="preserve"><value>User ID and Token are required.</value></data>
+  <data name="TEXT_TOKEN_IS_REQUIRED" xml:space="preserve"><value>Token is required.</value></data>
+  <data name="TEXT_EMPTY_SEARCH_QUERY" xml:space="preserve"><value>Empty search query.</value></data>
+  <data name="TEXT_OTHER_USER_ID_IS_REQUIRED" xml:space="preserve"><value>Other User ID is required.</value></data>
+  <data name="TEXT_PAGE_NUMBER_AND_PAGESIZE_MUST_BE_GREATER_THAN_0" xml:space="preserve"><value>pageNumber and pageSize must be greater than 0.</value></data>
+  <data name="TEXT_USER_ID_MISMATCH" xml:space="preserve"><value>User id mismatch.</value></data>
+
+  <data name="TEXT_FIRST_NAME_IS_REQUIRED" xml:space="preserve"><value>First name is required.</value></data>
+  <data name="TEXT_FIRST_NAME_MUST_BE_BETWEEN_2_AND_50_CHARACTERS" xml:space="preserve"><value>First name must be between 2 and 50 characters.</value></data>
+  <data name="TEXT_LAST_NAME_IS_REQUIRED" xml:space="preserve"><value>Last name is required.</value></data>
+  <data name="TEXT_LAST_NAME_MUST_BE_BETWEEN_2_AND_50_CHARACTERS" xml:space="preserve"><value>Last name must be between 2 and 50 characters.</value></data>
+  <data name="TEXT_DATE_OF_BIRTH_IS_REQUIRED" xml:space="preserve"><value>Date of birth is required.</value></data>
+  <data name="TEXT_GENDER_IS_REQUIRED" xml:space="preserve"><value>Gender is required.</value></data>
+  <data name="TEXT_LANGUAGE_IS_REQUIRED" xml:space="preserve"><value>Language is required.</value></data>
+  <data name="TEXT_COUNTRY_IS_REQUIRED" xml:space="preserve"><value>Country is required.</value></data>
+  <data name="TEXT_BIO_CANNOT_EXCEED_500_CHARACTERS" xml:space="preserve"><value>Bio cannot exceed 500 characters.</value></data>
+  <data name="TEXT_EMAIL_ADDRESS_IS_REQUIRED" xml:space="preserve"><value>Email address is required.</value></data>
+  <data name="TEXT_INVALID_EMAIL_ADDRESS" xml:space="preserve"><value>Invalid email address.</value></data>
+  <data name="TEXT_EMAIL_ADDRESS_CANNOT_EXCEED_256_CHARACTERS" xml:space="preserve"><value>Email address cannot exceed 256 characters.</value></data>
+  <data name="TEXT_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>Password is required.</value></data>
+  <data name="TEXT_PASSWORD_MUST_BE_BETWEEN_8_AND_100_CHARACTERS" xml:space="preserve"><value>Password must be between 8 and 100 characters.</value></data>
+  <data name="TEXT_CONFIRMING_THE_PASSWORD_IS_REQUIRED" xml:space="preserve"><value>Confirming the password is required.</value></data>
+  <data name="TEXT_PASSWORD_AND_CONFIRMATION_PASSWORD_DO_NOT_MATCH" xml:space="preserve"><value>Password and confirmation password do not match.</value></data>
+  <data name="TEXT_DATE_OF_BIRTH_MUST_REPRESENT_AN_AGE_BETWEEN_13_AND_120_YEARS" xml:space="preserve"><value>Date of birth must represent an age between 13 and 120 years.</value></data>
+
+  <data name="NOTIFICATION_PROPERTY_SUBMITTED_TITLE" xml:space="preserve"><value>Property Submitted for Review</value></data>
+  <data name="NOTIFICATION_PROPERTY_SUBMITTED_BODY" xml:space="preserve"><value>Your property "{0}" has been submitted successfully and is now pending admin verification. This process may take up to 24 hours. We'll notify you once it's approved.</value></data>
+  <data name="NOTIFICATION_PROPERTY_UPDATED_TITLE" xml:space="preserve"><value>Property Update Under Review</value></data>
+  <data name="NOTIFICATION_PROPERTY_UPDATED_BODY" xml:space="preserve"><value>Your property "{0}" has been updated and its status is now set back to pending. The admin will re-verify it, which may take up to 24 hours. We'll notify you once it's approved.</value></data>
+  <data name="NOTIFICATION_PROPERTY_DELETED_TITLE" xml:space="preserve"><value>Property Deleted</value></data>
+  <data name="NOTIFICATION_PROPERTY_DELETED_BODY" xml:space="preserve"><value>Your property "{0}" has been deleted successfully. If this was a mistake or you'd like to restore it, please contact our support team for assistance.</value></data>
+  <data name="NOTIFICATION_RATING_UPDATED_TITLE" xml:space="preserve"><value>Rating Updated on Your Property</value></data>
+  <data name="NOTIFICATION_RATING_UPDATED_BODY" xml:space="preserve"><value>A user has updated their rating to {0} stars on your property "{1}".</value></data>
+  <data name="NOTIFICATION_NEW_RATING_TITLE" xml:space="preserve"><value>New Rating on Your Property</value></data>
+  <data name="NOTIFICATION_NEW_RATING_BODY" xml:space="preserve"><value>A user has rated your property with {0} stars: "{1}".</value></data>
+  <data name="NOTIFICATION_NEW_COMMENT_TITLE" xml:space="preserve"><value>New Comment on Your Property</value></data>
+  <data name="NOTIFICATION_NEW_COMMENT_BODY" xml:space="preserve"><value>A user has left a new comment on your property "{0}".</value></data>
+  <data name="NOTIFICATION_COMMENT_UPDATED_TITLE" xml:space="preserve"><value>Comment Updated on Your Property</value></data>
+  <data name="NOTIFICATION_COMMENT_UPDATED_BODY" xml:space="preserve"><value>A user has updated their comment on your property "{0}".</value></data>
+  <data name="NOTIFICATION_PROFILE_UPDATED_TITLE" xml:space="preserve"><value>Profile Updated Successfully!</value></data>
+  <data name="NOTIFICATION_PROFILE_UPDATED_BODY" xml:space="preserve"><value>Your profile has been updated successfully. Our team will review your information, and your account is expected to be verified within approximately 24 hours.
+
+Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.</value></data>
+  <data name="NOTIFICATION_WELCOME_TITLE" xml:space="preserve"><value>Welcome to Your New Home Journey {0}!</value></data>
+  <data name="NOTIFICATION_WELCOME_BODY" xml:space="preserve"><value>We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.
+
+Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.</value></data>
+  <data name="NOTIFICATION_PASSWORD_RESET_TITLE" xml:space="preserve"><value>Password Reset Successful!</value></data>
+  <data name="NOTIFICATION_PASSWORD_RESET_BODY" xml:space="preserve"><value>Hello {0}, your password has been updated successfully. You can now log in with your new credentials.
+
+If you didn't make this change, please contact our support team immediately to secure your account.</value></data>
+  <data name="NOTIFICATION_CONTRACT_READY_TITLE" xml:space="preserve"><value>Contract Ready for Signature</value></data>
+  <data name="NOTIFICATION_CONTRACT_READY_BODY" xml:space="preserve"><value>The owner of "{0}" has generated a contract for you. Please review and sign it.</value></data>
+  <data name="NOTIFICATION_CONTRACT_SIGNED_TITLE" xml:space="preserve"><value>Contract Signed</value></data>
+  <data name="NOTIFICATION_CONTRACT_SIGNED_BODY" xml:space="preserve"><value>The renter {0} has signed the contract for "{1}".</value></data>
+  <data name="NOTIFICATION_CONTRACT_CANCELLED_TITLE" xml:space="preserve"><value>Contract Cancelled</value></data>
+  <data name="NOTIFICATION_CONTRACT_CANCELLED_BY_RENTER_BODY" xml:space="preserve"><value>The renter has cancelled the pending contract for "{0}".</value></data>
+  <data name="NOTIFICATION_CONTRACT_CANCELLED_BY_OWNER_BODY" xml:space="preserve"><value>The owner has cancelled the pending contract for "{0}".</value></data>
+  <data name="NOTIFICATION_ADMIN_CONTRACT_CANCELLED_BODY" xml:space="preserve"><value>An admin has cancelled contract #{0} for "{1}".</value></data>
+  <data name="NOTIFICATION_PAYMENT_RECEIVED_TITLE" xml:space="preserve"><value>Payment Received</value></data>
+  <data name="NOTIFICATION_PAYMENT_RECEIVED_BODY" xml:space="preserve"><value>You have received a payment of {0} {1} for "{2}".
+This payment is for the due date {3}.
+
+You can withdraw this amount after {4}.</value></data>
+  <data name="NOTIFICATION_PAYMENT_SUCCESSFUL_TITLE" xml:space="preserve"><value>Payment Successful</value></data>
+  <data name="NOTIFICATION_PAYMENT_SUCCESSFUL_BODY" xml:space="preserve"><value>Your payment of {0} {1} for "{2}" has been successful.
+This payment is for the due date {3}.</value></data>
+  <data name="NOTIFICATION_PAYMENT_FAILED_TITLE" xml:space="preserve"><value>Payment Failed</value></data>
+  <data name="NOTIFICATION_PAYMENT_FAILED_BODY" xml:space="preserve"><value>Your payment for "{0}" has failed.
+Please try again.</value></data>
+  <data name="NOTIFICATION_CONNECT_SUCCESS_TITLE" xml:space="preserve"><value>Connect Account Activated</value></data>
+  <data name="NOTIFICATION_CONNECT_SUCCESS_BODY" xml:space="preserve"><value>Your Stripe Connect account has been activated and is now ready to withdraw your payments.</value></data>
+  <data name="NOTIFICATION_CONNECT_FAILED_TITLE" xml:space="preserve"><value>Connect Account Failed</value></data>
+  <data name="NOTIFICATION_CONNECT_FAILED_BODY" xml:space="preserve"><value>Your Stripe Connect account is not fully activated. Please complete the onboarding process to enable charges and payouts.</value></data>
+  <data name="NOTIFICATION_WITHDRAW_SUCCESS_TITLE" xml:space="preserve"><value>Withdrawal Initiated</value></data>
+  <data name="NOTIFICATION_WITHDRAW_SUCCESS_BODY" xml:space="preserve"><value>A withdrawal of {0} {1} has been initiated to your connected account.
+It should reflect in your bank account within a few business days.</value></data>
+  <data name="NOTIFICATION_WITHDRAW_FAILED_TITLE" xml:space="preserve"><value>Withdrawal Failed</value></data>
+  <data name="NOTIFICATION_WITHDRAW_FAILED_BODY" xml:space="preserve"><value>A withdrawal of {0} {1} to your connected account has failed. Please check your Stripe dashboard for details.</value></data>
+  <data name="NOTIFICATION_UPCOMING_PAYMENT_TITLE" xml:space="preserve"><value>Upcoming Payment Available</value></data>
+  <data name="NOTIFICATION_UPCOMING_PAYMENT_BODY" xml:space="preserve"><value>Your payment of {0} {1} for "{2}" is now available and can be paid.
+{3} day(s) left until the due date {4}.</value></data>
+  <data name="NOTIFICATION_PAYMENT_DUE_TODAY_TITLE" xml:space="preserve"><value>Payment Due Today</value></data>
+  <data name="NOTIFICATION_PAYMENT_DUE_TODAY_BODY" xml:space="preserve"><value>Your payment of {0} {1} for "{2}" is due today.</value></data>
+  <data name="NOTIFICATION_PAYMENT_OVERDUE_TITLE" xml:space="preserve"><value>Payment Overdue</value></data>
+  <data name="NOTIFICATION_PAYMENT_OVERDUE_BODY" xml:space="preserve"><value>Your payment of {0} {1} for "{2}" is overdue.
+You are {3} day(s) past the due date.
+
+Please complete the payment as soon as possible to avoid any service interruption or further actions in accordance with our terms.
+If you have any issues, please contact support.</value></data>
+  <data name="NOTIFICATION_PAYMENT_AVAILABLE_FOR_WITHDRAWAL_TITLE" xml:space="preserve"><value>Payment Available for Withdrawal</value></data>
+  <data name="NOTIFICATION_PAYMENT_AVAILABLE_FOR_WITHDRAWAL_BODY" xml:space="preserve"><value>Your payment of {0} {1} from contract "{2}"
+that paid at {3} is now available for withdrawal.</value></data>
+  <data name="NOTIFICATION_BOOKING_REQUEST_TITLE" xml:space="preserve"><value>New Booking Request</value></data>
+  <data name="NOTIFICATION_BOOKING_REQUEST_BODY" xml:space="preserve"><value>You have received a new booking request for "{0}" from {1}.</value></data>
+  <data name="NOTIFICATION_BOOKING_REJECTED_TITLE" xml:space="preserve"><value>Booking Request Rejected</value></data>
+  <data name="NOTIFICATION_BOOKING_REJECTED_BODY" xml:space="preserve"><value>Your booking request for "{0}" was rejected by the owner.</value></data>
+  <data name="NOTIFICATION_BOOKING_CANCELLED_TITLE" xml:space="preserve"><value>Booking Request Cancelled</value></data>
+  <data name="NOTIFICATION_BOOKING_CANCELLED_BODY" xml:space="preserve"><value>The booking request for "{0}" was cancelled by the renter.</value></data>
+  <data name="NOTIFICATION_NEW_MESSAGE_TITLE" xml:space="preserve"><value>New Message</value></data>
+  <data name="NOTIFICATION_NEW_MESSAGE_BODY" xml:space="preserve"><value>You have a new message from {0}</value></data>
+  <data name="NOTIFICATION_PROPERTY_RESTORED_TITLE" xml:space="preserve"><value>Property Restored</value></data>
+  <data name="NOTIFICATION_PROPERTY_RESTORED_BODY" xml:space="preserve"><value>An admin has restored your property "{0}" and made it active again.</value></data>
+  <data name="NOTIFICATION_PROPERTY_DEACTIVATED_TITLE" xml:space="preserve"><value>Property Deactivated</value></data>
+  <data name="NOTIFICATION_PROPERTY_DEACTIVATED_BODY" xml:space="preserve"><value>An admin has deactivated your property "{0}". It is no longer publicly available.</value></data>
+  <data name="NOTIFICATION_TEST_TITLE" xml:space="preserve"><value>Test Notification</value></data>
+  <data name="NOTIFICATION_TEST_BODY" xml:space="preserve"><value>This is a test notification.</value></data>
+
+  <data name="EMAIL_CONFIRMATION_SUBJECT" xml:space="preserve"><value>Email Confirmation - MARN</value></data>
+  <data name="EMAIL_CONFIRMATION_HEADING" xml:space="preserve"><value>Welcome, {0}!</value></data>
+  <data name="EMAIL_CONFIRMATION_BODY" xml:space="preserve"><value>Thank you for registering. Please confirm your email by clicking the button below.</value></data>
+  <data name="EMAIL_CONFIRMATION_BUTTON" xml:space="preserve"><value>Confirm Your Email</value></data>
+  <data name="EMAIL_ACCOUNT_CREATED_SUBJECT" xml:space="preserve"><value>Account Created - MARN</value></data>
+  <data name="EMAIL_ACCOUNT_CREATED_HEADING" xml:space="preserve"><value>Hello, {0}!</value></data>
+  <data name="EMAIL_ACCOUNT_CREATED_BODY" xml:space="preserve"><value>Your account has been successfully created and your email is confirmed.</value></data>
+  <data name="EMAIL_ACCOUNT_CREATED_BUTTON" xml:space="preserve"><value>Login to Your Account</value></data>
+  <data name="EMAIL_RESEND_CONFIRMATION_BODY" xml:space="preserve"><value>You requested a new email confirmation link. Please confirm your email by clicking the button below.</value></data>
+  <data name="EMAIL_RESET_PASSWORD_SUBJECT" xml:space="preserve"><value>Reset Password - MARN</value></data>
+  <data name="EMAIL_RESET_PASSWORD_BODY" xml:space="preserve"><value>You requested a Reset Password link. Please reset your password by clicking the button below.</value></data>
+  <data name="EMAIL_RESET_PASSWORD_BUTTON" xml:space="preserve"><value>Reset Password</value></data>
+  <data name="EMAIL_RESET_PASSWORD_EXPIRY" xml:space="preserve"><value>This link will expire in 1 hour.</value></data>
+  <data name="EMAIL_ACCOUNT_DELETION_SUBJECT" xml:space="preserve"><value>Account Deletion Confirmation - MARN</value></data>
+  <data name="EMAIL_ACCOUNT_DELETION_HEADING" xml:space="preserve"><value>Goodbye, {0}</value></data>
+  <data name="EMAIL_ACCOUNT_DELETION_BODY_1" xml:space="preserve"><value>Your account has been successfully deleted from our platform.</value></data>
+  <data name="EMAIL_ACCOUNT_DELETION_BODY_2" xml:space="preserve"><value>If this action was not intended or you would like to restore your account or create a new one using the same email address, please contact our support team.</value></data>
+  <data name="EMAIL_ACCOUNT_DELETION_BUTTON" xml:space="preserve"><value>Contact Support</value></data>
+  <data name="EMAIL_SUPPORT_EMAIL_LABEL" xml:space="preserve"><value>Support Email:</value></data>
+  <data name="EMAIL_TWO_FACTOR_SUBJECT" xml:space="preserve"><value>2FA Code - MARN</value></data>
+  <data name="EMAIL_TWO_FACTOR_HEADING" xml:space="preserve"><value>Two-Factor Authentication</value></data>
+  <data name="EMAIL_TWO_FACTOR_BODY" xml:space="preserve"><value>Use the verification code below to complete your sign-in.</value></data>
+  <data name="EMAIL_TWO_FACTOR_EXPIRY" xml:space="preserve"><value>This code will expire in 5 minutes.</value></data>
+  <data name="EMAIL_TWO_FACTOR_IGNORE" xml:space="preserve"><value>If you did not request this code, please ignore this email.</value></data>
+  <data name="EMAIL_FOOTER" xml:space="preserve"><value>MARN. All rights reserved.</value></data>
+
+  <data name="ENUM_Language_English" xml:space="preserve"><value>English</value></data>
+  <data name="ENUM_Language_Arabic" xml:space="preserve"><value>Arabic</value></data>
+  <data name="ENUM_Gender_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_Gender_Male" xml:space="preserve"><value>Male</value></data>
+  <data name="ENUM_Gender_Female" xml:space="preserve"><value>Female</value></data>
+  <data name="ENUM_Country_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_Country_Egypt" xml:space="preserve"><value>Egypt</value></data>
+  <data name="ENUM_Country_SaudiArabia" xml:space="preserve"><value>Saudi Arabia</value></data>
+  <data name="ENUM_Country_UnitedArabEmirates" xml:space="preserve"><value>United Arab Emirates</value></data>
+  <data name="ENUM_Country_Qatar" xml:space="preserve"><value>Qatar</value></data>
+  <data name="ENUM_Country_Kuwait" xml:space="preserve"><value>Kuwait</value></data>
+  <data name="ENUM_Country_Bahrain" xml:space="preserve"><value>Bahrain</value></data>
+  <data name="ENUM_Country_Oman" xml:space="preserve"><value>Oman</value></data>
+  <data name="ENUM_Country_Jordan" xml:space="preserve"><value>Jordan</value></data>
+  <data name="ENUM_Country_Lebanon" xml:space="preserve"><value>Lebanon</value></data>
+  <data name="ENUM_AccountStatus_Unverified" xml:space="preserve"><value>Unverified</value></data>
+  <data name="ENUM_AccountStatus_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="ENUM_AccountStatus_Verified" xml:space="preserve"><value>Verified</value></data>
+  <data name="ENUM_AccountStatus_Declined" xml:space="preserve"><value>Declined</value></data>
+  <data name="ENUM_AccountStatus_Banned" xml:space="preserve"><value>Banned</value></data>
+  <data name="ENUM_PropertyType_Apartment" xml:space="preserve"><value>Apartment</value></data>
+  <data name="ENUM_PropertyType_House" xml:space="preserve"><value>House</value></data>
+  <data name="ENUM_PropertyType_Room" xml:space="preserve"><value>Room</value></data>
+  <data name="ENUM_PropertyType_Villa" xml:space="preserve"><value>Villa</value></data>
+  <data name="ENUM_PropertyType_Studio" xml:space="preserve"><value>Studio</value></data>
+  <data name="ENUM_PropertyType_SharedRoom" xml:space="preserve"><value>Shared Room</value></data>
+  <data name="ENUM_RentalUnit_Daily" xml:space="preserve"><value>Daily</value></data>
+  <data name="ENUM_RentalUnit_Monthly" xml:space="preserve"><value>Monthly</value></data>
+  <data name="ENUM_RentalUnit_Yearly" xml:space="preserve"><value>Yearly</value></data>
+  <data name="ENUM_PropertyStatus_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="ENUM_PropertyStatus_Verified" xml:space="preserve"><value>Verified</value></data>
+  <data name="ENUM_PropertyStatus_Declined" xml:space="preserve"><value>Declined</value></data>
+  <data name="ENUM_ContractStatus_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="ENUM_ContractStatus_Active" xml:space="preserve"><value>Active</value></data>
+  <data name="ENUM_ContractStatus_Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="ENUM_ContractStatus_Expired" xml:space="preserve"><value>Expired</value></data>
+  <data name="ENUM_PaymentFrequency_OneTime" xml:space="preserve"><value>One-Time</value></data>
+  <data name="ENUM_PaymentFrequency_Monthly" xml:space="preserve"><value>Monthly</value></data>
+  <data name="ENUM_PaymentFrequency_Quarterly" xml:space="preserve"><value>Quarterly</value></data>
+  <data name="ENUM_PaymentFrequency_Yearly" xml:space="preserve"><value>Yearly</value></data>
+  <data name="ENUM_AmenityType_Wifi" xml:space="preserve"><value>Wi-Fi</value></data>
+  <data name="ENUM_AmenityType_Parking" xml:space="preserve"><value>Parking</value></data>
+  <data name="ENUM_AmenityType_AirConditioning" xml:space="preserve"><value>Air Conditioning</value></data>
+  <data name="ENUM_AmenityType_Heating" xml:space="preserve"><value>Heating</value></data>
+  <data name="ENUM_AmenityType_Tv" xml:space="preserve"><value>TV</value></data>
+  <data name="ENUM_AmenityType_Elevator" xml:space="preserve"><value>Elevator</value></data>
+  <data name="ENUM_AmenityType_Pool" xml:space="preserve"><value>Pool</value></data>
+  <data name="ENUM_AmenityType_Gym" xml:space="preserve"><value>Gym</value></data>
+  <data name="ENUM_AmenityType_Kitchen" xml:space="preserve"><value>Kitchen</value></data>
+  <data name="ENUM_AmenityType_Dishwasher" xml:space="preserve"><value>Dishwasher</value></data>
+  <data name="ENUM_AmenityType_Microwave" xml:space="preserve"><value>Microwave</value></data>
+  <data name="ENUM_AmenityType_Refrigerator" xml:space="preserve"><value>Refrigerator</value></data>
+  <data name="ENUM_AmenityType_Washer" xml:space="preserve"><value>Washer</value></data>
+  <data name="ENUM_AmenityType_Dryer" xml:space="preserve"><value>Dryer</value></data>
+  <data name="ENUM_AmenityType_Balcony" xml:space="preserve"><value>Balcony</value></data>
+  <data name="ENUM_AmenityType_HardwoodFloors" xml:space="preserve"><value>Hardwood Floors</value></data>
+  <data name="ENUM_AmenityType_StorageSpace" xml:space="preserve"><value>Storage Space</value></data>
+  <data name="ENUM_AmenityType_SecuritySystem" xml:space="preserve"><value>Security System</value></data>
+  <data name="AUTH_USER_ID_MISSING" xml:space="preserve"><value>User ID not found in token.</value></data>
+  <data name="AUTH_USER_ID_MISMATCH" xml:space="preserve"><value>User ID mismatch.</value></data>
+  <data name="USER_ID_AND_TOKEN_REQUIRED" xml:space="preserve"><value>User ID and token are required.</value></data>
+  <data name="TOKEN_REQUIRED" xml:space="preserve"><value>Token is required.</value></data>
+  <data name="EMPTY_SEARCH_QUERY" xml:space="preserve"><value>Empty search query.</value></data>
+  <data name="OTHER_USER_ID_REQUIRED" xml:space="preserve"><value>Other User ID is required.</value></data>
+  <data name="INVALID_PAGINATION" xml:space="preserve"><value>pageNumber and pageSize must be greater than 0.</value></data>
+  <data name="INVALID_WEBHOOK_SIGNATURE" xml:space="preserve"><value>Webhook signature validation failed.</value></data>
+  <data name="ENUM_ServiceResultType_Success" xml:space="preserve"><value>Success</value></data>
+  <data name="ENUM_ServiceResultType_Created" xml:space="preserve"><value>Created</value></data>
+  <data name="ENUM_ServiceResultType_InvalidInput" xml:space="preserve"><value>Invalid Input</value></data>
+  <data name="ENUM_ServiceResultType_Unauthorized" xml:space="preserve"><value>Unauthorized</value></data>
+  <data name="ENUM_ServiceResultType_NotFound" xml:space="preserve"><value>Not Found</value></data>
+  <data name="ENUM_ServiceResultType_Conflict" xml:space="preserve"><value>Conflict</value></data>
+  <data name="ENUM_ServiceResultType_InternalError" xml:space="preserve"><value>Internal Error</value></data>
+  <data name="ENUM_ServiceResultType_BadRequest" xml:space="preserve"><value>Bad Request</value></data>
+  <data name="ENUM_ServiceResultType_Forbidden" xml:space="preserve"><value>Forbidden</value></data>
+  <data name="ENUM_ServiceResultType_RequiresTwoFactor" xml:space="preserve"><value>Requires Two-Factor</value></data>
+  <data name="ENUM_AdminAnalyticsReportFormat_Pdf" xml:space="preserve"><value>PDF</value></data>
+  <data name="ENUM_AdminAnalyticsReportFormat_Csv" xml:space="preserve"><value>CSV</value></data>
+  <data name="ENUM_AdminAnalyticsReportPeriod_AllTime" xml:space="preserve"><value>All Time</value></data>
+  <data name="ENUM_AdminAnalyticsReportPeriod_ThisMonth" xml:space="preserve"><value>This Month</value></data>
+  <data name="ENUM_AdminAnalyticsReportPeriod_ThisYear" xml:space="preserve"><value>This Year</value></data>
+  <data name="ENUM_AdminAnalyticsReportPeriod_Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="ENUM_AdminAnalyticsReportScope_Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="ENUM_AdminAnalyticsReportScope_Users" xml:space="preserve"><value>Users</value></data>
+  <data name="ENUM_AdminAnalyticsReportScope_Properties" xml:space="preserve"><value>Properties</value></data>
+  <data name="ENUM_AdminAnalyticsReportScope_Contracts" xml:space="preserve"><value>Contracts</value></data>
+  <data name="ENUM_AdminAnalyticsReportScope_Revenue" xml:space="preserve"><value>Revenue</value></data>
+  <data name="ENUM_AdminAnalyticsReportScope_Full" xml:space="preserve"><value>Full</value></data>
+  <data name="ENUM_ReportableType_User" xml:space="preserve"><value>User</value></data>
+  <data name="ENUM_ReportableType_Property" xml:space="preserve"><value>Property</value></data>
+  <data name="ENUM_ReportableType_Message" xml:space="preserve"><value>Message</value></data>
+  <data name="ENUM_ReportableType_PropertyComment" xml:space="preserve"><value>Property Comment</value></data>
+  <data name="ENUM_ReportModerationActionType_BanUser" xml:space="preserve"><value>Ban User</value></data>
+  <data name="ENUM_ReportModerationActionType_DeactivateProperty" xml:space="preserve"><value>Deactivate Property</value></data>
+  <data name="ENUM_ReportModerationActionType_HideMessage" xml:space="preserve"><value>Hide Message</value></data>
+  <data name="ENUM_ReportModerationActionType_HidePropertyComment" xml:space="preserve"><value>Hide Property Comment</value></data>
+  <data name="ENUM_ReportStatus_InReview" xml:space="preserve"><value>In Review</value></data>
+  <data name="ENUM_ReportStatus_Resolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="ENUM_ReportStatus_Rejected" xml:space="preserve"><value>Rejected</value></data>
+  <data name="ENUM_UserActivityType_Login" xml:space="preserve"><value>Login</value></data>
+  <data name="ENUM_UserActivityType_Logout" xml:space="preserve"><value>Logout</value></data>
+  <data name="ENUM_UserActivityType_CreatedProperty" xml:space="preserve"><value>Created Property</value></data>
+  <data name="ENUM_UserActivityType_UpdatedProperty" xml:space="preserve"><value>Updated Property</value></data>
+  <data name="ENUM_UserActivityType_DeletedProperty" xml:space="preserve"><value>Deleted Property</value></data>
+  <data name="ENUM_UserActivityType_CreatedBookingRequest" xml:space="preserve"><value>Created Booking Request</value></data>
+  <data name="ENUM_UserActivityType_UpdatedBookingRequest" xml:space="preserve"><value>Updated Booking Request</value></data>
+  <data name="ENUM_UserActivityType_CreatedContract" xml:space="preserve"><value>Created Contract</value></data>
+  <data name="ENUM_UserActivityType_PaymentMade" xml:space="preserve"><value>Payment Made</value></data>
+  <data name="ENUM_UserActivityType_ViewedProperty" xml:space="preserve"><value>Viewed Property</value></data>
+  <data name="ENUM_UserActivityType_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="ENUM_ContractAnchoringStatus_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="ENUM_ContractAnchoringStatus_Anchored" xml:space="preserve"><value>Anchored</value></data>
+  <data name="ENUM_ContractAnchoringStatus_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="ENUM_NotificationActionType_Property" xml:space="preserve"><value>Property</value></data>
+  <data name="ENUM_NotificationActionType_ChatUser" xml:space="preserve"><value>Chat User</value></data>
+  <data name="ENUM_NotificationActionType_EditProfile" xml:space="preserve"><value>Edit Profile</value></data>
+  <data name="ENUM_NotificationActionType_RenterDashboard" xml:space="preserve"><value>Renter Dashboard</value></data>
+  <data name="ENUM_NotificationActionType_OwnerDashboard" xml:space="preserve"><value>Owner Dashboard</value></data>
+  <data name="ENUM_NotificationType_General" xml:space="preserve"><value>General</value></data>
+  <data name="ENUM_NotificationType_NewMessage" xml:space="preserve"><value>New Message</value></data>
+  <data name="ENUM_NotificationType_NewBookingRequest" xml:space="preserve"><value>New Booking Request</value></data>
+  <data name="ENUM_NotificationType_BookingRequestCanceled" xml:space="preserve"><value>Booking Request Canceled</value></data>
+  <data name="ENUM_NotificationType_BookingRequestRejected" xml:space="preserve"><value>Booking Request Rejected</value></data>
+  <data name="ENUM_NotificationType_NewReview" xml:space="preserve"><value>New Review</value></data>
+  <data name="ENUM_NotificationType_ContractStarted" xml:space="preserve"><value>Contract Started</value></data>
+  <data name="ENUM_NotificationType_ContractCanceled" xml:space="preserve"><value>Contract Canceled</value></data>
+  <data name="ENUM_NotificationType_ContractSigned" xml:space="preserve"><value>Contract Signed</value></data>
+  <data name="ENUM_NotificationType_ContractCompleted" xml:space="preserve"><value>Contract Completed</value></data>
+  <data name="ENUM_NotificationType_UpcomingPayment" xml:space="preserve"><value>Upcoming Payment</value></data>
+  <data name="ENUM_NotificationType_PaymentArrived" xml:space="preserve"><value>Payment Arrived</value></data>
+  <data name="ENUM_NotificationType_DelayedPayment" xml:space="preserve"><value>Delayed Payment</value></data>
+  <data name="ENUM_NotificationType_PaymentSuccessful" xml:space="preserve"><value>Payment Successful</value></data>
+  <data name="ENUM_NotificationType_PaymentFailed" xml:space="preserve"><value>Payment Failed</value></data>
+  <data name="ENUM_NotificationType_PaymentReceived" xml:space="preserve"><value>Payment Received</value></data>
+  <data name="ENUM_NotificationType_AvailableForWithdrawal" xml:space="preserve"><value>Available for Withdrawal</value></data>
+  <data name="ENUM_NotificationType_ConnectAccountSuccess" xml:space="preserve"><value>Connect Account Success</value></data>
+  <data name="ENUM_NotificationType_ConnectAccountFailed" xml:space="preserve"><value>Connect Account Failed</value></data>
+  <data name="ENUM_NotificationType_WithdrawSuccess" xml:space="preserve"><value>Withdraw Success</value></data>
+  <data name="ENUM_NotificationType_WithdrawFailed" xml:space="preserve"><value>Withdraw Failed</value></data>
+  <data name="ENUM_NotificationType_PropertyAdded" xml:space="preserve"><value>Property Added</value></data>
+  <data name="ENUM_NotificationType_PropertyEdited" xml:space="preserve"><value>Property Edited</value></data>
+  <data name="ENUM_NotificationType_PropertyDeleted" xml:space="preserve"><value>Property Deleted</value></data>
+  <data name="ENUM_NotificationUserType_General" xml:space="preserve"><value>General</value></data>
+  <data name="ENUM_NotificationUserType_Renter" xml:space="preserve"><value>Renter</value></data>
+  <data name="ENUM_NotificationUserType_Owner" xml:space="preserve"><value>Owner</value></data>
+  <data name="ENUM_PaymentScheduleStatus_NotAvailableYet" xml:space="preserve"><value>Not Available Yet</value></data>
+  <data name="ENUM_PaymentScheduleStatus_Available" xml:space="preserve"><value>Available</value></data>
+  <data name="ENUM_PaymentScheduleStatus_DueToday" xml:space="preserve"><value>Due Today</value></data>
+  <data name="ENUM_PaymentScheduleStatus_PaidEarly" xml:space="preserve"><value>Paid Early</value></data>
+  <data name="ENUM_PaymentScheduleStatus_PaidOnTime" xml:space="preserve"><value>Paid On Time</value></data>
+  <data name="ENUM_PaymentScheduleStatus_PaidLate" xml:space="preserve"><value>Paid Late</value></data>
+  <data name="ENUM_PaymentScheduleStatus_Overdue" xml:space="preserve"><value>Overdue</value></data>
+  <data name="ENUM_PaymentScheduleStatus_Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="ENUM_PaymentStatus_OnHold" xml:space="preserve"><value>On Hold</value></data>
+  <data name="ENUM_PaymentStatus_Available" xml:space="preserve"><value>Available</value></data>
+  <data name="ENUM_PaymentStatus_Withdrawn" xml:space="preserve"><value>Withdrawn</value></data>
+  <data name="ENUM_PropertyAvailability_Available" xml:space="preserve"><value>Available</value></data>
+  <data name="ENUM_PropertyAvailability_Booked" xml:space="preserve"><value>Booked</value></data>
+  <data name="ENUM_PropertySortBy_Newest" xml:space="preserve"><value>Newest</value></data>
+  <data name="ENUM_PropertySortBy_Price" xml:space="preserve"><value>Price</value></data>
+  <data name="ENUM_PropertySortBy_Rating" xml:space="preserve"><value>Rating</value></data>
+  <data name="ENUM_PropertySortBy_Bedrooms" xml:space="preserve"><value>Bedrooms</value></data>
+  <data name="ENUM_PropertySortBy_Bathrooms" xml:space="preserve"><value>Bathrooms</value></data>
+  <data name="ENUM_PropertySortBy_SquareMeters" xml:space="preserve"><value>Square Meters</value></data>
+  <data name="ENUM_PropertySortBy_Distance" xml:space="preserve"><value>Distance</value></data>
+  <data name="ENUM_City_Cairo" xml:space="preserve"><value>Cairo</value></data>
+  <data name="ENUM_City_Giza" xml:space="preserve"><value>Giza</value></data>
+  <data name="ENUM_City_Alexandria" xml:space="preserve"><value>Alexandria</value></data>
+  <data name="ENUM_City_NewCairo" xml:space="preserve"><value>New Cairo</value></data>
+  <data name="ENUM_City_SixthOfOctober" xml:space="preserve"><value>6th of October</value></data>
+  <data name="ENUM_City_Shubra" xml:space="preserve"><value>Shubra</value></data>
+  <data name="ENUM_City_PortSaid" xml:space="preserve"><value>Port Said</value></data>
+  <data name="ENUM_City_Suez" xml:space="preserve"><value>Suez</value></data>
+  <data name="ENUM_City_Luxor" xml:space="preserve"><value>Luxor</value></data>
+  <data name="ENUM_City_Aswan" xml:space="preserve"><value>Aswan</value></data>
+  <data name="ENUM_City_Mansoura" xml:space="preserve"><value>Mansoura</value></data>
+  <data name="ENUM_City_Tanta" xml:space="preserve"><value>Tanta</value></data>
+  <data name="ENUM_City_Ismailia" xml:space="preserve"><value>Ismailia</value></data>
+  <data name="ENUM_City_Faiyum" xml:space="preserve"><value>Faiyum</value></data>
+  <data name="ENUM_City_Zagazig" xml:space="preserve"><value>Zagazig</value></data>
+  <data name="ENUM_City_Damietta" xml:space="preserve"><value>Damietta</value></data>
+  <data name="ENUM_City_Asyut" xml:space="preserve"><value>Asyut</value></data>
+  <data name="ENUM_City_Minya" xml:space="preserve"><value>Minya</value></data>
+  <data name="ENUM_City_BeniSuef" xml:space="preserve"><value>Beni Suef</value></data>
+  <data name="ENUM_City_Sohag" xml:space="preserve"><value>Sohag</value></data>
+  <data name="ENUM_City_Hurghada" xml:space="preserve"><value>Hurghada</value></data>
+  <data name="ENUM_City_SharmElSheikh" xml:space="preserve"><value>Sharm El Sheikh</value></data>
+  <data name="ENUM_City_Obour" xml:space="preserve"><value>Obour</value></data>
+  <data name="ENUM_City_Helwan" xml:space="preserve"><value>Helwan</value></data>
+  <data name="ENUM_City_Nasr" xml:space="preserve"><value>Nasr City</value></data>
+  <data name="ENUM_City_Maadi" xml:space="preserve"><value>Maadi</value></data>
+  <data name="ENUM_City_Heliopolis" xml:space="preserve"><value>Heliopolis</value></data>
+  <data name="ENUM_City_Dokki" xml:space="preserve"><value>Dokki</value></data>
+  <data name="ENUM_City_Mohandessin" xml:space="preserve"><value>Mohandessin</value></data>
+  <data name="ENUM_City_NewAdministrativeCapital" xml:space="preserve"><value>New Administrative Capital</value></data>
+  <data name="ENUM_City_ElShorouk" xml:space="preserve"><value>El Shorouk</value></data>
+  <data name="ENUM_City_BorgElArab" xml:space="preserve"><value>Borg El Arab</value></data>
+  <data name="ENUM_City_Badr" xml:space="preserve"><value>Badr</value></data>
+  <data name="ENUM_City_TenthOfRamadan" xml:space="preserve"><value>10th of Ramadan</value></data>
+  <data name="ENUM_City_Rehab" xml:space="preserve"><value>Rehab</value></data>
+  <data name="ENUM_City_Tagamoa" xml:space="preserve"><value>Tagamoa</value></data>
+  <data name="ENUM_City_Sadat" xml:space="preserve"><value>Sadat</value></data>
+  <data name="ENUM_City_Benha" xml:space="preserve"><value>Benha</value></data>
+  <data name="ENUM_City_KafrElSheikh" xml:space="preserve"><value>Kafr El Sheikh</value></data>
+  <data name="ENUM_City_Qena" xml:space="preserve"><value>Qena</value></data>
+  <data name="ENUM_City_MarsaAlam" xml:space="preserve"><value>Marsa Alam</value></data>
+  <data name="ENUM_Governorate_CairoGovernorate" xml:space="preserve"><value>Cairo</value></data>
+  <data name="ENUM_Governorate_GizaGovernorate" xml:space="preserve"><value>Giza</value></data>
+  <data name="ENUM_Governorate_AlexandriaGovernorate" xml:space="preserve"><value>Alexandria</value></data>
+  <data name="ENUM_Governorate_QalyubiaGovernorate" xml:space="preserve"><value>Qalyubia</value></data>
+  <data name="ENUM_Governorate_PortSaidGovernorate" xml:space="preserve"><value>Port Said</value></data>
+  <data name="ENUM_Governorate_SuezGovernorate" xml:space="preserve"><value>Suez</value></data>
+  <data name="ENUM_Governorate_DakhaliaGovernorate" xml:space="preserve"><value>Dakahlia</value></data>
+  <data name="ENUM_Governorate_SharkiaGovernorate" xml:space="preserve"><value>Sharqia</value></data>
+  <data name="ENUM_Governorate_GharbiaGovernorate" xml:space="preserve"><value>Gharbia</value></data>
+  <data name="ENUM_Governorate_MonufiaGovernorate" xml:space="preserve"><value>Monufia</value></data>
+  <data name="ENUM_Governorate_BehiraGovernorate" xml:space="preserve"><value>Beheira</value></data>
+  <data name="ENUM_Governorate_KafrElSheikhGovernorate" xml:space="preserve"><value>Kafr El Sheikh</value></data>
+  <data name="ENUM_Governorate_DamiettaGovernorate" xml:space="preserve"><value>Damietta</value></data>
+  <data name="ENUM_Governorate_IsmailiaGovernorate" xml:space="preserve"><value>Ismailia</value></data>
+  <data name="ENUM_Governorate_FaiyumGovernorate" xml:space="preserve"><value>Faiyum</value></data>
+  <data name="ENUM_Governorate_BeniSuefGovernorate" xml:space="preserve"><value>Beni Suef</value></data>
+  <data name="ENUM_Governorate_MiniaGovernorate" xml:space="preserve"><value>Minya</value></data>
+  <data name="ENUM_Governorate_AsyutGovernorate" xml:space="preserve"><value>Asyut</value></data>
+  <data name="ENUM_Governorate_SohagGovernorate" xml:space="preserve"><value>Sohag</value></data>
+  <data name="ENUM_Governorate_QenaGovernorate" xml:space="preserve"><value>Qena</value></data>
+  <data name="ENUM_Governorate_LuxorGovernorate" xml:space="preserve"><value>Luxor</value></data>
+  <data name="ENUM_Governorate_AswanGovernorate" xml:space="preserve"><value>Aswan</value></data>
+  <data name="ENUM_Governorate_RedSeaGovernorate" xml:space="preserve"><value>Red Sea</value></data>
+  <data name="ENUM_Governorate_NewValleyGovernorate" xml:space="preserve"><value>New Valley</value></data>
+  <data name="ENUM_Governorate_MarsaMatruhGovernorate" xml:space="preserve"><value>Marsa Matruh</value></data>
+  <data name="ENUM_Governorate_NorthSinaiGovernorate" xml:space="preserve"><value>North Sinai</value></data>
+  <data name="ENUM_Governorate_SouthSinaiGovernorate" xml:space="preserve"><value>South Sinai</value></data>
+  <data name="ENUM_EducationLevel_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_EducationLevel_HighSchool" xml:space="preserve"><value>High School</value></data>
+  <data name="ENUM_EducationLevel_Bachelor" xml:space="preserve"><value>Bachelor</value></data>
+  <data name="ENUM_EducationLevel_Master" xml:space="preserve"><value>Master</value></data>
+  <data name="ENUM_EducationLevel_Doctorate" xml:space="preserve"><value>Doctorate</value></data>
+  <data name="ENUM_FieldOfStudy_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_FieldOfStudy_Engineering" xml:space="preserve"><value>Engineering</value></data>
+  <data name="ENUM_FieldOfStudy_Medicine" xml:space="preserve"><value>Medicine</value></data>
+  <data name="ENUM_FieldOfStudy_Business" xml:space="preserve"><value>Business</value></data>
+  <data name="ENUM_FieldOfStudy_ComputerScience" xml:space="preserve"><value>Computer Science</value></data>
+  <data name="ENUM_FieldOfStudy_Arts" xml:space="preserve"><value>Arts</value></data>
+  <data name="ENUM_FieldOfStudy_Law" xml:space="preserve"><value>Law</value></data>
+  <data name="ENUM_FieldOfStudy_Physics" xml:space="preserve"><value>Physics</value></data>
+  <data name="ENUM_FieldOfStudy_Psychology" xml:space="preserve"><value>Psychology</value></data>
+  <data name="ENUM_FieldOfStudy_Pharmacy" xml:space="preserve"><value>Pharmacy</value></data>
+  <data name="ENUM_FieldOfStudy_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="ENUM_GuestsFrequency_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_GuestsFrequency_Never" xml:space="preserve"><value>Never</value></data>
+  <data name="ENUM_GuestsFrequency_Rarely" xml:space="preserve"><value>Rarely</value></data>
+  <data name="ENUM_GuestsFrequency_Sometimes" xml:space="preserve"><value>Sometimes</value></data>
+  <data name="ENUM_GuestsFrequency_Often" xml:space="preserve"><value>Often</value></data>
+  <data name="ENUM_RoommateSearchStatus_Searching" xml:space="preserve"><value>Searching</value></data>
+  <data name="ENUM_RoommateSearchStatus_Offering" xml:space="preserve"><value>Offering</value></data>
+  <data name="ENUM_RoommateSearchStatus_Found" xml:space="preserve"><value>Found</value></data>
+  <data name="ENUM_SharingLevel_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_SharingLevel_Low" xml:space="preserve"><value>Low</value></data>
+  <data name="ENUM_SharingLevel_Medium" xml:space="preserve"><value>Medium</value></data>
+  <data name="ENUM_SharingLevel_High" xml:space="preserve"><value>High</value></data>
+  <data name="ENUM_SleepSchedule_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_SleepSchedule_EarlyBird" xml:space="preserve"><value>Early Bird</value></data>
+  <data name="ENUM_SleepSchedule_NightOwl" xml:space="preserve"><value>Night Owl</value></data>
+  <data name="ENUM_SleepSchedule_Flexible" xml:space="preserve"><value>Flexible</value></data>
+  <data name="ENUM_WorkSchedule_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="ENUM_WorkSchedule_NotWorking" xml:space="preserve"><value>Not Working</value></data>
+  <data name="ENUM_WorkSchedule_DayShift" xml:space="preserve"><value>Day Shift</value></data>
+  <data name="ENUM_WorkSchedule_NightShift" xml:space="preserve"><value>Night Shift</value></data>
+  <data name="ENUM_WorkSchedule_Mixed" xml:space="preserve"><value>Mixed</value></data>
+  <data name="ENUM_WorkSchedule_Remote" xml:space="preserve"><value>Remote</value></data>
+  <data name="TEXT_METRIC" xml:space="preserve"><value>Metric</value></data>
+  <data name="TEXT_VALUE" xml:space="preserve"><value>Value</value></data>
+  <data name="TEXT_USER_ID" xml:space="preserve"><value>User ID</value></data>
+  <data name="TEXT_FULL_NAME" xml:space="preserve"><value>Full Name</value></data>
+  <data name="TEXT_EMAIL" xml:space="preserve"><value>Email</value></data>
+  <data name="TEXT_ACCOUNT_STATUS" xml:space="preserve"><value>Account Status</value></data>
+  <data name="TEXT_IS_DELETED" xml:space="preserve"><value>Is Deleted</value></data>
+  <data name="TEXT_CREATED_AT" xml:space="preserve"><value>Created At</value></data>
+  <data name="TEXT_ROLES" xml:space="preserve"><value>Roles</value></data>
+  <data name="TEXT_OWNED_PROPERTIES_COUNT" xml:space="preserve"><value>Owned Properties Count</value></data>
+  <data name="TEXT_ACTIVE_PROPERTIES_COUNT" xml:space="preserve"><value>Active Properties Count</value></data>
+  <data name="TEXT_RENTER_CONTRACTS_COUNT" xml:space="preserve"><value>Renter Contracts Count</value></data>
+  <data name="TEXT_OWNER_CONTRACTS_COUNT" xml:space="preserve"><value>Owner Contracts Count</value></data>
+  <data name="TEXT_ACTIVE_CONTRACTS_COUNT" xml:space="preserve"><value>Active Contracts Count</value></data>
+  <data name="TEXT_CANCELLED_CONTRACTS_COUNT" xml:space="preserve"><value>Cancelled Contracts Count</value></data>
+  <data name="TEXT_PAYMENTS_MADE_COUNT" xml:space="preserve"><value>Payments Made Count</value></data>
+  <data name="TEXT_PAYMENTS_RECEIVED_COUNT" xml:space="preserve"><value>Payments Received Count</value></data>
+  <data name="TEXT_TOTAL_PAID_AMOUNT" xml:space="preserve"><value>Total Paid Amount</value></data>
+  <data name="TEXT_TOTAL_RECEIVED_AMOUNT" xml:space="preserve"><value>Total Received Amount</value></data>
+  <data name="TEXT_REPORTS_SUBMITTED_COUNT" xml:space="preserve"><value>Reports Submitted Count</value></data>
+  <data name="TEXT_REPORTS_AGAINST_USER_COUNT" xml:space="preserve"><value>Reports Against User Count</value></data>
+  <data name="TEXT_PROPERTY_ID" xml:space="preserve"><value>Property ID</value></data>
+  <data name="TEXT_TITLE" xml:space="preserve"><value>Title</value></data>
+  <data name="TEXT_OWNER_ID" xml:space="preserve"><value>Owner ID</value></data>
+  <data name="TEXT_OWNER_NAME" xml:space="preserve"><value>Owner Name</value></data>
+  <data name="TEXT_STATUS" xml:space="preserve"><value>Status</value></data>
+  <data name="TEXT_TYPE" xml:space="preserve"><value>Type</value></data>
+  <data name="TEXT_CITY" xml:space="preserve"><value>City</value></data>
+  <data name="TEXT_STATE" xml:space="preserve"><value>State</value></data>
+  <data name="TEXT_PRICE" xml:space="preserve"><value>Price</value></data>
+  <data name="TEXT_IS_ACTIVE" xml:space="preserve"><value>Is Active</value></data>
+  <data name="TEXT_CONTRACT_ID" xml:space="preserve"><value>Contract ID</value></data>
+  <data name="TEXT_LEASE_START_DATE" xml:space="preserve"><value>Lease Start Date</value></data>
+  <data name="TEXT_LEASE_END_DATE" xml:space="preserve"><value>Lease End Date</value></data>
+  <data name="TEXT_TOTAL_CONTRACT_AMOUNT" xml:space="preserve"><value>Total Contract Amount</value></data>
+  <data name="TEXT_PAYMENT_FREQUENCY" xml:space="preserve"><value>Payment Frequency</value></data>
+  <data name="TEXT_PROPERTY_TITLE" xml:space="preserve"><value>Property Title</value></data>
+  <data name="TEXT_RENTER_ID" xml:space="preserve"><value>Renter ID</value></data>
+  <data name="TEXT_RENTER_NAME" xml:space="preserve"><value>Renter Name</value></data>
+  <data name="TEXT_PAYMENT_ID" xml:space="preserve"><value>Payment ID</value></data>
+  <data name="TEXT_PAYMENT_SCHEDULE_ID" xml:space="preserve"><value>Payment Schedule ID</value></data>
+  <data name="TEXT_AMOUNT_TOTAL" xml:space="preserve"><value>Amount Total</value></data>
+  <data name="TEXT_PLATFORM_FEE" xml:space="preserve"><value>Platform Fee</value></data>
+  <data name="TEXT_OWNER_AMOUNT" xml:space="preserve"><value>Owner Amount</value></data>
+  <data name="TEXT_PAID_AT" xml:space="preserve"><value>Paid At</value></data>
+  <data name="TEXT_AVAILABLE_AT" xml:space="preserve"><value>Available At</value></data>
+  <data name="TEXT_CURRENCY" xml:space="preserve"><value>Currency</value></data>
+  <data name="TEXT_ADMIN_0_REPORT" xml:space="preserve"><value>Admin {0} Report</value></data>
+  <data name="TEXT_PERIOD_0" xml:space="preserve"><value>Period: {0}</value></data>
+  <data name="TEXT_GENERATED_AT_0" xml:space="preserve"><value>Generated at: {0}</value></data>
+  <data name="TEXT_GENERATED_BY_0" xml:space="preserve"><value>Generated by: {0}</value></data>
+  <data name="TEXT_PAGE" xml:space="preserve"><value>Page</value></data>
+  <data name="TEXT_EXECUTIVE_SNAPSHOT" xml:space="preserve"><value>Executive Snapshot</value></data>
+  <data name="TEXT_TOTAL_USERS" xml:space="preserve"><value>Total Users</value></data>
+  <data name="TEXT_TOTAL_PROPERTIES" xml:space="preserve"><value>Total Properties</value></data>
+  <data name="TEXT_PENDING_VERIFICATIONS" xml:space="preserve"><value>Pending Verifications</value></data>
+  <data name="TEXT_TOTAL_CONTRACTS" xml:space="preserve"><value>Total Contracts</value></data>
+  <data name="TEXT_TOTAL_REVENUE" xml:space="preserve"><value>Total Revenue</value></data>
+  <data name="TEXT_TOTAL_SALES" xml:space="preserve"><value>Total Sales</value></data>
+  <data name="TEXT_ACTIVE_CONTRACTS" xml:space="preserve"><value>Active Contracts</value></data>
+  <data name="TEXT_NEW_USERS_THIS_MONTH" xml:space="preserve"><value>New Users This Month</value></data>
+  <data name="TEXT_THIS_REPORT_REFLECTS_THE_CURRENT_ADMIN_SNAPSHOT_AND_THE_SELECTED_PERIOD_CONTEXT_0" xml:space="preserve"><value>This report reflects the current admin snapshot and the selected period context: {0}.</value></data>
+  <data name="TEXT_USERS" xml:space="preserve"><value>Users</value></data>
+  <data name="TEXT_DELETED_USERS" xml:space="preserve"><value>Deleted Users</value></data>
+  <data name="TEXT_STATUS_BREAKDOWN" xml:space="preserve"><value>Status Breakdown</value></data>
+  <data name="TEXT_COUNT" xml:space="preserve"><value>Count</value></data>
+  <data name="TEXT_SHARE" xml:space="preserve"><value>Share</value></data>
+  <data name="TEXT_LATEST_USERS" xml:space="preserve"><value>Latest Users</value></data>
+  <data name="TEXT_USER" xml:space="preserve"><value>User</value></data>
+  <data name="TEXT_CREATED" xml:space="preserve"><value>Created</value></data>
+  <data name="TEXT_USER_ACTIVITY_METRICS" xml:space="preserve"><value>User Activity Metrics</value></data>
+  <data name="TEXT_PROPERTIES" xml:space="preserve"><value>Properties</value></data>
+  <data name="TEXT_CONTRACTS" xml:space="preserve"><value>Contracts</value></data>
+  <data name="TEXT_PAYMENTS" xml:space="preserve"><value>Payments</value></data>
+  <data name="TEXT_AMOUNTS" xml:space="preserve"><value>Amounts</value></data>
+  <data name="TEXT_REPORTS" xml:space="preserve"><value>Reports</value></data>
+  <data name="TEXT_OWNED_0_ACTIVE_1" xml:space="preserve"><value>Owned: {0}, Active: {1}</value></data>
+  <data name="TEXT_RENTER_0_OWNER_1_ACTIVE_2_CANCELLED_3" xml:space="preserve"><value>Renter: {0}, Owner: {1}, Active: {2}, Cancelled: {3}</value></data>
+  <data name="TEXT_MADE_0_RECEIVED_1" xml:space="preserve"><value>Made: {0}, Received: {1}</value></data>
+  <data name="TEXT_PAID_0_RECEIVED_1" xml:space="preserve"><value>Paid: {0}, Received: {1}</value></data>
+  <data name="TEXT_FILED_0_AGAINST_1" xml:space="preserve"><value>Filed: {0}, Against: {1}</value></data>
+  <data name="TEXT_ACTIVE_PROPERTIES" xml:space="preserve"><value>Active Properties</value></data>
+  <data name="TEXT_INACTIVE_PROPERTIES" xml:space="preserve"><value>Inactive Properties</value></data>
+  <data name="TEXT_DELETED_PROPERTIES" xml:space="preserve"><value>Deleted Properties</value></data>
+  <data name="TEXT_LATEST_PROPERTIES" xml:space="preserve"><value>Latest Properties</value></data>
+  <data name="TEXT_PROPERTY" xml:space="preserve"><value>Property</value></data>
+  <data name="TEXT_OWNER" xml:space="preserve"><value>Owner</value></data>
+  <data name="TEXT_LOCATION" xml:space="preserve"><value>Location</value></data>
+  <data name="TEXT_TOTAL_CONTRACT_VALUE" xml:space="preserve"><value>Total Contract Value</value></data>
+  <data name="TEXT_LATEST_CONTRACTS" xml:space="preserve"><value>Latest Contracts</value></data>
+  <data name="TEXT_CONTRACT" xml:space="preserve"><value>Contract</value></data>
+  <data name="TEXT_RENTER" xml:space="preserve"><value>Renter</value></data>
+  <data name="TEXT_REVENUE" xml:space="preserve"><value>Revenue</value></data>
+  <data name="TEXT_TOTAL_PAYMENTS" xml:space="preserve"><value>Total Payments</value></data>
+  <data name="TEXT_PLATFORM_REVENUE" xml:space="preserve"><value>Platform Revenue</value></data>
+  <data name="TEXT_OWNER_PAYOUTS" xml:space="preserve"><value>Owner Payouts</value></data>
+  <data name="TEXT_PAYMENT_STATUS_BREAKDOWN" xml:space="preserve"><value>Payment Status Breakdown</value></data>
+  <data name="TEXT_REVENUE_OVER_TIME" xml:space="preserve"><value>Revenue Over Time</value></data>
+  <data name="TEXT_PERIOD" xml:space="preserve"><value>Period</value></data>
+  <data name="TEXT_SALES" xml:space="preserve"><value>Sales</value></data>
+  <data name="TEXT_0_TO_1" xml:space="preserve"><value>{0} to {1}</value></data>
+  <data name="TEXT_ADMIN_USER_NOT_FOUND" xml:space="preserve"><value>Admin user not found.</value></data>
+  <data name="TEXT_ANALYTICS_REPORT_GENERATED_SUCCESSFULLY" xml:space="preserve"><value>Analytics report generated successfully.</value></data>
+  <data name="TEXT_ANALYTICS_REPORT_NOT_FOUND" xml:space="preserve"><value>Analytics report not found.</value></data>
+  <data name="TEXT_STORED_REPORT_FILE_WAS_NOT_FOUND_ON_DISK" xml:space="preserve"><value>Stored report file was not found on disk.</value></data>
+  <data name="TEXT_CSV_EXPORTS_SUPPORT_OVERVIEW_USERS_PROPERTIES_CONTRACTS_AND_REVENUE_SCOPES_INDIVIDUALLY_USE_PDF_FOR_THE_FULL_COMBINED_REPORT" xml:space="preserve"><value>CSV exports support overview, users, properties, contracts, and revenue scopes individually. Use PDF for the full combined report.</value></data>
+  <data name="TEXT_FAILED_TO_LOAD_DASHBOARD_OVERVIEW_DATA" xml:space="preserve"><value>Failed to load dashboard overview data.</value></data>
+  <data name="TEXT_CUSTOM_PERIOD_REQUIRES_FROMUTC_AND_TOUTC" xml:space="preserve"><value>Custom period requires fromUtc and toUtc.</value></data>
+  <data name="TEXT_FROMUTC_MUST_BE_EARLIER_THAN_TOUTC" xml:space="preserve"><value>fromUtc must be earlier than toUtc.</value></data>
+  <data name="TEXT_INVALID_PERIOD" xml:space="preserve"><value>Invalid period.</value></data>
+  <data name="TEXT_FAILED_TO_UPLOAD_IMAGE" xml:space="preserve"><value>Failed to upload image</value></data>
+  <data name="TEXT_UPDATE_PROFILE_DATA_SUCCESSFUL" xml:space="preserve"><value>Update Profile Data successful.</value></data>
+  <data name="TEXT_UPDATE_PROFILE_DATA_FAILED" xml:space="preserve"><value>Update Profile Data failed.</value></data>
+  <data name="TEXT_UPDATE_PROFILE_DATA_FAILED_AN_ERROR_OCCURRED_WHILE_SAVING_ROOMMATE_PREFERENCES" xml:space="preserve"><value>Update Profile Data failed. An error occurred while saving roommate preferences.</value></data>
+  <data name="TEXT_UPDATE_ROOMMATE_PREFERENCES_DATA_SUCCESSFUL" xml:space="preserve"><value>Update Roommate Preferences Data successful.</value></data>
+  <data name="TEXT_INVALID_PASSWORD" xml:space="preserve"><value>Invalid password</value></data>
+  <data name="TEXT_FAILED_TO_TOGGLE_2FA" xml:space="preserve"><value>Failed to toggle 2FA</value></data>
+  <data name="TEXT_TWO_FACTOR_AUTHENTICATION_IS_NOW_ENABLED" xml:space="preserve"><value>Two-Factor Authentication is now enabled</value></data>
+  <data name="TEXT_TWO_FACTOR_AUTHENTICATION_IS_NOW_DISABLED" xml:space="preserve"><value>Two-Factor Authentication is now disabled</value></data>
+  <data name="TEXT_CURRENT_PASSWORD_IS_INCORRECT" xml:space="preserve"><value>Current password is incorrect</value></data>
+  <data name="TEXT_CURRENT_PASSWORD_AND_THE_NEW_PASSWORD_IS_THE_SAME" xml:space="preserve"><value>Current password and the new password is the same</value></data>
+  <data name="TEXT_CHANGE_PASSWORD_FAILED_AN_ERROR_OCCURRED_WHILE_CHANGING_THE_PASSWORD" xml:space="preserve"><value>Change Password failed. An error occurred while Changing the password.</value></data>
+  <data name="TEXT_PASSWORD_CHANGED_SUCCESSFULLY" xml:space="preserve"><value>Password Changed successfully.</value></data>
+  <data name="TEXT_USER_HAS_ACTIVE_CONTRACTS_AND_CANNOT_BE_DELETED" xml:space="preserve"><value>User has active contracts and cannot be deleted</value></data>
+  <data name="TEXT_FAILED_TO_DELETE_USER" xml:space="preserve"><value>Failed to delete user</value></data>
+  <data name="TEXT_AN_ERROR_OCCURRED_WHILE_DELETING_THE_USER_ALL_CHANGES_HAVE_BEEN_ROLLED_BACK" xml:space="preserve"><value>An error occurred while deleting the user. All changes have been rolled back.</value></data>
+  <data name="TEXT_USER_DELETED_SUCCESSFULLY" xml:space="preserve"><value>User deleted successfully</value></data>
+  <data name="TEXT_INVALID_IMAGE_FORMAT" xml:space="preserve"><value>Invalid image format</value></data>
+  <data name="TEXT_IMAGE_SIZE_EXCEEDS_2MB" xml:space="preserve"><value>Image size exceeds 2MB</value></data>
+  <data name="TEXT_PAYMENT_SCHEDULE_NOT_FOUND" xml:space="preserve"><value>Payment schedule not found.</value></data>
+  <data name="TEXT_THIS_PAYMENT_IS_NO_LONGER_AVAILABLE_BECAUSE_THE_CONTRACT_HAS_BEEN_CANCELLED" xml:space="preserve"><value>This payment is no longer available because the contract has been cancelled.</value></data>
+  <data name="TEXT_PAYMENT_CAN_ONLY_BE_MADE_WITHIN_7_DAYS_OF_THE_DUE_DATE" xml:space="preserve"><value>Payment can only be made within 7 days of the due date.</value></data>
+  <data name="TEXT_PAYMENT_HAS_ALREADY_BEEN_DONE" xml:space="preserve"><value>Payment has already been done</value></data>
+  <data name="TEXT_UNAUTHORIZED_ACCESS_TO_PAYMENT_SCHEDULE" xml:space="preserve"><value>Unauthorized access to payment schedule.</value></data>
+  <data name="TEXT_EXISTING_CLIENTSECRET_RETURNED" xml:space="preserve"><value>Existing ClientSecret returned.</value></data>
+  <data name="TEXT_CLIENTSECRET_CREATED_SUCCESSFULLY" xml:space="preserve"><value>ClientSecret created successfully.</value></data>
+  <data name="TEXT_PAYMENT_PROVIDER_ERROR" xml:space="preserve"><value>Payment provider error.</value></data>
+  <data name="TEXT_OWNER_NOT_FOUND" xml:space="preserve"><value>Owner not found</value></data>
+  <data name="TEXT_FAILED_TO_SAVE_STRIPE_ACCOUNT_PLEASE_TRY_AGAIN" xml:space="preserve"><value>Failed to save Stripe account. Please try again.</value></data>
+  <data name="TEXT_ONBOARDING_LINK_CREATED_SUCCESSFULLY" xml:space="preserve"><value>Onboarding link created successfully.</value></data>
+  <data name="TEXT_STRIPE_ACCOUNT_NOT_CONNECTED_PLEASE_CONNECT_YOUR_STRIPE_ACCOUNT_FIRST" xml:space="preserve"><value>Stripe account not connected. Please connect your Stripe account first.</value></data>
+  <data name="TEXT_STRIPE_ACCOUNT_NOT_FULLY_ACTIVATED_PLEASE_COMPLETE_THE_ONBOARDING_PROCESS_TO_ENABLE_CHARGES_AND_PAYOUTS" xml:space="preserve"><value>Stripe account not fully activated. Please complete the onboarding process to enable charges and payouts.</value></data>
+  <data name="TEXT_NO_FUNDS_AVAILABLE_FOR_WITHDRAWAL" xml:space="preserve"><value>No funds available for withdrawal.</value></data>
+  <data name="TEXT_NO_USD_BALANCE_AVAILABLE" xml:space="preserve"><value>No USD balance available.</value></data>
+  <data name="TEXT_YOU_CAN_ONLY_UPLOAD_A_MAXIMUM_OF_10_IMAGES_INCLUDING_THE_PRIMARY_IMAGE" xml:space="preserve"><value>You can only upload a maximum of 10 images including the primary image.</value></data>
+  <data name="TEXT_BANNED_ACCOUNTS_CANNOT_ADD_PROPERTIES" xml:space="preserve"><value>Banned accounts cannot add properties.</value></data>
+  <data name="TEXT_YOUR_ACCOUNT_MUST_BE_VERIFIED_TO_ADD_A_PROPERTY" xml:space="preserve"><value>Your account must be verified to add a property.</value></data>
+  <data name="TEXT_PROPERTY_ADDED_SUCCESSFULLY" xml:space="preserve"><value>Property added successfully.</value></data>
+  <data name="TEXT_PROPERTY_NOT_FOUND" xml:space="preserve"><value>Property not found.</value></data>
+  <data name="TEXT_UNAUTHORIZED_ACCESS" xml:space="preserve"><value>Unauthorized access.</value></data>
+  <data name="TEXT_YOUR_ACCOUNT_MUST_BE_VERIFIED_TO_EDIT_A_PROPERTY" xml:space="preserve"><value>Your account must be verified to edit a property.</value></data>
+  <data name="TEXT_YOU_CANNOT_ADD_MORE_THAN_10_IMAGES_AT_ONCE" xml:space="preserve"><value>You cannot add more than 10 images at once.</value></data>
+  <data name="TEXT_CANNOT_EDIT_A_PROPERTY_THAT_HAS_AN_ACTIVE_CONTRACT" xml:space="preserve"><value>Cannot edit a property that has an active contract.</value></data>
+  <data name="TEXT_PROPERTY_UPDATED_SUCCESSFULLY" xml:space="preserve"><value>Property updated successfully.</value></data>
+  <data name="TEXT_PROPERTY_UNSAVED_SUCCESSFULLY" xml:space="preserve"><value>Property unsaved successfully.</value></data>
+  <data name="TEXT_PROPERTY_SAVED_SUCCESSFULLY" xml:space="preserve"><value>Property saved successfully.</value></data>
+  <data name="TEXT_UNAUTHORIZED_OR_NOTFOUND" xml:space="preserve"><value>Unauthorized or NotFound.</value></data>
+  <data name="TEXT_PROPERTY_ACTIVATED_SUCCESSFULLY" xml:space="preserve"><value>Property activated successfully.</value></data>
+  <data name="TEXT_PROPERTY_DEACTIVATED_SUCCESSFULLY" xml:space="preserve"><value>Property deactivated successfully.</value></data>
+  <data name="TEXT_PROPERTY_HAS_ACTIVE_CONTRACTS_AND_CANNOT_BE_DELETED" xml:space="preserve"><value>Property has active contracts and cannot be deleted.</value></data>
+  <data name="TEXT_ERROR_DELETING_PROPERTY" xml:space="preserve"><value>Error deleting property.</value></data>
+  <data name="TEXT_PROPERTY_DELETED_COMPLETELY" xml:space="preserve"><value>Property deleted completely.</value></data>
+  <data name="TEXT_INVALID_REQUEST" xml:space="preserve"><value>Invalid request</value></data>
+  <data name="TEXT_ACCOUNT_IS_LOCKED_TRY_AGAIN_LATER" xml:space="preserve"><value>Account is locked. Try again later.</value></data>
+  <data name="TEXT_INVALID_VERIFICATION_CODE" xml:space="preserve"><value>Invalid verification code</value></data>
+  <data name="TEXT_FAILED_TO_REGISTER" xml:space="preserve"><value>Failed to Register</value></data>
+  <data name="TEXT_REGISTRATION_SUCCESSFUL_PLEASE_CONFIRM_YOUR_EMAIL" xml:space="preserve"><value>Registration successful. Please confirm your email.</value></data>
+  <data name="TEXT_FAILED_TO_CONFIRM_EMAIL_USER_NOT_FOUND" xml:space="preserve"><value>Failed to Confirm Email: User not found.</value></data>
+  <data name="TEXT_THE_EMAIL_ALLREADY_CONFIRMED_SUCCESSFULLY" xml:space="preserve"><value>The Email Allready Confirmed Successfully</value></data>
+  <data name="TEXT_FAILED_TO_CONFIRM_EMAIL" xml:space="preserve"><value>Failed to Confirm Email</value></data>
+  <data name="TEXT_THE_EMAIL_CONFIRMED_SUCCESSFULLY" xml:space="preserve"><value>The Email Confirmed Successfully</value></data>
+  <data name="TEXT_IF_THE_EMAIL_EXISTS_AND_NOT_CONFIRMED_A_CONFIRMATION_EMAIL_HAS_BEEN_SENT_PLEASE_CHECK_YOUR_INBOX" xml:space="preserve"><value>If the email exists and not confirmed, a confirmation email has been sent. Please check your inbox.</value></data>
+  <data name="TEXT_IF_THE_EMAIL_EXISTS_A_RESET_LINK_WAS_SENT" xml:space="preserve"><value>If the email exists, a reset link was sent.</value></data>
+  <data name="TEXT_INVALID_OR_EXPIRED_TOKEN" xml:space="preserve"><value>Invalid or expired token.</value></data>
+  <data name="TEXT_VALID_TOKEN" xml:space="preserve"><value>Valid token</value></data>
+  <data name="TEXT_PASSWORD_RESET_FAILED" xml:space="preserve"><value>Password reset failed.</value></data>
+  <data name="TEXT_PASSWORD_RESET_SUCCESSFUL" xml:space="preserve"><value>Password reset successful.</value></data>
+  <data name="TEXT_ROOMMATE_MATCHING_PREFERENCES_NOT_FOUND_OR_DISABLED" xml:space="preserve"><value>Roommate matching preferences not found or disabled.</value></data>
+  <data name="TEXT_BOTH_SMOKE" xml:space="preserve"><value>Both Smoke</value></data>
+  <data name="TEXT_BOTH_NON_SMOKERS" xml:space="preserve"><value>Both Non-Smokers</value></data>
+  <data name="TEXT_SMOKING_PREFERENCE" xml:space="preserve"><value>Smoking Preference</value></data>
+  <data name="TEXT_SMOKING_MISMATCH" xml:space="preserve"><value>Smoking mismatch</value></data>
+  <data name="TEXT_BOTH_LOVE_PETS" xml:space="preserve"><value>Both love pets</value></data>
+  <data name="TEXT_BOTH_PREFER_NO_PETS" xml:space="preserve"><value>Both prefer no pets</value></data>
+  <data name="TEXT_PETS_PREFERENCE" xml:space="preserve"><value>Pets Preference</value></data>
+  <data name="TEXT_PETS_MISMATCH" xml:space="preserve"><value>Pets mismatch</value></data>
+  <data name="TEXT_COMPATIBLE_SLEEP_SCHEDULE" xml:space="preserve"><value>Compatible Sleep Schedule</value></data>
+  <data name="TEXT_SLEEP_SCHEDULE" xml:space="preserve"><value>Sleep Schedule</value></data>
+  <data name="TEXT_SLEEP_SCHEDULE_MISMATCH" xml:space="preserve"><value>Sleep Schedule mismatch</value></data>
+  <data name="TEXT_SIMILAR_EDUCATION_LEVEL" xml:space="preserve"><value>Similar Education Level</value></data>
+  <data name="TEXT_EDUCATION_LEVEL" xml:space="preserve"><value>Education Level</value></data>
+  <data name="TEXT_EDUCATION_LEVEL_MISMATCH" xml:space="preserve"><value>Education Level mismatch</value></data>
+  <data name="TEXT_SAME_FIELD_OF_STUDY" xml:space="preserve"><value>Same Field of Study</value></data>
+  <data name="TEXT_FIELD_OF_STUDY" xml:space="preserve"><value>Field of Study</value></data>
+  <data name="TEXT_FIELD_OF_STUDY_MISMATCH" xml:space="preserve"><value>Field of Study mismatch</value></data>
+  <data name="TEXT_SIMILAR_NOISE_TOLERANCE" xml:space="preserve"><value>Similar Noise Tolerance</value></data>
+  <data name="TEXT_NOISE_TOLERANCE" xml:space="preserve"><value>Noise Tolerance</value></data>
+  <data name="TEXT_NOISE_TOLERANCE_MISMATCH" xml:space="preserve"><value>Noise Tolerance mismatch</value></data>
+  <data name="TEXT_SIMILAR_GUESTS_PREFERENCE" xml:space="preserve"><value>Similar Guests Preference</value></data>
+  <data name="TEXT_GUESTS_FREQUENCY" xml:space="preserve"><value>Guests Frequency</value></data>
+  <data name="TEXT_GUESTS_FREQUENCY_MISMATCH" xml:space="preserve"><value>Guests Frequency mismatch</value></data>
+  <data name="TEXT_SIMILAR_SHARING_LEVEL" xml:space="preserve"><value>Similar Sharing Level</value></data>
+  <data name="TEXT_SHARING_LEVEL" xml:space="preserve"><value>Sharing Level</value></data>
+  <data name="TEXT_SHARING_LEVEL_MISMATCH" xml:space="preserve"><value>Sharing Level mismatch</value></data>
+  <data name="TEXT_SAME_WORK_SCHEDULE" xml:space="preserve"><value>Same Work Schedule</value></data>
+  <data name="TEXT_WORK_SCHEDULE" xml:space="preserve"><value>Work Schedule</value></data>
+  <data name="TEXT_WORK_SCHEDULE_MISMATCH" xml:space="preserve"><value>Work Schedule mismatch</value></data>
+  <data name="TEXT_COMPATIBLE_BUDGET" xml:space="preserve"><value>Compatible Budget</value></data>
+  <data name="TEXT_BUDGET" xml:space="preserve"><value>Budget</value></data>
+  <data name="TEXT_INSUFFICIENT_BUDGET_OVERLAP" xml:space="preserve"><value>Insufficient Budget overlap</value></data>
+  <data name="TEXT_LET_S_FIND_A_PLACE" xml:space="preserve"><value>Let's Find a Place</value></data>
+  <data name="TEXT_HAS_APARTMENT" xml:space="preserve"><value>Has Apartment</value></data>
+  <data name="TEXT_LOOKING_FOR_A_ROOM" xml:space="preserve"><value>Looking for a Room</value></data>
+  <data name="TEXT_MESSAGE_HIDDEN_BY_ADMIN" xml:space="preserve"><value>Message hidden by admin</value></data>
+  <data name="TEXT_DELETED_USER" xml:space="preserve"><value>Deleted user</value></data>
+  <data name="TEXT_TARGET_NOT_FOUND" xml:space="preserve"><value>Target not found</value></data>
+  <data name="TEXT_TO_0" xml:space="preserve"><value>To {0}</value></data>
+  <data name="TEXT_ON_PROPERTY_0" xml:space="preserve"><value>On property: {0}</value></data>
+  <data name="TEXT_INVALID_USERID_FORMAT" xml:space="preserve"><value>Invalid userId format</value></data>
+  <data name="TEXT_MESSAGE_CONTENT_CANNOT_BE_EMPTY" xml:space="preserve"><value>Message content cannot be empty</value></data>
+  <data name="TEXT_SENDER_USER_NOT_FOUND" xml:space="preserve"><value>Sender user not found</value></data>
+  <data name="TEXT_RECEIVER_USER_NOT_FOUND" xml:space="preserve"><value>Receiver user not found</value></data>
+  <data name="TEXT_CANNOT_SEND_MESSAGES_TO_A_BANNED_USER" xml:space="preserve"><value>Cannot send messages to a banned user.</value></data>
+  <data name="TEXT_CANNOT_SEND_MESSAGE_TO_A_DELETED_USER" xml:space="preserve"><value>Cannot send message to a deleted user</value></data>
+  <data name="TEXT_BANNED_ACCOUNTS_CANNOT_USE_CHAT" xml:space="preserve"><value>Banned accounts cannot use chat.</value></data>
+  <data name="TEXT_BANNED_ACCOUNTS_CANNOT_CREATE_BOOKING_REQUESTS" xml:space="preserve"><value>Banned accounts cannot create booking requests.</value></data>
+  <data name="TEXT_USER_ACCOUNT_MUST_BE_VERIFIED_TO_ADD_A_BOOKING_REQUEST" xml:space="preserve"><value>User account must be verified to add a booking request.</value></data>
+  <data name="TEXT_PROPERTY_IS_NOT_PUBLICLY_AVAILABLE_FOR_BOOKING" xml:space="preserve"><value>Property is not publicly available for booking.</value></data>
+  <data name="TEXT_PROPERTY_IS_FULL_AND_HAS_NO_AVAILABLE_SPOTS" xml:space="preserve"><value>Property is full and has no available spots.</value></data>
+  <data name="TEXT_PROPERTY_IS_NOT_AVAILABLE_AS_IT_IS_ALREADY_OCCUPIED" xml:space="preserve"><value>Property is not available as it is already occupied.</value></data>
+  <data name="TEXT_START_AND_END_DATE_MUST_ALIGN_WITH_THE_RENTAL_DURATION_UNIT_E_G_COMPLETE_MONTHS_YEARS" xml:space="preserve"><value>Start and end date must align with the rental duration unit (e.g. complete months/years).</value></data>
+  <data name="BOOKING_DAILY_PAYMENT_FREQUENCY_INVALID" xml:space="preserve"><value>For daily rentals, only '{0}' payment frequency is allowed.</value></data>
+  <data name="BOOKING_MONTHLY_PAYMENT_FREQUENCY_INVALID" xml:space="preserve"><value>For monthly rentals, only '{0}' or '{1}' payment frequencies are allowed.</value></data>
+  <data name="TEXT_BOOKING_REQUEST_ADDED_SUCCESSFULLY" xml:space="preserve"><value>Booking request added successfully.</value></data>
+  <data name="TEXT_BOOKING_REQUEST_NOT_FOUND" xml:space="preserve"><value>Booking request not found.</value></data>
+  <data name="TEXT_UNAUTHORIZED_TO_CANCEL_OR_REJECT_THIS_BOOKING_REQUEST" xml:space="preserve"><value>Unauthorized to cancel or reject this booking request.</value></data>
+  <data name="TEXT_BOOKING_REQUEST_REMOVED_SUCCESSFULLY" xml:space="preserve"><value>Booking request removed successfully.</value></data>
+  <data name="TEXT_UNAUTHORIZED_TO_START_A_CHAT_FOR_THIS_BOOKING_REQUEST" xml:space="preserve"><value>Unauthorized to start a chat for this booking request.</value></data>
+  <data name="TEXT_FAILED_TO_SEND_THE_INITIAL_CHAT_MESSAGE" xml:space="preserve"><value>Failed to send the initial chat message.</value></data>
+  <data name="TEXT_CHAT_STARTED_SUCCESSFULLY" xml:space="preserve"><value>Chat started successfully.</value></data>
+  <data name="TEXT_HELLO_I_AM_CONTACTING_YOU_REGARDING_THE_BOOKING_REQUEST_FOR_THE_PROPERTY_0" xml:space="preserve"><value>Hello! I am contacting you regarding the booking request for the property '{0}'.</value></data>
+  <data name="TEXT_YOU_ARE_NOT_ALLOWED_TO_RATE_OR_COMMENT_ON_THIS_PROPERTY" xml:space="preserve"><value>You are not allowed to rate or comment on this property</value></data>
+  <data name="TEXT_COMMENT_CONTENT_IS_REQUIRED" xml:space="preserve"><value>Comment content is required.</value></data>
+  <data name="TEXT_COMMENT_CREATED_SUCCESSFULLY" xml:space="preserve"><value>Comment created successfully</value></data>
+  <data name="TEXT_COMMENT_NOT_FOUND" xml:space="preserve"><value>Comment not found</value></data>
+  <data name="TEXT_YOU_ARE_NOT_ALLOWED_TO_EDIT_THIS_COMMENT" xml:space="preserve"><value>You are not allowed to edit this comment</value></data>
+  <data name="TEXT_COMMENT_UPDATED_SUCCESSFULLY" xml:space="preserve"><value>Comment updated successfully</value></data>
+  <data name="TEXT_YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_COMMENT" xml:space="preserve"><value>You are not allowed to delete this comment</value></data>
+  <data name="TEXT_COMMENT_DELETED_SUCCESSFULLY" xml:space="preserve"><value>Comment deleted successfully</value></data>
+  <data name="TEXT_RATING_UPDATED_SUCCESSFULLY" xml:space="preserve"><value>Rating updated successfully</value></data>
+  <data name="TEXT_RATING_CREATED_SUCCESSFULLY" xml:space="preserve"><value>Rating created successfully</value></data>
+  <data name="TEXT_RATING_NOT_FOUND" xml:space="preserve"><value>Rating not found</value></data>
+  <data name="TEXT_RATING_DELETED_SUCCESSFULLY" xml:space="preserve"><value>Rating deleted successfully</value></data>
+  <data name="TEXT_USER_VERIFICATION_REQUEST_NOT_FOUND" xml:space="preserve"><value>User verification request not found.</value></data>
+  <data name="USER_VERIFICATION_APPROVAL_STATUS_CONFLICT" xml:space="preserve"><value>User verification cannot be approved while account status is {0}.</value></data>
+  <data name="TEXT_USER_VERIFICATION_APPROVED" xml:space="preserve"><value>User verification approved.</value></data>
+  <data name="USER_VERIFICATION_DECLINE_STATUS_CONFLICT" xml:space="preserve"><value>User verification cannot be declined while account status is {0}.</value></data>
+  <data name="TEXT_USER_VERIFICATION_DECLINED" xml:space="preserve"><value>User verification declined.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_REQUEST_NOT_FOUND" xml:space="preserve"><value>Property verification request not found.</value></data>
+  <data name="PROPERTY_VERIFICATION_APPROVAL_STATUS_CONFLICT" xml:space="preserve"><value>Property verification cannot be approved while property status is {0}.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_APPROVED" xml:space="preserve"><value>Property verification approved.</value></data>
+  <data name="PROPERTY_VERIFICATION_DECLINE_STATUS_CONFLICT" xml:space="preserve"><value>Property verification cannot be declined while property status is {0}.</value></data>
+  <data name="TEXT_PROPERTY_VERIFICATION_DECLINED" xml:space="preserve"><value>Property verification declined.</value></data>
+  <data name="TEXT_DELETED_USERS_CANNOT_BE_BANNED" xml:space="preserve"><value>Deleted users cannot be banned.</value></data>
+  <data name="TEXT_USER_IS_ALREADY_BANNED" xml:space="preserve"><value>User is already banned.</value></data>
+  <data name="TEXT_USER_BANNED_SUCCESSFULLY" xml:space="preserve"><value>User banned successfully.</value></data>
+  <data name="TEXT_DELETED_USERS_CANNOT_BE_RESTORED_FROM_BAN" xml:space="preserve"><value>Deleted users cannot be restored from ban.</value></data>
+  <data name="TEXT_ONLY_BANNED_USERS_CAN_BE_RESTORED" xml:space="preserve"><value>Only banned users can be restored.</value></data>
+  <data name="TEXT_USER_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>User restored successfully.</value></data>
+  <data name="TEXT_USER_IS_ALREADY_DELETED" xml:space="preserve"><value>User is already deleted.</value></data>
+  <data name="TEXT_ADMIN_USERS_CANNOT_BE_MANAGED_FROM_THIS_ENDPOINT" xml:space="preserve"><value>Admin users cannot be managed from this endpoint.</value></data>
+  <data name="TEXT_DELETED_USERS_CANNOT_BE_EDITED" xml:space="preserve"><value>Deleted users cannot be edited.</value></data>
+  <data name="TEXT_AT_LEAST_ONE_ROLE_MUST_REMAIN_ASSIGNED" xml:space="preserve"><value>At least one role must remain assigned.</value></data>
+  <data name="ADMIN_ROLE_UNKNOWN_OR_PROTECTED" xml:space="preserve"><value>Unknown or protected role(s): {0}.</value></data>
+  <data name="TEXT_THE_LAST_ADMIN_CANNOT_BE_REMOVED" xml:space="preserve"><value>The last admin cannot be removed.</value></data>
+  <data name="TEXT_FAILED_TO_REMOVE_ROLES" xml:space="preserve"><value>Failed to remove roles.</value></data>
+  <data name="TEXT_FAILED_TO_ADD_ROLES" xml:space="preserve"><value>Failed to add roles.</value></data>
+  <data name="TEXT_USER_NOT_FOUND_AFTER_UPDATE" xml:space="preserve"><value>User not found after update.</value></data>
+  <data name="TEXT_USER_ROLES_UPDATED_SUCCESSFULLY" xml:space="preserve"><value>User roles updated successfully.</value></data>
+  <data name="TEXT_REPORT_NOT_FOUND" xml:space="preserve"><value>Report not found.</value></data>
+  <data name="TEXT_REVIEW_STATUS_MUST_BE_RESOLVED_OR_REJECTED" xml:space="preserve"><value>Review status must be Resolved or Rejected.</value></data>
+  <data name="TEXT_REJECTED_REPORTS_CANNOT_APPLY_A_MODERATION_ACTION" xml:space="preserve"><value>Rejected reports cannot apply a moderation action.</value></data>
+  <data name="TEXT_THIS_REPORT_HAS_ALREADY_BEEN_REVIEWED" xml:space="preserve"><value>This report has already been reviewed.</value></data>
+  <data name="TEXT_FAILED_TO_APPLY_MODERATION_ACTION" xml:space="preserve"><value>Failed to apply moderation action.</value></data>
+  <data name="TEXT_REPORT_REVIEWED_SUCCESSFULLY" xml:space="preserve"><value>Report reviewed successfully.</value></data>
+  <data name="TEXT_THE_REPORTED_USER_OR_RESPONSIBLE_ACTOR_NO_LONGER_EXISTS" xml:space="preserve"><value>The reported user or responsible actor no longer exists.</value></data>
+  <data name="TEXT_THIS_REPORT_DOES_NOT_CONTAIN_A_VALID_PROPERTY_TARGET" xml:space="preserve"><value>This report does not contain a valid property target.</value></data>
+  <data name="TEXT_THE_REPORTED_PROPERTY_NO_LONGER_EXISTS" xml:space="preserve"><value>The reported property no longer exists.</value></data>
+  <data name="TEXT_THIS_REPORT_DOES_NOT_CONTAIN_A_VALID_MESSAGE_TARGET" xml:space="preserve"><value>This report does not contain a valid message target.</value></data>
+  <data name="TEXT_THE_REPORTED_MESSAGE_NO_LONGER_EXISTS" xml:space="preserve"><value>The reported message no longer exists.</value></data>
+  <data name="TEXT_THIS_REPORT_DOES_NOT_CONTAIN_A_VALID_PROPERTY_COMMENT_TARGET" xml:space="preserve"><value>This report does not contain a valid property comment target.</value></data>
+  <data name="TEXT_THE_REPORTED_PROPERTY_COMMENT_NO_LONGER_EXISTS" xml:space="preserve"><value>The reported property comment no longer exists.</value></data>
+  <data name="TEXT_REASON_MUST_BE_AT_LEAST_5_CHARACTERS_LONG" xml:space="preserve"><value>Reason must be at least 5 characters long.</value></data>
+  <data name="TEXT_REPORTABLETARGETID_IS_REQUIRED" xml:space="preserve"><value>ReportableTargetId is required.</value></data>
+  <data name="TEXT_REPORT_SUBMITTED_SUCCESSFULLY" xml:space="preserve"><value>Report submitted successfully.</value></data>
+  <data name="TEXT_USER_REPORTS_REQUIRE_A_VALID_GUID_TARGET_ID" xml:space="preserve"><value>User reports require a valid GUID target ID.</value></data>
+  <data name="TEXT_YOU_CANNOT_REPORT_YOUR_OWN_ACCOUNT" xml:space="preserve"><value>You cannot report your own account.</value></data>
+  <data name="TEXT_REPORTED_USER_WAS_NOT_FOUND" xml:space="preserve"><value>Reported user was not found.</value></data>
+  <data name="TEXT_PROPERTY_REPORTS_REQUIRE_A_VALID_NUMERIC_TARGET_ID" xml:space="preserve"><value>Property reports require a valid numeric target ID.</value></data>
+  <data name="TEXT_REPORTED_PROPERTY_WAS_NOT_FOUND" xml:space="preserve"><value>Reported property was not found.</value></data>
+  <data name="TEXT_MESSAGE_REPORTS_REQUIRE_A_VALID_GUID_TARGET_ID" xml:space="preserve"><value>Message reports require a valid GUID target ID.</value></data>
+  <data name="TEXT_REPORTED_MESSAGE_WAS_NOT_FOUND" xml:space="preserve"><value>Reported message was not found.</value></data>
+  <data name="TEXT_YOU_CAN_ONLY_REPORT_MESSAGES_THAT_BELONG_TO_YOUR_CONVERSATION" xml:space="preserve"><value>You can only report messages that belong to your conversation.</value></data>
+  <data name="TEXT_PROPERTY_COMMENT_REPORTS_REQUIRE_A_VALID_NUMERIC_TARGET_ID" xml:space="preserve"><value>Property comment reports require a valid numeric target ID.</value></data>
+  <data name="TEXT_REPORTED_PROPERTY_COMMENT_WAS_NOT_FOUND" xml:space="preserve"><value>Reported property comment was not found.</value></data>
+  <data name="TEXT_UNSUPPORTED_REPORT_TYPE" xml:space="preserve"><value>Unsupported report type.</value></data>
+  <data name="REPORT_GUID_TARGET_ID_REQUIRED" xml:space="preserve"><value>{0} reports require a valid GUID target ID.</value></data>
+  <data name="REPORT_NUMERIC_TARGET_ID_REQUIRED" xml:space="preserve"><value>{0} reports require a valid positive numeric target ID.</value></data>
+  <data name="TEXT_BANNED_ACCOUNTS_CANNOT_CREATE_CONTRACTS" xml:space="preserve"><value>Banned accounts cannot create contracts.</value></data>
+  <data name="TEXT_YOU_ARE_NOT_THE_OWNER_OF_THIS_PROPERTY" xml:space="preserve"><value>You are not the owner of this property.</value></data>
+  <data name="TEXT_THIS_PROPERTY_ALREADY_HAS_AN_ACTIVE_OR_PENDING_CONTRACT" xml:space="preserve"><value>This property already has an active or pending contract.</value></data>
+  <data name="TEXT_CONTRACT_CREATED_SUCCESSFULLY" xml:space="preserve"><value>Contract created successfully.</value></data>
+  <data name="TEXT_YOU_ARE_NOT_THE_DESIGNATED_RENTER_FOR_THIS_CONTRACT" xml:space="preserve"><value>You are not the designated renter for this contract.</value></data>
+  <data name="TEXT_BANNED_ACCOUNTS_CANNOT_SIGN_NEW_CONTRACTS" xml:space="preserve"><value>Banned accounts cannot sign new contracts.</value></data>
+  <data name="CONTRACT_SIGN_STATUS_INVALID" xml:space="preserve"><value>Contract is in {0} status. Only Pending contracts can be signed.</value></data>
+  <data name="CONTRACT_PDF_REQUIRED_DATA_MISSING" xml:space="preserve"><value>Contract generation failed: Missing required data ({0}).</value></data>
+  <data name="TEXT_AN_UNEXPECTED_ERROR_OCCURRED_WHILE_GENERATING_THE_CONTRACT_DOCUMENT" xml:space="preserve"><value>An unexpected error occurred while generating the contract document.</value></data>
+  <data name="TEXT_AN_ERROR_OCCURRED_WHILE_SAVING_THE_CONTRACT_AND_GENERATING_PAYMENT_SCHEDULES_PLEASE_TRY_AGAIN" xml:space="preserve"><value>An error occurred while saving the contract and generating payment schedules. Please try again.</value></data>
+  <data name="TEXT_CONTRACT_SIGNED_SUCCESSFULLY" xml:space="preserve"><value>Contract signed successfully.</value></data>
+  <data name="TEXT_YOU_DO_NOT_HAVE_ACCESS_TO_VIEW_THIS_CONTRACT" xml:space="preserve"><value>You do not have access to view this contract.</value></data>
+  <data name="TEXT_CONTRACT_FILE_NOT_FOUND" xml:space="preserve"><value>Contract file not found.</value></data>
+  <data name="TEXT_YOU_DO_NOT_HAVE_ACCESS_TO_THIS_CONTRACT" xml:space="preserve"><value>You do not have access to this contract.</value></data>
+  <data name="TEXT_PROOF_NOT_FOUND" xml:space="preserve"><value>Proof not found.</value></data>
+  <data name="TEXT_CONTRACT_HAS_BEEN_TAMPERED_WITH" xml:space="preserve"><value>Contract has been tampered with.</value></data>
+  <data name="TEXT_ORIGINAL_CONTRACT_VERIFIED_BLOCKCHAIN_ANCHORING_IS_STILL_IN_PROGRESS" xml:space="preserve"><value>Original contract verified. Blockchain anchoring is still in progress.</value></data>
+  <data name="TEXT_ORIGINAL_CONTRACT_VERIFIED_AND_ANCHORED_ON_BITCOIN" xml:space="preserve"><value>Original contract verified and anchored on Bitcoin.</value></data>
+  <data name="TEXT_CONTRACT_IS_ALREADY_SIGNED" xml:space="preserve"><value>Contract is already signed.</value></data>
+  <data name="TEXT_YOU_DO_NOT_HAVE_ACCESS_TO_CANCEL_THIS_CONTRACT" xml:space="preserve"><value>You do not have access to cancel this contract.</value></data>
+  <data name="TEXT_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve"><value>Contract cancelled successfully.</value></data>
+</root>

@@ -52,7 +52,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> StartPayment(long paymentScheduleId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _paymentService.CreatePaymentIntent(userId, paymentScheduleId);
             return HandleServiceResult(result);
@@ -73,7 +73,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> CreateConnectAccount()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized();
+                return UnauthorizedUserIdMissing();
 
             var result = await _paymentService.CreateOrGetConnectOnboardingLink(userId);
             return HandleServiceResult(result);
@@ -94,7 +94,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> Withdraw()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized();
+                return UnauthorizedUserIdMissing();
 
             var result = await _paymentService.Withdraw(userId);
             return HandleServiceResult(result);
@@ -209,7 +209,7 @@ namespace MARN_API.Controllers
                 catch (StripeException e)
                 {
                     _logger.LogError(e, "Stripe webhook signature validation failed for both standard and Connect secrets: {Message}", e.StripeError?.Message);
-                    return BadRequest();
+                    return BadRequestWebhookSignatureInvalid();
                 }
             }
             

@@ -55,6 +55,15 @@ namespace MARN_API.Services.Implementations
                                     UserId = payment.PaymentSchedule.Contract.Property.OwnerId.ToString(),
                                     UserType = NotificationUserType.Owner,
                                     Type = NotificationType.AvailableForWithdrawal,
+                                    TitleKey = "NOTIFICATION_PAYMENT_AVAILABLE_FOR_WITHDRAWAL_TITLE",
+                                    BodyKey = "NOTIFICATION_PAYMENT_AVAILABLE_FOR_WITHDRAWAL_BODY",
+                                    LocalizationArguments = new()
+                                    {
+                                        payment.OwnerAmount.ToString(),
+                                        payment.PaymentSchedule.Currency,
+                                        payment.PaymentSchedule.Contract.Property.Title,
+                                        payment.PaidAt.ToString("yyyy-MM-dd")
+                                    },
                                     Title = "Payment Available for Withdrawal",
                                     Body = $"Your payment of {payment.OwnerAmount} {payment.PaymentSchedule.Currency} from contract \"{payment.PaymentSchedule.Contract.Property.Title}\"\n" +
                                            $"that paid at {payment.PaidAt:yyyy-MM-dd} is now available for withdrawal."

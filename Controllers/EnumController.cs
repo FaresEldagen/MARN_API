@@ -7,6 +7,7 @@ using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 using MARN_API.Enums.RoommatePreferences;
 using MARN_API.Models;
+using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,14 +22,17 @@ namespace MARN_API.Controllers
     [ApiController]
     public class EnumController : BaseController
     {
-        private List<EnumValueDto> GetEnumValues<T>() where T : Enum
+        private List<EnumValueDto> GetEnumValues<T>() where T : struct, Enum
         {
+            var localizer = HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+
             return Enum.GetValues(typeof(T))
                 .Cast<T>()
                 .Select(e => new EnumValueDto
                 {
                     Id = Convert.ToInt32(e),
-                    Name = e.ToString()
+                    Name = e.ToString(),
+                    DisplayName = localizer.GetEnumDisplayName(e)
                 })
                 .ToList();
         }

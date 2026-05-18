@@ -8,6 +8,8 @@ namespace MARN_API.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Notification> builder)
         {
+            builder.Property(n => n.TitleKey).HasMaxLength(200);
+            builder.Property(n => n.BodyKey).HasMaxLength(200);
             builder.Property(n => n.Title).IsRequired();
             builder.Property(n => n.Body).IsRequired();
             builder.Property(n => n.UserId).IsRequired();

@@ -42,7 +42,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetNotifications()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _notificationService.GetUserNotificationsAsync(userId);
             return HandleServiceResult(result);
@@ -53,12 +53,14 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> TestNotification()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {
                 UserId = userId.ToString(),
                 Type = NotificationType.General,
+                TitleKey = "NOTIFICATION_TEST_TITLE",
+                BodyKey = "NOTIFICATION_TEST_BODY",
                 Title = "Test Notificaiton",
                 Body = "This is a test notification",
                 SaveInDB = false
@@ -84,10 +86,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> SaveFcmToken([FromBody] FcmTokenRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.token))
-                return BadRequest("Token is required.");
+                return BadRequestTokenRequired();
 
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             _logger.LogInformation("User {UserId} saving FCM token", userId);
 
@@ -112,10 +114,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> RemoveFcmToken([FromBody] FcmTokenRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.token))
-                return BadRequest("Token is required.");
+                return BadRequestTokenRequired();
 
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             _logger.LogInformation("User {UserId} removing FCM token", userId);
 
