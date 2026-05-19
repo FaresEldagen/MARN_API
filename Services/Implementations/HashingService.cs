@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
 
+using MARN_API.Services.Interfaces;
+
 namespace MARN_API.Services.Implementations
 {
-    public class HashingService
+    public class HashingService : IHashingService
     {
         public async Task<string> ComputeSha256HashAsync(Stream fileStream)
         {

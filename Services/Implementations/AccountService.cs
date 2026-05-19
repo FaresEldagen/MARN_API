@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Google.Apis.Auth;
 using MARN_API.DTOs.Auth;
 using MARN_API.DTOs.Notification;
@@ -28,6 +28,8 @@ namespace MARN_API.Services.Implementations
         private readonly INotificationService _notificationService;
         private readonly ILogger<AccountService> _logger;
         private readonly IMapper _mapper;
+        private readonly MARN_API.Data.AppDbContext _context;
+
         public AccountService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -37,7 +39,8 @@ namespace MARN_API.Services.Implementations
             ITokenService tokenService,
             INotificationService notificationService,
             IMapper mapper,
-            ILogger<AccountService> logger)
+            ILogger<AccountService> logger,
+            MARN_API.Data.AppDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -48,6 +51,7 @@ namespace MARN_API.Services.Implementations
             _notificationService = notificationService;
             _mapper = mapper; 
             _logger = logger;
+            _context = context;
         }
 
 
@@ -202,37 +206,42 @@ namespace MARN_API.Services.Implementations
 
                 user = await _userManager.FindByEmailAsync(payload.Email);
 
-                if (user == null)
+                bool isNewUser = false;
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    _logger.LogInformation("Creating new user for Google email: {Email}", payload.Email);
-
-                    user = new ApplicationUser
+                    if (user == null)
                     {
-                        Email = payload.Email,
-                        UserName = payload.Email,
+                        _logger.LogInformation("Creating new user for Google email: {Email}", payload.Email);
 
-                        FirstName = payload.GivenName,
-                        LastName = payload.FamilyName,
+                        user = new ApplicationUser
+                        {
+                            Email = payload.Email,
+                            UserName = payload.Email,
 
-                        EmailConfirmed = true
-                    };
+                            FirstName = payload.GivenName,
+                            LastName = payload.FamilyName,
 
-                    var createResult = await _userManager.CreateAsync(user);
-                    if (!createResult.Succeeded)
-                    {
-                        _logger.LogWarning(
-                            "Failed to create user for Google login with email: {Email}. Errors: {@Errors}",
-                            payload.Email,
-                            createResult.Errors.Select(e => e.Description)
-                        );
-                        return ServiceResult<LoginResponseDto>.Fail(
-                            "User creation failed", 
-                            createResult.Errors.Select(e => e.Description).ToList(),
-                            resultType: ServiceResultType.Conflict
-                        );
-                    }
+                            EmailConfirmed = true
+                        };
 
-                    await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                        var createResult = await _userManager.CreateAsync(user);
+                        if (!createResult.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            _logger.LogWarning(
+                                "Failed to create user for Google login with email: {Email}. Errors: {@Errors}",
+                                payload.Email,
+                                createResult.Errors.Select(e => e.Description)
+                            );
+                            return ServiceResult<LoginResponseDto>.Fail(
+                                "User creation failed", 
+                                createResult.Errors.Select(e => e.Description).ToList(),
+                                resultType: ServiceResultType.Conflict
+                            );
+                        }
+                        isNewUser = true;
+                                      await _notificationService.SendNotificationAsync(new NotificationRequestDto
                     {
                         UserId = user.Id.ToString(),
                         UserType = NotificationUserType.General,
@@ -247,27 +256,59 @@ namespace MARN_API.Services.Implementations
 
                         ActionType = NotificationActionType.EditProfile,
                     });
+                    }
+
+                    var logins = await _userManager.GetLoginsAsync(user);
+                    if (!logins.Any(l => l.LoginProvider == "Google"))
+                    {
+                        var addLoginResult = await _userManager.AddLoginAsync(
+                            user,
+                            new UserLoginInfo("Google", payload.Subject, "Google"));
+
+                        if (!addLoginResult.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            _logger.LogError(
+                                "Failed to link Google login to user {UserId}. Errors: {@Errors}",
+                                user.Id,
+                                addLoginResult.Errors.Select(e => e.Description));
+
+                            return ServiceResult<LoginResponseDto>.Fail(
+                                "External login failed.",
+                                addLoginResult.Errors.Select(e => e.Description).ToList(),
+                                resultType: ServiceResultType.Conflict
+                            );
+                        }
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
                 }
 
-                var logins = await _userManager.GetLoginsAsync(user);
-                if (!logins.Any(l => l.LoginProvider == "Google"))
+                if (isNewUser)
                 {
-                    var addLoginResult = await _userManager.AddLoginAsync(
-                        user,
-                        new UserLoginInfo("Google", payload.Subject, "Google"));
-
-                    if (!addLoginResult.Succeeded)
+                    try
                     {
-                        _logger.LogError(
-                            "Failed to link Google login to user {UserId}. Errors: {@Errors}",
-                            user.Id,
-                            addLoginResult.Errors.Select(e => e.Description));
+                        await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                        {
+                            UserId = user.Id.ToString(),
+                            UserType = NotificationUserType.General,
+                            Type = NotificationType.General,
 
-                        return ServiceResult<LoginResponseDto>.Fail(
-                            "External login failed.",
-                            addLoginResult.Errors.Select(e => e.Description).ToList(),
-                            resultType: ServiceResultType.Conflict
-                        );
+                            Title = $"Welcome to Your New Home Journey {user.FirstName}!",
+                            Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
+                                "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
+
+                            ActionType = NotificationActionType.EditProfile,
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send welcome notification to Google user {UserId}", user.Id);
                     }
                 }
 
@@ -372,34 +413,54 @@ namespace MARN_API.Services.Implementations
 
             var user = _mapper.Map<ApplicationUser>(dto);
 
-            IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                _logger.LogWarning(
-                    "Registration failed for {Email}. Errors: {@Errors}",
-                    user.Email,
-                    result.Errors.Select(e => e.Description)
-                );
-                return ServiceResult<bool>.Fail("Failed to Register", result.Errors.Select(e => e.Description).ToList());
+                IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
+                if (!result.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogWarning(
+                        "Registration failed for {Email}. Errors: {@Errors}",
+                        user.Email,
+                        result.Errors.Select(e => e.Description)
+                    );
+                    return ServiceResult<bool>.Fail("Failed to Register", result.Errors.Select(e => e.Description).ToList());
+                }
+
+                IdentityResult roleAssignResult = await _userManager.AddToRoleAsync(user, "Renter");
+                if (!roleAssignResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(
+                        "Registration failed for {Email}. Errors: {@Errors}",
+                        user.Email,
+                        roleAssignResult.Errors.Select(e => e.Description)
+                    );
+                    return ServiceResult<bool>.Fail("Failed to Register", roleAssignResult.Errors.Select(e => e.Description).ToList());
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
 
-            IdentityResult roleAssignResult = await _userManager.AddToRoleAsync(user, "Renter");
-            if (!roleAssignResult.Succeeded)
+            try
             {
-                _logger.LogError(
-                    "Registration failed for {Email}. Errors: {@Errors}",
-                    user.Email,
-                    roleAssignResult.Errors.Select(e => e.Description)
-                );
-                return ServiceResult<bool>.Fail("Failed to Register", roleAssignResult.Errors.Select(e => e.Description).ToList());
+                var token = await GenerateEmailConfirmationTokenAsync(user);
+
+                var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
+                var confirmationLink = $"{frontBaseUrl}/confirm-email?userId={user.Id}&token={token}";
+
+                await _emailService.SendRegistrationConfirmationEmailAsync(user.Email!, user.FirstName, confirmationLink);
             }
-
-            var token = await GenerateEmailConfirmationTokenAsync(user);
-
-            var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-            var confirmationLink = $"{frontBaseUrl}/confirm-email?userId={user.Id}&token={token}";
-
-            await _emailService.SendRegistrationConfirmationEmailAsync(user.Email!, user.FirstName, confirmationLink);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send registration confirmation email to {Email}", user.Email);
+            }
 
             _logger.LogInformation("Registration successful for email: {Email}", user.Email);
             return ServiceResult<bool>

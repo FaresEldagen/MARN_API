@@ -37,6 +37,7 @@ namespace MARN_API.Models
         // Soft delete and audit
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeletedAt { get; set; }
+        public string? ImagesDeletionJob { get; set; }
 
         // Navigation properties
         public virtual RoommatePreference? RoommatePreference { get; set; }

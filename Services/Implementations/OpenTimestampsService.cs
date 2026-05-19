@@ -1,8 +1,10 @@
 using System.Net.Http.Headers;
 
+using MARN_API.Services.Interfaces;
+
 namespace MARN_API.Services.Implementations
 {
-    public class OpenTimestampsService
+    public class OpenTimestampsService : IOpenTimestampsService
     {
         private static readonly byte[] OtsHeaderPrefix =
         [

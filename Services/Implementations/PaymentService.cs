@@ -26,6 +26,7 @@ namespace MARN_API.Services.Implementations
         private readonly ILogger<PaymentService> _logger;
         private readonly IConfiguration _configuration;
         private readonly ICurrencyExchangeService _currencyExchangeService;
+        private readonly MARN_API.Data.AppDbContext _context;
 
         public PaymentService(
             IPaymentRepo paymentRepo,
@@ -34,7 +35,8 @@ namespace MARN_API.Services.Implementations
             UserManager<ApplicationUser> userManager,
             ILogger<PaymentService> logger,
             IConfiguration configuration,
-            ICurrencyExchangeService currencyExchangeService)
+            ICurrencyExchangeService currencyExchangeService,
+            MARN_API.Data.AppDbContext context)
 
         {
             _paymentRepo = paymentRepo;
@@ -44,6 +46,7 @@ namespace MARN_API.Services.Implementations
             _logger = logger;
             _configuration = configuration;
             _currencyExchangeService = currencyExchangeService;
+            _context = context;
         }
 
 
@@ -244,15 +247,16 @@ namespace MARN_API.Services.Implementations
 
             var amount = withdrawablePayments.Sum(p => p.OwnerAmount);
 
-            // Mark payments as Withdrawn before calling Stripe to prevent double-withdraw on concurrent requests
-            foreach (var payment in withdrawablePayments)
-                payment.Status = PaymentStatus.Withdrawn;
-
-            await _paymentRepo.UpdatePayments(withdrawablePayments);
-
-            var transferService = new TransferService();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                // Mark payments as Withdrawn before calling Stripe to prevent double-withdraw on concurrent requests
+                foreach (var payment in withdrawablePayments)
+                    payment.Status = PaymentStatus.Withdrawn;
+
+                await _paymentRepo.UpdatePayments(withdrawablePayments);
+
+                var transferService = new TransferService();
                 // Detect platform's available currency to avoid "insufficient funds" if currencies mismatch
                 var balanceService = new BalanceService();
                 var platformBalance = await balanceService.GetAsync();
@@ -261,6 +265,7 @@ namespace MARN_API.Services.Implementations
                     .FirstOrDefault(b => b.Currency.ToLower() == "usd");
                 if (usdBalance == null || usdBalance.Amount <= 0)
                 {
+                    await transaction.RollbackAsync();
                     return ServiceResult<bool>.Fail(
                         "No USD balance available.",
                         resultType: ServiceResultType.BadRequest);
@@ -278,19 +283,22 @@ namespace MARN_API.Services.Implementations
                 };
                 var transfer = await transferService.CreateAsync(transferOptions);
 
+                await transaction.CommitAsync();
+
                 _logger.LogInformation("Withdraw successful for ownerId: {ownerId}, amount: {amount} {currency}", ownerId, transferAmount, transferCurrency);
                 return ServiceResult<bool>.Ok(true, $"Withdrawal of {transferAmount} {transferCurrency.ToUpper()} initiated successfully.", ServiceResultType.Success);
             }
             catch (StripeException e)
             {
-                // Revert payment statuses back to Available since Stripe transfer failed
-                foreach (var payment in withdrawablePayments)
-                    payment.Status = PaymentStatus.Available;
-
-                await _paymentRepo.UpdatePayments(withdrawablePayments);
-
+                await transaction.RollbackAsync();
                 _logger.LogError(e, "Stripe API Error while creating transfer for ownerId: {ownerId}. Payment statuses reverted.", ownerId);
                 return ServiceResult<bool>.Fail(e.StripeError?.Message ?? "Payment provider error.", resultType: ServiceResultType.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Unexpected Error while creating transfer for ownerId: {ownerId}", ownerId);
+                return ServiceResult<bool>.Fail("An unexpected error occurred.", resultType: ServiceResultType.InternalError);
             }
         }
 
@@ -447,12 +455,25 @@ namespace MARN_API.Services.Implementations
                 return;
             }
 
-            owner.StripePayoutsEnabled = account.PayoutsEnabled;
-            owner.StripeChargesEnabled = account.ChargesEnabled;
-            var result = await _userManager.UpdateAsync(owner);
+            var wasReady =
+                owner.StripeChargesEnabled &&
+                owner.StripePayoutsEnabled;
 
-            if (account.ChargesEnabled && account.PayoutsEnabled)
+            var isReady =
+                account.ChargesEnabled &&
+                account.PayoutsEnabled;
+
+
+            owner.StripeChargesEnabled = account.ChargesEnabled;
+            owner.StripePayoutsEnabled = account.PayoutsEnabled;
+
+            await _userManager.UpdateAsync(owner);
+
+
+            // First time for the account to be ready
+            if (!wasReady && isReady)
             {
+
                 await _notificationService.SendNotificationAsync(new NotificationRequestDto
                 {
                     UserId = owner.Id.ToString(),
@@ -462,14 +483,20 @@ namespace MARN_API.Services.Implementations
                     BodyKey = "NOTIFICATION_CONNECT_SUCCESS_BODY",
                     Title = "Connect Account Activated",
                     Body = "Your Stripe Connect account has been activated and is now ready to withdraw your payments.",
+                        ActionType = NotificationActionType.OwnerDashboard
+                    });
 
-                    ActionType = NotificationActionType.OwnerDashboard
-                });
 
-                _logger.LogInformation("Handle Connected Account Updated successful: Connect account activated for ownerId: {OwnerId}", owner.Id);
+                _logger.LogInformation(
+                    "Connect account activated for ownerId: {OwnerId}",
+                    owner.Id);
             }
-            else
+
+            // Problem happened
+            else if (!isReady &&
+                     !string.IsNullOrEmpty(account.Requirements?.DisabledReason))
             {
+
                 await _notificationService.SendNotificationAsync(new NotificationRequestDto
                 {
                     UserId = owner.Id.ToString(),
@@ -480,10 +507,13 @@ namespace MARN_API.Services.Implementations
                     Title = "Connect Account Failed",
                     Body = "Your Stripe Connect account is not fully activated. Please complete the onboarding process to enable charges and payouts.",
 
-                    ActionType = NotificationActionType.OwnerDashboard
-                });
+                        ActionType = NotificationActionType.OwnerDashboard
+                    });
 
-                _logger.LogInformation("Handle Connected Account Updated: Charges and payouts not enabled for StripeAccountId: {StripeAccountId}", account.Id);
+
+                _logger.LogInformation(
+                    "Handle Connected Account Updated: Charges and payouts not enabled for StripeAccountId: {StripeAccountId}", 
+                    account.Id);
             }
         }
 

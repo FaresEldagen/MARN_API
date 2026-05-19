@@ -1,5 +1,5 @@
 using MARN_API.DTOs.Contracts;
-using MARN_API.Services.Implementations;
+using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MARN_API.Data;
 using MARN_API.Enums;
@@ -18,22 +18,25 @@ namespace MARN_API.Controllers
     [Route("api/[controller]")]
     public class TempGenController : ControllerBase
     {
+
         private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en");
         private static readonly CultureInfo ArabicCulture = CultureInfo.GetCultureInfo("ar");
-        private readonly ContractPdfGenerator _contractPdfGenerator;
-        private readonly HashingService _hashingService;
-        private readonly OpenTimestampsService _openTimestampsService;
-        private readonly OpenTimestampsProofReader _proofReader;
+
+
+        private readonly IContractPdfGenerator _contractPdfGenerator;
+        private readonly IHashingService _hashingService;
+        private readonly IOpenTimestampsService _openTimestampsService;
+        private readonly IOpenTimestampsProofReader _proofReader;
         private readonly IWebHostEnvironment _env;
         private readonly AppDbContext _dbContext;
         private readonly IAppTextLocalizer _localizer;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public TempGenController(
-            ContractPdfGenerator contractPdfGenerator,
-            HashingService hashingService,
-            OpenTimestampsService openTimestampsService,
-            OpenTimestampsProofReader proofReader,
+            IContractPdfGenerator contractPdfGenerator,
+            IHashingService hashingService,
+            IOpenTimestampsService openTimestampsService,
+            IOpenTimestampsProofReader proofReader,
             IWebHostEnvironment env,
             AppDbContext dbContext,
             IAppTextLocalizer localizer,

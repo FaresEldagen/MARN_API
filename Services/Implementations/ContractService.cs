@@ -22,29 +22,31 @@ namespace MARN_API.Services.Implementations
         private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en");
         private static readonly CultureInfo ArabicCulture = CultureInfo.GetCultureInfo("ar");
         private readonly IContractRepo _contractRepo;
-        private readonly HashingService _hashingService;
-        private readonly OpenTimestampsService _openTimestampsService;
-        private readonly OpenTimestampsProofReader _proofReader;
-        private readonly ContractPdfGenerator _contractPdfGenerator;
+        private readonly IHashingService _hashingService;
+        private readonly IOpenTimestampsService _openTimestampsService;
+        private readonly IOpenTimestampsProofReader _proofReader;
+        private readonly IContractPdfGenerator _contractPdfGenerator;
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
         private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<ContractService> _logger;
+        private readonly MARN_API.Data.AppDbContext _context;
 
         public ContractService(
             IContractRepo contractRepo,
-            HashingService hashingService,
-            OpenTimestampsService openTimestampsService,
-            OpenTimestampsProofReader proofReader,
-            ContractPdfGenerator contractPdfGenerator,
+            IHashingService hashingService,
+            IOpenTimestampsService openTimestampsService,
+            IOpenTimestampsProofReader proofReader,
+            IContractPdfGenerator contractPdfGenerator,
             IBookingRequestRepo bookingRequestRepo,
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
             INotificationService notificationService,
             IAppTextLocalizer localizer,
-            ILogger<ContractService> logger)
+            ILogger<ContractService> logger,
+            MARN_API.Data.AppDbContext context)
         {
             _contractRepo = contractRepo;
             _hashingService = hashingService;
@@ -57,6 +59,7 @@ namespace MARN_API.Services.Implementations
             _notificationService = notificationService;
             _localizer = localizer;
             _logger = logger;
+            _context = context;
         }
 
 
@@ -112,10 +115,24 @@ namespace MARN_API.Services.Implementations
                 TotalContractAmount = totalContractAmount
             };
 
-            await _contractRepo.AddAsync(contract);
-            await _bookingRequestRepo.DeleteAsync(booking);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
 
-            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                await _contractRepo.AddAsync(contract);
+                await _bookingRequestRepo.DeleteAsync(booking);
+                await transaction.CommitAsync();
+                
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            try
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {
                 UserId = contract.RenterId.ToString(),
                 UserType = NotificationUserType.Renter,
@@ -126,6 +143,12 @@ namespace MARN_API.Services.Implementations
                 Title = "Contract Ready for Signature",
                 Body = $"The owner of \"{property.Title}\" has generated a contract for you. Please review and sign it."
             });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send notification for contractId: {contractId}", contract.Id);
+            }
+
 
             _logger.LogInformation("Create Contract successful for contractId: {contractId}", contract.Id);
             return ServiceResult<long>.Ok(contract.Id, "Contract created successfully.", ServiceResultType.Created);
@@ -286,7 +309,10 @@ namespace MARN_API.Services.Implementations
                 BodyKey = "NOTIFICATION_CONTRACT_SIGNED_BODY",
                 LocalizationArguments = new() { $"{renter!.FirstName} {renter.LastName}", property.Title },
                 Title = "Contract Signed",
-                Body = $"The renter {renter!.FirstName} {renter.LastName} has signed the contract for \"{property.Title}\"."
+                Body = $"The renter {renter!.FirstName} {renter.LastName} has signed the contract for \"{property.Title}\".",
+
+                ActionType = NotificationActionType.Contract,
+                ActionId = contract.Id.ToString()
             });
 
             _logger.LogInformation("Sign Contract successful for contractId: {contractId}", contractId);

@@ -15,6 +15,7 @@ using System;
 using System.Threading.Tasks;
 using MARN_API.Enums.Contract;
 using MARN_API.Enums.Property;
+using Hangfire;
 
 namespace MARN_API.Services.Implementations
 {
@@ -115,56 +116,69 @@ namespace MARN_API.Services.Implementations
             }
 
 
-            await _propertyRepo.AddPropertyAsync(property);
-            _logger.LogInformation("Added Property {PropertyId} for user {UserId}", property.Id, userId);
-
-            if (dto.Amenities != null)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                foreach (var am in dto.Amenities)
-                {
-                    await _amenityRepo.AddByPropertyIdAsync(property.Id, new PropertyAmenity { Amenity = am });
-                }
-            }
+                await _propertyRepo.AddPropertyAsync(property);
+                _logger.LogInformation("Added Property {PropertyId} for user {UserId}", property.Id, userId);
 
-            if (dto.Rules != null)
-            {
-                foreach (var rule in dto.Rules)
+                if (dto.Amenities != null)
                 {
-                    if (string.IsNullOrWhiteSpace(rule))
-                        continue;
-
-                    await _ruleRepo.AddByPropertyIdAsync(property.Id, new PropertyRule { Rule = rule });
-                }
-            }
-
-            if (dto.PrimaryImage != null)
-            {
-                var primaryPath = await _fileService.SaveImageAsync(dto.PrimaryImage, "properties");
-                if (primaryPath != null)
-                {
-                    await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = primaryPath, IsPrimary = true });
-                }
-            }
-
-            if (dto.MediaFiles != null)
-            {
-                foreach (var file in dto.MediaFiles)
-                {
-                    var path = await _fileService.SaveImageAsync(file, "properties");
-                    if (path != null)
+                    foreach (var am in dto.Amenities)
                     {
-                        await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = path, IsPrimary = false });
+                        await _amenityRepo.AddByPropertyIdAsync(property.Id, new PropertyAmenity { Amenity = am });
                     }
                 }
+
+                if (dto.Rules != null)
+                {
+                    foreach (var rule in dto.Rules)
+                    {
+                        if (string.IsNullOrWhiteSpace(rule))
+                            continue;
+
+                        await _ruleRepo.AddByPropertyIdAsync(property.Id, new PropertyRule { Rule = rule });
+                    }
+                }
+
+                if (dto.PrimaryImage != null)
+                {
+                    var primaryPath = await _fileService.SaveImageAsync(dto.PrimaryImage, "properties");
+                    if (primaryPath != null)
+                    {
+                        await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = primaryPath, IsPrimary = true });
+                    }
+                }
+
+                if (dto.MediaFiles != null)
+                {
+                    foreach (var file in dto.MediaFiles)
+                    {
+                        var path = await _fileService.SaveImageAsync(file, "properties");
+                        if (path != null)
+                        {
+                            await _mediaRepo.AddByPropertyIdAsync(property.Id, new PropertyMedia { Path = path, IsPrimary = false });
+                        }
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
 
             _logger.LogInformation("Successfully fully mapped and saved property {PropertyId}", property.Id);
 
-            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            try
             {
-                UserId = userId.ToString(),
-                UserType = NotificationUserType.Owner,
-                Type = NotificationType.PropertyAdded,
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = userId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.PropertyAdded,
 
                 TitleKey = "NOTIFICATION_PROPERTY_SUBMITTED_TITLE",
                 BodyKey = "NOTIFICATION_PROPERTY_SUBMITTED_BODY",
@@ -172,10 +186,14 @@ namespace MARN_API.Services.Implementations
                 Title = "Property Submitted for Review",
                 Body = $"Your property \"{property.Title}\" has been submitted successfully and is now pending admin verification. " +
                        "This process may take up to 24 hours. We'll notify you once it's approved.",
-
-                ActionType = NotificationActionType.Property,
-                ActionId = property.Id.ToString()
-            });
+                    ActionType = NotificationActionType.Property,
+                    ActionId = property.Id.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send property added notification for propertyId: {PropertyId}", property.Id);
+            }
 
             return ServiceResult<bool>.Ok(true, "Property added successfully.");
         }
@@ -392,75 +410,88 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
-            await _propertyRepo.UpdatePropertyAsync(property);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _propertyRepo.UpdatePropertyAsync(property);
 
-            if (dto.RemovedAmenityIds != null)
-            {
-                foreach(long id in dto.RemovedAmenityIds) await _amenityRepo.RemoveByObjectIdAsync(id);
-            }
-            if (dto.RemovedRuleIds != null)
-            {
-                foreach(long id in dto.RemovedRuleIds) await _ruleRepo.RemoveByObjectIdAsync(id);
-            }
-            if (dto.RemovedMediaIds != null)
-            {
-                var existingMedia = await _mediaRepo.GetByPropertyIdAsync(propertyId);
-                foreach(long id in dto.RemovedMediaIds) 
+                if (dto.RemovedAmenityIds != null)
                 {
-                    var mediaItem = existingMedia.FirstOrDefault(m => m.Id == id);
-                    if (mediaItem != null)
+                    foreach(long id in dto.RemovedAmenityIds) await _amenityRepo.RemoveByObjectIdAsync(id);
+                }
+                if (dto.RemovedRuleIds != null)
+                {
+                    foreach(long id in dto.RemovedRuleIds) await _ruleRepo.RemoveByObjectIdAsync(id);
+                }
+                if (dto.RemovedMediaIds != null)
+                {
+                    var existingMedia = await _mediaRepo.GetByPropertyIdAsync(propertyId);
+                    foreach(long id in dto.RemovedMediaIds) 
                     {
-                        _fileService.DeleteImage(mediaItem.Path);
-                    }
-                    await _mediaRepo.RemoveByObjectIdAsync(id);
-                }
-            }
-
-            if (dto.AddedAmenities != null)
-            {
-                foreach(var am in dto.AddedAmenities) await _amenityRepo.AddByPropertyIdAsync(propertyId, new PropertyAmenity { Amenity = am });
-            }
-            if (dto.AddedRules != null)
-            {
-                foreach(var rule in dto.AddedRules) await _ruleRepo.AddByPropertyIdAsync(propertyId, new PropertyRule { Rule = rule });
-            }
-
-            if (dto.NewPrimaryImage != null)
-            {
-                var existingMedia = await _mediaRepo.GetByPropertyIdAsync(propertyId);
-                var oldPrimary = existingMedia.FirstOrDefault(m => m.IsPrimary);
-                if (oldPrimary != null)
-                {
-                    _fileService.DeleteImage(oldPrimary.Path);
-                    await _mediaRepo.RemoveByObjectIdAsync(oldPrimary.Id);
-                }
-
-                var pPath = await _fileService.SaveImageAsync(dto.NewPrimaryImage, "properties");
-                if (pPath != null)
-                {
-                    await _mediaRepo.AddByPropertyIdAsync(propertyId, new PropertyMedia { Path = pPath, IsPrimary = true });
-                }
-            }
-
-            if (dto.AddedMediaFiles != null)
-            {
-                foreach (var mf in dto.AddedMediaFiles)
-                {
-                    var mPath = await _fileService.SaveImageAsync(mf, "properties");
-                    if (mPath != null)
-                    {
-                        await _mediaRepo.AddByPropertyIdAsync(propertyId, new PropertyMedia { Path = mPath, IsPrimary = false });
+                        var mediaItem = existingMedia.FirstOrDefault(m => m.Id == id);
+                        if (mediaItem != null)
+                        {
+                            _fileService.DeleteImage(mediaItem.Path);
+                        }
+                        await _mediaRepo.RemoveByObjectIdAsync(id);
                     }
                 }
+
+                if (dto.AddedAmenities != null)
+                {
+                    foreach(var am in dto.AddedAmenities) await _amenityRepo.AddByPropertyIdAsync(propertyId, new PropertyAmenity { Amenity = am });
+                }
+                if (dto.AddedRules != null)
+                {
+                    foreach(var rule in dto.AddedRules) await _ruleRepo.AddByPropertyIdAsync(propertyId, new PropertyRule { Rule = rule });
+                }
+
+                if (dto.NewPrimaryImage != null)
+                {
+                    var existingMedia = await _mediaRepo.GetByPropertyIdAsync(propertyId);
+                    var oldPrimary = existingMedia.FirstOrDefault(m => m.IsPrimary);
+                    if (oldPrimary != null)
+                    {
+                        _fileService.DeleteImage(oldPrimary.Path);
+                        await _mediaRepo.RemoveByObjectIdAsync(oldPrimary.Id);
+                    }
+
+                    var pPath = await _fileService.SaveImageAsync(dto.NewPrimaryImage, "properties");
+                    if (pPath != null)
+                    {
+                        await _mediaRepo.AddByPropertyIdAsync(propertyId, new PropertyMedia { Path = pPath, IsPrimary = true });
+                    }
+                }
+
+                if (dto.AddedMediaFiles != null)
+                {
+                    foreach (var mf in dto.AddedMediaFiles)
+                    {
+                        var mPath = await _fileService.SaveImageAsync(mf, "properties");
+                        if (mPath != null)
+                        {
+                            await _mediaRepo.AddByPropertyIdAsync(propertyId, new PropertyMedia { Path = mPath, IsPrimary = false });
+                        }
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
 
             _logger.LogInformation("Property {PropertyId} edited successfully by user {UserId}", propertyId, userId);
 
-            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            try
             {
-                UserId = userId.ToString(),
-                UserType = NotificationUserType.Owner,
-                Type = NotificationType.PropertyEdited,
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = userId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.PropertyEdited,
 
                 TitleKey = "NOTIFICATION_PROPERTY_UPDATED_TITLE",
                 BodyKey = "NOTIFICATION_PROPERTY_UPDATED_BODY",
@@ -469,9 +500,14 @@ namespace MARN_API.Services.Implementations
                 Body = $"Your property \"{property.Title}\" has been updated and its status is now set back to pending. " +
                        "The admin will re-verify it, which may take up to 24 hours. We'll notify you once it's approved.",
 
-                ActionType = NotificationActionType.Property,
-                ActionId = propertyId.ToString()
-            });
+                    ActionType = NotificationActionType.Property,
+                    ActionId = propertyId.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send property edited notification for propertyId: {PropertyId}", propertyId);
+            }
 
             return ServiceResult<bool>.Ok(true, "Property updated successfully.");
         }
@@ -523,7 +559,7 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Property has active contracts and cannot be deleted.", resultType: ServiceResultType.BadRequest);
             }
 
-            var filesToDelete = new System.Collections.Generic.List<string>();
+            var filesToDelete = new List<string>();
             if (!string.IsNullOrEmpty(property.ProofOfOwnership))
             {
                 filesToDelete.Add(property.ProofOfOwnership);
@@ -535,12 +571,18 @@ namespace MARN_API.Services.Implementations
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+
                 await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyCommentRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyRatingRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyRepo.DeleteMediaByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
 
+                string jobId = BackgroundJob.Schedule(
+                    () => DeletePropertyImages(filesToDelete),
+                    TimeSpan.FromDays(7));
+
                 property.DeletedAt = DateTime.UtcNow;
+                property.ImagesDeletionJob = jobId;
                 await _propertyRepo.UpdatePropertyAsync(property);
 
                 await transaction.CommitAsync();
@@ -550,12 +592,6 @@ namespace MARN_API.Services.Implementations
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "Transaction failed deleting property {Id}", propertyId);
                 return ServiceResult<bool>.Fail("Error deleting property.", resultType: ServiceResultType.BadRequest);
-            }
-
-            foreach (var file in filesToDelete)
-            {
-                try { _fileService.DeleteImage(file); }
-                catch (Exception) { /* Ignored */ }
             }
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -573,6 +609,22 @@ namespace MARN_API.Services.Implementations
             });
 
             return ServiceResult<bool>.Ok(true, "Property deleted completely.");
+        }
+
+        private void DeletePropertyImages(List<string> filesToDelete)
+        {
+            foreach (var file in filesToDelete)
+            {
+                try 
+                { 
+                    _fileService.DeleteImage(file); 
+                }
+                catch (Exception ex) 
+                {
+                    _logger.LogWarning(ex, "Failed to delete file from storage: {FilePath}", file);
+                    throw; 
+                }
+            }
         }
     }
 }

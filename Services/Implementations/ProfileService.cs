@@ -1,4 +1,5 @@
 using AutoMapper;
+using Hangfire;
 using MARN_API.Data;
 using MARN_API.DTOs.Dashboard;
 using MARN_API.DTOs.Notification;
@@ -737,8 +738,14 @@ namespace MARN_API.Services.Implementations
                 _logger.LogInformation("Deleting property comments for userId: {userId}", userId);
                 await _propertyCommentRepo.DeleteByUserIdAsync(userId);
 
-                // 7. Soft delete the user
+                // 7. Delay User images deletion for 7 days
+                string jobId = BackgroundJob.Schedule(
+                    () => DeleteUserImages(filesToDelete),
+                    TimeSpan.FromDays(7));
+
+                // 8. Soft delete the user
                 user.DeletedAt = DateTime.UtcNow;
+                user.ImagesDeletionJob = jobId;
                 var result = await _userManager.UpdateAsync(user);
 
                 if (!result.Succeeded)
@@ -761,8 +768,16 @@ namespace MARN_API.Services.Implementations
                 _logger.LogError(ex, "Delete User failed: Transaction rolled back for userId: {userId}", userId);
                 return ServiceResult<bool>.Fail("An error occurred while deleting the user. All changes have been rolled back.");
             }
+            
 
-            // Delete files from storage AFTER successful transaction commit
+            // Send deletion email (outside transaction)
+            await _emailService.SendAccountDeletionEmailAsync(user.Email!, user.FirstName);
+
+            return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
+        }
+
+        private void DeleteUserImages(List<string> filesToDelete)
+        {
             foreach (var filePath in filesToDelete)
             {
                 try
@@ -771,15 +786,10 @@ namespace MARN_API.Services.Implementations
                 }
                 catch (Exception ex)
                 {
-                    // Log but do not fail — DB is already committed
                     _logger.LogWarning(ex, "Failed to delete file from storage: {FilePath}", filePath);
+                    throw;
                 }
             }
-
-            // Send deletion email (outside transaction)
-            await _emailService.SendAccountDeletionEmailAsync(user.Email!, user.FirstName);
-
-            return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
         }
         #endregion
 

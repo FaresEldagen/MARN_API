@@ -22,6 +22,9 @@ using MARN_API.Localization;
 using Microsoft.AspNetCore.Localization;
 using System.Security.Claims;
 using System.Text.Json;
+using Hangfire;
+using Hangfire.SqlServer;
+using MARN_API.BackgroundJobs;
 
 namespace MARN_API
 {
@@ -220,15 +223,15 @@ namespace MARN_API
             builder.Services.AddScoped<IUserCultureService, UserCultureService>();
             builder.Services.AddScoped<INotificationContentLocalizer, NotificationContentLocalizer>();
 
-            builder.Services.AddScoped<ContractPdfGenerator>();
-            builder.Services.AddScoped<HashingService>();
-            builder.Services.AddScoped<OpenTimestampsProofReader>();
-            builder.Services.AddHttpClient<OpenTimestampsService>();
+            builder.Services.AddScoped<IContractPdfGenerator, ContractPdfGenerator>();
+            builder.Services.AddScoped<IHashingService, HashingService>();
+            builder.Services.AddScoped<IOpenTimestampsProofReader, OpenTimestampsProofReader>();
+            builder.Services.AddHttpClient<IOpenTimestampsService, OpenTimestampsService>();
             builder.Services.AddHttpClient<ICurrencyExchangeService, CurrencyExchangeService>();
-            builder.Services.AddHostedService<OtsUpgradeBackgroundService>();
 
-            builder.Services.AddHostedService<PaymentScheduleBackgroundService>();
-            builder.Services.AddHostedService<PaymentBackgroundService>();
+            builder.Services.AddScoped<PaymentScheduleJob>();
+            builder.Services.AddScoped<PaymentJob>();
+            builder.Services.AddScoped<OtsUpgradeJob>();
 
             builder.Services.AddMemoryCache();
             builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
@@ -246,6 +249,14 @@ namespace MARN_API
 
             builder.Services.AddSingleton<IUserIdProvider, MARN_API.Hubs.CustomUserIdProvider>();
             builder.Services.AddSingleton<MARN_API.Hubs.ConnectionTracker>();
+            #endregion
+
+
+            #region Hangfire Configuration
+            builder.Services.AddHangfire(x => x.UseSqlServerStorage(
+                builder.Configuration.GetConnectionString("DefaultConnection")
+            ));
+            builder.Services.AddHangfireServer();
             #endregion
 
 
@@ -493,10 +504,8 @@ namespace MARN_API
             // Global Exception Handling
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
-            // Logging Requests
             app.UseMiddleware<RequestLoggingMiddleware>();
 
-            // Swagger
             app.UseSwagger();
             app.UseSwaggerUI();
 
@@ -510,6 +519,39 @@ namespace MARN_API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireAuthorizationFilter() }
+            });
+            #endregion
+
+
+            #region Hangfire Jobs
+            var egyptTz = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            RecurringJob.AddOrUpdate<PaymentScheduleJob>(
+                "payment-schedules",
+                x => x.ExecuteAsync(),
+                Cron.Daily(12),
+                new RecurringJobOptions
+                {
+                    TimeZone = egyptTz
+                });
+
+            RecurringJob.AddOrUpdate<PaymentJob>(
+                "payments",
+                x => x.ExecuteAsync(),
+                Cron.Daily(12),
+                new RecurringJobOptions
+                {
+                    TimeZone = egyptTz
+                });
+
+            RecurringJob.AddOrUpdate<OtsUpgradeJob>(
+                "ots-upgrade",
+                x => x.ExecuteAsync(),
+                Cron.Hourly);
             #endregion
 
 

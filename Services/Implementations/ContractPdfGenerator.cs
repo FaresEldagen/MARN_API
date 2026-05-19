@@ -12,9 +12,11 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
+using MARN_API.Services.Interfaces;
+
 namespace MARN_API.Services.Implementations
 {
-    public class ContractPdfGenerator
+    public class ContractPdfGenerator : IContractPdfGenerator
     {
         private const string LocalizedSeparator = " / ";
         private const string EnglishGoverningLawNote = "This document is electronically signed and intended to be legally binding under Egypt Law No. 15 of 2004.";

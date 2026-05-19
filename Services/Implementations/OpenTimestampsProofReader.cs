@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
 
+using MARN_API.Services.Interfaces;
+
 namespace MARN_API.Services.Implementations
 {
-    public class OpenTimestampsProofReader
+    public class OpenTimestampsProofReader : IOpenTimestampsProofReader
     {
         private static readonly byte[] DetachedHeaderPrefix =
         [
