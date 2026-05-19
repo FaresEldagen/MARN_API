@@ -781,11 +781,13 @@
   <data name="VALIDATION_STRING_LENGTH_RANGE" xml:space="preserve"><value>يجب أن يكون {0} بين {1} و {2} حرفًا.</value></data>
   <data name="VALIDATION_RANGE_BETWEEN" xml:space="preserve"><value>يجب أن تكون قيمة {0} بين {1} و {2}.</value></data>
   <data name="VALIDATION_VALUE_INVALID" xml:space="preserve"><value>قيمة {0} غير صالحة.</value></data>
+  <data name="VALIDATION_INVALID_JSON" xml:space="preserve"><value>يحتوي جسم الطلب على JSON غير صالح.</value></data>
   <data name="FIELD_PHONE_NUMBER" xml:space="preserve"><value>رقم الهاتف</value></data>
   <data name="FIELD_FULL_NAME" xml:space="preserve"><value>الاسم الكامل</value></data>
   <data name="FIELD_EMAIL_ADDRESS" xml:space="preserve"><value>البريد الإلكتروني</value></data>
   <data name="FIELD_SUBJECT" xml:space="preserve"><value>الموضوع</value></data>
   <data name="FIELD_MESSAGE" xml:space="preserve"><value>الرسالة</value></data>
+  <data name="FIELD_REQUEST" xml:space="preserve"><value>الطلب</value></data>
   <data name="FIELD_CURRENT_PASSWORD" xml:space="preserve"><value>كلمة المرور الحالية</value></data>
   <data name="FIELD_NEW_PASSWORD" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>
   <data name="FIELD_CONFIRM_NEW_PASSWORD" xml:space="preserve"><value>تأكيد كلمة المرور الجديدة</value></data>

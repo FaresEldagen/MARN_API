@@ -14,6 +14,13 @@ namespace MARN_API.Localization
                 return literal;
             }
 
+            if (string.Equals(fieldName, "$", StringComparison.Ordinal) ||
+                fallbackMessage.StartsWith("The JSON ", StringComparison.OrdinalIgnoreCase) ||
+                fallbackMessage.Contains("BytePositionInLine", StringComparison.OrdinalIgnoreCase))
+            {
+                return localizer.Get("VALIDATION_INVALID_JSON");
+            }
+
             var normalizedFieldName = ResolveFieldLabel(fieldName, localizer);
 
             if (TryMatch(RequiredPattern(), fallbackMessage, out var requiredMatch))

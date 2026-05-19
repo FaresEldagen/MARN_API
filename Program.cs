@@ -45,8 +45,37 @@ namespace MARN_API
             if (builder.Environment.IsDevelopment())
                 builder.Logging.AddEventSourceLogger();
 
-            // Custom model validation response
-            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            #endregion
+
+
+            #region Request & Upload Limits
+            // Limit file upload size (10MB)
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 10 * 1024 * 1024;
+            });
+
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
+            });
+            #endregion
+
+
+            #region Controllers & JSON
+            var mvcBuilder = builder.Services.AddControllers(options =>
+                {
+                    options.Filters.Add<BannedAccountAccessFilter>();
+                })
+                .AddDataAnnotationsLocalization()
+                .AddJsonOptions(options =>
+                {
+                    // Convert Enums to string instead of int
+                    options.JsonSerializerOptions.Converters
+                        .Add(new JsonStringEnumConverter());
+                });
+
+            mvcBuilder.ConfigureApiBehaviorOptions(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
                 {
@@ -60,7 +89,7 @@ namespace MARN_API
                     var errors = context.ModelState
                         .Where(entry => entry.Value?.Errors.Count > 0)
                         .ToDictionary(
-                            entry => entry.Key,
+                            entry => NormalizeValidationKey(entry.Key),
                             entry => entry.Value!.Errors
                                 .Select(error =>
                                 {
@@ -83,35 +112,6 @@ namespace MARN_API
                     });
                 };
             });
-            #endregion
-
-
-            #region Request & Upload Limits
-            // Limit file upload size (10MB)
-            builder.Services.Configure<FormOptions>(options =>
-            {
-                options.MultipartBodyLengthLimit = 10 * 1024 * 1024;
-            });
-
-            builder.WebHost.ConfigureKestrel(options =>
-            {
-                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
-            });
-            #endregion
-
-
-            #region Controllers & JSON
-            builder.Services.AddControllers(options =>
-                {
-                    options.Filters.Add<BannedAccountAccessFilter>();
-                })
-                .AddDataAnnotationsLocalization()
-                .AddJsonOptions(options =>
-                {
-                    // Convert Enums to string instead of int
-                    options.JsonSerializerOptions.Converters
-                        .Add(new JsonStringEnumConverter());
-                });
 
             builder.Services.AddEndpointsApiExplorer();
             #endregion
@@ -566,6 +566,16 @@ namespace MARN_API
                 TraceId = context.TraceIdentifier,
                 Timestamp = DateTime.UtcNow
             };
+        }
+
+        private static string NormalizeValidationKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key) || key == "$")
+            {
+                return "body";
+            }
+
+            return key;
         }
     }
 }

@@ -781,11 +781,13 @@ that paid at {3} is now available for withdrawal.</value></data>
   <data name="VALIDATION_STRING_LENGTH_RANGE" xml:space="preserve"><value>{0} must be between {1} and {2} characters.</value></data>
   <data name="VALIDATION_RANGE_BETWEEN" xml:space="preserve"><value>{0} must be between {1} and {2}.</value></data>
   <data name="VALIDATION_VALUE_INVALID" xml:space="preserve"><value>{0} is invalid.</value></data>
+  <data name="VALIDATION_INVALID_JSON" xml:space="preserve"><value>The request body contains invalid JSON.</value></data>
   <data name="FIELD_PHONE_NUMBER" xml:space="preserve"><value>Phone number</value></data>
   <data name="FIELD_FULL_NAME" xml:space="preserve"><value>Full name</value></data>
   <data name="FIELD_EMAIL_ADDRESS" xml:space="preserve"><value>Email address</value></data>
   <data name="FIELD_SUBJECT" xml:space="preserve"><value>Subject</value></data>
   <data name="FIELD_MESSAGE" xml:space="preserve"><value>Message</value></data>
+  <data name="FIELD_REQUEST" xml:space="preserve"><value>Request</value></data>
   <data name="FIELD_CURRENT_PASSWORD" xml:space="preserve"><value>Current password</value></data>
   <data name="FIELD_NEW_PASSWORD" xml:space="preserve"><value>New password</value></data>
   <data name="FIELD_CONFIRM_NEW_PASSWORD" xml:space="preserve"><value>Confirm new password</value></data>
