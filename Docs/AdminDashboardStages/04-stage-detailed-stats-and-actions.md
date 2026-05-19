@@ -179,29 +179,10 @@ Looks in:
 | Field | Meaning |
 |---|---|
 | `canDeactivate` | true only when property is active and not deleted |
-| `canRestore` | true only when property is inactive and not deleted |
+| `canRestore` | always `false` |
 | `isDeleted` | whether `DeletedAt` exists |
 
-## 3. Restore property
-
-```http
-PATCH /api/admin/stats/properties/{propertyId}/restore
-```
-
-### What happens
-
-- `IsActive` becomes `true`
-- verification `Status` is unchanged
-- owner receives a notification
-
-### Errors
-
-- `404`
-- `409`
-  - property already active
-  - property is soft deleted
-
-## 4. Soft delete property
+## 3. Soft delete property
 
 ```http
 DELETE /api/admin/stats/properties/{propertyId}
@@ -222,7 +203,7 @@ DELETE /api/admin/stats/properties/{propertyId}
 - `409`
   - property is already deleted
 
-## 5. Restore deleted property
+## 4. Restore deleted property
 
 ```http
 PATCH /api/admin/stats/properties/{propertyId}/restore-deleted

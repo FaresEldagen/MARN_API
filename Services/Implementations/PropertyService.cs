@@ -549,7 +549,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(property.IsActive, property.IsActive ? "Property activated successfully." : "Property deactivated successfully.");
         }
 
-        public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId)
+        public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId, bool adminInitiated = false, bool suppressNotification = false)
         {
             var property = await _propertyRepo.GetByIdAsync(propertyId);
             if (property == null || property.OwnerId != userId)
@@ -569,7 +569,10 @@ namespace MARN_API.Services.Implementations
             var mediaPaths = await _propertyRepo.GetMediaPathsByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
             filesToDelete.AddRange(mediaPaths);
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            var ownsTransaction = _context.Database.CurrentTransaction == null;
+            var transaction = ownsTransaction
+                ? await _context.Database.BeginTransactionAsync()
+                : null;
             try
             {
                 await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
@@ -584,33 +587,49 @@ namespace MARN_API.Services.Implementations
                 property.ImagesDeletionJob = jobId;
                 await _propertyRepo.UpdatePropertyAsync(property);
 
-                await transaction.CommitAsync();
+                if (transaction != null)
+                {
+                    await transaction.CommitAsync();
+                }
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                if (transaction != null)
+                {
+                    await transaction.RollbackAsync();
+                }
+
                 _logger.LogError(ex, "Transaction failed deleting property {Id}", propertyId);
                 return ServiceResult<bool>.Fail("Error deleting property.", resultType: ServiceResultType.BadRequest);
             }
 
-            await _notificationService.SendNotificationAsync(new NotificationRequestDto
+            if (!suppressNotification)
             {
-                UserId = userId.ToString(),
-                UserType = NotificationUserType.Owner,
-                Type = NotificationType.PropertyDeleted,
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = userId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.PropertyDeleted,
 
-                TitleKey = "NOTIFICATION_PROPERTY_DELETED_TITLE",
-                BodyKey = "NOTIFICATION_PROPERTY_DELETED_BODY",
-                LocalizationArguments = new() { property.Title },
-                Title = "Property Deleted",
-                Body = $"Your property \"{property.Title}\" has been deleted successfully. " +
-                       "If this was a mistake or you'd like to restore it, please contact our support team for assistance.",
-            });
+                    TitleKey = adminInitiated
+                        ? "NOTIFICATION_ADMIN_PROPERTY_DELETED_TITLE"
+                        : "NOTIFICATION_PROPERTY_DELETED_TITLE",
+                    BodyKey = adminInitiated
+                        ? "NOTIFICATION_ADMIN_PROPERTY_DELETED_BODY"
+                        : "NOTIFICATION_PROPERTY_DELETED_BODY",
+                    LocalizationArguments = new() { property.Title },
+                    Title = "Property Deleted",
+                    Body = adminInitiated
+                        ? $"An admin has deleted your property \"{property.Title}\". If you believe this is a mistake, please contact support."
+                        : $"Your property \"{property.Title}\" has been deleted successfully. " +
+                          "If this was a mistake or you'd like to restore it, please contact our support team for assistance.",
+                });
+            }
 
             return ServiceResult<bool>.Ok(true, "Property deleted completely.");
         }
 
-        private async Task DeletePropertyMediaAfterGracePeriod(long propertyId, List<string> filesToDelete)
+        public async Task DeletePropertyMediaAfterGracePeriod(long propertyId, List<string> filesToDelete)
         {
             var property = await _context.Properties
                 .IgnoreQueryFilters()

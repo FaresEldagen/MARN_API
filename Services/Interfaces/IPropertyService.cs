@@ -14,6 +14,6 @@ namespace MARN_API.Services.Interfaces
         Task<ServiceResult<bool>> EditPropertyAsync(long propertyId, EditPropertyDto dto, Guid userId);
         Task<ServiceResult<bool>> ToggleSavePropertyAsync(long propertyId, Guid userId);
         Task<ServiceResult<bool>> DeactivatePropertyAsync(long propertyId, Guid userId);
-        Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId);
+        Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId, bool adminInitiated = false, bool suppressNotification = false);
     }
 }

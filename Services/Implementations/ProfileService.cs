@@ -733,7 +733,10 @@ namespace MARN_API.Services.Implementations
                 var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
                 foreach(var propertyId in ownedPropertyIds)
                 {
-                    var propertyDeleteResult = await _propertyService.DeletePropertyAsync(propertyId, userId);
+                    var propertyDeleteResult = await _propertyService.DeletePropertyAsync(
+                        propertyId,
+                        userId,
+                        suppressNotification: true);
                     if (!propertyDeleteResult.Success)
                     {
                         _logger.LogWarning("Delete User failed: Could not delete owned property {PropertyId} for userId: {userId}. Error: {Error}", 
@@ -801,7 +804,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
         }
 
-        private void DeleteUserImages(List<string> filesToDelete)
+        public void DeleteUserImages(List<string> filesToDelete)
         {
             foreach (var filePath in filesToDelete)
             {

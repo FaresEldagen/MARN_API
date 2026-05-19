@@ -224,26 +224,6 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
-        /// Restores an inactive property from the detailed properties admin area.
-        /// </summary>
-        /// <param name="propertyId">The property identifier.</param>
-        /// <remarks>
-        /// This action only flips <c>IsActive</c> back to <c>true</c>. Deleted properties cannot be restored.
-        /// Restoring does not override a property's verification status.
-        /// </remarks>
-        [HttpPatch("stats/properties/{propertyId:long}/restore")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> RestoreDetailedProperty(long propertyId)
-        {
-            var result = await _adminDetailedStatsService.RestorePropertyAsync(propertyId);
-            return HandleServiceResult(result);
-        }
-
-        /// <summary>
         /// Soft deletes a property from the detailed properties admin area.
         /// </summary>
         /// <param name="propertyId">The property identifier.</param>

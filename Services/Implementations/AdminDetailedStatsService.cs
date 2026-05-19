@@ -75,36 +75,6 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<AdminPropertyDetailsDto>.Ok(result);
         }
 
-        public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> RestorePropertyAsync(long propertyId)
-        {
-            var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
-            if (property is null)
-                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
-
-            if (property.DeletedAt != null)
-            {
-                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
-                    "Deleted properties cannot be restored.",
-                    resultType: ServiceResultType.Conflict);
-            }
-
-            if (property.IsActive)
-            {
-                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
-                    "Property is already active.",
-                    resultType: ServiceResultType.Conflict);
-            }
-
-            property.IsActive = true;
-            await _detailedStatsRepo.SaveAdminContractChangesAsync();
-
-            await NotifyPropertyAvailabilityChangedAsync(property, restored: true);
-
-            return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
-                MapProperty(property),
-                "Property restored successfully.");
-        }
-
         public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId)
         {
             var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
@@ -115,7 +85,7 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Property is already deleted.", resultType: ServiceResultType.Conflict);
 
             _logger.LogInformation("Admin requested soft delete for property {PropertyId}", propertyId);
-            return await _propertyService.DeletePropertyAsync(propertyId, property.OwnerId);
+            return await _propertyService.DeletePropertyAsync(propertyId, property.OwnerId, adminInitiated: true);
         }
 
         public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> RestoreDeletedPropertyAsync(long propertyId)
@@ -153,6 +123,7 @@ namespace MARN_API.Services.Implementations
             }
 
             await _detailedStatsRepo.SaveAdminContractChangesAsync();
+            await NotifyDeletedPropertyRestoredAsync(property, imagesWereDeleted);
 
             _logger.LogInformation(
                 "Admin restored deleted property {PropertyId}. Images retained: {ImagesRetained}. Current status: {Status}",
@@ -316,20 +287,22 @@ namespace MARN_API.Services.Implementations
             });
         }
 
-        private async Task NotifyPropertyAvailabilityChangedAsync(Property property, bool restored)
+        private async Task NotifyDeletedPropertyRestoredAsync(Property property, bool imagesWereDeleted)
         {
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {
                 UserId = property.OwnerId.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.General,
-                TitleKey = restored ? "NOTIFICATION_PROPERTY_RESTORED_TITLE" : "NOTIFICATION_PROPERTY_DEACTIVATED_TITLE",
-                BodyKey = restored ? "NOTIFICATION_PROPERTY_RESTORED_BODY" : "NOTIFICATION_PROPERTY_DEACTIVATED_BODY",
+                TitleKey = "NOTIFICATION_ADMIN_PROPERTY_RESTORED_TITLE",
+                BodyKey = imagesWereDeleted
+                    ? "NOTIFICATION_ADMIN_PROPERTY_RESTORED_REVERIFY_BODY"
+                    : "NOTIFICATION_ADMIN_PROPERTY_RESTORED_BODY",
                 LocalizationArguments = new() { property.Title },
-                Title = restored ? "Property Restored" : "Property Deactivated",
-                Body = restored
-                    ? $"An admin has restored your property \"{property.Title}\" and made it active again."
-                    : $"An admin has deactivated your property \"{property.Title}\". It is no longer publicly available.",
+                Title = "Property Restored",
+                Body = imagesWereDeleted
+                    ? $"An admin has restored your property \"{property.Title}\". Its ownership files were already removed during the deletion grace period, so it may need to go through verification again."
+                    : $"An admin has restored your deleted property \"{property.Title}\". It is available in your account again.",
                 ActionType = NotificationActionType.Property,
                 ActionId = property.Id.ToString()
             });
@@ -428,7 +401,7 @@ namespace MARN_API.Services.Implementations
                 CommentsCount = property.PropertyComments.Count(comment => !comment.IsHiddenByModeration),
                 IsActive = property.IsActive,
                 CanDeactivate = property.IsActive && property.DeletedAt == null,
-                CanRestore = !property.IsActive && property.DeletedAt == null,
+                CanRestore = false,
                 IsDeleted = property.DeletedAt != null,
                 CreatedAt = property.CreatedAt
             };
