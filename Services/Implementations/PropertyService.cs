@@ -15,6 +15,7 @@ using System;
 using System.Threading.Tasks;
 using MARN_API.Enums.Contract;
 using MARN_API.Enums.Property;
+using Hangfire;
 
 namespace MARN_API.Services.Implementations
 {
@@ -553,7 +554,7 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Property has active contracts and cannot be deleted.", resultType: ServiceResultType.BadRequest);
             }
 
-            var filesToDelete = new System.Collections.Generic.List<string>();
+            var filesToDelete = new List<string>();
             if (!string.IsNullOrEmpty(property.ProofOfOwnership))
             {
                 filesToDelete.Add(property.ProofOfOwnership);
@@ -565,12 +566,18 @@ namespace MARN_API.Services.Implementations
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+
                 await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyCommentRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyRatingRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyRepo.DeleteMediaByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
 
+                string jobId = BackgroundJob.Schedule(
+                    () => DeletePropertyImages(filesToDelete),
+                    TimeSpan.FromDays(7));
+
                 property.DeletedAt = DateTime.UtcNow;
+                property.ImagesDeletionJob = jobId;
                 await _propertyRepo.UpdatePropertyAsync(property);
 
                 await transaction.CommitAsync();
@@ -580,12 +587,6 @@ namespace MARN_API.Services.Implementations
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "Transaction failed deleting property {Id}", propertyId);
                 return ServiceResult<bool>.Fail("Error deleting property.", resultType: ServiceResultType.BadRequest);
-            }
-
-            foreach (var file in filesToDelete)
-            {
-                try { _fileService.DeleteImage(file); }
-                catch (Exception) { /* Ignored */ }
             }
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -600,6 +601,22 @@ namespace MARN_API.Services.Implementations
             });
 
             return ServiceResult<bool>.Ok(true, "Property deleted completely.");
+        }
+
+        private void DeletePropertyImages(List<string> filesToDelete)
+        {
+            foreach (var file in filesToDelete)
+            {
+                try 
+                { 
+                    _fileService.DeleteImage(file); 
+                }
+                catch (Exception ex) 
+                {
+                    _logger.LogWarning(ex, "Failed to delete file from storage: {FilePath}", file);
+                    throw; 
+                }
+            }
         }
     }
 }

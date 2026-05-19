@@ -36,6 +36,7 @@ namespace MARN_API.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeletedAt { get; set; }
+        public string? ImagesDeletionJob { get; set; }
 
 
         public Guid OwnerId { get; set; }

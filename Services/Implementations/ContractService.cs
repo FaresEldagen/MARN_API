@@ -19,10 +19,10 @@ namespace MARN_API.Services.Implementations
     public class ContractService : IContractService
     {
         private readonly IContractRepo _contractRepo;
-        private readonly HashingService _hashingService;
-        private readonly OpenTimestampsService _openTimestampsService;
-        private readonly OpenTimestampsProofReader _proofReader;
-        private readonly ContractPdfGenerator _contractPdfGenerator;
+        private readonly IHashingService _hashingService;
+        private readonly IOpenTimestampsService _openTimestampsService;
+        private readonly IOpenTimestampsProofReader _proofReader;
+        private readonly IContractPdfGenerator _contractPdfGenerator;
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
@@ -32,10 +32,10 @@ namespace MARN_API.Services.Implementations
 
         public ContractService(
             IContractRepo contractRepo,
-            HashingService hashingService,
-            OpenTimestampsService openTimestampsService,
-            OpenTimestampsProofReader proofReader,
-            ContractPdfGenerator contractPdfGenerator,
+            IHashingService hashingService,
+            IOpenTimestampsService openTimestampsService,
+            IOpenTimestampsProofReader proofReader,
+            IContractPdfGenerator contractPdfGenerator,
             IBookingRequestRepo bookingRequestRepo,
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
@@ -130,7 +130,10 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.Renter,
                     Type = NotificationType.ContractStarted,
                     Title = "Contract Ready for Signature",
-                    Body = $"The owner of \"{property.Title}\" has generated a contract for you. Please review and sign it."
+                    Body = $"The owner of \"{property.Title}\" has generated a contract for you. Please review and sign it.",
+
+                    ActionType = NotificationActionType.Contract,
+                    ActionId = contract.Id.ToString(),
                 });
             }
             catch (Exception ex)
@@ -286,7 +289,10 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.ContractSigned,
                 Title = "Contract Signed",
-                Body = $"The renter {renter!.FirstName} {renter.LastName} has signed the contract for \"{property.Title}\"."
+                Body = $"The renter {renter!.FirstName} {renter.LastName} has signed the contract for \"{property.Title}\".",
+
+                ActionType = NotificationActionType.Contract,
+                ActionId = contract.Id.ToString()
             });
 
             _logger.LogInformation("Sign Contract successful for contractId: {contractId}", contractId);

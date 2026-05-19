@@ -8,9 +8,11 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using static System.Collections.Specialized.BitVector32;
 
+using MARN_API.Services.Interfaces;
+
 namespace MARN_API.Services.Implementations
 {
-    public class ContractPdfGenerator
+    public class ContractPdfGenerator : IContractPdfGenerator
     {
         private readonly IWebHostEnvironment _env;
 
