@@ -433,39 +433,58 @@ namespace MARN_API.Services.Implementations
                 return;
             }
 
-            owner.StripePayoutsEnabled = account.PayoutsEnabled;
+            var wasReady =
+                owner.StripeChargesEnabled &&
+                owner.StripePayoutsEnabled;
+
+            var isReady =
+                account.ChargesEnabled &&
+                account.PayoutsEnabled;
+
+
             owner.StripeChargesEnabled = account.ChargesEnabled;
-            var result = await _userManager.UpdateAsync(owner);
+            owner.StripePayoutsEnabled = account.PayoutsEnabled;
 
-            if (account.ChargesEnabled && account.PayoutsEnabled)
+            await _userManager.UpdateAsync(owner);
+
+
+            // First time for the account to be ready
+            if (!wasReady && isReady)
             {
-                await _notificationService.SendNotificationAsync(new NotificationRequestDto
-                {
-                    UserId = owner.Id.ToString(),
-                    UserType = NotificationUserType.Owner,
-                    Type = NotificationType.ConnectAccountSuccess,
-                    Title = "Connect Account Activated",
-                    Body = "Your Stripe Connect account has been activated and is now ready to withdraw your payments.",
+                await _notificationService.SendNotificationAsync(
+                    new NotificationRequestDto
+                    {
+                        UserId = owner.Id.ToString(),
+                        UserType = NotificationUserType.Owner,
+                        Type = NotificationType.ConnectAccountSuccess,
+                        Title = "Connect Account Activated",
+                        Body = "Your Stripe Connect account has been activated and is now ready to withdraw your payments.",
+                        ActionType = NotificationActionType.OwnerDashboard
+                    });
 
-                    ActionType = NotificationActionType.OwnerDashboard
-                });
-
-                _logger.LogInformation("Handle Connected Account Updated successful: Connect account activated for ownerId: {OwnerId}", owner.Id);
+                _logger.LogInformation(
+                    "Connect account activated for ownerId: {OwnerId}",
+                    owner.Id);
             }
-            else
+
+            // Problem happened
+            else if (!isReady &&
+                     !string.IsNullOrEmpty(account.Requirements?.DisabledReason))
             {
-                await _notificationService.SendNotificationAsync(new NotificationRequestDto
-                {
-                    UserId = owner.Id.ToString(),
-                    UserType = NotificationUserType.Owner,
-                    Type = NotificationType.ConnectAccountFailed,
-                    Title = "Connect Account Failed",
-                    Body = "Your Stripe Connect account is not fully activated. Please complete the onboarding process to enable charges and payouts.",
+                await _notificationService.SendNotificationAsync(
+                    new NotificationRequestDto
+                    {
+                        UserId = owner.Id.ToString(),
+                        UserType = NotificationUserType.Owner,
+                        Type = NotificationType.ConnectAccountFailed,
+                        Title = "Connect Account Issue",
+                        Body = $"Stripe requires additional information: {account.Requirements.DisabledReason}",
+                        ActionType = NotificationActionType.OwnerDashboard
+                    });
 
-                    ActionType = NotificationActionType.OwnerDashboard
-                });
-
-                _logger.LogInformation("Handle Connected Account Updated: Charges and payouts not enabled for StripeAccountId: {StripeAccountId}", account.Id);
+                _logger.LogInformation(
+                    "Handle Connected Account Updated: Charges and payouts not enabled for StripeAccountId: {StripeAccountId}", 
+                    account.Id);
             }
         }
 
