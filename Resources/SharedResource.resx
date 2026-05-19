@@ -853,4 +853,13 @@ that paid at {3} is now available for withdrawal.</value></data>
   <data name="TEXT_USER_VERIFICATION_CANNOT_BE_APPROVED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>User verification cannot be approved while account status is {0}.</value></data>
   <data name="TEXT_USER_VERIFICATION_CANNOT_BE_DECLINED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>User verification cannot be declined while account status is {0}.</value></data>
   <data name="TEXT_WEBHOOK_SIGNATURE_VALIDATION_FAILED" xml:space="preserve"><value>Webhook signature validation failed.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_BANNED_TITLE" xml:space="preserve"><value>Account Banned</value></data>
+  <data name="NOTIFICATION_ACCOUNT_BANNED_BODY" xml:space="preserve"><value>An admin has banned your account. You can no longer use MARN until the ban is removed. If you believe this is a mistake, please contact support.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_UNBANNED_TITLE" xml:space="preserve"><value>Account Unbanned</value></data>
+  <data name="NOTIFICATION_ACCOUNT_UNBANNED_BODY" xml:space="preserve"><value>An admin has removed the ban from your account. You can now sign in and continue using MARN.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_RESTORED_TITLE" xml:space="preserve"><value>Account Restored</value></data>
+  <data name="NOTIFICATION_ACCOUNT_RESTORED_BODY" xml:space="preserve"><value>An admin has restored your deleted account. You can now sign in and continue using MARN.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_RESTORED_REVERIFY_BODY" xml:space="preserve"><value>An admin has restored your account. Some verification images were removed during the deletion grace period, so you may need to resubmit them before your account can be verified again.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_DELETED_TITLE" xml:space="preserve"><value>Account Deleted</value></data>
+  <data name="NOTIFICATION_ACCOUNT_DELETED_BODY" xml:space="preserve"><value>An admin has deleted your account. If you believe this is a mistake, please contact support.</value></data>
 </root>
