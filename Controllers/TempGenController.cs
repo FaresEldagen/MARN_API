@@ -11,6 +11,7 @@ using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using MARN_API.Services.Implementations;
 
 namespace MARN_API.Controllers
 {
@@ -18,6 +19,7 @@ namespace MARN_API.Controllers
     [Route("api/[controller]")]
     public class TempGenController : ControllerBase
     {
+        private static readonly byte[] DummyOtsAttestation = [0x01, 0x02, 0x03];
 
         private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en");
         private static readonly CultureInfo ArabicCulture = CultureInfo.GetCultureInfo("ar");
@@ -59,6 +61,7 @@ namespace MARN_API.Controllers
         [HttpGet("generate")]
         public async Task<IActionResult> Generate()
         {
+            var generatedAtUtc = DateTime.UtcNow;
             var seedPath = Path.Combine(_env.ContentRootPath, "Data", "Seed", "Files");
             if (!Directory.Exists(seedPath)) Directory.CreateDirectory(seedPath);
 
@@ -72,7 +75,7 @@ namespace MARN_API.Controllers
                 new { Id = 1000006, PropertyId = 1004L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 180000m, Start = new DateTime(2025, 5, 1), End = new DateTime(2026, 5, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly }
             };
 
-            var results = new List<string>();
+            var results = new List<TempGeneratedContractResult>();
 
             foreach (var c in contracts)
             {
@@ -84,7 +87,13 @@ namespace MARN_API.Controllers
 
                 if (property == null)
                 {
-                    results.Add($"// Property {c.PropertyId} not found");
+                    results.Add(new TempGeneratedContractResult
+                    {
+                        ContractId = c.Id,
+                        PropertyId = c.PropertyId,
+                        Success = false,
+                        Error = $"Property {c.PropertyId} not found."
+                    });
                     continue;
                 }
 
@@ -156,17 +165,21 @@ namespace MARN_API.Controllers
                 var hash = await _hashingService.ComputeSha256HashAsync(stream);
 
                 byte[] otsFileBytes;
+                OpenTimestampsProofReader.OpenTimestampsProofExtractionResult? proofData = null;
+                string? otsSubmissionError = null;
+                var usedFallbackProof = false;
+
                 try
                 {
                     otsFileBytes = await _openTimestampsService.SubmitHashAsync(hash);
+                    proofData = _proofReader.Extract(otsFileBytes);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // Fallback if OTS fails, just create a dummy OTS file
-                    otsFileBytes = _openTimestampsService.BuildDetachedOtsFile(hash, new byte[] { 0x01, 0x02, 0x03 });
+                    usedFallbackProof = true;
+                    otsSubmissionError = ex.Message;
+                    otsFileBytes = _openTimestampsService.BuildDetachedOtsFile(hash, DummyOtsAttestation);
                 }
-
-                var proofData = _proofReader.Extract(otsFileBytes);
 
                 var pdfPath = Path.Combine(seedPath, $"{c.Id}.pdf");
                 var otsPath = Path.Combine(seedPath, $"{c.Id}.ots");
@@ -174,10 +187,11 @@ namespace MARN_API.Controllers
                 await System.IO.File.WriteAllBytesAsync(pdfPath, pdfResult.Content);
                 await System.IO.File.WriteAllBytesAsync(otsPath, otsFileBytes);
 
-                var txId = proofData.TransactionIds.FirstOrDefault();
-                var merkleRoot = proofData.MerkleRoots.FirstOrDefault();
+                var txId = proofData?.TransactionIds.FirstOrDefault();
+                var merkleRoot = proofData?.MerkleRoots.FirstOrDefault();
 
                 var dbContract = await _dbContext.Contracts.FirstOrDefaultAsync(co => co.Id == c.Id);
+                var databaseContractUpdated = dbContract != null;
                 if (dbContract != null)
                 {
                     dbContract.FileName = pdfResult.FileName;
@@ -189,23 +203,40 @@ namespace MARN_API.Controllers
                     _dbContext.Contracts.Update(dbContract);
                 }
 
-                results.Add($@"
-                // For Contract {c.Id}
-                FileName = ""{pdfResult.FileName}"",
-                Hash = ""{hash}"",
-                TransactionId = {(txId != null ? $"\"{txId}\"" : "null")},
-                MerkleRoot = {(merkleRoot != null ? $"\"{merkleRoot}\"" : "null")},
-                // Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{c.Id}.pdf""))
-                // Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{c.Id}.ots""))
-");
+                results.Add(new TempGeneratedContractResult
+                {
+                    ContractId = c.Id,
+                    PropertyId = c.PropertyId,
+                    Success = true,
+                    FileName = pdfResult.FileName,
+                    Hash = hash,
+                    TransactionId = txId,
+                    MerkleRoot = merkleRoot,
+                    PendingCalendarUrls = proofData?.PendingCalendarUrls ?? [],
+                    UsedFallbackProof = usedFallbackProof,
+                    OtsSubmissionError = otsSubmissionError,
+                    DatabaseContractUpdated = databaseContractUpdated,
+                    PdfPath = pdfPath,
+                    OtsPath = otsPath
+                });
             }
 
-            var outputStr = string.Join("\n", results);
+            var outputStr = string.Join(
+                Environment.NewLine + Environment.NewLine,
+                results.Select(FormatSeedResult));
             await System.IO.File.WriteAllTextAsync(Path.Combine(seedPath, "results.txt"), outputStr);
 
             await _dbContext.SaveChangesAsync();
 
-            return Ok(results);
+            return Ok(new
+            {
+                generatedAtUtc,
+                seedPath,
+                totalContracts = results.Count,
+                successfulContracts = results.Count(r => r.Success),
+                fallbackProofContracts = results.Count(r => r.UsedFallbackProof),
+                contracts = results
+            });
         }
 
         /// <summary>
@@ -379,6 +410,41 @@ namespace MARN_API.Controllers
         private string GetEnumBilingualDisplayName<TEnum>(TEnum value) where TEnum : struct, Enum
         {
             return $"{_localizer.GetEnumDisplayName(value, EnglishCulture)} / {_localizer.GetEnumDisplayName(value, ArabicCulture)}";
+        }
+
+        private static string FormatSeedResult(TempGeneratedContractResult result)
+        {
+            if (!result.Success)
+            {
+                return $"// Contract {result.ContractId}: {result.Error}";
+            }
+
+            return $@"
+// For Contract {result.ContractId}
+FileName = ""{result.FileName}"",
+Hash = ""{result.Hash}"",
+TransactionId = {(result.TransactionId != null ? $"\"{result.TransactionId}\"" : "null")},
+MerkleRoot = {(result.MerkleRoot != null ? $"\"{result.MerkleRoot}\"" : "null")},
+// Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{result.ContractId}.pdf""))
+// Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{result.ContractId}.ots""))".Trim();
+        }
+
+        private sealed class TempGeneratedContractResult
+        {
+            public long ContractId { get; init; }
+            public long PropertyId { get; init; }
+            public bool Success { get; init; }
+            public string? FileName { get; init; }
+            public string? Hash { get; init; }
+            public string? TransactionId { get; init; }
+            public string? MerkleRoot { get; init; }
+            public List<string> PendingCalendarUrls { get; init; } = [];
+            public bool UsedFallbackProof { get; init; }
+            public string? OtsSubmissionError { get; init; }
+            public bool DatabaseContractUpdated { get; init; }
+            public string? PdfPath { get; init; }
+            public string? OtsPath { get; init; }
+            public string? Error { get; init; }
         }
     }
 }
