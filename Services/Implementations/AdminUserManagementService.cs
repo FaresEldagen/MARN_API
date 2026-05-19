@@ -5,12 +5,14 @@ using MARN_API.Enums.Account;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
+using Hangfire;
 
 namespace MARN_API.Services.Implementations
 {
     public class AdminUserManagementService : IAdminUserManagementService
     {
         private const int MaxPageSize = 100;
+        private static readonly TimeSpan ImageRestoreGracePeriod = TimeSpan.FromDays(7);
         private readonly IAdminUserManagementRepo _userManagementRepo;
         private readonly IProfileService _profileService;
         private readonly ILogger<AdminUserManagementService> _logger;
@@ -60,23 +62,71 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "User banned successfully.");
         }
 
-        public async Task<ServiceResult<bool>> RestoreUserAsync(Guid userId)
+        public async Task<ServiceResult<bool>> UnbanUserAsync(Guid userId)
         {
             var user = await GetManageableUserAsync(userId);
             if (!user.Success)
                 return ServiceResult<bool>.Fail(user.Message!, resultType: user.ResultType);
 
             if (user.Data!.DeletedAt != null)
-                return ServiceResult<bool>.Fail("Deleted users cannot be restored from ban.", resultType: ServiceResultType.Conflict);
+                return ServiceResult<bool>.Fail("Deleted users cannot be unbanned.", resultType: ServiceResultType.Conflict);
 
             if (user.Data.AccountStatus != AccountStatus.Banned)
-                return ServiceResult<bool>.Fail("Only banned users can be restored.", resultType: ServiceResultType.Conflict);
+                return ServiceResult<bool>.Fail("Only banned users can be unbanned.", resultType: ServiceResultType.Conflict);
 
             user.Data.AccountStatus = user.Data.StatusBeforeBan ?? AccountStatus.Unverified;
             user.Data.StatusBeforeBan = null;
             await _userManagementRepo.SaveChangesAsync();
 
-            _logger.LogInformation("Admin restored banned user {UserId} to status {Status}", userId, user.Data.AccountStatus);
+            _logger.LogInformation("Admin unbanned user {UserId} to status {Status}", userId, user.Data.AccountStatus);
+            return ServiceResult<bool>.Ok(true, "User unbanned successfully.");
+        }
+
+        public async Task<ServiceResult<bool>> RestoreDeletedUserAsync(Guid userId)
+        {
+            var user = await GetManageableUserAsync(userId);
+            if (!user.Success)
+                return ServiceResult<bool>.Fail(user.Message!, resultType: user.ResultType);
+
+            if (user.Data!.DeletedAt == null)
+                return ServiceResult<bool>.Fail("Only deleted users can be restored.", resultType: ServiceResultType.Conflict);
+
+            var imagesWereDeleted = user.Data.DeletedAt.Value <= DateTime.UtcNow.Subtract(ImageRestoreGracePeriod);
+
+            if (!imagesWereDeleted && !string.IsNullOrWhiteSpace(user.Data.ImagesDeletionJob))
+            {
+                BackgroundJob.Delete(user.Data.ImagesDeletionJob);
+            }
+
+            user.Data.DeletedAt = null;
+            user.Data.ImagesDeletionJob = null;
+
+            if (imagesWereDeleted)
+            {
+                user.Data.ProfileImage = null;
+                user.Data.FrontIdPhoto = null;
+                user.Data.BackIdPhoto = null;
+
+                if (user.Data.AccountStatus == AccountStatus.Verified)
+                {
+                    user.Data.AccountStatus = AccountStatus.Unverified;
+                }
+
+                if (user.Data.AccountStatus == AccountStatus.Banned && user.Data.StatusBeforeBan == AccountStatus.Verified)
+                {
+                    user.Data.StatusBeforeBan = AccountStatus.Unverified;
+                }
+            }
+
+            await _userManagementRepo.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Admin restored deleted user {UserId}. Images retained: {ImagesRetained}. Current status: {Status}. Status before ban: {StatusBeforeBan}",
+                userId,
+                !imagesWereDeleted,
+                user.Data.AccountStatus,
+                user.Data.StatusBeforeBan);
+
             return ServiceResult<bool>.Ok(true, "User restored successfully.");
         }
 

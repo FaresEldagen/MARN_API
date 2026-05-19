@@ -11,6 +11,7 @@ using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using MARN_API.Enums.Contract;
@@ -571,14 +572,12 @@ namespace MARN_API.Services.Implementations
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-
                 await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyCommentRepo.DeleteByPropertyIdAsync(propertyId);
                 await _propertyRatingRepo.DeleteByPropertyIdAsync(propertyId);
-                await _propertyRepo.DeleteMediaByPropertyIdsAsync(new System.Collections.Generic.List<long> { propertyId });
 
                 string jobId = BackgroundJob.Schedule(
-                    () => DeletePropertyImages(filesToDelete),
+                    () => DeletePropertyMediaAfterGracePeriod(propertyId, filesToDelete),
                     TimeSpan.FromDays(7));
 
                 property.DeletedAt = DateTime.UtcNow;
@@ -611,8 +610,17 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "Property deleted completely.");
         }
 
-        private void DeletePropertyImages(List<string> filesToDelete)
+        private async Task DeletePropertyMediaAfterGracePeriod(long propertyId, List<string> filesToDelete)
         {
+            var property = await _context.Properties
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == propertyId);
+
+            if (property == null || property.DeletedAt == null)
+            {
+                return;
+            }
+
             foreach (var file in filesToDelete)
             {
                 try 
@@ -625,6 +633,12 @@ namespace MARN_API.Services.Implementations
                     throw; 
                 }
             }
+
+            property.ProofOfOwnership = null;
+            property.ImagesDeletionJob = null;
+
+            await _propertyRepo.DeleteMediaByPropertyIdsAsync([propertyId]);
+            await _context.SaveChangesAsync();
         }
     }
 }

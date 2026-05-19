@@ -4,7 +4,7 @@
 
 This stage covers:
 - user list and user details
-- ban / restore / soft delete
+- ban / unban / restore soft delete / soft delete
 - role list
 - role-management user list
 - role updates, including `Admin` and future roles like `Moderator`
@@ -123,10 +123,10 @@ PATCH /api/admin/users/{userId}/ban
   - user already banned
   - user already deleted
 
-### 4. Restore user
+### 4. Unban user
 
 ```http
-PATCH /api/admin/users/{userId}/restore
+PATCH /api/admin/users/{userId}/unban
 ```
 
 ### What happens
@@ -149,7 +149,30 @@ This does **not** force users back to `Verified`.
   - user is not banned
   - user is deleted
 
-### 5. Soft delete user
+### 5. Restore deleted user
+
+```http
+PATCH /api/admin/users/{userId}/restore
+```
+
+### What happens
+
+- only deleted non-admin users are allowed
+- `DeletedAt` is cleared
+- if the delayed Hangfire image deletion job is still pending, it is cancelled
+- if more than 7 days passed and verification images were already removed, the user is restored as `Unverified`
+- if the deleted user is still banned and `StatusBeforeBan` was `Verified`, `StatusBeforeBan` is downgraded to `Unverified`
+
+### Errors
+
+- `403`
+  - target user is an admin user
+- `404`
+  - user not found
+- `409`
+  - user is not deleted
+
+### 6. Soft delete user
 
 ```http
 DELETE /api/admin/users/{userId}

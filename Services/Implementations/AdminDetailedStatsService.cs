@@ -9,27 +9,35 @@ using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Stripe;
+using Hangfire;
 
 namespace MARN_API.Services.Implementations
 {
     public class AdminDetailedStatsService : IAdminDetailedStatsService
     {
         private const int MaxPageSize = 100;
+        private static readonly TimeSpan ImageRestoreGracePeriod = TimeSpan.FromDays(7);
         private readonly IAdminDetailedStatsRepo _detailedStatsRepo;
         private readonly INotificationService _notificationService;
         private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<AdminDetailedStatsService> _logger;
+        private readonly IPropertyService _propertyService;
+        private readonly IPropertyRepo _propertyRepo;
 
         public AdminDetailedStatsService(
             IAdminDetailedStatsRepo detailedStatsRepo,
             INotificationService notificationService,
             IAppTextLocalizer localizer,
-            ILogger<AdminDetailedStatsService> logger)
+            ILogger<AdminDetailedStatsService> logger,
+            IPropertyService propertyService,
+            IPropertyRepo propertyRepo)
         {
             _detailedStatsRepo = detailedStatsRepo;
             _notificationService = notificationService;
             _localizer = localizer;
             _logger = logger;
+            _propertyService = propertyService;
+            _propertyRepo = propertyRepo;
         }
 
         public async Task<ServiceResult<AdminDetailedUsersResponseDto>> GetUsersAsync(AdminDetailedUsersQueryDto query)
@@ -67,36 +75,6 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<AdminPropertyDetailsDto>.Ok(result);
         }
 
-        public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> DeactivatePropertyAsync(long propertyId)
-        {
-            var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
-            if (property is null)
-                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
-
-            if (property.DeletedAt != null)
-            {
-                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
-                    "Deleted properties cannot be deactivated.",
-                    resultType: ServiceResultType.Conflict);
-            }
-
-            if (!property.IsActive)
-            {
-                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
-                    "Property is already deactivated.",
-                    resultType: ServiceResultType.Conflict);
-            }
-
-            property.IsActive = false;
-            await _detailedStatsRepo.SaveAdminContractChangesAsync();
-
-            await NotifyPropertyAvailabilityChangedAsync(property, restored: false);
-
-            return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
-                MapProperty(property),
-                "Property deactivated successfully.");
-        }
-
         public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> RestorePropertyAsync(long propertyId)
         {
             var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
@@ -121,6 +99,66 @@ namespace MARN_API.Services.Implementations
             await _detailedStatsRepo.SaveAdminContractChangesAsync();
 
             await NotifyPropertyAvailabilityChangedAsync(property, restored: true);
+
+            return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
+                MapProperty(property),
+                "Property restored successfully.");
+        }
+
+        public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId)
+        {
+            var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
+            if (property is null)
+                return ServiceResult<bool>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.DeletedAt != null)
+                return ServiceResult<bool>.Fail("Property is already deleted.", resultType: ServiceResultType.Conflict);
+
+            _logger.LogInformation("Admin requested soft delete for property {PropertyId}", propertyId);
+            return await _propertyService.DeletePropertyAsync(propertyId, property.OwnerId);
+        }
+
+        public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> RestoreDeletedPropertyAsync(long propertyId)
+        {
+            var property = await _detailedStatsRepo.GetPropertyForAdminActionAsync(propertyId);
+            if (property is null)
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+
+            if (property.DeletedAt == null)
+            {
+                return ServiceResult<AdminDetailedPropertyListItemDto>.Fail(
+                    "Only deleted properties can be restored.",
+                    resultType: ServiceResultType.Conflict);
+            }
+
+            var imagesWereDeleted = property.DeletedAt.Value <= DateTime.UtcNow.Subtract(ImageRestoreGracePeriod);
+
+            if (!imagesWereDeleted && !string.IsNullOrWhiteSpace(property.ImagesDeletionJob))
+            {
+                BackgroundJob.Delete(property.ImagesDeletionJob);
+            }
+
+            property.DeletedAt = null;
+            property.ImagesDeletionJob = null;
+
+            if (imagesWereDeleted)
+            {
+                property.ProofOfOwnership = null;
+                await _propertyRepo.DeleteMediaByPropertyIdsAsync([propertyId]);
+
+                if (property.Status == PropertyStatus.Verified)
+                {
+                    property.Status = PropertyStatus.Pending;
+                }
+            }
+
+            await _detailedStatsRepo.SaveAdminContractChangesAsync();
+
+            _logger.LogInformation(
+                "Admin restored deleted property {PropertyId}. Images retained: {ImagesRetained}. Current status: {Status}",
+                propertyId,
+                !imagesWereDeleted,
+                property.Status);
 
             return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
                 MapProperty(property),
