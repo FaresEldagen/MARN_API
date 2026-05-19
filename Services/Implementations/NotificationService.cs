@@ -6,7 +6,7 @@ using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
-using System.Text.Json;
+using MARN_API.Localization;
 
 namespace MARN_API.Services.Implementations
 {
@@ -18,6 +18,8 @@ namespace MARN_API.Services.Implementations
         private readonly IHubContext<NotificationHub> _notificationHub;
         private readonly IMapper _mapper;
         private readonly ILogger<NotificationService> _logger;
+        private readonly IUserCultureService _userCultureService;
+        private readonly INotificationContentLocalizer _notificationContentLocalizer;
 
         public NotificationService(
             INotificationRepo notificationRepo,
@@ -25,7 +27,9 @@ namespace MARN_API.Services.Implementations
             ConnectionTracker tracker,
             IHubContext<NotificationHub> notificationHub,
             IMapper mapper,
-            ILogger<NotificationService> logger)
+            ILogger<NotificationService> logger,
+            IUserCultureService userCultureService,
+            INotificationContentLocalizer notificationContentLocalizer)
         {
             _notificationRepo = notificationRepo;
             _tracker = tracker;
@@ -33,16 +37,26 @@ namespace MARN_API.Services.Implementations
             _notificationHub = notificationHub;
             _mapper = mapper;
             _logger = logger;
+            _userCultureService = userCultureService;
+            _notificationContentLocalizer = notificationContentLocalizer;
         }
 
 
         #region Notification
         public async Task SendNotificationAsync(NotificationRequestDto request)
         {
+            var recipientCulture = await _userCultureService.ResolveUserCultureAsync(request.UserId);
+            var localizedContent = _notificationContentLocalizer.Render(request, recipientCulture);
+
             // Save in DB
             if (request.SaveInDB)
             {
                 var notification = _mapper.Map<Notification>(request);
+                var englishFallbackContent = _notificationContentLocalizer.Render(
+                    request,
+                    LocalizationConstants.GetCulture(LocalizationConstants.DefaultCulture));
+                notification.Title = englishFallbackContent.Title;
+                notification.Body = englishFallbackContent.Body;
                 await _notificationRepo.AddAsync(notification);
             }
 
@@ -50,6 +64,8 @@ namespace MARN_API.Services.Implementations
             if (_tracker.IsOnline(request.UserId))
             {
                 // Send real-time notification via SignalR
+                request.Title = localizedContent.Title;
+                request.Body = localizedContent.Body;
                 await _notificationHub.Clients.User(request.UserId.ToLower())
                     .SendAsync("ReceiveNotification", request);
             }
@@ -62,7 +78,7 @@ namespace MARN_API.Services.Implementations
                 {
                     _logger.LogInformation("Receiver {ReceiverId} is offline, sending FCM notification", request.UserId);
 
-                    var invalidTokens = await _fcmService.SendNotificationAsync(tokens, request.Title, request.Body);
+                    var invalidTokens = await _fcmService.SendNotificationAsync(tokens, localizedContent.Title, localizedContent.Body);
 
                     foreach (var invalidToken in invalidTokens)
                     {
@@ -79,7 +95,14 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Fetching notifications for user {UserId}", userId);
 
             var notifications = await _notificationRepo.GetAllNotificationsAsync(userId.ToString());
-            var result = _mapper.Map<List<NotificationCardDto>>(notifications);
+            var result = notifications.Select(notification =>
+            {
+                var dto = _mapper.Map<NotificationCardDto>(notification);
+                var content = _notificationContentLocalizer.Render(notification);
+                dto.Title = content.Title;
+                dto.Body = content.Body;
+                return dto;
+            }).ToList();
 
             return ServiceResult<List<NotificationCardDto>>.Ok(result);
         }

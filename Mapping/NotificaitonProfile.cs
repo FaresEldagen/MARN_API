@@ -18,6 +18,8 @@ namespace MARN_API.Mapping
             CreateMap<NotificationRequestDto, Notification>()
                 .ForMember(dest => dest.UserId,
                     opt => opt.MapFrom(src => Guid.Parse(src.UserId)))
+                .ForMember(dest => dest.LocalizationArgumentsJson,
+                    opt => opt.MapFrom<NotificationLocalizationArgumentsResolver>())
                 .ForMember(dest => dest.Data,
                     opt => opt.MapFrom<JsonSerializerResolver>());
         }
@@ -50,6 +52,17 @@ namespace MARN_API.Mapping
                 return null;
 
             return JsonSerializer.Serialize(src.Data);
+        }
+    }
+
+    public class NotificationLocalizationArgumentsResolver : IValueResolver<NotificationRequestDto, Notification, string?>
+    {
+        public string? Resolve(NotificationRequestDto src, Notification dest, string? destMember, ResolutionContext context)
+        {
+            if (src.LocalizationArguments == null || src.LocalizationArguments.Count == 0)
+                return null;
+
+            return JsonSerializer.Serialize(src.LocalizationArguments);
         }
     }
     #endregion

@@ -93,7 +93,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GenerateAnalyticsReport([FromBody] AdminAnalyticsReportGenerateRequestDto request)
         {
             if (!TryGetUserId(out var adminId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _adminAnalyticsReportService.GenerateAsync(adminId, request);
             return HandleServiceResult(result);
@@ -208,6 +208,22 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
+        /// Returns a deep admin view of a single property, including owner info, media, amenities,
+        /// comments, ratings, contracts, and booking requests.
+        /// </summary>
+        /// <param name="propertyId">The property identifier.</param>
+        [HttpGet("stats/properties/{propertyId:long}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDetailedProperty(long propertyId)
+        {
+            var result = await _adminDetailedStatsService.GetPropertyDetailsAsync(propertyId);
+            return HandleServiceResult(result);
+        }
+
+        /// <summary>
         /// Deactivates a property from the detailed properties admin area.
         /// </summary>
         /// <param name="propertyId">The property identifier.</param>
@@ -284,7 +300,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DownloadDetailedContract(long contractId)
         {
             if (!TryGetUserId(out var adminId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.DownloadContractAsync(adminId, contractId);
             if (!result.Success)
@@ -704,7 +720,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> ReviewReport(long reportId, [FromBody] AdminReviewReportDto request)
         {
             if (!TryGetUserId(out var adminId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _adminReportModerationService.ReviewReportAsync(adminId, reportId, request);
             return HandleServiceResult(result);

@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Google.Apis.Auth;
 using MARN_API.DTOs.Auth;
 using MARN_API.DTOs.Notification;
@@ -240,8 +240,22 @@ namespace MARN_API.Services.Implementations
                                 resultType: ServiceResultType.Conflict
                             );
                         }
-
                         isNewUser = true;
+                                      await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                    {
+                        UserId = user.Id.ToString(),
+                        UserType = NotificationUserType.General,
+                        Type = NotificationType.General,
+
+                        TitleKey = "NOTIFICATION_WELCOME_TITLE",
+                        BodyKey = "NOTIFICATION_WELCOME_BODY",
+                        LocalizationArguments = new() { user.FirstName },
+                        Title = $"Welcome to Your New Home Journey {user.FirstName}!",
+                        Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
+                            "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
+
+                        ActionType = NotificationActionType.EditProfile,
+                    });
                     }
 
                     var logins = await _userManager.GetLoginsAsync(user);
@@ -505,6 +519,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.General,
                 Type = NotificationType.General,
 
+                TitleKey = "NOTIFICATION_WELCOME_TITLE",
+                BodyKey = "NOTIFICATION_WELCOME_BODY",
+                LocalizationArguments = new() { user.FirstName },
                 Title = $"Welcome to Your New Home Journey {user.FirstName}!",
                 Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
                     "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
@@ -668,6 +685,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.General,
                 Type = NotificationType.General,
 
+                TitleKey = "NOTIFICATION_PASSWORD_RESET_TITLE",
+                BodyKey = "NOTIFICATION_PASSWORD_RESET_BODY",
+                LocalizationArguments = new() { user.FirstName },
                 Title = "Password Reset Successful!",
                 Body = $"Hello {user.FirstName}, your password has been updated successfully. You can now log in with your new credentials.\n\n" +
                     "If you didn't make this change, please contact our support team immediately to secure your account.",

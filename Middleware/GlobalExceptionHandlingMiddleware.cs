@@ -1,6 +1,8 @@
 using MARN_API.Models;
+using MARN_API.Services.Interfaces;
 using System.Net;
 using System.Text.Json;
+using MARN_API.Localization;
 
 namespace MARN_API.Middleware
 {
@@ -38,7 +40,9 @@ namespace MARN_API.Middleware
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            var localizer = context.RequestServices.GetRequiredService<IAppTextLocalizer>();
             var statusCode = HttpStatusCode.InternalServerError;
+            var code = "INTERNAL_ERROR";
             var message = "An unexpected error occurred. Please try again later.";
             var details = (string?)null;
 
@@ -47,6 +51,7 @@ namespace MARN_API.Middleware
             {
                 case UnauthorizedAccessException:
                     statusCode = HttpStatusCode.Unauthorized;
+                    code = "ACCESS_FORBIDDEN";
                     message = "You are not authorized to perform this action.";
                     break;
 
@@ -57,7 +62,9 @@ namespace MARN_API.Middleware
 
                 case KeyNotFoundException:
                     statusCode = HttpStatusCode.NotFound;
-                    message = "The requested resource was not found.";
+                    message = string.IsNullOrWhiteSpace(exception.Message) || exception.Message.StartsWith("The given key", StringComparison.Ordinal)
+                        ? "The requested resource was not found."
+                        : exception.Message;
                     break;
 
                 case InvalidOperationException:
@@ -67,6 +74,7 @@ namespace MARN_API.Middleware
 
                 case TimeoutException:
                     statusCode = HttpStatusCode.RequestTimeout;
+                    code = "REQUEST_TIMEOUT";
                     message = "The request timed out. Please try again.";
                     break;
 
@@ -80,9 +88,12 @@ namespace MARN_API.Middleware
                     break;
             }
 
+            code = LocalizationKeyBuilder.BuildErrorCode(code == "INTERNAL_ERROR" || code == "ACCESS_FORBIDDEN" || code == "REQUEST_TIMEOUT" ? code : null, message, null, code);
+
             var errorResponse = new ErrorResponse
             {
-                Message = message,
+                Code = code,
+                Message = localizer.LocalizeMessage(code, message),
                 Details = details,
                 StatusCode = (int)statusCode,
                 Path = context.Request.Path,

@@ -35,6 +35,7 @@ namespace MARN_API.Services.Implementations
         private readonly IFileService _fileService;
         private readonly IEmailService _emailService;
         private readonly INotificationService _notificationService;
+        private readonly INotificationContentLocalizer _notificationContentLocalizer;
         private readonly IMapper _mapper;
         private readonly ILogger<AccountService> _logger;
         private readonly IPropertyService _propertyService;
@@ -54,6 +55,7 @@ namespace MARN_API.Services.Implementations
             UserManager<ApplicationUser> userManager,
             AppDbContext dbContext,
             INotificationService notificationService,
+            INotificationContentLocalizer notificationContentLocalizer,
             IFileService fileService,
             IEmailService emailService,
             IMapper mapper,
@@ -75,6 +77,7 @@ namespace MARN_API.Services.Implementations
             _userManager = userManager;
             _dbContext = dbContext;
             _notificationService = notificationService;
+            _notificationContentLocalizer = notificationContentLocalizer;
             _fileService = fileService;
             _emailService = emailService;
             _mapper = mapper;
@@ -107,7 +110,20 @@ namespace MARN_API.Services.Implementations
             var savedProperties = await _savedPropertyRepo.GetSavedProperties(userId);
             var savedPropertiesCount = savedProperties == null ? 0 : savedProperties.Count;
 
-            var notifications = await _notificationRepo.GetRenterDashboardNotifications(userId);
+            var notifications = (await _notificationRepo.GetRenterDashboardNotifications(userId))
+                .Select(notification =>
+                {
+                    var content = _notificationContentLocalizer.Render(notification);
+                    return new NotificationMiniCardDto
+                    {
+                        Id = notification.Id,
+                        Type = notification.Type,
+                        Title = content.Title,
+                        IsRead = notification.ReadAt.HasValue,
+                        CreatedAt = notification.CreatedAt
+                    };
+                })
+                .ToList();
             var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
             
             var accountSatus = user.AccountStatus;
@@ -172,7 +188,20 @@ namespace MARN_API.Services.Implementations
             var allContracts = await _contractRepo.GetOwnerContracts(userId);
             var receivedPayments = await _paymentRepo.GetReceivedPayments(userId);
 
-            var notifications = await _notificationRepo.GetOwnerDashboardNotifications(userId);
+            var notifications = (await _notificationRepo.GetOwnerDashboardNotifications(userId))
+                .Select(notification =>
+                {
+                    var content = _notificationContentLocalizer.Render(notification);
+                    return new NotificationMiniCardDto
+                    {
+                        Id = notification.Id,
+                        Type = notification.Type,
+                        Title = content.Title,
+                        IsRead = notification.ReadAt.HasValue,
+                        CreatedAt = notification.CreatedAt
+                    };
+                })
+                .ToList();
 
             var unreadNotificationsCount = notifications == null ? 0 : notifications.Count(n => !n.IsRead);
 
@@ -393,6 +422,8 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.General,
                     Type = NotificationType.General,
 
+                    TitleKey = "NOTIFICATION_PROFILE_UPDATED_TITLE",
+                    BodyKey = "NOTIFICATION_PROFILE_UPDATED_BODY",
                     Title = "Profile Updated Successfully!",
                     Body = "Your profile has been updated successfully. Our team will review your information, and your account is expected to be verified within approximately 24 hours.\n\n" +
                         "Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.",
@@ -485,6 +516,8 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.General,
                 Type = NotificationType.General,
 
+                TitleKey = "NOTIFICATION_PROFILE_UPDATED_TITLE",
+                BodyKey = "NOTIFICATION_PROFILE_UPDATED_BODY",
                 Title = "Profile Updated Successfully!",
                 Body = "Your profile has been updated successfully. Our team will review your information, and your account is expected to be verified within approximately 24 hours.\n\n" +
                     "Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.",

@@ -11,6 +11,7 @@ namespace MARN_API.DTOs.Roommate
         public string? ProfileImage { get; set; }
         public double CompatibilityScore { get; set; }
         public RoommateSearchStatus SearchStatus { get; set; }
+        public string SearchStatusDisplayName { get; set; } = string.Empty;
         public string Badge { get; set; } = string.Empty;
         public List<string> TopMatchingTraits { get; set; } = new List<string>();
         public List<string> MismatchedTraits { get; set; } = new();

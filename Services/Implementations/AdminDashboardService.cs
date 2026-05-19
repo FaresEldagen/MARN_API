@@ -142,7 +142,7 @@ namespace MARN_API.Services.Implementations
                 {
                     Year = month.Year,
                     Month = month.Month,
-                    Label = CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(month.Month),
+                    Label = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(month.Month),
                     Revenue = point?.Revenue ?? 0m,
                     Sales = point?.Sales ?? 0m
                 });

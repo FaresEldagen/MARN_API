@@ -30,7 +30,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> ContactUs([FromBody] ContactSupportRequestDto request)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contactSupportService.SendContactUsEmailAsync(request,userId);
             return HandleServiceResult(result);

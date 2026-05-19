@@ -219,6 +219,10 @@ namespace MARN_API.Repositories.Implementations
                     City = p.City,
                     State = p.State,
                     Price = p.Price,
+                    AverageRating = p.PropertyRatings.Any()
+                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
+                        : 0f,
+                    CommentsCount = p.PropertyComments.Count(c => !c.IsHiddenByModeration),
                     IsActive = p.IsActive,
                     CanDeactivate = p.IsActive && p.DeletedAt == null,
                     CanRestore = !p.IsActive && p.DeletedAt == null,
@@ -238,6 +242,146 @@ namespace MARN_API.Repositories.Implementations
                 GovernorateBreakdown = governorateBreakdown,
                 Properties = CreatePagedResult(properties, query.PageNumber, query.PageSize, totalListCount)
             };
+        }
+
+        public Task<AdminPropertyDetailsDto?> GetPropertyDetailsAsync(long propertyId)
+        {
+            return _context.Properties
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(p => p.Id == propertyId)
+                .Select(p => new AdminPropertyDetailsDto
+                {
+                    PropertyId = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    OwnerId = p.OwnerId,
+                    OwnerName = (p.Owner.FirstName + " " + p.Owner.LastName).Trim(),
+                    OwnerEmail = p.Owner.Email,
+                    OwnerPhoneNumber = p.Owner.PhoneNumber,
+                    OwnerProfileImage = p.Owner.ProfileImage,
+                    Status = p.Status,
+                    Type = p.Type,
+                    RentalUnit = p.RentalUnit,
+                    Address = p.Address,
+                    City = p.City,
+                    State = p.State,
+                    ZipCode = p.ZipCode,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
+                    MaxOccupants = p.MaxOccupants,
+                    IsShared = p.IsShared,
+                    Bedrooms = p.Bedrooms,
+                    Beds = p.Beds,
+                    Bathrooms = p.Bathrooms,
+                    SquareMeters = p.SquareMeters,
+                    ViewsCount = p.Views,
+                    Price = p.Price,
+                    IsActive = p.IsActive,
+                    IsDeleted = p.DeletedAt != null,
+                    CreatedAt = p.CreatedAt,
+                    ProofOfOwnership = p.ProofOfOwnership,
+                    AverageRating = p.PropertyRatings.Any()
+                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
+                        : 0f,
+                    RatingsCount = p.PropertyRatings.Count,
+                    CommentsCount = p.PropertyComments.Count(c => !c.IsHiddenByModeration),
+                    SavedByUsersCount = p.SavedProperty.Count,
+                    BookingRequestsCount = p.BookingRequests.Count,
+                    Amenities = p.Amenities
+                        .OrderBy(a => a.Id)
+                        .Select(a => new AdminPropertyAmenityDto
+                        {
+                            AmenityId = a.Id,
+                            Amenity = a.Amenity
+                        })
+                        .ToList(),
+                    Rules = p.Rules
+                        .OrderBy(r => r.Id)
+                        .Select(r => new AdminPropertyRuleDto
+                        {
+                            RuleId = r.Id,
+                            Text = r.Rule
+                        })
+                        .ToList(),
+                    Media = p.Media
+                        .OrderByDescending(m => m.IsPrimary)
+                        .ThenBy(m => m.Id)
+                        .Select(m => new AdminPropertyMediaDto
+                        {
+                            MediaId = m.Id,
+                            Path = m.Path,
+                            IsPrimary = m.IsPrimary
+                        })
+                        .ToList(),
+                    Comments = p.PropertyComments
+                        .OrderByDescending(c => c.CreatedAt)
+                        .Select(c => new AdminPropertyCommentDto
+                        {
+                            CommentId = c.Id,
+                            UserId = c.UserId,
+                            UserName = (c.User.FirstName + " " + c.User.LastName).Trim(),
+                            UserProfileImage = c.User.ProfileImage,
+                            Content = c.Content,
+                            Rating = p.PropertyRatings
+                                .Where(r => r.UserId == c.UserId)
+                                .Select(r => (int?)r.Rating)
+                                .FirstOrDefault(),
+                            CreatedAt = c.CreatedAt,
+                            UpdatedAt = c.UpdatedAt,
+                            IsHiddenByModeration = c.IsHiddenByModeration,
+                            HiddenAt = c.HiddenAt,
+                            HiddenByAdminId = c.HiddenByAdminId,
+                            HiddenReason = c.HiddenReason
+                        })
+                        .ToList(),
+                    Ratings = p.PropertyRatings
+                        .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
+                        .Select(r => new AdminPropertyRatingDto
+                        {
+                            RatingId = r.Id,
+                            UserId = r.UserId,
+                            UserName = (r.User.FirstName + " " + r.User.LastName).Trim(),
+                            UserProfileImage = r.User.ProfileImage,
+                            Rating = r.Rating,
+                            CreatedAt = r.CreatedAt,
+                            UpdatedAt = r.UpdatedAt
+                        })
+                        .ToList(),
+                    Contracts = p.Contracts
+                        .OrderByDescending(c => c.CreatedAt)
+                        .Select(c => new AdminPropertyContractDto
+                        {
+                            ContractId = c.Id,
+                            Status = c.Status,
+                            AnchoringStatus = c.AnchoringStatus,
+                            RenterId = c.RenterId,
+                            RenterName = (c.Renter.FirstName + " " + c.Renter.LastName).Trim(),
+                            RenterProfileImage = c.Renter.ProfileImage,
+                            CreatedAt = c.CreatedAt,
+                            LeaseStartDate = c.LeaseStartDate,
+                            LeaseEndDate = c.LeaseEndDate,
+                            PaymentFrequency = c.PaymentFrequency,
+                            TotalContractAmount = c.TotalContractAmount,
+                            SignedByRenterAt = c.SignedByRenterAt
+                        })
+                        .ToList(),
+                    BookingRequests = p.BookingRequests
+                        .OrderByDescending(b => b.CreatedAt)
+                        .Select(b => new AdminPropertyBookingRequestDto
+                        {
+                            BookingRequestId = b.Id,
+                            RenterId = b.RenterId,
+                            RenterName = (b.Renter.FirstName + " " + b.Renter.LastName).Trim(),
+                            RenterProfileImage = b.Renter.ProfileImage,
+                            StartDate = b.StartDate,
+                            EndDate = b.EndDate,
+                            PaymentFrequency = b.PaymentFrequency,
+                            CreatedAt = b.CreatedAt
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task<AdminDetailedContractsResponseDto> GetContractsAsync(AdminDetailedContractsQueryDto query, DateTime? fromUtc, DateTime? toUtc)
@@ -422,6 +566,8 @@ namespace MARN_API.Repositories.Implementations
             return _context.Properties
                 .IgnoreQueryFilters()
                 .Include(p => p.Owner)
+                .Include(p => p.PropertyRatings)
+                .Include(p => p.PropertyComments)
                 .FirstOrDefaultAsync(p => p.Id == propertyId);
         }
 
@@ -603,7 +749,7 @@ namespace MARN_API.Repositories.Implementations
                     return new AdminCountTimePointDto
                     {
                         PeriodStartUtc = periodStartUtc,
-                        Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
+                        Label = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
                         Count = x.Count
                     };
                 })
@@ -661,7 +807,7 @@ namespace MARN_API.Repositories.Implementations
                     return new AdminRevenueTimePointDto
                     {
                         PeriodStartUtc = periodStartUtc,
-                        Label = $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
+                        Label = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month)} {x.Year}",
                         Revenue = x.Revenue,
                         Sales = x.Sales,
                         OwnerPayouts = x.OwnerPayouts,

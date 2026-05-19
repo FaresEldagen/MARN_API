@@ -58,7 +58,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> RenterDashboard()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _profileService.RenterDashboardAsync(userId);
             return HandleServiceResult<RenterDashboardDto>(result);
@@ -98,7 +98,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> OwnerDashboard()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _profileService.OwnerDashboardAsync(userId);
             return HandleServiceResult<OwnerDashboardDto>(result);
@@ -124,7 +124,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetPersonalProfile()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _profileService.GetProfileAsync(userId);
             return HandleServiceResult<ProfileDto>(result);
@@ -183,7 +183,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetProfileSettingsData()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _profileService.GetProfileSettingsAsync(userId);
             return HandleServiceResult<ProfileSettingsDto>(result);
@@ -210,10 +210,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> UpdateProfileBasicData([FromForm] UpdateProfileDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User id not found in token");
+                return UnauthorizedUserIdMissing();
 
             if (userId != dto.Id)
-                return Unauthorized("User id mismatch");
+                return UnauthorizedUserIdMismatch();
 
             var result = await _profileService.UpdateProfileBasicDataAsync(dto);
             return HandleServiceResult<bool>(result);
@@ -240,10 +240,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> UpdateProfileLegalData([FromForm] UpdateLegalDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User id not found in token");
+                return UnauthorizedUserIdMissing();
 
             if (userId != dto.Id)
-                return Unauthorized("User id mismatch");
+                return UnauthorizedUserIdMismatch();
 
             var result = await _profileService.UpdateProfileLegalDataAsync(dto);
             return HandleServiceResult<bool>(result);
@@ -270,10 +270,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> UpdateProfileRoommatePreferencesData([FromBody] UpdateRoommatePreferencesDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User id not found in token");
+                return UnauthorizedUserIdMissing();
 
             if (userId != dto.UserId)
-                return Unauthorized("User id mismatch");
+                return UnauthorizedUserIdMismatch();
 
             var result = await _profileService.UpdateProfileRoommatePreferencesDataAsync(dto);
             return HandleServiceResult<bool>(result);
@@ -298,7 +298,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> ToggleTwoFactor(ToggleTwoFactorDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _profileService.ToggleTwoFactorAsync(userId, dto.Password);
             return HandleServiceResult<bool>(result);
@@ -325,10 +325,10 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User id not found in token");
+                return UnauthorizedUserIdMissing();
 
             if (userId != dto.id)
-                return Unauthorized("User id mismatch");
+                return UnauthorizedUserIdMismatch();
 
             var result = await _profileService.ChangePasswordAsync(dto);
             return HandleServiceResult<bool>(result);
@@ -349,7 +349,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DeleteProfile()
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User id not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _profileService.DeleteUserAsync(userId);
             return HandleServiceResult<bool>(result);

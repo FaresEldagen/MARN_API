@@ -8,11 +8,11 @@ namespace MARN_API.DTOs.Moderation
     {
         public ReportableType ReportableType { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Report target is required.")]
         public string ReportableTargetId { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(2000, MinimumLength = 5)]
+        [Required(ErrorMessage = "Report reason is required.")]
+        [StringLength(2000, MinimumLength = 5, ErrorMessage = "Report reason must be between 5 and 2000 characters.")]
         public string Reason { get; set; } = string.Empty;
     }
 
@@ -20,6 +20,7 @@ namespace MARN_API.DTOs.Moderation
     {
         public long ReportId { get; set; }
         public ReportStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
 
@@ -36,7 +37,7 @@ namespace MARN_API.DTOs.Moderation
     {
         public ReportStatus Status { get; set; }
 
-        [StringLength(2000)]
+        [StringLength(2000, ErrorMessage = "Review note cannot exceed 2000 characters.")]
         public string? Note { get; set; }
 
         public List<ReportModerationActionType>? ActionTypes { get; set; }
@@ -46,12 +47,16 @@ namespace MARN_API.DTOs.Moderation
     {
         public long ReportId { get; set; }
         public ReportableType ReportableType { get; set; }
+        public string ReportableTypeDisplayName { get; set; } = string.Empty;
         public ReportStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public string Reason { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? ReviewedAt { get; set; }
         public ReportModerationActionType? ActionTaken { get; set; }
+        public string ActionTakenDisplayName { get; set; } = string.Empty;
         public List<ReportModerationActionType> ActionsTaken { get; set; } = [];
+        public List<string> ActionsTakenDisplayNames { get; set; } = [];
         public Guid ReporterId { get; set; }
         public string ReporterName { get; set; } = string.Empty;
         public Guid? ReviewerId { get; set; }
@@ -63,11 +68,15 @@ namespace MARN_API.DTOs.Moderation
     {
         public long ReportId { get; set; }
         public ReportableType ReportableType { get; set; }
+        public string ReportableTypeDisplayName { get; set; } = string.Empty;
         public ReportStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public string Reason { get; set; } = string.Empty;
         public string? ReviewerNote { get; set; }
         public ReportModerationActionType? ActionTaken { get; set; }
+        public string ActionTakenDisplayName { get; set; } = string.Empty;
         public List<ReportModerationActionType> ActionsTaken { get; set; } = [];
+        public List<string> ActionsTakenDisplayNames { get; set; } = [];
         public DateTime CreatedAt { get; set; }
         public DateTime? ReviewedAt { get; set; }
         public Guid ReporterId { get; set; }
@@ -102,12 +111,14 @@ namespace MARN_API.DTOs.Moderation
     public class AdminReportStatusCountDto
     {
         public ReportStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 
     public class AdminReportTypeCountDto
     {
         public ReportableType ReportableType { get; set; }
+        public string ReportableTypeDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 }

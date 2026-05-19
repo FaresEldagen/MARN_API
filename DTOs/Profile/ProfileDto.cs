@@ -12,9 +12,12 @@ namespace MARN_API.DTOs.Profile
         public string Email { get; set; } = string.Empty;
         public string? ProfileImage { get; set; }
         public AccountStatus AccountStatus { get; set; }
+        public string AccountStatusDisplayName { get; set; } = string.Empty;
         public DateTime? DateOfBirth { get; set; }
         public Gender Gender { get; set; }
+        public string GenderDisplayName { get; set; } = string.Empty;
         public Country Country { get; set; }
+        public string CountryDisplayName { get; set; } = string.Empty;
         public DateTime MemberSince { get; set; }
         public string? Bio { get; set; }
 
@@ -32,12 +35,18 @@ namespace MARN_API.DTOs.Profile
         public bool? Smoking { get; set; } = null;
         public bool? Pets { get; set; } = null;
         public string? SleepSchedule { get; set; } = null;
+        public string SleepScheduleDisplayName { get; set; } = string.Empty;
         public EducationLevel? EducationLevel { get; set; } = null;
+        public string EducationLevelDisplayName { get; set; } = string.Empty;
         public FieldOfStudy? FieldOfStudy { get; set; } = null;
+        public string FieldOfStudyDisplayName { get; set; } = string.Empty;
         public int? NoiseTolerance { get; set; } = null;
         public GuestsFrequency? GuestsFrequency { get; set; } = null;
+        public string GuestsFrequencyDisplayName { get; set; } = string.Empty;
         public WorkSchedule? WorkSchedule { get; set; } = null;
+        public string WorkScheduleDisplayName { get; set; } = string.Empty;
         public SharingLevel? SharingLevel { get; set; } = null;
+        public string SharingLevelDisplayName { get; set; } = string.Empty;
         public decimal? BudgetRangeMin { get; set; } = null;
         public decimal? BudgetRangeMax { get; set; } = null;
         // Roommate Matches

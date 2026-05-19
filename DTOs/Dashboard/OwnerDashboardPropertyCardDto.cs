@@ -9,6 +9,7 @@ namespace MARN_API.DTOs.Dashboard
         public string Title { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
         public long Views { get; set; }
         public bool IsSaved { get; set; }
 
@@ -17,12 +18,14 @@ namespace MARN_API.DTOs.Dashboard
 
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
+        public string RentalUnitDisplayName { get; set; } = string.Empty;
 
         public float AverageRating { get; set; }
         public int Ratings { get; set; }
 
         public bool IsActive { get; set; }
         public PropertyStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public ICollection<OwnerPropertyContractDto>? ActiveContracts { get; set; }
     }
 }

@@ -22,9 +22,11 @@ namespace MARN_API.DTOs.Admin
         public string? PhoneNumber { get; set; }
         public string? ProfileImage { get; set; }
         public AccountStatus AccountStatus { get; set; }
+        public string AccountStatusDisplayName { get; set; } = string.Empty;
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<string> Roles { get; set; } = [];
+        public List<string> RolesDisplayNames { get; set; } = [];
         public int OwnedPropertiesCount { get; set; }
         public int ActiveContractsCount { get; set; }
     }
@@ -47,9 +49,13 @@ namespace MARN_API.DTOs.Admin
         public bool TwoFactorEnabled { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public Gender Gender { get; set; }
+        public string GenderDisplayName { get; set; } = string.Empty;
         public Country Country { get; set; }
+        public string CountryDisplayName { get; set; } = string.Empty;
         public Language Language { get; set; }
+        public string LanguageDisplayName { get; set; } = string.Empty;
         public AccountStatus AccountStatus { get; set; }
+        public string AccountStatusDisplayName { get; set; } = string.Empty;
 
         public string? FrontIdPhoto { get; set; }
         public string? BackIdPhoto { get; set; }
@@ -58,6 +64,7 @@ namespace MARN_API.DTOs.Admin
         public string? NationalIDNumber { get; set; }
 
         public List<string> Roles { get; set; } = [];
+        public List<string> RolesDisplayNames { get; set; } = [];
         public AdminUserActivitySummaryDto Summary { get; set; } = new();
         public List<AdminManagedPropertyDto> OwnedProperties { get; set; } = [];
         public List<RenterContractCardDto> RenterContracts { get; set; } = [];
@@ -85,10 +92,12 @@ namespace MARN_API.DTOs.Admin
         public long PropertyId { get; set; }
         public string Title { get; set; } = string.Empty;
         public PropertyStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
+        public string RentalUnitDisplayName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string? PrimaryImage { get; set; }
         public DateTime CreatedAt { get; set; }

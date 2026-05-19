@@ -50,6 +50,7 @@ namespace MARN_API.DTOs.Admin
     public class AdminContractStatusCountDto
     {
         public ContractStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public long Count { get; set; }
     }
 }

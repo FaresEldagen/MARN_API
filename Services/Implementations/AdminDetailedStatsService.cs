@@ -3,6 +3,7 @@ using MARN_API.Enums;
 using MARN_API.Enums.Contract;
 using MARN_API.Enums.Notification;
 using MARN_API.Enums.Payment;
+using MARN_API.Enums.Property;
 using MARN_API.DTOs.Notification;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
@@ -16,15 +17,18 @@ namespace MARN_API.Services.Implementations
         private const int MaxPageSize = 100;
         private readonly IAdminDetailedStatsRepo _detailedStatsRepo;
         private readonly INotificationService _notificationService;
+        private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<AdminDetailedStatsService> _logger;
 
         public AdminDetailedStatsService(
             IAdminDetailedStatsRepo detailedStatsRepo,
             INotificationService notificationService,
+            IAppTextLocalizer localizer,
             ILogger<AdminDetailedStatsService> logger)
         {
             _detailedStatsRepo = detailedStatsRepo;
             _notificationService = notificationService;
+            _localizer = localizer;
             _logger = logger;
         }
 
@@ -47,7 +51,20 @@ namespace MARN_API.Services.Implementations
 
             var result = await _detailedStatsRepo.GetPropertiesAsync(query, period.Data!.FromUtc, period.Data.ToUtc);
             result.AppliedPeriod = period.Data.ToDto();
+            LocalizePropertyItems(result.Properties.Items);
             return ServiceResult<AdminDetailedPropertiesResponseDto>.Ok(result);
+        }
+
+        public async Task<ServiceResult<AdminPropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId)
+        {
+            var result = await _detailedStatsRepo.GetPropertyDetailsAsync(propertyId);
+            if (result == null)
+            {
+                return ServiceResult<AdminPropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
+            }
+
+            LocalizePropertyDetails(result);
+            return ServiceResult<AdminPropertyDetailsDto>.Ok(result);
         }
 
         public async Task<ServiceResult<AdminDetailedPropertyListItemDto>> DeactivatePropertyAsync(long propertyId)
@@ -118,6 +135,7 @@ namespace MARN_API.Services.Implementations
 
             var result = await _detailedStatsRepo.GetContractsAsync(query, period.Data!.FromUtc, period.Data.ToUtc);
             result.AppliedPeriod = period.Data.ToDto();
+            LocalizeContractItems(result.Contracts.Items);
             return ServiceResult<AdminDetailedContractsResponseDto>.Ok(result);
         }
 
@@ -238,6 +256,9 @@ namespace MARN_API.Services.Implementations
                 UserId = contract.RenterId.ToString(),
                 UserType = NotificationUserType.Renter,
                 Type = NotificationType.ContractCanceled,
+                TitleKey = "NOTIFICATION_CONTRACT_CANCELLED_TITLE",
+                BodyKey = "NOTIFICATION_ADMIN_CONTRACT_CANCELLED_BODY",
+                LocalizationArguments = new() { contract.Id.ToString(), contract.Property.Title },
                 Title = "Contract Cancelled",
                 Body = $"An admin has cancelled contract #{contract.Id} for \"{contract.Property.Title}\".",
                 ActionType = NotificationActionType.RenterDashboard
@@ -248,6 +269,9 @@ namespace MARN_API.Services.Implementations
                 UserId = contract.Property.OwnerId.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.ContractCanceled,
+                TitleKey = "NOTIFICATION_CONTRACT_CANCELLED_TITLE",
+                BodyKey = "NOTIFICATION_ADMIN_CONTRACT_CANCELLED_BODY",
+                LocalizationArguments = new() { contract.Id.ToString(), contract.Property.Title },
                 Title = "Contract Cancelled",
                 Body = $"An admin has cancelled contract #{contract.Id} for \"{contract.Property.Title}\".",
                 ActionType = NotificationActionType.OwnerDashboard
@@ -261,6 +285,9 @@ namespace MARN_API.Services.Implementations
                 UserId = property.OwnerId.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.General,
+                TitleKey = restored ? "NOTIFICATION_PROPERTY_RESTORED_TITLE" : "NOTIFICATION_PROPERTY_DEACTIVATED_TITLE",
+                BodyKey = restored ? "NOTIFICATION_PROPERTY_RESTORED_BODY" : "NOTIFICATION_PROPERTY_DEACTIVATED_BODY",
+                LocalizationArguments = new() { property.Title },
                 Title = restored ? "Property Restored" : "Property Deactivated",
                 Body = restored
                     ? $"An admin has restored your property \"{property.Title}\" and made it active again."
@@ -317,18 +344,20 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true);
         }
 
-        private static AdminDetailedContractListItemDto MapContract(Contract contract)
+        private AdminDetailedContractListItemDto MapContract(Contract contract)
         {
             return new AdminDetailedContractListItemDto
             {
                 ContractId = contract.Id,
                 Status = contract.Status,
+                StatusDisplayName = _localizer.GetEnumDisplayName(contract.Status),
                 CanCancel = contract.Status == ContractStatus.Pending || contract.Status == ContractStatus.Active,
                 CreatedAt = contract.CreatedAt,
                 LeaseStartDate = contract.LeaseStartDate,
                 LeaseEndDate = contract.LeaseEndDate,
                 TotalContractAmount = contract.TotalContractAmount,
                 PaymentFrequency = contract.PaymentFrequency.ToString(),
+                PaymentFrequencyDisplayName = _localizer.GetEnumDisplayName(contract.PaymentFrequency),
                 PropertyId = contract.PropertyId,
                 PropertyTitle = contract.Property.Title,
                 OwnerId = contract.Property.OwnerId,
@@ -338,7 +367,7 @@ namespace MARN_API.Services.Implementations
             };
         }
 
-        private static AdminDetailedPropertyListItemDto MapProperty(Property property)
+        private AdminDetailedPropertyListItemDto MapProperty(Property property)
         {
             return new AdminDetailedPropertyListItemDto
             {
@@ -347,16 +376,88 @@ namespace MARN_API.Services.Implementations
                 OwnerId = property.OwnerId,
                 OwnerName = $"{property.Owner.FirstName} {property.Owner.LastName}".Trim(),
                 Status = property.Status,
+                StatusDisplayName = _localizer.GetEnumDisplayName(property.Status),
                 Type = property.Type,
+                TypeDisplayName = _localizer.GetEnumDisplayName(property.Type),
                 City = property.City,
+                CityDisplayName = GetLocationDisplayName<City>(property.City),
                 State = property.State,
+                StateDisplayName = GetLocationDisplayName<Governorate>(property.State),
                 Price = property.Price,
+                AverageRating = property.PropertyRatings.Any()
+                    ? property.PropertyRatings.Average(rating => (float?)rating.Rating) ?? 0f
+                    : 0f,
+                CommentsCount = property.PropertyComments.Count(comment => !comment.IsHiddenByModeration),
                 IsActive = property.IsActive,
                 CanDeactivate = property.IsActive && property.DeletedAt == null,
                 CanRestore = !property.IsActive && property.DeletedAt == null,
                 IsDeleted = property.DeletedAt != null,
                 CreatedAt = property.CreatedAt
             };
+        }
+
+        private void LocalizePropertyItems(IEnumerable<AdminDetailedPropertyListItemDto> items)
+        {
+            foreach (var item in items)
+            {
+                item.StatusDisplayName = _localizer.GetEnumDisplayName(item.Status);
+                item.TypeDisplayName = _localizer.GetEnumDisplayName(item.Type);
+                item.CityDisplayName = GetLocationDisplayName<City>(item.City);
+                item.StateDisplayName = GetLocationDisplayName<Governorate>(item.State);
+            }
+        }
+
+        private void LocalizePropertyDetails(AdminPropertyDetailsDto property)
+        {
+            property.StatusDisplayName = _localizer.GetEnumDisplayName(property.Status);
+            property.TypeDisplayName = _localizer.GetEnumDisplayName(property.Type);
+            property.RentalUnitDisplayName = _localizer.GetEnumDisplayName(property.RentalUnit);
+            property.CityDisplayName = GetLocationDisplayName<City>(property.City);
+            property.StateDisplayName = GetLocationDisplayName<Governorate>(property.State);
+
+            foreach (var amenity in property.Amenities)
+            {
+                amenity.AmenityDisplayName = _localizer.GetEnumDisplayName(amenity.Amenity);
+            }
+
+            foreach (var contract in property.Contracts)
+            {
+                contract.StatusDisplayName = _localizer.GetEnumDisplayName(contract.Status);
+                contract.AnchoringStatusDisplayName = _localizer.GetEnumDisplayName(contract.AnchoringStatus);
+                contract.PaymentFrequencyDisplayName = _localizer.GetEnumDisplayName(contract.PaymentFrequency);
+            }
+
+            foreach (var bookingRequest in property.BookingRequests)
+            {
+                bookingRequest.PaymentFrequencyDisplayName = _localizer.GetEnumDisplayName(bookingRequest.PaymentFrequency);
+            }
+        }
+
+        private void LocalizeContractItems(IEnumerable<AdminDetailedContractListItemDto> items)
+        {
+            foreach (var item in items)
+            {
+                item.StatusDisplayName = _localizer.GetEnumDisplayName(item.Status);
+
+                if (Enum.TryParse<PaymentFrequency>(item.PaymentFrequency, true, out var paymentFrequency))
+                {
+                    item.PaymentFrequencyDisplayName = _localizer.GetEnumDisplayName(paymentFrequency);
+                }
+                else
+                {
+                    item.PaymentFrequencyDisplayName = item.PaymentFrequency;
+                }
+            }
+        }
+
+        private string GetLocationDisplayName<TEnum>(string? rawValue) where TEnum : struct, Enum
+        {
+            if (!string.IsNullOrWhiteSpace(rawValue) && Enum.TryParse<TEnum>(rawValue, true, out var parsed))
+            {
+                return _localizer.GetEnumDisplayName(parsed);
+            }
+
+            return rawValue ?? string.Empty;
         }
 
         private sealed class ResolvedPeriod

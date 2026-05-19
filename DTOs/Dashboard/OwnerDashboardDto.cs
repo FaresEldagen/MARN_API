@@ -29,6 +29,7 @@ namespace MARN_API.DTOs.Dashboard
         public ICollection<OwnerPendingBookingRequestDto>? PendingBookingRequests { get; set; }
 
         public AccountStatus AccountStatus { get; set; }
+        public string AccountStatusDisplayName { get; set; } = string.Empty;
         public ICollection<ReceivedPaymentDto>? ReceivedPayments { get; set; }
 
         public bool StripeAccountEnabled { get; set; }

@@ -7,6 +7,7 @@ using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 using MARN_API.Enums.RoommatePreferences;
 using MARN_API.Models;
+using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,14 +22,17 @@ namespace MARN_API.Controllers
     [ApiController]
     public class EnumController : BaseController
     {
-        private List<EnumValueDto> GetEnumValues<T>() where T : Enum
+        private List<EnumValueDto> GetEnumValues<T>() where T : struct, Enum
         {
+            var localizer = HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+
             return Enum.GetValues(typeof(T))
                 .Cast<T>()
                 .Select(e => new EnumValueDto
                 {
                     Id = Convert.ToInt32(e),
-                    Name = e.ToString()
+                    Name = e.ToString(),
+                    DisplayName = localizer.GetEnumDisplayName(e)
                 })
                 .ToList();
         }
@@ -56,8 +60,11 @@ namespace MARN_API.Controllers
                 WorkSchedules = GetEnumValues<WorkSchedule>(),
                 ContractStatuses = GetEnumValues<ContractStatus>(),
                 PaymentFrequencies = GetEnumValues<PaymentFrequency>(),
+                PaymentStatuses = GetEnumValues<PaymentStatus>(),
+                PaymentScheduleStatuses = GetEnumValues<PaymentScheduleStatus>(),
                 ReportStatuses = GetEnumValues<ReportStatus>(),
                 ReportableTypes = GetEnumValues<ReportableType>(),
+                ReportModerationActionTypes = GetEnumValues<ReportModerationActionType>(),
                 AccountStatuses = GetEnumValues<AccountStatus>(),
                 PropertyAvailabilities = GetEnumValues<PropertyAvailability>(),
                 NotificationUserTypes = GetEnumValues<NotificationUserType>(),
@@ -66,6 +73,10 @@ namespace MARN_API.Controllers
                 ServiceResultTypes = GetEnumValues<ServiceResultType>(),
                 UserActivityTypes = GetEnumValues<UserActivityType>(),
                 ContractAnchoringStatuses = GetEnumValues<ContractAnchoringStatus>(),
+                RoommateSearchStatuses = GetEnumValues<RoommateSearchStatus>(),
+                AdminAnalyticsReportFormats = GetEnumValues<AdminAnalyticsReportFormat>(),
+                AdminAnalyticsReportScopes = GetEnumValues<AdminAnalyticsReportScope>(),
+                AdminAnalyticsReportPeriods = GetEnumValues<AdminAnalyticsReportPeriod>(),
                 Cities = GetEnumValues<City>(),
                 Governorates = GetEnumValues<Governorate>(),
                 PropertySortByOptions = GetEnumValues<PropertySortBy>()
@@ -119,11 +130,20 @@ namespace MARN_API.Controllers
         [HttpGet("payment-frequencies")]
         public IActionResult GetPaymentFrequencies() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentFrequency>()));
 
+        [HttpGet("payment-statuses")]
+        public IActionResult GetPaymentStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentStatus>()));
+
+        [HttpGet("payment-schedule-statuses")]
+        public IActionResult GetPaymentScheduleStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<PaymentScheduleStatus>()));
+
         [HttpGet("report-statuses")]
         public IActionResult GetReportStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ReportStatus>()));
 
         [HttpGet("reportable-types")]
         public IActionResult GetReportableTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ReportableType>()));
+
+        [HttpGet("report-moderation-action-types")]
+        public IActionResult GetReportModerationActionTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ReportModerationActionType>()));
 
         [HttpGet("account-statuses")]
         public IActionResult GetAccountStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<AccountStatus>()));
@@ -148,6 +168,18 @@ namespace MARN_API.Controllers
 
         [HttpGet("contract-anchoring-statuses")]
         public IActionResult GetContractAnchoringStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractAnchoringStatus>()));
+
+        [HttpGet("roommate-search-statuses")]
+        public IActionResult GetRoommateSearchStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<RoommateSearchStatus>()));
+
+        [HttpGet("admin-analytics-report-formats")]
+        public IActionResult GetAdminAnalyticsReportFormats() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<AdminAnalyticsReportFormat>()));
+
+        [HttpGet("admin-analytics-report-scopes")]
+        public IActionResult GetAdminAnalyticsReportScopes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<AdminAnalyticsReportScope>()));
+
+        [HttpGet("admin-analytics-report-periods")]
+        public IActionResult GetAdminAnalyticsReportPeriods() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<AdminAnalyticsReportPeriod>()));
 
         [HttpGet("cities")]
         public IActionResult GetCities() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<City>()));

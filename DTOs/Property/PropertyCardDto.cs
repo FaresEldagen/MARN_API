@@ -14,11 +14,13 @@ namespace MARN_API.DTOs.Property
         public int MaxOccupants { get; set; }
 
         public PropertyType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
         public float AverageRating { get; set; }
         public int Ratings { get; set; }
 
         public decimal Price { get; set; }
         public RentalUnit RentalUnit { get; set; }
+        public string RentalUnitDisplayName { get; set; } = string.Empty;
 
         public bool IsSaved { get; set; }
     }

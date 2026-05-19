@@ -180,10 +180,12 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.PropertyAdded,
 
-                    Title = "Property Submitted for Review",
-                    Body = $"Your property \"{property.Title}\" has been submitted successfully and is now pending admin verification. " +
-                           "This process may take up to 24 hours. We'll notify you once it's approved.",
-
+                TitleKey = "NOTIFICATION_PROPERTY_SUBMITTED_TITLE",
+                BodyKey = "NOTIFICATION_PROPERTY_SUBMITTED_BODY",
+                LocalizationArguments = new() { property.Title },
+                Title = "Property Submitted for Review",
+                Body = $"Your property \"{property.Title}\" has been submitted successfully and is now pending admin verification. " +
+                       "This process may take up to 24 hours. We'll notify you once it's approved.",
                     ActionType = NotificationActionType.Property,
                     ActionId = property.Id.ToString()
                 });
@@ -491,9 +493,12 @@ namespace MARN_API.Services.Implementations
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.PropertyEdited,
 
-                    Title = "Property Update Under Review",
-                    Body = $"Your property \"{property.Title}\" has been updated and its status is now set back to pending. " +
-                           "The admin will re-verify it, which may take up to 24 hours. We'll notify you once it's approved.",
+                TitleKey = "NOTIFICATION_PROPERTY_UPDATED_TITLE",
+                BodyKey = "NOTIFICATION_PROPERTY_UPDATED_BODY",
+                LocalizationArguments = new() { property.Title },
+                Title = "Property Update Under Review",
+                Body = $"Your property \"{property.Title}\" has been updated and its status is now set back to pending. " +
+                       "The admin will re-verify it, which may take up to 24 hours. We'll notify you once it's approved.",
 
                     ActionType = NotificationActionType.Property,
                     ActionId = propertyId.ToString()
@@ -595,6 +600,9 @@ namespace MARN_API.Services.Implementations
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.PropertyDeleted,
 
+                TitleKey = "NOTIFICATION_PROPERTY_DELETED_TITLE",
+                BodyKey = "NOTIFICATION_PROPERTY_DELETED_BODY",
+                LocalizationArguments = new() { property.Title },
                 Title = "Property Deleted",
                 Body = $"Your property \"{property.Title}\" has been deleted successfully. " +
                        "If this was a mistake or you'd like to restore it, please contact our support team for assistance.",

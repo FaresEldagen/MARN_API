@@ -39,7 +39,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> BecomeAnOwner([FromServices] IOwnerService ownerService)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await ownerService.AddOwnerRole(userId);
             return HandleServiceResult<string>(result);
@@ -67,7 +67,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> AddProperty([FromForm] AddPropertyDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyService.AddPropertyAsync(dto, userId);
             return HandleServiceResult<bool>(result);
@@ -154,7 +154,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetPropertyEdit(long propertyId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyService.GetPropertyEditAsync(propertyId, userId);
             return HandleServiceResult<PropertyEditDataDto>(result);
@@ -180,7 +180,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> EditProperty(long propertyId, [FromForm] EditPropertyDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyService.EditPropertyAsync(propertyId, dto, userId);
             return HandleServiceResult<bool>(result);
@@ -204,7 +204,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DeactivateProperty(long propertyId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyService.DeactivatePropertyAsync(propertyId, userId);
             return HandleServiceResult<bool>(result);
@@ -228,7 +228,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> SaveProperty(long propertyId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyService.ToggleSavePropertyAsync(propertyId, userId);
             return HandleServiceResult<bool>(result);
@@ -254,7 +254,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DeleteProperty(long propertyId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token");
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyService.DeletePropertyAsync(propertyId, userId);
             return HandleServiceResult<bool>(result);

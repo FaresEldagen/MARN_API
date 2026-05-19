@@ -48,7 +48,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> CreateContractFromBooking(long bookingRequestId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token.");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.CreateContractFromBookingAsync(userId, bookingRequestId);
             return HandleServiceResult(result);
@@ -77,8 +77,8 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> SignContract(long contractId)
         {
-            if (!TryGetUserId(out var userId)) 
-                return Unauthorized("User ID not found in token.");
+            if (!TryGetUserId(out var userId))
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.SignContractAsync(userId, contractId);
             return HandleServiceResult(result);
@@ -111,7 +111,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetContract(long contractId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token.");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.GetContractByIdAsync(userId, contractId);
             return HandleServiceResult(result);
@@ -135,7 +135,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DownloadOtsProof(long contractId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token.");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.DownloadOtsProofAsync(userId, contractId);
 
@@ -163,7 +163,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DownloadContract(long contractId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token.");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.DownloadContractAsync(userId, contractId);
 
@@ -200,7 +200,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> VerifyContract(IFormFile file, [FromQuery] long contractId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token.");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.VerifyContractAsync(userId, file, contractId);
             return HandleServiceResult(result);
@@ -226,7 +226,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> CancelContract(long contractId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized("User ID not found in token.");
+                return UnauthorizedUserIdMissing();
 
             var result = await _contractService.CancelContractAsync(userId, contractId);
             return HandleServiceResult(result);

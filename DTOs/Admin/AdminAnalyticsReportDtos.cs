@@ -17,9 +17,9 @@ namespace MARN_API.DTOs.Admin
     {
         public AdminAnalyticsReportScope? Scope { get; set; }
         public AdminAnalyticsReportFormat? Format { get; set; }
-        [Range(1, 9999)]
+        [Range(1, 9999, ErrorMessage = "Year must be between 1 and 9999.")]
         public int? Year { get; set; }
-        [Range(1, 12)]
+        [Range(1, 12, ErrorMessage = "Month must be between 1 and 12.")]
         public int? Month { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;
@@ -29,8 +29,11 @@ namespace MARN_API.DTOs.Admin
     {
         public long ReportId { get; set; }
         public AdminAnalyticsReportScope Scope { get; set; }
+        public string ScopeDisplayName { get; set; } = string.Empty;
         public AdminAnalyticsReportFormat Format { get; set; }
+        public string FormatDisplayName { get; set; } = string.Empty;
         public AdminAnalyticsReportPeriod RequestedPeriod { get; set; }
+        public string RequestedPeriodDisplayName { get; set; } = string.Empty;
         public DateTime? FromUtc { get; set; }
         public DateTime? ToUtc { get; set; }
         public string Grouping { get; set; } = string.Empty;

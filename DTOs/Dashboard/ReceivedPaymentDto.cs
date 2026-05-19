@@ -10,5 +10,6 @@ namespace MARN_API.DTOs.Dashboard
         public DateTime PaidAt { get; set; }
         public DateTime AvailableAt { get; set; }
         public PaymentStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
     }
 }

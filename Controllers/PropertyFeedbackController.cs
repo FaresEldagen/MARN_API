@@ -41,7 +41,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetRatingSummary(long propertyId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyRatingService.GetSummaryAsync(propertyId, userId);
             return HandleServiceResult(result);
@@ -71,7 +71,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> CreateRating(long propertyId, [FromBody] CreatePropertyRatingDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyRatingService.CreateAsync(propertyId, userId, dto);
             return HandleServiceResult(result);
@@ -99,7 +99,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> UpdateRating(long propertyId, [FromBody] UpdatePropertyRatingDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyRatingService.UpdateAsync(propertyId, userId, dto);
             return HandleServiceResult(result);
@@ -124,7 +124,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DeleteRating(long propertyId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyRatingService.DeleteAsync(propertyId, userId);
             return HandleServiceResult(result);
@@ -150,11 +150,11 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> GetComments(long propertyId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
             if (!TryGetUserId(out _))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             if (pageNumber < 1 || pageSize < 1)
             {
-                return BadRequest(CreateErrorResponse(StatusCodes.Status400BadRequest, "pageNumber and pageSize must be greater than 0."));
+                return BadRequestInvalidPagination();
             }
 
             var result = await _propertyCommentService.GetByPropertyIdAsync(propertyId, pageNumber, pageSize);
@@ -183,7 +183,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> CreateComment(long propertyId, [FromBody] CreatePropertyCommentDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyCommentService.CreateAsync(propertyId, userId, dto);
             return HandleServiceResult(result);
@@ -212,7 +212,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> UpdateComment(long propertyId, long commentId, [FromBody] UpdatePropertyCommentDto dto)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyCommentService.UpdateAsync(propertyId, commentId, userId, dto);
             return HandleServiceResult(result);
@@ -238,7 +238,7 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> DeleteComment(long propertyId, long commentId)
         {
             if (!TryGetUserId(out var userId))
-                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized, "User ID not found in token"));
+                return UnauthorizedUserIdMissing();
 
             var result = await _propertyCommentService.DeleteAsync(propertyId, commentId, userId);
             return HandleServiceResult(result);

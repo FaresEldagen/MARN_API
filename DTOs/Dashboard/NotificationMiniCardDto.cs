@@ -7,6 +7,7 @@ namespace MARN_API.DTOs.Dashboard
     {
         public long Id { get; set; }
         public NotificationType Type { get; set; }
+        public string TypeDisplayName { get; set; } = string.Empty;
 
         public string Title { get; set; } = string.Empty;
 

@@ -18,8 +18,11 @@ namespace MARN_API.DTOs.Contracts
         public string? TransactionId { get; set; }
         public string? MerkleRoot { get; set; }
         public ContractStatus Status { get; set; }
+        public string StatusDisplayName { get; set; } = string.Empty;
         public ContractAnchoringStatus AnchoringStatus { get; set; }
+        public string AnchoringStatusDisplayName { get; set; } = string.Empty;
         public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
         public decimal TotalContractAmount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

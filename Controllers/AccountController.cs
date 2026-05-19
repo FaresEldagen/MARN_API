@@ -143,7 +143,7 @@ namespace MARN_API.Controllers
             if (userId == Guid.Empty || string.IsNullOrWhiteSpace(token))
             {
                 _logger.LogWarning("Email confirmation failed: Invalid userId or token");
-                return BadRequest(new { Message = "User ID and Token are required." });
+                return BadRequestUserIdAndTokenRequired();
             }
 
             var result = await _accountService.ConfirmEmailAsync(userId, token);

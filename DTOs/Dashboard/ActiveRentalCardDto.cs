@@ -8,6 +8,7 @@ namespace MARN_API.DTOs.Dashboard
     {
         public long ContractId { get; set; }
         public ContractStatus ContractStatus { get; set; }
+        public string ContractStatusDisplayName { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
@@ -16,10 +17,12 @@ namespace MARN_API.DTOs.Dashboard
         public string PropertyImageUrl { get; set; } = string.Empty;
 
         public PaymentFrequency PaymentFrequency { get; set; }
+        public string PaymentFrequencyDisplayName { get; set; } = string.Empty;
 
         public DateTime? NextPaymentScheduleDate { get; set; }
         public long? NextPaymentScheduleId { get; set; }
         public PaymentScheduleStatus? NextPaymentScheduleStatus { get; set; }
+        public string NextPaymentScheduleStatusDisplayName { get; set; } = string.Empty;
         public Guid OwnerId { get; set; }
     }
 }

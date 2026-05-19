@@ -7,6 +7,7 @@ namespace MARN_API.Services.Interfaces
     {
         Task<ServiceResult<AdminDetailedUsersResponseDto>> GetUsersAsync(AdminDetailedUsersQueryDto query);
         Task<ServiceResult<AdminDetailedPropertiesResponseDto>> GetPropertiesAsync(AdminDetailedPropertiesQueryDto query);
+        Task<ServiceResult<AdminPropertyDetailsDto>> GetPropertyDetailsAsync(long propertyId);
         Task<ServiceResult<AdminDetailedPropertyListItemDto>> DeactivatePropertyAsync(long propertyId);
         Task<ServiceResult<AdminDetailedPropertyListItemDto>> RestorePropertyAsync(long propertyId);
         Task<ServiceResult<AdminDetailedContractsResponseDto>> GetContractsAsync(AdminDetailedContractsQueryDto query);

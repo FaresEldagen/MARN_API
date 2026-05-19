@@ -18,6 +18,10 @@ using System.Text.Json.Serialization;
 using System.Text;
 using System.Threading.RateLimiting;
 using MARN_API.Hubs;
+using MARN_API.Localization;
+using Microsoft.AspNetCore.Localization;
+using System.Security.Claims;
+using System.Text.Json;
 using Hangfire;
 using Hangfire.SqlServer;
 using MARN_API.BackgroundJobs;
@@ -30,6 +34,9 @@ namespace MARN_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+            builder.Services.AddHttpContextAccessor();
+
 
             #region Logging Configuration
             // Configure application logging (Console, Debug, File)
@@ -41,35 +48,6 @@ namespace MARN_API
             if (builder.Environment.IsDevelopment())
                 builder.Logging.AddEventSourceLogger();
 
-            // Custom model validation response
-            builder.Services.Configure<ApiBehaviorOptions>(options =>
-            {
-                options.InvalidModelStateResponseFactory = context =>
-                {
-                    var logger = context.HttpContext.RequestServices
-                        .GetRequiredService<ILogger<Program>>();
-
-                    logger.LogWarning("Model validation failed for path {Path}", context.HttpContext.Request.Path);
-
-                    var errors = context.ModelState
-                        .Where(entry => entry.Value?.Errors.Count > 0)
-                        .ToDictionary(
-                            entry => entry.Key,
-                            entry => entry.Value!.Errors
-                                .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "The provided value is invalid." : error.ErrorMessage)
-                                .ToArray());
-
-                    return new BadRequestObjectResult(new ErrorResponse
-                    {
-                        Message = "The request payload is invalid.",
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        Path = context.HttpContext.Request.Path,
-                        TraceId = context.HttpContext.TraceIdentifier,
-                        Timestamp = DateTime.UtcNow,
-                        Errors = errors
-                    });
-                };
-            });
             #endregion
 
 
@@ -88,16 +66,55 @@ namespace MARN_API
 
 
             #region Controllers & JSON
-            builder.Services.AddControllers(options =>
+            var mvcBuilder = builder.Services.AddControllers(options =>
                 {
                     options.Filters.Add<BannedAccountAccessFilter>();
                 })
+                .AddDataAnnotationsLocalization()
                 .AddJsonOptions(options =>
                 {
                     // Convert Enums to string instead of int
                     options.JsonSerializerOptions.Converters
                         .Add(new JsonStringEnumConverter());
                 });
+
+            mvcBuilder.ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var logger = context.HttpContext.RequestServices
+                        .GetRequiredService<ILogger<Program>>();
+                    var localizer = context.HttpContext.RequestServices
+                        .GetRequiredService<IAppTextLocalizer>();
+
+                    logger.LogWarning("Model validation failed for path {Path}", context.HttpContext.Request.Path);
+
+                    var errors = context.ModelState
+                        .Where(entry => entry.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            entry => NormalizeValidationKey(entry.Key),
+                            entry => entry.Value!.Errors
+                                .Select(error =>
+                                {
+                                    var message = string.IsNullOrWhiteSpace(error.ErrorMessage)
+                                        ? "The provided value is invalid."
+                                        : error.ErrorMessage;
+                                    return ValidationMessageLocalizer.Localize(entry.Key, message, localizer);
+                                })
+                                .ToArray());
+
+                    return new BadRequestObjectResult(new ErrorResponse
+                    {
+                        Code = "VALIDATION_FAILED",
+                        Message = localizer.LocalizeMessage("VALIDATION_FAILED", "The request payload is invalid."),
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Path = context.HttpContext.Request.Path,
+                        TraceId = context.HttpContext.TraceIdentifier,
+                        Timestamp = DateTime.UtcNow,
+                        Errors = errors
+                    });
+                };
+            });
 
             builder.Services.AddEndpointsApiExplorer();
             #endregion
@@ -137,6 +154,8 @@ namespace MARN_API
                         Array.Empty<string>()
                     }
                 });
+
+                options.OperationFilter<AcceptLanguageHeaderOperationFilter>();
             });
             #endregion
 
@@ -199,6 +218,10 @@ namespace MARN_API
             builder.Services.AddScoped<IHomepageService, HomepageService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IAppTextLocalizer, AppTextLocalizer>();
+            builder.Services.AddScoped<IResponsePayloadLocalizer, ResponsePayloadLocalizer>();
+            builder.Services.AddScoped<IUserCultureService, UserCultureService>();
+            builder.Services.AddScoped<INotificationContentLocalizer, NotificationContentLocalizer>();
 
             builder.Services.AddScoped<IContractPdfGenerator, ContractPdfGenerator>();
             builder.Services.AddScoped<IHashingService, HashingService>();
@@ -343,6 +366,38 @@ namespace MARN_API
                             context.Token = accessToken;
                         }
                         return Task.CompletedTask;
+                    },
+                    OnChallenge = async context =>
+                    {
+                        if (context.Response.HasStarted)
+                            return;
+
+                        context.HandleResponse();
+
+                        var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+                        var (code, fallbackMessage) = ResolveAuthenticationChallenge(context);
+                        var response = CreateFrameworkErrorResponse(context.HttpContext, localizer, StatusCodes.Status401Unauthorized, code, fallbackMessage);
+
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions), context.HttpContext.RequestAborted);
+                    },
+                    OnForbidden = async context =>
+                    {
+                        if (context.Response.HasStarted)
+                            return;
+
+                        var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+                        var response = CreateFrameworkErrorResponse(
+                            context.HttpContext,
+                            localizer,
+                            StatusCodes.Status403Forbidden,
+                            "ACCESS_FORBIDDEN",
+                            "You do not have permission to access this endpoint.");
+
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions), context.HttpContext.RequestAborted);
                     }
                 };
             });
@@ -393,18 +448,60 @@ namespace MARN_API
                 // On Rejected
                 options.OnRejected = async (context, token) =>
                 {
+                    var localizer = context.HttpContext.RequestServices.GetRequiredService<IAppTextLocalizer>();
+                    var response = CreateFrameworkErrorResponse(
+                        context.HttpContext,
+                        localizer,
+                        StatusCodes.Status429TooManyRequests,
+                        "RATE_LIMIT_EXCEEDED",
+                        "Rate limit exceeded. Please try again later.");
+
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                    await context.HttpContext.Response.WriteAsync(
-                        "Rate limit exceeded. Please try again later.", token);
+                    context.HttpContext.Response.ContentType = "application/json";
+                    await context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions), token);
                 };
             });
             #endregion
 
 
             var app = builder.Build();
+            var requestLocalizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(LocalizationConstants.DefaultCulture),
+                SupportedCultures = LocalizationConstants.SupportedCultures.ToList(),
+                SupportedUICultures = LocalizationConstants.SupportedCultures.ToList()
+            };
+
+            requestLocalizationOptions.RequestCultureProviders = new List<IRequestCultureProvider>
+            {
+                new CustomRequestCultureProvider(async context =>
+                {
+                    var acceptLanguageHeader = context.Request.Headers.AcceptLanguage.ToString();
+                    if (!string.IsNullOrWhiteSpace(acceptLanguageHeader))
+                    {
+                        var requestedCulture = acceptLanguageHeader
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(value => value.Split(';', StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+
+                        if (!string.IsNullOrWhiteSpace(requestedCulture))
+                        {
+                            return new ProviderCultureResult(LocalizationConstants.NormalizeCultureName(requestedCulture));
+                        }
+                    }
+
+                    var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userCultureService = context.RequestServices.GetRequiredService<IUserCultureService>();
+                    var culture = await userCultureService.ResolveUserCultureAsync(userId);
+                    return new ProviderCultureResult(culture.Name);
+                })
+            };
 
 
             #region Middleware Pipeline
+            app.UseRequestLocalization(requestLocalizationOptions);
+
+            // Global Exception Handling
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
             app.UseMiddleware<RequestLoggingMiddleware>();
@@ -473,6 +570,54 @@ namespace MARN_API
 
 
             await app.RunAsync();
+        }
+
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
+        private static (string Code, string Message) ResolveAuthenticationChallenge(JwtBearerChallengeContext context)
+        {
+            if (context.AuthenticateFailure is SecurityTokenExpiredException)
+            {
+                return ("ACCESS_TOKEN_EXPIRED", "The access token has expired. Please sign in again.");
+            }
+
+            if (string.IsNullOrWhiteSpace(context.Request.Headers.Authorization))
+            {
+                return ("AUTHENTICATION_REQUIRED", "Authentication is required to access this endpoint.");
+            }
+
+            return ("ACCESS_TOKEN_INVALID", "The access token is invalid or malformed.");
+        }
+
+        private static ErrorResponse CreateFrameworkErrorResponse(
+            HttpContext context,
+            IAppTextLocalizer localizer,
+            int statusCode,
+            string code,
+            string fallbackMessage)
+        {
+            return new ErrorResponse
+            {
+                Code = code,
+                Message = localizer.LocalizeMessage(code, fallbackMessage),
+                StatusCode = statusCode,
+                Path = context.Request.Path,
+                TraceId = context.TraceIdentifier,
+                Timestamp = DateTime.UtcNow
+            };
+        }
+
+        private static string NormalizeValidationKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key) || key == "$")
+            {
+                return "body";
+            }
+
+            return key;
         }
     }
 }

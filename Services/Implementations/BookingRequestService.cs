@@ -31,6 +31,7 @@ namespace MARN_API.Services.Implementations
         private readonly INotificationService _notificationService;
         private readonly IChatService _chatService;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IAppTextLocalizer _localizer;
 
         public BookingRequestService(
             IBookingRequestRepo bookingRequestRepo,
@@ -41,7 +42,8 @@ namespace MARN_API.Services.Implementations
             ILogger<BookingRequestService> logger,
             INotificationService notificationService,
             IChatService chatService,
-            IHubContext<ChatHub> hubContext)
+            IHubContext<ChatHub> hubContext,
+            IAppTextLocalizer localizer)
         {
             _bookingRequestRepo = bookingRequestRepo;
             _propertyRepo = propertyRepo;
@@ -52,6 +54,7 @@ namespace MARN_API.Services.Implementations
             _notificationService = notificationService;
             _chatService = chatService;
             _hubContext = hubContext;
+            _localizer = localizer;
         }
 
 
@@ -112,11 +115,23 @@ namespace MARN_API.Services.Implementations
             // Validate PaymentFrequency based on RentalUnit
             if (property.RentalUnit == RentalUnit.Daily && dto.PaymentFrequency != PaymentFrequency.OneTime)
             {
-                return ServiceResult<bool>.Fail("For daily rentals, only 'OneTime' payment frequency is allowed.", resultType: ServiceResultType.BadRequest);
+                return ServiceResult<bool>.Fail(
+                    "For daily rentals, only '{0}' payment frequency is allowed.",
+                    resultType: ServiceResultType.BadRequest,
+                    code: "BOOKING_DAILY_PAYMENT_FREQUENCY_INVALID",
+                    messageArguments: [_localizer.GetEnumDisplayName(PaymentFrequency.OneTime)]);
             }
             if (property.RentalUnit == RentalUnit.Monthly && dto.PaymentFrequency != PaymentFrequency.OneTime && dto.PaymentFrequency != PaymentFrequency.Monthly)
             {
-                return ServiceResult<bool>.Fail("For monthly rentals, only 'OneTime' or 'Monthly' payment frequencies are allowed.", resultType: ServiceResultType.BadRequest);
+                return ServiceResult<bool>.Fail(
+                    "For monthly rentals, only '{0}' or '{1}' payment frequencies are allowed.",
+                    resultType: ServiceResultType.BadRequest,
+                    code: "BOOKING_MONTHLY_PAYMENT_FREQUENCY_INVALID",
+                    messageArguments:
+                    [
+                        _localizer.GetEnumDisplayName(PaymentFrequency.OneTime),
+                        _localizer.GetEnumDisplayName(PaymentFrequency.Monthly)
+                    ]);
             }
             // For Yearly, any PaymentFrequency (OneTime, Monthly, Quarterly, Yearly) is allowed, so no check is needed.
 
@@ -131,6 +146,9 @@ namespace MARN_API.Services.Implementations
                 UserId = property.OwnerId.ToString(),
                 UserType = NotificationUserType.Owner,
                 Type = NotificationType.NewBookingRequest,
+                TitleKey = "NOTIFICATION_BOOKING_REQUEST_TITLE",
+                BodyKey = "NOTIFICATION_BOOKING_REQUEST_BODY",
+                LocalizationArguments = new() { property.Title, $"{user.FirstName} {user.LastName}" },
                 Title = "New Booking Request",
                 Body = $"You have received a new booking request for \"{property.Title}\" from {user.FirstName} {user.LastName}."
             });
@@ -170,6 +188,9 @@ namespace MARN_API.Services.Implementations
                     UserId = bookingRequest.RenterId.ToString(),
                     UserType = NotificationUserType.Renter,
                     Type = NotificationType.BookingRequestRejected,
+                    TitleKey = "NOTIFICATION_BOOKING_REJECTED_TITLE",
+                    BodyKey = "NOTIFICATION_BOOKING_REJECTED_BODY",
+                    LocalizationArguments = new() { bookingRequest.Property.Title },
                     Title = "Booking Request Rejected",
                     Body = $"Your booking request for \"{bookingRequest.Property.Title}\" was rejected by the owner."
                 });
@@ -182,6 +203,9 @@ namespace MARN_API.Services.Implementations
                     UserId = bookingRequest.Property.OwnerId.ToString(),
                     UserType = NotificationUserType.Owner,
                     Type = NotificationType.BookingRequestCanceled,
+                    TitleKey = "NOTIFICATION_BOOKING_CANCELLED_TITLE",
+                    BodyKey = "NOTIFICATION_BOOKING_CANCELLED_BODY",
+                    LocalizationArguments = new() { bookingRequest.Property.Title },
                     Title = "Booking Request Cancelled",
                     Body = $"The booking request for \"{bookingRequest.Property.Title}\" was cancelled by the renter."
                 });
@@ -212,7 +236,10 @@ namespace MARN_API.Services.Implementations
             string senderId = userId.ToString();
             string receiverId = isRenter ? bookingRequest.Property.OwnerId.ToString() : bookingRequest.RenterId.ToString();
 
-            string content = $"Hello! I am contacting you regarding the booking request for the property '{bookingRequest.Property.Title}'.";
+            string content = _localizer.GetOrFallback(
+                "TEXT_HELLO_I_AM_CONTACTING_YOU_REGARDING_THE_BOOKING_REQUEST_FOR_THE_PROPERTY_0",
+                "Hello! I am contacting you regarding the booking request for the property '{0}'.",
+                arguments: [bookingRequest.Property.Title]);
 
             var result = await _chatService.SendMessageAsync(senderId, receiverId, content);
             if (!result.Success)
