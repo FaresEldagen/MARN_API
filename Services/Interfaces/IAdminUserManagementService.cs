@@ -9,7 +9,8 @@ namespace MARN_API.Services.Interfaces
         Task<ServiceResult<PagedResult<AdminUserListItemDto>>> GetUsersAsync(AdminUserManagementQueryDto query);
         Task<ServiceResult<AdminUserDetailsDto>> GetUserDetailsAsync(Guid userId);
         Task<ServiceResult<bool>> BanUserAsync(Guid userId);
-        Task<ServiceResult<bool>> RestoreUserAsync(Guid userId);
+        Task<ServiceResult<bool>> UnbanUserAsync(Guid userId);
+        Task<ServiceResult<bool>> RestoreDeletedUserAsync(Guid userId);
         Task<ServiceResult<bool>> DeleteUserAsync(Guid userId);
     }
 }

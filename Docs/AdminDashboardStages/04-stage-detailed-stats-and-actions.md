@@ -7,7 +7,7 @@ This stage powers the drilldown pages behind the main dashboard cards:
 - detailed properties stats
 - detailed contracts stats
 - detailed revenue stats
-- admin property activate/deactivate actions
+- admin property restore/soft-delete actions
 - admin contract cancel action
 - admin contract PDF download
 
@@ -179,53 +179,56 @@ Looks in:
 | Field | Meaning |
 |---|---|
 | `canDeactivate` | true only when property is active and not deleted |
-| `canRestore` | true only when property is inactive and not deleted |
+| `canRestore` | always `false` |
 | `isDeleted` | whether `DeletedAt` exists |
 
-## 3. Deactivate property
+## 3. Soft delete property
 
 ```http
-PATCH /api/admin/stats/properties/{propertyId}/deactivate
+DELETE /api/admin/stats/properties/{propertyId}
 ```
-
-### Request body
-
-None.
 
 ### What happens
 
-- `IsActive` becomes `false`
-- verification `Status` is unchanged
-- owner receives a notification
+- reuses the existing property soft-delete workflow
+- booking requests, comments, and ratings are hard deleted immediately
+- the property gets `DeletedAt`
+- property media files are kept for 7 days through a delayed Hangfire job
+- if that grace window expires, the media files and stored media references are removed
 
 ### Errors
 
 - `404`
   - property not found
 - `409`
-  - property already inactive
-  - property is soft deleted
+  - property is already deleted
 
-## 4. Restore property
+## 4. Restore deleted property
 
 ```http
-PATCH /api/admin/stats/properties/{propertyId}/restore
+PATCH /api/admin/stats/properties/{propertyId}/restore-deleted
 ```
 
 ### What happens
 
-- `IsActive` becomes `true`
-- verification `Status` is unchanged
-- owner receives a notification
+- only soft-deleted properties are allowed
+- `DeletedAt` is cleared
+- if the delayed Hangfire image deletion job is still pending, it is cancelled
+- if more than 7 days passed and the proof-of-ownership image was already removed, the property is restored as `Pending`
+- if those delayed file deletions already happened, the stored property media rows are cleared so the restored property does not point at missing files
+
+### Important note
+
+Within the 7-day grace window, this restore brings the property back with its media references intact. Booking requests, comments, and ratings are not restored because they are deleted immediately during soft delete.
 
 ### Errors
 
 - `404`
+  - property not found
 - `409`
-  - property already active
-  - property is soft deleted
+  - property is not deleted
 
-## 5. Detailed contracts stats
+## 6. Detailed contracts stats
 
 ```http
 GET /api/admin/stats/contracts?period=allTime&search=1000101&status=Pending

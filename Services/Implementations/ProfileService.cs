@@ -657,7 +657,7 @@ namespace MARN_API.Services.Implementations
             return ServiceResult<bool>.Ok(true, "Password Changed successfully.");
         }
 
-        public async Task<ServiceResult<bool>> DeleteUserAsync(Guid userId)
+        public async Task<ServiceResult<bool>> DeleteUserAsync(Guid userId, bool adminInitiated = false)
         {
             _logger.LogInformation("Delete User attempt for userId: {userId}", userId);
 
@@ -695,6 +695,19 @@ namespace MARN_API.Services.Implementations
             if (!string.IsNullOrEmpty(user.BackIdPhoto))
                 filesToDelete.Add(user.BackIdPhoto);
 
+            NotificationRequestDto? adminDeletionNotification = adminInitiated
+                ? new NotificationRequestDto
+                {
+                    UserId = user.Id.ToString(),
+                    UserType = NotificationUserType.General,
+                    Type = NotificationType.General,
+                    TitleKey = "NOTIFICATION_ACCOUNT_DELETED_TITLE",
+                    BodyKey = "NOTIFICATION_ACCOUNT_DELETED_BODY",
+                    Title = "Account Deleted",
+                    Body = "An admin has deleted your account. If you believe this is a mistake, please contact support."
+                }
+                : null;
+
 
             // Begin transactional deletion
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -720,7 +733,10 @@ namespace MARN_API.Services.Implementations
                 var ownedPropertyIds = await _propertyRepo.GetPropertyIdsByOwnerAsync(userId);
                 foreach(var propertyId in ownedPropertyIds)
                 {
-                    var propertyDeleteResult = await _propertyService.DeletePropertyAsync(propertyId, userId);
+                    var propertyDeleteResult = await _propertyService.DeletePropertyAsync(
+                        propertyId,
+                        userId,
+                        suppressNotification: true);
                     if (!propertyDeleteResult.Success)
                     {
                         _logger.LogWarning("Delete User failed: Could not delete owned property {PropertyId} for userId: {userId}. Error: {Error}", 
@@ -771,12 +787,24 @@ namespace MARN_API.Services.Implementations
             
 
             // Send deletion email (outside transaction)
+            if (adminDeletionNotification != null)
+            {
+                try
+                {
+                    await _notificationService.SendNotificationAsync(adminDeletionNotification);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send admin deletion notification to user {UserId}", userId);
+                }
+            }
+
             await _emailService.SendAccountDeletionEmailAsync(user.Email!, user.FirstName);
 
             return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
         }
 
-        private void DeleteUserImages(List<string> filesToDelete)
+        public void DeleteUserImages(List<string> filesToDelete)
         {
             foreach (var filePath in filesToDelete)
             {

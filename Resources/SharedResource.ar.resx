@@ -853,4 +853,18 @@
   <data name="TEXT_USER_VERIFICATION_CANNOT_BE_APPROVED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>لا يمكن الموافقة على توثيق المستخدم بينما حالة الحساب هي {0}.</value></data>
   <data name="TEXT_USER_VERIFICATION_CANNOT_BE_DECLINED_WHILE_ACCOUNT_STATUS_IS_0" xml:space="preserve"><value>لا يمكن رفض توثيق المستخدم بينما حالة الحساب هي {0}.</value></data>
   <data name="TEXT_WEBHOOK_SIGNATURE_VALIDATION_FAILED" xml:space="preserve"><value>فشل التحقق من توقيع Webhook.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_BANNED_TITLE" xml:space="preserve"><value>تم حظر الحساب</value></data>
+  <data name="NOTIFICATION_ACCOUNT_BANNED_BODY" xml:space="preserve"><value>قام أحد المشرفين بحظر حسابك. لن تتمكن من استخدام MARN حتى يتم رفع الحظر. إذا كنت تعتقد أن هذا تم بالخطأ، يرجى التواصل مع الدعم.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_UNBANNED_TITLE" xml:space="preserve"><value>تم رفع الحظر عن الحساب</value></data>
+  <data name="NOTIFICATION_ACCOUNT_UNBANNED_BODY" xml:space="preserve"><value>قام أحد المشرفين برفع الحظر عن حسابك. يمكنك الآن تسجيل الدخول ومتابعة استخدام MARN.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_RESTORED_TITLE" xml:space="preserve"><value>تمت استعادة الحساب</value></data>
+  <data name="NOTIFICATION_ACCOUNT_RESTORED_BODY" xml:space="preserve"><value>قام أحد المشرفين باستعادة حسابك المحذوف. يمكنك الآن تسجيل الدخول ومتابعة استخدام MARN.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_RESTORED_REVERIFY_BODY" xml:space="preserve"><value>قام أحد المشرفين باستعادة حسابك. تمت إزالة بعض صور التحقق خلال فترة سماح الحذف، لذلك قد تحتاج إلى إعادة رفعها قبل أن يتم توثيق حسابك مرة أخرى.</value></data>
+  <data name="NOTIFICATION_ACCOUNT_DELETED_TITLE" xml:space="preserve"><value>تم حذف الحساب</value></data>
+  <data name="NOTIFICATION_ACCOUNT_DELETED_BODY" xml:space="preserve"><value>قام أحد المشرفين بحذف حسابك. إذا كنت تعتقد أن هذا تم بالخطأ، يرجى التواصل مع الدعم.</value></data>
+  <data name="NOTIFICATION_ADMIN_PROPERTY_DELETED_TITLE" xml:space="preserve"><value>تم حذف العقار</value></data>
+  <data name="NOTIFICATION_ADMIN_PROPERTY_DELETED_BODY" xml:space="preserve"><value>قام أحد المشرفين بحذف عقارك "{0}". إذا كنت تعتقد أن هذا تم بالخطأ، يرجى التواصل مع الدعم.</value></data>
+  <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_TITLE" xml:space="preserve"><value>تمت استعادة العقار</value></data>
+  <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_BODY" xml:space="preserve"><value>قام أحد المشرفين باستعادة عقارك المحذوف "{0}". وأصبح متاحًا في حسابك مرة أخرى.</value></data>
+  <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_REVERIFY_BODY" xml:space="preserve"><value>قام أحد المشرفين باستعادة عقارك "{0}". تمت إزالة ملفات إثبات الملكية خلال فترة سماح الحذف، لذلك قد يحتاج العقار إلى المرور بعملية التحقق مرة أخرى.</value></data>
 </root>

@@ -224,42 +224,43 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
-        /// Deactivates a property from the detailed properties admin area.
+        /// Soft deletes a property from the detailed properties admin area.
         /// </summary>
         /// <param name="propertyId">The property identifier.</param>
         /// <remarks>
-        /// This action only flips <c>IsActive</c> to <c>false</c>. It does not change the property's
-        /// verification status. Deleted properties cannot be deactivated.
+        /// This reuses the existing property soft-delete workflow, including the delayed Hangfire image
+        /// cleanup job that runs after seven days.
         /// </remarks>
-        [HttpPatch("stats/properties/{propertyId:long}/deactivate")]
+        [HttpDelete("stats/properties/{propertyId:long}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> DeactivateDetailedProperty(long propertyId)
+        public async Task<IActionResult> DeleteDetailedProperty(long propertyId)
         {
-            var result = await _adminDetailedStatsService.DeactivatePropertyAsync(propertyId);
+            var result = await _adminDetailedStatsService.DeletePropertyAsync(propertyId);
             return HandleServiceResult(result);
         }
 
         /// <summary>
-        /// Restores an inactive property from the detailed properties admin area.
+        /// Restores a soft-deleted property from the detailed properties admin area.
         /// </summary>
         /// <param name="propertyId">The property identifier.</param>
         /// <remarks>
-        /// This action only flips <c>IsActive</c> back to <c>true</c>. Deleted properties cannot be restored.
-        /// Restoring does not override a property's verification status.
+        /// If the delayed Hangfire image cleanup job is still pending, it is cancelled. If the seven-day
+        /// grace window has already elapsed and the proof-of-ownership image was removed, the property is
+        /// restored in <c>Pending</c> status so verification can be resubmitted.
         /// </remarks>
-        [HttpPatch("stats/properties/{propertyId:long}/restore")]
+        [HttpPatch("stats/properties/{propertyId:long}/restore-deleted")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> RestoreDetailedProperty(long propertyId)
+        public async Task<IActionResult> RestoreDeletedDetailedProperty(long propertyId)
         {
-            var result = await _adminDetailedStatsService.RestorePropertyAsync(propertyId);
+            var result = await _adminDetailedStatsService.RestoreDeletedPropertyAsync(propertyId);
             return HandleServiceResult(result);
         }
 
@@ -548,13 +549,35 @@ namespace MARN_API.Controllers
         }
 
         /// <summary>
-        /// Restores a banned manageable non-admin user.
+        /// Removes a ban from a manageable non-admin user.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <remarks>
-        /// Only users currently in <c>Banned</c> status can be restored. Deleted users cannot be restored
+        /// Only users currently in <c>Banned</c> status can be unbanned. Deleted users cannot be unbanned
         /// through this endpoint. The restored state comes from <c>StatusBeforeBan</c>, not a forced
         /// <c>Verified</c> fallback.
+        /// </remarks>
+        [HttpPatch("users/{userId:guid}/unban")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> UnbanUser(Guid userId)
+        {
+            var result = await _adminUserManagementService.UnbanUserAsync(userId);
+            return HandleServiceResult(result);
+        }
+
+        /// <summary>
+        /// Restores a soft-deleted manageable non-admin user.
+        /// </summary>
+        /// <param name="userId">The user identifier.</param>
+        /// <remarks>
+        /// This endpoint reverses the user soft-delete. If the delayed Hangfire image cleanup job is still
+        /// pending, it is cancelled so the stored media stays available. If the seven-day grace window has
+        /// already elapsed and the user's verification images were removed, the account is restored in an
+        /// unverified state so identity verification can be resubmitted.
         /// </remarks>
         [HttpPatch("users/{userId:guid}/restore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -562,9 +585,9 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> RestoreUser(Guid userId)
+        public async Task<IActionResult> RestoreDeletedUser(Guid userId)
         {
-            var result = await _adminUserManagementService.RestoreUserAsync(userId);
+            var result = await _adminUserManagementService.RestoreDeletedUserAsync(userId);
             return HandleServiceResult(result);
         }
 
