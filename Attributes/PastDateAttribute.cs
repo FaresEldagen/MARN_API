@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MARN_API.Validation
+namespace MARN_API.Attributes
 {
     /// <summary>
     /// Validates that a DateTime value is in the past and not unreasonably old.
