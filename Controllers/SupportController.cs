@@ -29,8 +29,7 @@ namespace MARN_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ContactUs([FromBody] ContactSupportRequestDto request)
         {
-            if (!TryGetUserId(out var userId))
-                return UnauthorizedUserIdMissing();
+            TryGetUserId(out var userId);
 
             var result = await _contactSupportService.SendContactUsEmailAsync(request,userId);
             return HandleServiceResult(result);

@@ -5,6 +5,6 @@ namespace MARN_API.Services.Interfaces
 {
     public interface IContactSupportService
     {
-        Task<ServiceResult<bool>> SendContactUsEmailAsync(ContactSupportRequestDto request,Guid userId);
+        Task<ServiceResult<bool>> SendContactUsEmailAsync(ContactSupportRequestDto request,Guid? userId);
     }
 }
