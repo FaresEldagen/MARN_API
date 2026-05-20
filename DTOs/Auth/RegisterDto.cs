@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using MARN_API.Enums.Account;
-using MARN_API.Validation;
+using MARN_API.Attributes;
 
 namespace MARN_API.DTOs.Auth
 {

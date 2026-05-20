@@ -1,5 +1,5 @@
 ﻿using MARN_API.Enums.Account;
-using MARN_API.Validation;
+using MARN_API.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace MARN_API.DTOs.Profile
