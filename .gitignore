@@ -82,3 +82,5 @@ wwwroot/
 /MARN_Frontend
 /serviceAccountKey.json
 /Data/Seed/Files
+.vscode/
+!.vscode/extensions.json
