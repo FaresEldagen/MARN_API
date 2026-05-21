@@ -152,7 +152,11 @@ namespace MARN_API.Controllers
                 await service.CreateAsync(options);
 
                 _logger.LogInformation("Platform balance topped up successfully with 500,000 EGP (Available).");
-                var result = ServiceResult<bool>.Ok(true, "Platform balance topped up successfully with 500,000 EGP (Available).", ServiceResultType.Success);
+                var result = ServiceResult<bool>.Ok(
+                    true,
+                    "Platform balance topped up successfully with 500,000 EGP (Available).",
+                    ServiceResultType.Success,
+                    code: "ZZ_TEST_PLATFORM_BALANCE_TOPPED_UP_SUCCESSFULLY");
                 return HandleServiceResult(result);
             }
             catch (StripeException e)

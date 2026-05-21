@@ -2573,10 +2573,273 @@ that paid at {3} is now available for withdrawal.</value>
 <data name="n_external_login_success" xml:space="preserve">
     <value>External Login completed successfully.</value>
   </data>
-<data name="ZZ_TWO_FACTOR_AUTHENTICATION_REQUIRED" xml:space="preserve">
-    <value>Two-Factor Authentication is required.</value>
+  <data name="ZZ_TWO_FACTOR_AUTHENTICATION_REQUIRED" xml:space="preserve">
+    <value>Two-factor authentication is required. A verification code has been sent to your email.</value>
   </data>
 <data name="ZZ_INVALID_EMAIL_OR_PASSWORD" xml:space="preserve">
     <value>Invalid email or password.</value>
+  </data>
+
+  <data name="ZZ_STRIPE_CONNECT_ONBOARDING_LINK_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Stripe onboarding link created successfully.</value>
+  </data>
+<data name="ZZ_LOGIN_SUCCESSFUL" xml:space="preserve">
+    <value>Login completed successfully.</value>
+  </data>
+
+  <data name="ZZ_GOOGLE_LOGIN_SUCCESSFUL" xml:space="preserve">
+    <value>Google login completed successfully.</value>
+  </data>
+
+  <data name="ZZ_TWO_FACTOR_VERIFICATION_SUCCESSFUL" xml:space="preserve">
+    <value>Two-factor authentication verified successfully.</value>
+  </data>
+
+  <data name="ZZ_REGISTRATION_SUCCESSFUL" xml:space="preserve">
+    <value>Registration completed successfully. Please confirm your email.</value>
+  </data>
+
+  <data name="ZZ_CONFIRMATION_EMAIL_RESEND_REQUEST_PROCESSED" xml:space="preserve">
+    <value>If the email exists and is not confirmed, a confirmation email has been sent.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_RESET_LINK_REQUEST_PROCESSED" xml:space="preserve">
+    <value>If the email exists, a password reset link has been sent.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_RESET_TOKEN_VALIDATED" xml:space="preserve">
+    <value>Password reset token validated successfully.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_RESET_COMPLETED_SUCCESSFULLY" xml:space="preserve">
+    <value>Password reset completed successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_ANALYTICS_REPORT_GENERATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Analytics report generated successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_DELETED_PROPERTY_RESTORED_SUCCESSFULLY" xml:space="preserve">
+    <value>Deleted property restored successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve">
+    <value>Contract cancelled successfully by admin.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_CONTRACT_PAYMENT_INTENTS_CLEARED_FOR_CANCELLATION" xml:space="preserve">
+    <value>All related payment intents were cleared successfully for contract cancellation.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_REPORT_REVIEWED_SUCCESSFULLY" xml:space="preserve">
+    <value>Report reviewed successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_REPORT_MODERATION_ACTION_APPLIED_SUCCESSFULLY" xml:space="preserve">
+    <value>Moderation action applied successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_ROLES_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>User roles updated successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_BANNED_SUCCESSFULLY" xml:space="preserve">
+    <value>User banned successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_UNBANNED_SUCCESSFULLY" xml:space="preserve">
+    <value>User unbanned successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_RESTORED_SUCCESSFULLY" xml:space="preserve">
+    <value>User restored successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_MANAGEABLE_USER_RESOLVED_SUCCESSFULLY" xml:space="preserve">
+    <value>Target user resolved successfully for admin management.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_VERIFICATION_APPROVED" xml:space="preserve">
+    <value>User verification approved successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_VERIFICATION_DECLINED" xml:space="preserve">
+    <value>User verification declined successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_PROPERTY_VERIFICATION_APPROVED" xml:space="preserve">
+    <value>Property verification approved successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_PROPERTY_VERIFICATION_DECLINED" xml:space="preserve">
+    <value>Property verification declined successfully.</value>
+  </data>
+
+  <data name="ZZ_BOOKING_REQUEST_ADDED_SUCCESSFULLY" xml:space="preserve">
+    <value>Booking request submitted successfully.</value>
+  </data>
+
+  <data name="ZZ_BOOKING_REQUEST_REMOVED_SUCCESSFULLY" xml:space="preserve">
+    <value>Booking request removed successfully.</value>
+  </data>
+
+  <data name="ZZ_BOOKING_REQUEST_CHAT_STARTED_SUCCESSFULLY" xml:space="preserve">
+    <value>Chat started successfully for the booking request.</value>
+  </data>
+
+  <data name="ZZ_CHAT_MESSAGE_SENT_SUCCESSFULLY" xml:space="preserve">
+    <value>Message sent successfully.</value>
+  </data>
+
+  <data name="ZZ_CHAT_MESSAGES_MARKED_AS_READ_SUCCESSFULLY" xml:space="preserve">
+    <value>Messages marked as read successfully.</value>
+  </data>
+
+  <data name="ZZ_SUPPORT_REQUEST_SENT_SUCCESSFULLY" xml:space="preserve">
+    <value>Support request sent successfully.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Contract created successfully.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_SIGNED_SUCCESSFULLY" xml:space="preserve">
+    <value>Contract signed successfully.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_VERIFICATION_TAMPERING_DETECTED" xml:space="preserve">
+    <value>Contract verification completed. The uploaded file does not match the original contract.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_VERIFIED_PENDING_BLOCKCHAIN_ANCHORING" xml:space="preserve">
+    <value>Contract verified successfully. Blockchain anchoring is still in progress.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_VERIFIED_AND_ANCHORED" xml:space="preserve">
+    <value>Contract verified successfully and anchored on the blockchain.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve">
+    <value>Contract cancelled successfully.</value>
+  </data>
+
+  <data name="ZZ_FCM_DEVICE_TOKEN_SAVED_SUCCESSFULLY" xml:space="preserve">
+    <value>Device token saved successfully.</value>
+  </data>
+
+  <data name="ZZ_FCM_DEVICE_TOKEN_REMOVED_SUCCESSFULLY" xml:space="preserve">
+    <value>Device token removed successfully.</value>
+  </data>
+
+  <data name="ZZ_OWNER_ROLE_ADDED_SUCCESSFULLY" xml:space="preserve">
+    <value>Owner role granted successfully.</value>
+  </data>
+
+  <data name="ZZ_EXISTING_PAYMENT_INTENT_CLIENT_SECRET_RETURNED" xml:space="preserve">
+    <value>Existing payment intent client secret returned successfully.</value>
+  </data>
+
+  <data name="ZZ_PAYMENT_INTENT_CLIENT_SECRET_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Payment intent client secret created successfully.</value>
+  </data>
+
+  <data name="ZZ_WITHDRAWAL_INITIATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Withdrawal initiated successfully.</value>
+  </data>
+
+  <data name="ZZ_TEST_PLATFORM_BALANCE_TOPPED_UP_SUCCESSFULLY" xml:space="preserve">
+    <value>Test platform balance topped up successfully.</value>
+  </data>
+
+  <data name="ZZ_PROFILE_BASIC_DATA_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Basic profile data updated successfully.</value>
+  </data>
+
+  <data name="ZZ_PROFILE_LEGAL_DATA_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Legal profile data updated successfully.</value>
+  </data>
+
+  <data name="ZZ_ROOMMATE_PREFERENCES_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Roommate preferences updated successfully.</value>
+  </data>
+
+  <data name="ZZ_TWO_FACTOR_AUTHENTICATION_ENABLED" xml:space="preserve">
+    <value>Two-factor authentication enabled successfully.</value>
+  </data>
+
+  <data name="ZZ_TWO_FACTOR_AUTHENTICATION_DISABLED" xml:space="preserve">
+    <value>Two-factor authentication disabled successfully.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_CHANGED_SUCCESSFULLY" xml:space="preserve">
+    <value>Password changed successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>User deleted successfully by admin.</value>
+  </data>
+
+  <data name="ZZ_USER_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>User deleted successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_COMMENT_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property comment created successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_COMMENT_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property comment updated successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_COMMENT_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property comment deleted successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_RATING_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property rating created successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_RATING_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property rating updated successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_RATING_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property rating deleted successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_ADDED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property added successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property updated successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_UNSAVED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property removed from saved list successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_SAVED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property saved successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_ACTIVATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property activated successfully.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_DEACTIVATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property deactivated successfully.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_PROPERTY_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property deleted successfully by admin.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property deleted successfully.</value>
+  </data>
+
+  <data name="ZZ_REPORT_SUBMITTED_SUCCESSFULLY" xml:space="preserve">
+    <value>Report submitted successfully.</value>
   </data>
 </root>

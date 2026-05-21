@@ -124,7 +124,10 @@ namespace MARN_API.Services.Implementations
             var refreshedReport = await _reportRepo.GetReportDetailsAsync(reportId);
             var details = await BuildDetailsAsync(refreshedReport!);
 
-            return ServiceResult<AdminModerationReportDetailsDto>.Ok(details, "Report reviewed successfully.");
+            return ServiceResult<AdminModerationReportDetailsDto>.Ok(
+                details,
+                "Report reviewed successfully.",
+                code: "ZZ_ADMIN_REPORT_REVIEWED_SUCCESSFULLY");
         }
 
         private static ServiceResult<AdminModerationReportDetailsDto>? ValidateActionCompatibility(
@@ -303,7 +306,7 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult<bool>.Ok(true, code: "ZZ_ADMIN_REPORT_MODERATION_ACTION_APPLIED_SUCCESSFULLY");
         }
 
         private async Task<AdminModerationReportDetailsDto> BuildDetailsAsync(Report report)

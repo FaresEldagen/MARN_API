@@ -2573,10 +2573,273 @@
 <data name="n_external_login_success" xml:space="preserve">
     <value>اكتمل تسجيل الدخول بجوجل بنجاح</value>
   </data>
-<data name="ZZ_TWO_FACTOR_AUTHENTICATION_REQUIRED" xml:space="preserve">
-    <value>المصادقة الثنائية مطلوبة.</value>
+  <data name="ZZ_TWO_FACTOR_AUTHENTICATION_REQUIRED" xml:space="preserve">
+    <value>المصادقة الثنائية مطلوبة. تم إرسال رمز التحقق إلى بريدك الإلكتروني.</value>
   </data>
 <data name="ZZ_INVALID_EMAIL_OR_PASSWORD" xml:space="preserve">
     <value>البريد الإلكتروني أو كلمة المرور غير صحيحة.</value>
+  </data>
+
+  <data name="ZZ_STRIPE_CONNECT_ONBOARDING_LINK_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إنشاء رابط إعداد بوابة الدفع بنجاح.</value>
+  </data>
+<data name="ZZ_LOGIN_SUCCESSFUL" xml:space="preserve">
+    <value>اكتمل تسجيل الدخول بنجاح2.</value>
+  </data>
+
+  <data name="ZZ_GOOGLE_LOGIN_SUCCESSFUL" xml:space="preserve">
+    <value>اكتمل تسجيل الدخول باستخدام جوجل بنجاح.</value>
+  </data>
+
+  <data name="ZZ_TWO_FACTOR_VERIFICATION_SUCCESSFUL" xml:space="preserve">
+    <value>تم التحقق من المصادقة الثنائية بنجاح.</value>
+  </data>
+
+  <data name="ZZ_REGISTRATION_SUCCESSFUL" xml:space="preserve">
+    <value>اكتمل التسجيل بنجاح. يرجى تأكيد بريدك الإلكتروني.</value>
+  </data>
+
+  <data name="ZZ_CONFIRMATION_EMAIL_RESEND_REQUEST_PROCESSED" xml:space="preserve">
+    <value>إذا كان البريد الإلكتروني موجودًا ولم يتم تأكيده، فقد تم إرسال رسالة تأكيد.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_RESET_LINK_REQUEST_PROCESSED" xml:space="preserve">
+    <value>إذا كان البريد الإلكتروني موجودًا، فقد تم إرسال رابط إعادة تعيين كلمة المرور.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_RESET_TOKEN_VALIDATED" xml:space="preserve">
+    <value>تم التحقق من رمز إعادة تعيين كلمة المرور بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_RESET_COMPLETED_SUCCESSFULLY" xml:space="preserve">
+    <value>اكتملت إعادة تعيين كلمة المرور بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_ANALYTICS_REPORT_GENERATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إنشاء تقرير التحليلات بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_DELETED_PROPERTY_RESTORED_SUCCESSFULLY" xml:space="preserve">
+    <value>تمت استعادة العقار المحذوف بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إلغاء العقد بنجاح بواسطة المسؤول.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_CONTRACT_PAYMENT_INTENTS_CLEARED_FOR_CANCELLATION" xml:space="preserve">
+    <value>تمت معالجة جميع نوايا الدفع المرتبطة بنجاح لإلغاء العقد.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_REPORT_REVIEWED_SUCCESSFULLY" xml:space="preserve">
+    <value>تمت مراجعة البلاغ بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_REPORT_MODERATION_ACTION_APPLIED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تطبيق إجراء الإشراف بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_ROLES_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث أدوار المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_BANNED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حظر المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_UNBANNED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إلغاء حظر المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_RESTORED_SUCCESSFULLY" xml:space="preserve">
+    <value>تمت استعادة المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_MANAGEABLE_USER_RESOLVED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديد المستخدم المستهدف بنجاح لإدارة المسؤول.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_VERIFICATION_APPROVED" xml:space="preserve">
+    <value>تمت الموافقة على توثيق المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_VERIFICATION_DECLINED" xml:space="preserve">
+    <value>تم رفض توثيق المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_PROPERTY_VERIFICATION_APPROVED" xml:space="preserve">
+    <value>تمت الموافقة على توثيق العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_PROPERTY_VERIFICATION_DECLINED" xml:space="preserve">
+    <value>تم رفض توثيق العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_BOOKING_REQUEST_ADDED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إرسال طلب الحجز بنجاح.</value>
+  </data>
+
+  <data name="ZZ_BOOKING_REQUEST_REMOVED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف طلب الحجز بنجاح.</value>
+  </data>
+
+  <data name="ZZ_BOOKING_REQUEST_CHAT_STARTED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم بدء المحادثة بنجاح لطلب الحجز.</value>
+  </data>
+
+  <data name="ZZ_CHAT_MESSAGE_SENT_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إرسال الرسالة بنجاح.</value>
+  </data>
+
+  <data name="ZZ_CHAT_MESSAGES_MARKED_AS_READ_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديد الرسائل كمقروءة بنجاح.</value>
+  </data>
+
+  <data name="ZZ_SUPPORT_REQUEST_SENT_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إرسال طلب الدعم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إنشاء العقد بنجاح.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_SIGNED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم توقيع العقد بنجاح.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_VERIFICATION_TAMPERING_DETECTED" xml:space="preserve">
+    <value>اكتمل التحقق من العقد. الملف المرفوع لا يطابق العقد الأصلي.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_VERIFIED_PENDING_BLOCKCHAIN_ANCHORING" xml:space="preserve">
+    <value>تم التحقق من العقد بنجاح. ما زال توثيقه على البلوك تشين قيد التنفيذ.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_VERIFIED_AND_ANCHORED" xml:space="preserve">
+    <value>تم التحقق من العقد بنجاح وتوثيقه على البلوك تشين.</value>
+  </data>
+
+  <data name="ZZ_CONTRACT_CANCELLED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إلغاء العقد بنجاح.</value>
+  </data>
+
+  <data name="ZZ_FCM_DEVICE_TOKEN_SAVED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حفظ رمز الجهاز بنجاح.</value>
+  </data>
+
+  <data name="ZZ_FCM_DEVICE_TOKEN_REMOVED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف رمز الجهاز بنجاح.</value>
+  </data>
+
+  <data name="ZZ_OWNER_ROLE_ADDED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم منح دور المالك بنجاح.</value>
+  </data>
+
+  <data name="ZZ_EXISTING_PAYMENT_INTENT_CLIENT_SECRET_RETURNED" xml:space="preserve">
+    <value>تم إرجاع الرمز السري الحالي لنية الدفع بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PAYMENT_INTENT_CLIENT_SECRET_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إنشاء الرمز السري لنية الدفع بنجاح.</value>
+  </data>
+
+  <data name="ZZ_WITHDRAWAL_INITIATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم بدء عملية السحب بنجاح.</value>
+  </data>
+
+  <data name="ZZ_TEST_PLATFORM_BALANCE_TOPPED_UP_SUCCESSFULLY" xml:space="preserve">
+    <value>تم شحن رصيد المنصة التجريبي بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROFILE_BASIC_DATA_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث بيانات الملف الشخصي الأساسية بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROFILE_LEGAL_DATA_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث البيانات القانونية للملف الشخصي بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ROOMMATE_PREFERENCES_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث تفضيلات السكن المشترك بنجاح.</value>
+  </data>
+
+  <data name="ZZ_TWO_FACTOR_AUTHENTICATION_ENABLED" xml:space="preserve">
+    <value>تم تفعيل المصادقة الثنائية بنجاح.</value>
+  </data>
+
+  <data name="ZZ_TWO_FACTOR_AUTHENTICATION_DISABLED" xml:space="preserve">
+    <value>تم تعطيل المصادقة الثنائية بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PASSWORD_CHANGED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تغيير كلمة المرور بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_USER_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف المستخدم بنجاح بواسطة المسؤول.</value>
+  </data>
+
+  <data name="ZZ_USER_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف المستخدم بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_COMMENT_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إنشاء تعليق العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_COMMENT_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث تعليق العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_COMMENT_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف تعليق العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_RATING_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إنشاء تقييم العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_RATING_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث تقييم العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_RATING_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف تقييم العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_ADDED_SUCCESSFULLY" xml:space="preserve">
+    <value>تمت إضافة العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_UNSAVED_SUCCESSFULLY" xml:space="preserve">
+    <value>تمت إزالة العقار من قائمة المحفوظات بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_SAVED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حفظ العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_ACTIVATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تفعيل العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_DEACTIVATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تعطيل العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_ADMIN_PROPERTY_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف العقار بنجاح بواسطة المسؤول.</value>
+  </data>
+
+  <data name="ZZ_PROPERTY_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف العقار بنجاح.</value>
+  </data>
+
+  <data name="ZZ_REPORT_SUBMITTED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إرسال البلاغ بنجاح.</value>
   </data>
 </root>

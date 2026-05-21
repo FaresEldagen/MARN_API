@@ -58,7 +58,7 @@ namespace MARN_API.Services.Implementations
             await _verificationRepo.SaveChangesAsync();
 
             _logger.LogInformation("Admin approved user verification for user {UserId}", userId);
-            return ServiceResult<bool>.Ok(true, "User verification approved.");
+            return ServiceResult<bool>.Ok(true, "User verification approved.", code: "ZZ_ADMIN_USER_VERIFICATION_APPROVED");
         }
 
         public async Task<ServiceResult<bool>> DeclineUserVerificationAsync(Guid userId, AdminVerificationDecisionDto decision)
@@ -80,7 +80,7 @@ namespace MARN_API.Services.Implementations
             await _verificationRepo.SaveChangesAsync();
 
             _logger.LogInformation("Admin declined user verification for user {UserId}. Reason: {Reason}", userId, decision.Reason);
-            return ServiceResult<bool>.Ok(true, "User verification declined.");
+            return ServiceResult<bool>.Ok(true, "User verification declined.", code: "ZZ_ADMIN_USER_VERIFICATION_DECLINED");
         }
 
         public async Task<ServiceResult<PagedResult<AdminPropertyVerificationDto>>> GetPendingPropertyVerificationsAsync(AdminVerificationQueryDto query)
@@ -115,7 +115,7 @@ namespace MARN_API.Services.Implementations
             await _verificationRepo.SaveChangesAsync();
 
             _logger.LogInformation("Admin approved property verification for property {PropertyId}", propertyId);
-            return ServiceResult<bool>.Ok(true, "Property verification approved.");
+            return ServiceResult<bool>.Ok(true, "Property verification approved.", code: "ZZ_ADMIN_PROPERTY_VERIFICATION_APPROVED");
         }
 
         public async Task<ServiceResult<bool>> DeclinePropertyVerificationAsync(long propertyId, AdminVerificationDecisionDto decision)
@@ -137,7 +137,7 @@ namespace MARN_API.Services.Implementations
             await _verificationRepo.SaveChangesAsync();
 
             _logger.LogInformation("Admin declined property verification for property {PropertyId}. Reason: {Reason}", propertyId, decision.Reason);
-            return ServiceResult<bool>.Ok(true, "Property verification declined.");
+            return ServiceResult<bool>.Ok(true, "Property verification declined.", code: "ZZ_ADMIN_PROPERTY_VERIFICATION_DECLINED");
         }
 
         private static (int PageNumber, int PageSize) NormalizePaging(AdminVerificationQueryDto query)

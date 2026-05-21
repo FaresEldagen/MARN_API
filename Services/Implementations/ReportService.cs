@@ -77,7 +77,8 @@ namespace MARN_API.Services.Implementations
                     CreatedAt = report.CreatedAt
                 },
                 "Report submitted successfully.",
-                ServiceResultType.Created);
+                ServiceResultType.Created,
+                code: "ZZ_REPORT_SUBMITTED_SUCCESSFULLY");
         }
 
         private async Task<ServiceResult<ReportSubmissionResultDto>?> ValidateTargetAsync(

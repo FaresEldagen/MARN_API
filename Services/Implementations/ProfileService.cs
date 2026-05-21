@@ -429,7 +429,7 @@ namespace MARN_API.Services.Implementations
                         "Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.",
                 });
             }
-            return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
+            return ServiceResult<bool>.Ok(true, "Update Profile Data successful.", code: "ZZ_PROFILE_BASIC_DATA_UPDATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> UpdateProfileLegalDataAsync(UpdateLegalDto dto) 
@@ -522,7 +522,7 @@ namespace MARN_API.Services.Implementations
                 Body = "Your profile has been updated successfully. Our team will review your information, and your account is expected to be verified within approximately 24 hours.\n\n" +
                     "Once verified, you’ll be able to start renting properties, listing your own, and connecting with compatible roommates.",
             });
-            return ServiceResult<bool>.Ok(true, "Update Profile Data successful.");
+            return ServiceResult<bool>.Ok(true, "Update Profile Data successful.", code: "ZZ_PROFILE_LEGAL_DATA_UPDATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> UpdateProfileRoommatePreferencesDataAsync(UpdateRoommatePreferencesDto dto)
@@ -567,7 +567,10 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Update Roommate Preferences Data successful for user: {UserId}", user.Id);
-            return ServiceResult<bool>.Ok(true, "Update Roommate Preferences Data successful.");
+            return ServiceResult<bool>.Ok(
+                true,
+                "Update Roommate Preferences Data successful.",
+                code: "ZZ_ROOMMATE_PREFERENCES_UPDATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> ToggleTwoFactorAsync(Guid userId, string? password = null)
@@ -611,7 +614,10 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("User {UserId} toggled 2FA. Enabled={Enabled}", user.Id, newState);
-            return ServiceResult<bool>.Ok(newState, $"Two-Factor Authentication is now {(newState ? "enabled" : "disabled")}");
+            return ServiceResult<bool>.Ok(
+                newState,
+                $"Two-Factor Authentication is now {(newState ? "enabled" : "disabled")}",
+                code: newState ? "ZZ_TWO_FACTOR_AUTHENTICATION_ENABLED" : "ZZ_TWO_FACTOR_AUTHENTICATION_DISABLED");
         }
 
         public async Task<ServiceResult<bool>> ChangePasswordAsync(ChangePasswordDto dto)
@@ -654,7 +660,7 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Password Changed successfully for user: {UserId}", dto.id);
-            return ServiceResult<bool>.Ok(true, "Password Changed successfully.");
+            return ServiceResult<bool>.Ok(true, "Password Changed successfully.", code: "ZZ_PASSWORD_CHANGED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> DeleteUserAsync(Guid userId, bool adminInitiated = false)
@@ -801,7 +807,11 @@ namespace MARN_API.Services.Implementations
 
             await _emailService.SendAccountDeletionEmailAsync(user.Email!, user.FirstName);
 
-            return ServiceResult<bool>.Ok(true, "User deleted successfully", ServiceResultType.Success);
+            return ServiceResult<bool>.Ok(
+                true,
+                "User deleted successfully",
+                ServiceResultType.Success,
+                code: adminInitiated ? "ZZ_ADMIN_USER_DELETED_SUCCESSFULLY" : "ZZ_USER_DELETED_SUCCESSFULLY");
         }
 
         public void DeleteUserImages(List<string> filesToDelete)

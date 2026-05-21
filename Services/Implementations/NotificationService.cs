@@ -128,7 +128,7 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Saving FCM token for user {UserId}", userId);
 
             await _notificationRepo.AddOrUpdateUserDeviceAsync(userId, fcmToken);
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult<bool>.Ok(true, code: "ZZ_FCM_DEVICE_TOKEN_SAVED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> RemoveDeviceTokenAsync(string userId, string fcmToken)
@@ -136,7 +136,7 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Removing FCM token for user {UserId}", userId);
 
             await _notificationRepo.RemoveUserDeviceAsync(userId, fcmToken);
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult<bool>.Ok(true, code: "ZZ_FCM_DEVICE_TOKEN_REMOVED_SUCCESSFULLY");
         }
         #endregion
     }

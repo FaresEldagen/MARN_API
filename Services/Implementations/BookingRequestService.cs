@@ -154,7 +154,7 @@ namespace MARN_API.Services.Implementations
             });
 
             _logger.LogInformation("Add Booking Request successful for userId: {userId}, propertyId: {propertyId}", userId, dto.PropertyId);
-            return ServiceResult<bool>.Ok(true, "Booking request added successfully.");
+            return ServiceResult<bool>.Ok(true, "Booking request added successfully.", code: "ZZ_BOOKING_REQUEST_ADDED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> CancelBookingRequestAsync(Guid userId, long bookingRequestId)
@@ -212,7 +212,7 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Cancel Booking Request successful for userId: {userId}, bookingRequestId: {bookingRequestId}", userId, bookingRequestId);
-            return ServiceResult<bool>.Ok(true, "Booking request removed successfully.");
+            return ServiceResult<bool>.Ok(true, "Booking request removed successfully.", code: "ZZ_BOOKING_REQUEST_REMOVED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> StartChatAsync(Guid userId, long bookingRequestId)
@@ -253,7 +253,7 @@ namespace MARN_API.Services.Implementations
             await _hubContext.Clients.User(senderId).SendAsync("SendMessage", payload);
 
             _logger.LogInformation("Start Chat successful for userId: {userId}, bookingRequestId: {bookingRequestId}", userId, bookingRequestId);
-            return ServiceResult<bool>.Ok(true, "Chat started successfully.");
+            return ServiceResult<bool>.Ok(true, "Chat started successfully.", code: "ZZ_BOOKING_REQUEST_CHAT_STARTED_SUCCESSFULLY");
         }
         
 

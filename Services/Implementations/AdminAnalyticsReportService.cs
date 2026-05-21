@@ -127,7 +127,8 @@ namespace MARN_API.Services.Implementations
 
             return ServiceResult<AdminAnalyticsReportDetailsDto>.Ok(
                 MapDetailsDto(report, adminUser.FirstName + " " + adminUser.LastName),
-                "Analytics report generated successfully.");
+                "Analytics report generated successfully.",
+                code: "ZZ_ADMIN_ANALYTICS_REPORT_GENERATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<PagedResult<AdminAnalyticsReportListItemDto>>> GetReportsAsync(AdminAnalyticsReportQueryDto query)

@@ -149,7 +149,7 @@ namespace MARN_API.Services.Implementations
             }
 
             var response = await CreateJwtForUserAsync(user, dto.RememberMe);
-            return ServiceResult<LoginResponseDto>.Ok(response, code: "LOGIN_SUCCESSFUL");
+            return ServiceResult<LoginResponseDto>.Ok(response, code: "ZZ_LOGIN_SUCCESSFUL");
         }
 
         public async Task<LoginResponseDto> CreateJwtForUserAsync(ApplicationUser user, bool rememberMe = false, string provider = null!)
@@ -342,7 +342,7 @@ namespace MARN_API.Services.Implementations
             }
 
             var response = await CreateJwtForUserAsync(user, dto.RememberMe, "Google");
-            return ServiceResult<LoginResponseDto>.Ok(response, code: "n_external_login_success");
+            return ServiceResult<LoginResponseDto>.Ok(response, code: "ZZ_GOOGLE_LOGIN_SUCCESSFUL");
         }
 
         private async Task<GoogleJsonWebSignature.Payload?> ValidateGoogleTokenAsync(string idToken)
@@ -401,7 +401,7 @@ namespace MARN_API.Services.Implementations
             }
 
             var response = await CreateJwtForUserAsync(user, dto.RememberMe);
-            return ServiceResult<LoginResponseDto>.Ok(response);
+            return ServiceResult<LoginResponseDto>.Ok(response, code: "ZZ_TWO_FACTOR_VERIFICATION_SUCCESSFUL");
         }
         #endregion
 
@@ -464,7 +464,7 @@ namespace MARN_API.Services.Implementations
 
             _logger.LogInformation("Registration successful for email: {Email}", user.Email);
             return ServiceResult<bool>
-                .Ok(true, "Registration successful. Please confirm your email.", resultType: ServiceResultType.Created);
+                .Ok(true, "Registration successful. Please confirm your email.", ServiceResultType.Created, code: "ZZ_REGISTRATION_SUCCESSFUL");
         }
 
         private async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
@@ -551,7 +551,10 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
-            return ServiceResult<bool>.Ok(true, "If the email exists and not confirmed, a confirmation email has been sent. Please check your inbox.");
+            return ServiceResult<bool>.Ok(
+                true,
+                "If the email exists and not confirmed, a confirmation email has been sent. Please check your inbox.",
+                code: "ZZ_CONFIRMATION_EMAIL_RESEND_REQUEST_PROCESSED");
         }
         #endregion
 
@@ -582,7 +585,7 @@ namespace MARN_API.Services.Implementations
             }
 
             // Always return OK (security)
-            return ServiceResult<bool>.Ok(true, "If the email exists, a reset link was sent.");
+            return ServiceResult<bool>.Ok(true, "If the email exists, a reset link was sent.", code: "ZZ_PASSWORD_RESET_LINK_REQUEST_PROCESSED");
         }
 
         public async Task<ServiceResult<bool>> ValidateResetTokenAsync(ValidateResetTokenRequestDto dto)
@@ -621,7 +624,7 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Validate Reset Token successful for user: {UserId}", user.Id);
-            return ServiceResult<bool>.Ok(true, "Valid token");
+            return ServiceResult<bool>.Ok(true, "Valid token", code: "ZZ_PASSWORD_RESET_TOKEN_VALIDATED");
         }
 
         public async Task<ServiceResult<bool>> ResetPasswordAsync(ResetPasswordRequestDto dto)
@@ -693,7 +696,7 @@ namespace MARN_API.Services.Implementations
                     "If you didn't make this change, please contact our support team immediately to secure your account.",
             });
             _logger.LogInformation("Password reset successful for user: {UserId}", user.Id);
-            return ServiceResult<bool>.Ok(true, "Password reset successful.");
+            return ServiceResult<bool>.Ok(true, "Password reset successful.", code: "ZZ_PASSWORD_RESET_COMPLETED_SUCCESSFULLY");
         }
         #endregion
     }

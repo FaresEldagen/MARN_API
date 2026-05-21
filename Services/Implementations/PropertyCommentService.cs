@@ -95,7 +95,11 @@ namespace MARN_API.Services.Implementations
                 ActionId = propertyId.ToString()
             });
 
-            return ServiceResult<PropertyCommentMutationDto>.Ok(_mapper.Map<PropertyCommentMutationDto>(comment), "Comment created successfully", ServiceResultType.Created);
+            return ServiceResult<PropertyCommentMutationDto>.Ok(
+                _mapper.Map<PropertyCommentMutationDto>(comment),
+                "Comment created successfully",
+                ServiceResultType.Created,
+                code: "ZZ_PROPERTY_COMMENT_CREATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<PropertyCommentMutationDto>> UpdateAsync(long propertyId, long commentId, Guid userId, UpdatePropertyCommentDto dto)
@@ -159,7 +163,10 @@ namespace MARN_API.Services.Implementations
                 ActionId = propertyId.ToString()
             });
 
-            return ServiceResult<PropertyCommentMutationDto>.Ok(_mapper.Map<PropertyCommentMutationDto>(comment), "Comment updated successfully");
+            return ServiceResult<PropertyCommentMutationDto>.Ok(
+                _mapper.Map<PropertyCommentMutationDto>(comment),
+                "Comment updated successfully",
+                code: "ZZ_PROPERTY_COMMENT_UPDATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> DeleteAsync(long propertyId, long commentId, Guid userId)
@@ -194,7 +201,7 @@ namespace MARN_API.Services.Implementations
             }
 
             await _propertyCommentRepo.DeleteAsync(comment);
-            return ServiceResult<bool>.Ok(true, "Comment deleted successfully");
+            return ServiceResult<bool>.Ok(true, "Comment deleted successfully", code: "ZZ_PROPERTY_COMMENT_DELETED_SUCCESSFULLY");
         }
 
         private async Task<ServiceResult<PropertyComment>?> ValidatePropertyInteractionAsync(long propertyId, Guid userId)
