@@ -99,7 +99,8 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<string>.Ok(
                     existingIntent.ClientSecret,
                     "Existing ClientSecret returned.",
-                    ServiceResultType.Success
+                    ServiceResultType.Success,
+                    code: "ZZ_EXISTING_PAYMENT_INTENT_CLIENT_SECRET_RETURNED"
                 );
             }
 
@@ -128,7 +129,11 @@ namespace MARN_API.Services.Implementations
                 await _paymentRepo.UpdatePaymentSchedule(paymentSchedule);
 
                 _logger.LogInformation("Create Payment Intent successful for paymentScheduleId: {paymentScheduleId}", paymentScheduleId);
-                return ServiceResult<string>.Ok(intent.ClientSecret, "ClientSecret created successfully.", ServiceResultType.Success);
+                return ServiceResult<string>.Ok(
+                    intent.ClientSecret,
+                    "ClientSecret created successfully.",
+                    ServiceResultType.Success,
+                    code: "ZZ_PAYMENT_INTENT_CLIENT_SECRET_CREATED_SUCCESSFULLY");
             }
             catch (StripeException e)
             {
@@ -199,7 +204,8 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<string>.Ok(
                     accountLink.Url,
                     "Onboarding link created successfully.",
-                    ServiceResultType.Success);
+                    ServiceResultType.Success,
+                    code: "ZZ_STRIPE_CONNECT_ONBOARDING_LINK_CREATED_SUCCESSFULLY");
             }
             catch (StripeException e)
             {
@@ -286,7 +292,11 @@ namespace MARN_API.Services.Implementations
                 await transaction.CommitAsync();
 
                 _logger.LogInformation("Withdraw successful for ownerId: {ownerId}, amount: {amount} {currency}", ownerId, transferAmount, transferCurrency);
-                return ServiceResult<bool>.Ok(true, $"Withdrawal of {transferAmount} {transferCurrency.ToUpper()} initiated successfully.", ServiceResultType.Success);
+                return ServiceResult<bool>.Ok(
+                    true,
+                    $"Withdrawal of {transferAmount} {transferCurrency.ToUpper()} initiated successfully.",
+                    ServiceResultType.Success,
+                    code: "ZZ_WITHDRAWAL_INITIATED_SUCCESSFULLY");
             }
             catch (StripeException e)
             {

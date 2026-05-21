@@ -232,7 +232,7 @@ namespace MARN_API.Services.Implementations
                 IsHiddenByModeration = false
             };
 
-            return ServiceResult<MessageDto>.Ok(dto);
+            return ServiceResult<MessageDto>.Ok(dto, code: "ZZ_CHAT_MESSAGE_SENT_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> MarkChatAsReadAsync(string currentUserId, string senderId)
@@ -244,7 +244,7 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Marking messages from {SenderId} to {ReceiverId} as read", senderId, currentUserId);
 
             await _chatRepo.MarkMessagesAsReadAsync(senderId: senderId, receiverId: currentUserId);
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult<bool>.Ok(true, code: "ZZ_CHAT_MESSAGES_MARKED_AS_READ_SUCCESSFULLY");
         }
         #endregion
 

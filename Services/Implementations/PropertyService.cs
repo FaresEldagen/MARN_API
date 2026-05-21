@@ -196,7 +196,7 @@ namespace MARN_API.Services.Implementations
                 _logger.LogError(ex, "Failed to send property added notification for propertyId: {PropertyId}", property.Id);
             }
 
-            return ServiceResult<bool>.Ok(true, "Property added successfully.");
+            return ServiceResult<bool>.Ok(true, "Property added successfully.", code: "ZZ_PROPERTY_ADDED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<PropertySearchResultDto>> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? userId)
@@ -510,7 +510,7 @@ namespace MARN_API.Services.Implementations
                 _logger.LogError(ex, "Failed to send property edited notification for propertyId: {PropertyId}", propertyId);
             }
 
-            return ServiceResult<bool>.Ok(true, "Property updated successfully.");
+            return ServiceResult<bool>.Ok(true, "Property updated successfully.", code: "ZZ_PROPERTY_UPDATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> ToggleSavePropertyAsync(long propertyId, Guid userId)
@@ -523,7 +523,7 @@ namespace MARN_API.Services.Implementations
             if (isSaved)
             {
                 await _savedPropertyRepo.UnsavePropertyAsync(userId, propertyId);
-                return ServiceResult<bool>.Ok(false, "Property unsaved successfully.");
+                return ServiceResult<bool>.Ok(false, "Property unsaved successfully.", code: "ZZ_PROPERTY_UNSAVED_SUCCESSFULLY");
             }
             else
             {
@@ -533,7 +533,7 @@ namespace MARN_API.Services.Implementations
                     PropertyId = propertyId
                 };
                 await _savedPropertyRepo.SavePropertyAsync(savedProperty);
-                return ServiceResult<bool>.Ok(true, "Property saved successfully.");
+                return ServiceResult<bool>.Ok(true, "Property saved successfully.", code: "ZZ_PROPERTY_SAVED_SUCCESSFULLY");
             }
         }
 
@@ -546,7 +546,10 @@ namespace MARN_API.Services.Implementations
             property.IsActive = !property.IsActive;
             await _propertyRepo.UpdatePropertyAsync(property);
 
-            return ServiceResult<bool>.Ok(property.IsActive, property.IsActive ? "Property activated successfully." : "Property deactivated successfully.");
+            return ServiceResult<bool>.Ok(
+                property.IsActive,
+                property.IsActive ? "Property activated successfully." : "Property deactivated successfully.",
+                code: property.IsActive ? "ZZ_PROPERTY_ACTIVATED_SUCCESSFULLY" : "ZZ_PROPERTY_DEACTIVATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> DeletePropertyAsync(long propertyId, Guid userId, bool adminInitiated = false, bool suppressNotification = false)
@@ -626,7 +629,10 @@ namespace MARN_API.Services.Implementations
                 });
             }
 
-            return ServiceResult<bool>.Ok(true, "Property deleted completely.");
+            return ServiceResult<bool>.Ok(
+                true,
+                "Property deleted completely.",
+                code: adminInitiated ? "ZZ_ADMIN_PROPERTY_DELETED_SUCCESSFULLY" : "ZZ_PROPERTY_DELETED_SUCCESSFULLY");
         }
 
         public async Task DeletePropertyMediaAfterGracePeriod(long propertyId, List<string> filesToDelete)

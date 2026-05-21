@@ -38,7 +38,10 @@ namespace MARN_API.Services.Implementations
                     resultType: ServiceResultType.BadRequest);
             }
 
-            return ServiceResult<bool>.Ok(true, "Your message was sent successfully. Support will contact you later if needed.");
+            return ServiceResult<bool>.Ok(
+                true,
+                "Your message was sent successfully. Support will contact you later if needed.",
+                code: "ZZ_SUPPORT_REQUEST_SENT_SUCCESSFULLY");
         }
 
         private static string BuildSupportMessage(ContactSupportRequestDto request, Guid? userId)

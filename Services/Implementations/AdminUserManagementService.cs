@@ -74,7 +74,7 @@ namespace MARN_API.Services.Implementations
             });
 
             _logger.LogInformation("Admin banned user {UserId}", userId);
-            return ServiceResult<bool>.Ok(true, "User banned successfully.");
+            return ServiceResult<bool>.Ok(true, "User banned successfully.", code: "ZZ_ADMIN_USER_BANNED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> UnbanUserAsync(Guid userId)
@@ -104,7 +104,7 @@ namespace MARN_API.Services.Implementations
             });
 
             _logger.LogInformation("Admin unbanned user {UserId} to status {Status}", userId, user.Data.AccountStatus);
-            return ServiceResult<bool>.Ok(true, "User unbanned successfully.");
+            return ServiceResult<bool>.Ok(true, "User unbanned successfully.", code: "ZZ_ADMIN_USER_UNBANNED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> RestoreDeletedUserAsync(Guid userId)
@@ -166,7 +166,7 @@ namespace MARN_API.Services.Implementations
                 user.Data.AccountStatus,
                 user.Data.StatusBeforeBan);
 
-            return ServiceResult<bool>.Ok(true, "User restored successfully.");
+            return ServiceResult<bool>.Ok(true, "User restored successfully.", code: "ZZ_ADMIN_USER_RESTORED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> DeleteUserAsync(Guid userId)
@@ -190,7 +190,7 @@ namespace MARN_API.Services.Implementations
             var user = await _userManagementRepo.GetUserByIdAsync(userId);
             return user == null
                 ? ServiceResult<ApplicationUser>.Fail("User not found.", resultType: ServiceResultType.NotFound)
-                : ServiceResult<ApplicationUser>.Ok(user);
+                : ServiceResult<ApplicationUser>.Ok(user, code: "ZZ_ADMIN_MANAGEABLE_USER_RESOLVED_SUCCESSFULLY");
         }
 
         private static void NormalizePaging(AdminUserManagementQueryDto query)

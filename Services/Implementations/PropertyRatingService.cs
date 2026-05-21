@@ -87,7 +87,8 @@ namespace MARN_API.Services.Implementations
 
                 return ServiceResult<PropertyRatingDto>.Ok(
                     _mapper.Map<PropertyRatingDto>(existingRating),
-                    "Rating updated successfully");
+                    "Rating updated successfully",
+                    code: "ZZ_PROPERTY_RATING_UPDATED_SUCCESSFULLY");
             }
 
             var rating = new PropertyRating
@@ -115,7 +116,11 @@ namespace MARN_API.Services.Implementations
                 ActionId = propertyId.ToString()
             });
 
-            return ServiceResult<PropertyRatingDto>.Ok(_mapper.Map<PropertyRatingDto>(rating), "Rating created successfully", ServiceResultType.Created);
+            return ServiceResult<PropertyRatingDto>.Ok(
+                _mapper.Map<PropertyRatingDto>(rating),
+                "Rating created successfully",
+                ServiceResultType.Created,
+                code: "ZZ_PROPERTY_RATING_CREATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<PropertyRatingDto>> UpdateAsync(long propertyId, Guid userId, UpdatePropertyRatingDto dto)
@@ -164,7 +169,10 @@ namespace MARN_API.Services.Implementations
                 ActionId = propertyId.ToString()
             });
 
-            return ServiceResult<PropertyRatingDto>.Ok(_mapper.Map<PropertyRatingDto>(rating), "Rating updated successfully");
+            return ServiceResult<PropertyRatingDto>.Ok(
+                _mapper.Map<PropertyRatingDto>(rating),
+                "Rating updated successfully",
+                code: "ZZ_PROPERTY_RATING_UPDATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<bool>> DeleteAsync(long propertyId, Guid userId)
@@ -189,7 +197,7 @@ namespace MARN_API.Services.Implementations
             }
 
             await _propertyRatingRepo.DeleteAsync(rating);
-            return ServiceResult<bool>.Ok(true, "Rating deleted successfully");
+            return ServiceResult<bool>.Ok(true, "Rating deleted successfully", code: "ZZ_PROPERTY_RATING_DELETED_SUCCESSFULLY");
         }
 
         private async Task<ServiceResult<bool>?> ValidatePropertyAccessAsync(long propertyId)

@@ -14,7 +14,7 @@ namespace MARN_API.Controllers
         protected ActionResult HandleServiceResult<T>(ServiceResult<T> result)
         {
             var code = result.Success
-                ? result.Code ?? GetDefaultCode(result.ResultType)
+                ? ResolveSuccessCode(result)
                 : LocalizationKeyBuilder.BuildErrorCode(result.Code, result.Message, result.Errors, GetDefaultCode(result.ResultType));
             var primaryMessage = result.Success
                 ? result.Message
@@ -116,6 +116,21 @@ namespace MARN_API.Controllers
                 ServiceResultType.InternalError => "INTERNAL_ERROR",
                 _ => "SUCCESS"
             };
+        }
+
+        private static string ResolveSuccessCode<T>(ServiceResult<T> result)
+        {
+            if (!string.IsNullOrWhiteSpace(result.Code))
+            {
+                return result.Code.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(result.Message))
+            {
+                return LocalizationKeyBuilder.BuildLiteralKey(result.Message);
+            }
+
+            return GetDefaultCode(result.ResultType);
         }
 
         private static string GetDefaultCode(int statusCode)

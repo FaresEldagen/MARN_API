@@ -151,7 +151,11 @@ namespace MARN_API.Services.Implementations
 
 
             _logger.LogInformation("Create Contract successful for contractId: {contractId}", contract.Id);
-            return ServiceResult<long>.Ok(contract.Id, "Contract created successfully.", ServiceResultType.Created);
+            return ServiceResult<long>.Ok(
+                contract.Id,
+                "Contract created successfully.",
+                ServiceResultType.Created,
+                code: "ZZ_CONTRACT_CREATED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<long>> SignContractAsync(Guid userId, long contractId)
@@ -316,7 +320,7 @@ namespace MARN_API.Services.Implementations
             });
 
             _logger.LogInformation("Sign Contract successful for contractId: {contractId}", contractId);
-            return ServiceResult<long>.Ok(contract.Id, "Contract signed successfully.");
+            return ServiceResult<long>.Ok(contract.Id, "Contract signed successfully.", code: "ZZ_CONTRACT_SIGNED_SUCCESSFULLY");
         }
 
 
@@ -483,7 +487,8 @@ namespace MARN_API.Services.Implementations
                     Status = record.Status,
                     AnchoringStatus = record.AnchoringStatus,
                     AnchoredAt = record.AnchoredAt
-                });
+                },
+                code: "ZZ_CONTRACT_VERIFICATION_TAMPERING_DETECTED");
             }
 
             var message = record.AnchoringStatus == ContractAnchoringStatus.Pending
@@ -498,7 +503,10 @@ namespace MARN_API.Services.Implementations
                 Status = record.Status,
                 AnchoringStatus = record.AnchoringStatus,
                 AnchoredAt = record.AnchoredAt 
-            });
+            },
+            code: record.AnchoringStatus == ContractAnchoringStatus.Pending
+                ? "ZZ_CONTRACT_VERIFIED_PENDING_BLOCKCHAIN_ANCHORING"
+                : "ZZ_CONTRACT_VERIFIED_AND_ANCHORED");
         }
 
 
@@ -560,7 +568,7 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Cancel Contract successful for contractId: {contractId}", contractId);
-            return ServiceResult<bool>.Ok(true,"Contract cancelled successfully.");
+            return ServiceResult<bool>.Ok(true, "Contract cancelled successfully.", code: "ZZ_CONTRACT_CANCELLED_SUCCESSFULLY");
         }
 
 

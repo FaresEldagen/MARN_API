@@ -133,7 +133,8 @@ namespace MARN_API.Services.Implementations
 
             return ServiceResult<AdminDetailedPropertyListItemDto>.Ok(
                 MapProperty(property),
-                "Property restored successfully.");
+                "Property restored successfully.",
+                code: "ZZ_ADMIN_DELETED_PROPERTY_RESTORED_SUCCESSFULLY");
         }
 
         public async Task<ServiceResult<AdminDetailedContractsResponseDto>> GetContractsAsync(AdminDetailedContractsQueryDto query)
@@ -194,7 +195,8 @@ namespace MARN_API.Services.Implementations
 
             return ServiceResult<AdminDetailedContractListItemDto>.Ok(
                 MapContract(contract),
-                "Contract cancelled successfully.");
+                "Contract cancelled successfully.",
+                code: "ZZ_ADMIN_CONTRACT_CANCELLED_SUCCESSFULLY");
         }
 
         private ServiceResult<ResolvedPeriod> ResolvePeriod(AdminDetailedStatsPeriodQueryDto query)
@@ -352,7 +354,7 @@ namespace MARN_API.Services.Implementations
                 }
             }
 
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult<bool>.Ok(true, code: "ZZ_ADMIN_CONTRACT_PAYMENT_INTENTS_CLEARED_FOR_CANCELLATION");
         }
 
         private AdminDetailedContractListItemDto MapContract(Contract contract)

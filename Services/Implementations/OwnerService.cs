@@ -35,7 +35,10 @@ namespace MARN_API.Services.Implementations
 
             var loginResponse = await _accountService.CreateJwtForUserAsync(user);
 
-            return ServiceResult<string>.Ok(loginResponse.Token, "Successfully became an owner");
+            return ServiceResult<string>.Ok(
+                loginResponse.Token,
+                "Successfully became an owner",
+                code: "ZZ_OWNER_ROLE_ADDED_SUCCESSFULLY");
         }
     }
 }

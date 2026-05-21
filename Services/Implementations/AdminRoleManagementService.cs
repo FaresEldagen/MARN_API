@@ -186,7 +186,10 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<AdminRoleUserDetailsDto>.Fail("User not found after update.", resultType: ServiceResultType.NotFound);
 
             updatedUser.AvailableRoles = availableRoles;
-            return ServiceResult<AdminRoleUserDetailsDto>.Ok(updatedUser, "User roles updated successfully.");
+            return ServiceResult<AdminRoleUserDetailsDto>.Ok(
+                updatedUser,
+                "User roles updated successfully.",
+                code: "ZZ_ADMIN_USER_ROLES_UPDATED_SUCCESSFULLY");
         }
 
         private static void NormalizePaging(AdminRoleManagementQueryDto query)
