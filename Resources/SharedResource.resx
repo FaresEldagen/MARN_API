@@ -867,4 +867,16 @@ that paid at {3} is now available for withdrawal.</value></data>
   <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_TITLE" xml:space="preserve"><value>Property Restored</value></data>
   <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_BODY" xml:space="preserve"><value>An admin has restored your deleted property "{0}". It is available in your account again.</value></data>
   <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_REVERIFY_BODY" xml:space="preserve"><value>An admin has restored your property "{0}". Its ownership files were already removed during the deletion grace period, so it may need to go through verification again.</value></data>
+  <data name="ONLY_DELETED_PROPERTIES_CAN_BE_RESTORED" xml:space="preserve"><value>Only deleted properties can be restored.</value></data>
+  <data name="TEXT_ONLY_DELETED_PROPERTIES_CAN_BE_RESTORED" xml:space="preserve"><value>Only deleted properties can be restored.</value></data>
+  <data name="PROPERTY_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>Property restored successfully.</value></data>
+  <data name="TEXT_PROPERTY_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>Property restored successfully.</value></data>
+  <data name="PROPERTY_DELETED_COMPLETELY" xml:space="preserve"><value>Property deleted completely.</value></data>
+  <data name="USER_BANNED_SUCCESSFULLY" xml:space="preserve"><value>User banned successfully.</value></data>
+  <data name="USER_UNBANNED_SUCCESSFULLY" xml:space="preserve"><value>User unbanned successfully.</value></data>
+  <data name="TEXT_USER_UNBANNED_SUCCESSFULLY" xml:space="preserve"><value>User unbanned successfully.</value></data>
+  <data name="USER_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>User restored successfully.</value></data>
+  <data name="USER_DELETED_SUCCESSFULLY" xml:space="preserve"><value>User deleted successfully.</value></data>
+  <data name="ONLY_DELETED_USERS_CAN_BE_RESTORED" xml:space="preserve"><value>Only deleted users can be restored.</value></data>
+  <data name="TEXT_ONLY_DELETED_USERS_CAN_BE_RESTORED" xml:space="preserve"><value>Only deleted users can be restored.</value></data>
 </root>

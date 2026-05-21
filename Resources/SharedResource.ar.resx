@@ -867,4 +867,16 @@
   <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_TITLE" xml:space="preserve"><value>تمت استعادة العقار</value></data>
   <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_BODY" xml:space="preserve"><value>قام أحد المشرفين باستعادة عقارك المحذوف "{0}". وأصبح متاحًا في حسابك مرة أخرى.</value></data>
   <data name="NOTIFICATION_ADMIN_PROPERTY_RESTORED_REVERIFY_BODY" xml:space="preserve"><value>قام أحد المشرفين باستعادة عقارك "{0}". تمت إزالة ملفات إثبات الملكية خلال فترة سماح الحذف، لذلك قد يحتاج العقار إلى المرور بعملية التحقق مرة أخرى.</value></data>
+  <data name="ONLY_DELETED_PROPERTIES_CAN_BE_RESTORED" xml:space="preserve"><value>يمكن استعادة العقارات المحذوفة فقط.</value></data>
+  <data name="TEXT_ONLY_DELETED_PROPERTIES_CAN_BE_RESTORED" xml:space="preserve"><value>يمكن استعادة العقارات المحذوفة فقط.</value></data>
+  <data name="PROPERTY_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>تمت استعادة العقار بنجاح.</value></data>
+  <data name="TEXT_PROPERTY_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>تمت استعادة العقار بنجاح.</value></data>
+  <data name="PROPERTY_DELETED_COMPLETELY" xml:space="preserve"><value>تم حذف العقار بالكامل.</value></data>
+  <data name="USER_BANNED_SUCCESSFULLY" xml:space="preserve"><value>تم حظر المستخدم بنجاح.</value></data>
+  <data name="USER_UNBANNED_SUCCESSFULLY" xml:space="preserve"><value>تم رفع الحظر عن المستخدم بنجاح.</value></data>
+  <data name="TEXT_USER_UNBANNED_SUCCESSFULLY" xml:space="preserve"><value>تم رفع الحظر عن المستخدم بنجاح.</value></data>
+  <data name="USER_RESTORED_SUCCESSFULLY" xml:space="preserve"><value>تمت استعادة المستخدم بنجاح.</value></data>
+  <data name="USER_DELETED_SUCCESSFULLY" xml:space="preserve"><value>تم حذف المستخدم بنجاح.</value></data>
+  <data name="ONLY_DELETED_USERS_CAN_BE_RESTORED" xml:space="preserve"><value>يمكن استعادة المستخدمين المحذوفين فقط.</value></data>
+  <data name="TEXT_ONLY_DELETED_USERS_CAN_BE_RESTORED" xml:space="preserve"><value>يمكن استعادة المستخدمين المحذوفين فقط.</value></data>
 </root>
