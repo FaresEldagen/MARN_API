@@ -2584,7 +2584,7 @@
     <value>تم إنشاء رابط إعداد بوابة الدفع بنجاح.</value>
   </data>
 <data name="ZZ_LOGIN_SUCCESSFUL" xml:space="preserve">
-    <value>اكتمل تسجيل الدخول بنجاح2.</value>
+    <value>اكتمل تسجيل الدخول بنجاح.</value>
   </data>
 
   <data name="ZZ_GOOGLE_LOGIN_SUCCESSFUL" xml:space="preserve">
