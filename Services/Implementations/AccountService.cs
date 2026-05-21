@@ -49,7 +49,7 @@ namespace MARN_API.Services.Implementations
             _configuration = configuration;
             _tokenService = tokenService;
             _notificationService = notificationService;
-            _mapper = mapper; 
+            _mapper = mapper;
             _logger = logger;
             _context = context;
         }
@@ -71,8 +71,8 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogWarning("Login failed: User not found for email: {Email}", dto.Email);
                 return ServiceResult<LoginResponseDto>.Fail(
-                    "Invalid email or password", 
-                    resultType: ServiceResultType.Unauthorized
+                    "Invalid email or password",
+                    resultType: ServiceResultType.Unauthorized, code: "ZZ_INVALID_EMAIL_OR_PASSWORD"
                 );
             }
 
@@ -103,7 +103,7 @@ namespace MARN_API.Services.Implementations
 
                 _logger.LogWarning("Login failed: Invalid password for user: {UserId}", user.Id);
                 return ServiceResult<LoginResponseDto>.Fail(
-                    "Invalid email or password", 
+                    "Invalid email or password",
                     resultType: ServiceResultType.Unauthorized
                 );
             }
@@ -145,11 +145,11 @@ namespace MARN_API.Services.Implementations
                     TwoFactorProvider = "Email"
                 },
                 "Two-Factor Authentication is required. A verification code has been sent to your email.",
-                resultType: ServiceResultType.RequiresTwoFactor);
+                resultType: ServiceResultType.RequiresTwoFactor, code: "ZZ_TWO_FACTOR_AUTHENTICATION_REQUIRED");
             }
 
             var response = await CreateJwtForUserAsync(user, dto.RememberMe);
-            return ServiceResult<LoginResponseDto>.Ok(response);
+            return ServiceResult<LoginResponseDto>.Ok(response, code: "LOGIN_SUCCESSFUL");
         }
 
         public async Task<LoginResponseDto> CreateJwtForUserAsync(ApplicationUser user, bool rememberMe = false, string provider = null!)
@@ -235,27 +235,27 @@ namespace MARN_API.Services.Implementations
                                 createResult.Errors.Select(e => e.Description)
                             );
                             return ServiceResult<LoginResponseDto>.Fail(
-                                "User creation failed", 
+                                "User creation failed",
                                 createResult.Errors.Select(e => e.Description).ToList(),
                                 resultType: ServiceResultType.Conflict
                             );
                         }
                         isNewUser = true;
-                                      await _notificationService.SendNotificationAsync(new NotificationRequestDto
-                    {
-                        UserId = user.Id.ToString(),
-                        UserType = NotificationUserType.General,
-                        Type = NotificationType.General,
+                        await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                        {
+                            UserId = user.Id.ToString(),
+                            UserType = NotificationUserType.General,
+                            Type = NotificationType.General,
 
-                        TitleKey = "NOTIFICATION_WELCOME_TITLE",
-                        BodyKey = "NOTIFICATION_WELCOME_BODY",
-                        LocalizationArguments = new() { user.FirstName },
-                        Title = $"Welcome to Your New Home Journey {user.FirstName}!",
-                        Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
-                            "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
+                            TitleKey = "NOTIFICATION_WELCOME_TITLE",
+                            BodyKey = "NOTIFICATION_WELCOME_BODY",
+                            LocalizationArguments = new() { user.FirstName },
+                            Title = $"Welcome to Your New Home Journey {user.FirstName}!",
+                            Body = "We’re excited to have you on board! To get started, please complete your profile. This will allow you to explore rental opportunities, list your first property, and connect with suitable roommates.\n\n" +
+              "Don’t forget to set your roommate preferences in your profile to improve your matching experience and find the best fit for you.",
 
-                        ActionType = NotificationActionType.EditProfile,
-                    });
+                            ActionType = NotificationActionType.EditProfile,
+                        });
                     }
 
                     var logins = await _userManager.GetLoginsAsync(user);
@@ -342,7 +342,7 @@ namespace MARN_API.Services.Implementations
             }
 
             var response = await CreateJwtForUserAsync(user, dto.RememberMe, "Google");
-            return ServiceResult<LoginResponseDto>.Ok(response);
+            return ServiceResult<LoginResponseDto>.Ok(response, code: "n_external_login_success");
         }
 
         private async Task<GoogleJsonWebSignature.Payload?> ValidateGoogleTokenAsync(string idToken)
@@ -540,7 +540,7 @@ namespace MARN_API.Services.Implementations
             if (user != null)
             {
                 var isConfirmed = await _userManager.IsEmailConfirmedAsync(user);
-                if (!isConfirmed) 
+                if (!isConfirmed)
                 {
                     var token = await GenerateEmailConfirmationTokenAsync(user);
                     var frontBaseUrl = _configuration["AppSettings:FrontBaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");

@@ -84,3 +84,5 @@ appsettings.json
 wwwroot/
 /MARN_Frontend
 /serviceAccountKey.json
+scripts_for_fast_editing_resx/
+scripts_for_fast_editing_resx
