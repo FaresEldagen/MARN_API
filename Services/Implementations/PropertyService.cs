@@ -238,6 +238,9 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<PropertyDetailsDto>.Fail("Property not found.", resultType: ServiceResultType.NotFound);
             }
 
+            dto.IsUserAllowedToFeedback = userId.HasValue
+                && await _contractRepo.HasEligiblePropertyContractAsync(userId.Value, propertyId);
+
             bool shouldIncrementViews = !userId.HasValue || dto.HostedBy.Id != userId.Value;
             if (shouldIncrementViews)
             {

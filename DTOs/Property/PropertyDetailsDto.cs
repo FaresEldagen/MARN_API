@@ -37,6 +37,7 @@ namespace MARN_API.DTOs.Property
         public int RatingsCount { get; set; }
         public int CommentsCount { get; set; }
         public int? CurrentUserRating { get; set; }
+        public bool IsUserAllowedToFeedback { get; set; }
 
         public List<PropertyAmenityItemDto> Amenities { get; set; } = new();
         public List<PropertyRuleItemDto> Rules { get; set; } = new();
