@@ -25,6 +25,7 @@ namespace MARN_API.Services.Implementations
         private readonly IHashingService _hashingService;
         private readonly IOpenTimestampsService _openTimestampsService;
         private readonly IOpenTimestampsProofReader _proofReader;
+        private readonly IContractDocumentStorage _contractDocumentStorage;
         private readonly IContractPdfGenerator _contractPdfGenerator;
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -39,6 +40,7 @@ namespace MARN_API.Services.Implementations
             IHashingService hashingService,
             IOpenTimestampsService openTimestampsService,
             IOpenTimestampsProofReader proofReader,
+            IContractDocumentStorage contractDocumentStorage,
             IContractPdfGenerator contractPdfGenerator,
             IBookingRequestRepo bookingRequestRepo,
             UserManager<ApplicationUser> userManager,
@@ -52,6 +54,7 @@ namespace MARN_API.Services.Implementations
             _hashingService = hashingService;
             _openTimestampsService = openTimestampsService;
             _proofReader = proofReader;
+            _contractDocumentStorage = contractDocumentStorage;
             _contractPdfGenerator = contractPdfGenerator;
             _bookingRequestRepo = bookingRequestRepo;
             _userManager = userManager;
@@ -282,22 +285,30 @@ namespace MARN_API.Services.Implementations
             var otsFileBytes = await _openTimestampsService.SubmitHashAsync(hash);
             var proofData = _proofReader.Extract(otsFileBytes);
 
+            string? contractFilePath = null;
+            string? otsFilePath = null;
+
             contract.SignedByRenterAt = DateTime.UtcNow;
             contract.Status = ContractStatus.Active;
             contract.FileName = pdfResult.FileName;
-            contract.FileBytes = pdfResult.Content;
             contract.Hash = hash;
-            contract.OtsFileBytes = otsFileBytes;
             contract.TransactionId = proofData.TransactionIds.FirstOrDefault();
             contract.MerkleRoot = proofData.MerkleRoots.FirstOrDefault();
             contract.AnchoringStatus = ContractAnchoringStatus.Pending;
 
             try
             {
+                contractFilePath = await _contractDocumentStorage.SaveContractPdfAsync(contract.Id, pdfResult.Content);
+                otsFilePath = await _contractDocumentStorage.SaveOtsProofAsync(contract.Id, otsFileBytes);
+
+                contract.FilePath = contractFilePath;
+                contract.OtsFilePath = otsFilePath;
                 await _contractRepo.SignContractAsync(contract);
             }
             catch (Exception ex)
             {
+                await _contractDocumentStorage.DeleteAsync(contractFilePath);
+                await _contractDocumentStorage.DeleteAsync(otsFilePath);
                 _logger.LogError(ex, "Sign Contract failed: Could not persist contract or generate payment schedules for contractId: {contractId}", contractId);
                 return ServiceResult<long>.Fail(
                     "An error occurred while saving the contract and generating payment schedules. Please try again.",
@@ -395,7 +406,7 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Download Contract PDF attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
             var contract = await _contractRepo.GetByIdAsync(contractId);
-            if (contract is null || contract.FileBytes is null)
+            if (contract is null || string.IsNullOrWhiteSpace(contract.FilePath))
             {
                 _logger.LogWarning("Download Contract PDF failed: Contract or file not found for contractId: {contractId}", contractId);
                 return ServiceResult<ContractFileDto>.Fail("Contract file not found.", resultType: ServiceResultType.NotFound);
@@ -410,9 +421,16 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<ContractFileDto>.Fail("You do not have access to this contract.", resultType: ServiceResultType.Forbidden);
             }
 
+            var fileBytes = await _contractDocumentStorage.ReadAsync(contract.FilePath);
+            if (fileBytes is null)
+            {
+                _logger.LogWarning("Download Contract PDF failed: Stored file missing for contractId: {contractId}, path: {path}", contractId, contract.FilePath);
+                return ServiceResult<ContractFileDto>.Fail("Contract file not found.", resultType: ServiceResultType.NotFound);
+            }
+
             var fileDto = new ContractFileDto
             {
-                FileBytes = contract.FileBytes,
+                FileBytes = fileBytes,
                 ContentType = "application/pdf",
                 FileName = contract.FileName
             };
@@ -426,7 +444,7 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("Download OTS Proof attempt for userId: {userId}, contractId: {contractId}", userId, contractId);
 
             var contract = await _contractRepo.GetByIdAsync(contractId);
-            if (contract is null || contract.OtsFileBytes is null)
+            if (contract is null || string.IsNullOrWhiteSpace(contract.OtsFilePath))
             {
                 _logger.LogWarning("Download OTS Proof failed: Proof not found for contractId: {contractId}", contractId);
                 return ServiceResult<ContractFileDto>.Fail("Proof not found.", resultType: ServiceResultType.NotFound);
@@ -441,9 +459,16 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<ContractFileDto>.Fail("You do not have access to this contract.", resultType: ServiceResultType.Forbidden);
             }
 
+            var fileBytes = await _contractDocumentStorage.ReadAsync(contract.OtsFilePath);
+            if (fileBytes is null)
+            {
+                _logger.LogWarning("Download OTS Proof failed: Stored proof missing for contractId: {contractId}, path: {path}", contractId, contract.OtsFilePath);
+                return ServiceResult<ContractFileDto>.Fail("Proof not found.", resultType: ServiceResultType.NotFound);
+            }
+
             var fileDto = new ContractFileDto
             {
-                FileBytes = contract.OtsFileBytes,
+                FileBytes = fileBytes,
                 ContentType = "application/octet-stream",
                 FileName = $"{Path.GetFileNameWithoutExtension(contract.FileName)}.ots"
             };

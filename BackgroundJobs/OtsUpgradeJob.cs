@@ -7,17 +7,20 @@ namespace MARN_API.BackgroundJobs
     public class OtsUpgradeJob
     {
         private readonly IContractRepo _contractRepo;
+        private readonly IContractDocumentStorage _contractDocumentStorage;
         private readonly IOpenTimestampsService _openTimestampsService;
         private readonly IOpenTimestampsProofReader _openTimestampsProofReader;
         private readonly ILogger<OtsUpgradeJob> _logger;
 
         public OtsUpgradeJob(
             IContractRepo contractRepo,
+            IContractDocumentStorage contractDocumentStorage,
             IOpenTimestampsService openTimestampsService,
             IOpenTimestampsProofReader openTimestampsProofReader,
             ILogger<OtsUpgradeJob> logger)
         {
             _contractRepo = contractRepo;
+            _contractDocumentStorage = contractDocumentStorage;
             _openTimestampsService = openTimestampsService;
             _openTimestampsProofReader = openTimestampsProofReader;
             _logger = logger;
@@ -34,19 +37,25 @@ namespace MARN_API.BackgroundJobs
                 {
                     try
                     {
-                        if (contract.OtsFileBytes is null || contract.OtsFileBytes.Length == 0)
+                        if (string.IsNullOrWhiteSpace(contract.OtsFilePath))
                         {
                             continue;
                         }
 
-                        var updatedOts = await _openTimestampsService.UpgradeOtsAsync(contract.OtsFileBytes);
+                        var currentOtsBytes = await _contractDocumentStorage.ReadAsync(contract.OtsFilePath);
+                        if (currentOtsBytes is null || currentOtsBytes.Length == 0)
+                        {
+                            continue;
+                        }
+
+                        var updatedOts = await _openTimestampsService.UpgradeOtsAsync(currentOtsBytes);
                         if (updatedOts is null)
                         {
                             continue;
                         }
 
                         var proofData = _openTimestampsProofReader.Extract(updatedOts);
-                        contract.OtsFileBytes = updatedOts;
+                        contract.OtsFilePath = await _contractDocumentStorage.SaveOtsProofAsync(contract.Id, updatedOts);
                         contract.AnchoringStatus = ContractAnchoringStatus.Anchored;
                         contract.AnchoredAt = DateTime.UtcNow;
                         contract.TransactionId = proofData.TransactionIds.FirstOrDefault();

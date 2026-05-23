@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MARN_API.Models;
 using MARN_API.Enums.Payment;
 using MARN_API.Enums.Contract;
-using System.IO;
 
 namespace MARN_API.Data.Seed
 {
@@ -30,12 +29,6 @@ namespace MARN_API.Data.Seed
             var renterBId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var renterCId = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
-            Func<string, byte[]> safeReadFile = (filename) =>
-            {
-                var path = Path.Combine("Data", "Seed", "Files", filename);
-                return File.Exists(path) ? File.ReadAllBytes(path) : Array.Empty<byte>();
-            };
-
             builder.HasData(
 
                 // ── CONTRACT 1000001 ──────────────────────────────────────────────────────
@@ -59,8 +52,8 @@ namespace MARN_API.Data.Seed
                     Hash = "3039d56c00f0d4068ebe0b93a771e151c13954c3a18b5668817c573098f63198",
                     TransactionId = null,
                     MerkleRoot = null,
-                    FileBytes = safeReadFile("1000001.pdf"),
-                    OtsFileBytes = safeReadFile("1000001.ots")
+                    FilePath = BuildSeedFilePath("1000001.pdf"),
+                    OtsFilePath = BuildSeedFilePath("1000001.ots")
                 },
 
                 // ── CONTRACT 1000002 ──────────────────────────────────────────────────────
@@ -84,8 +77,8 @@ namespace MARN_API.Data.Seed
                     Hash = "ff411815aaad5ad467d9b4f65d194bff57438215019590ac11cef7ec788fca39",
                     TransactionId = null,
                     MerkleRoot = null,
-                    FileBytes = safeReadFile("1000002.pdf"),
-                    OtsFileBytes = safeReadFile("1000002.ots")
+                    FilePath = BuildSeedFilePath("1000002.pdf"),
+                    OtsFilePath = BuildSeedFilePath("1000002.ots")
                 },
 
                 // ── CONTRACT 1000003 ──────────────────────────────────────────────────────
@@ -109,8 +102,8 @@ namespace MARN_API.Data.Seed
                     Hash = "d7c850ed73db284d3804dbf6fa4e97d7ebebf30e046484d9a0ea2de8459b414d",
                     TransactionId = null,
                     MerkleRoot = null,
-                    FileBytes = safeReadFile("1000003.pdf"),
-                    OtsFileBytes = safeReadFile("1000003.ots")
+                    FilePath = BuildSeedFilePath("1000003.pdf"),
+                    OtsFilePath = BuildSeedFilePath("1000003.ots")
                 },
 
                 // ── CONTRACT 1000004 ──────────────────────────────────────────────────────
@@ -134,8 +127,8 @@ namespace MARN_API.Data.Seed
                     Hash = "050a52314d17bad942a9552a176b93f3c706366c14792f5570379d511bae24ba",
                     TransactionId = null,
                     MerkleRoot = null,
-                    FileBytes = safeReadFile("1000004.pdf"),
-                    OtsFileBytes = safeReadFile("1000004.ots")
+                    FilePath = BuildSeedFilePath("1000004.pdf"),
+                    OtsFilePath = BuildSeedFilePath("1000004.ots")
                 },
 
                 // ── CONTRACT 1000005 ──────────────────────────────────────────────────────
@@ -159,8 +152,8 @@ namespace MARN_API.Data.Seed
                     Hash = "037a1152d09ce6cecda1cc548dfce20efe010d53749dd5b7fa5409c2f1632139",
                     TransactionId = null,
                     MerkleRoot = null,
-                    FileBytes = safeReadFile("1000005.pdf"),
-                    OtsFileBytes = safeReadFile("1000005.ots")
+                    FilePath = BuildSeedFilePath("1000005.pdf"),
+                    OtsFilePath = BuildSeedFilePath("1000005.ots")
                 },
 
                 // ── CONTRACT 1000006 ──────────────────────────────────────────────────────
@@ -184,10 +177,15 @@ namespace MARN_API.Data.Seed
                     Hash = "59aa5fa3b0c47d6473f48638de632bd0e9de58332e4e3d77d6cdc3748c03de96",
                     TransactionId = null,
                     MerkleRoot = null,
-                    FileBytes = safeReadFile("1000006.pdf"),
-                    OtsFileBytes = safeReadFile("1000006.ots")
+                    FilePath = BuildSeedFilePath("1000006.pdf"),
+                    OtsFilePath = BuildSeedFilePath("1000006.ots")
                 }
             );
+        }
+
+        private static string BuildSeedFilePath(string fileName)
+        {
+            return Path.Combine("Data", "Seed", "Files", fileName).Replace("\\", "/");
         }
     }
 }

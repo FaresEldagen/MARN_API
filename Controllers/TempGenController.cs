@@ -7,7 +7,6 @@ using MARN_API.Enums.Account;
 using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 using MARN_API.Models;
-using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -196,8 +195,8 @@ namespace MARN_API.Controllers
                 {
                     dbContract.FileName = pdfResult.FileName;
                     dbContract.Hash = hash;
-                    dbContract.FileBytes = pdfResult.Content;
-                    dbContract.OtsFileBytes = otsFileBytes;
+                    dbContract.FilePath = ToRelativeContentPath(pdfPath);
+                    dbContract.OtsFilePath = ToRelativeContentPath(otsPath);
                     dbContract.TransactionId = txId;
                     dbContract.MerkleRoot = merkleRoot;
                     _dbContext.Contracts.Update(dbContract);
@@ -425,8 +424,13 @@ FileName = ""{result.FileName}"",
 Hash = ""{result.Hash}"",
 TransactionId = {(result.TransactionId != null ? $"\"{result.TransactionId}\"" : "null")},
 MerkleRoot = {(result.MerkleRoot != null ? $"\"{result.MerkleRoot}\"" : "null")},
-// Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{result.ContractId}.pdf""))
-// Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{result.ContractId}.ots""))".Trim();
+FilePath = ""Data/Seed/Files/{result.ContractId}.pdf"",
+OtsFilePath = ""Data/Seed/Files/{result.ContractId}.ots""".Trim();
+        }
+
+        private string ToRelativeContentPath(string absolutePath)
+        {
+            return Path.GetRelativePath(_env.ContentRootPath, absolutePath).Replace("\\", "/");
         }
 
         private sealed class TempGeneratedContractResult
