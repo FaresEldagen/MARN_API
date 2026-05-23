@@ -227,23 +227,13 @@ namespace MARN_API.Repositories.Implementations
 
         public async Task SignContractAsync(Contract contract)
         {
-            await using var transaction = await Context.Database.BeginTransactionAsync();
-            try
-            {
-                Context.Contracts.Update(contract);
+            Context.Contracts.Update(contract);
 
-                // Generate Payment Schedules based on start date, end date and payment frequency
-                var schedules = GeneratePaymentSchedules(contract);
-                await Context.PaymentSchedules.AddRangeAsync(schedules);
+            // Generate Payment Schedules based on start date, end date and payment frequency
+            var schedules = GeneratePaymentSchedules(contract);
+            await Context.PaymentSchedules.AddRangeAsync(schedules);
 
-                await Context.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+            await Context.SaveChangesAsync();
         }
 
         private static List<PaymentSchedule> GeneratePaymentSchedules(Contract contract)

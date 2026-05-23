@@ -102,6 +102,20 @@ namespace MARN_API.Repositories.Implementations
                 .ExecuteDeleteAsync();
         }
 
+        public async Task DeleteByPropertyIdAndRenterIdAsync(long propertyId, Guid renterId)
+        {
+            await Context.BookingRequests
+                .Where(b => b.PropertyId == propertyId && b.RenterId == renterId)
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task DeleteByPropertyIdExceptRenterIdAsync(long propertyId, Guid renterId)
+        {
+            await Context.BookingRequests
+                .Where(b => b.PropertyId == propertyId && b.RenterId != renterId)
+                .ExecuteDeleteAsync();
+        }
+
         public async Task DeleteByPropertyIdsAsync(List<long> propertyIds)
         {
             await Context.BookingRequests

@@ -14,6 +14,7 @@ using System.Globalization;
 
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace MARN_API.Services.Implementations
 {
@@ -298,12 +299,16 @@ namespace MARN_API.Services.Implementations
 
             try
             {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
                 contractFilePath = await _contractDocumentStorage.SaveContractPdfAsync(contract.Id, pdfResult.Content);
                 otsFilePath = await _contractDocumentStorage.SaveOtsProofAsync(contract.Id, otsFileBytes);
 
                 contract.FilePath = contractFilePath;
                 contract.OtsFilePath = otsFilePath;
                 await _contractRepo.SignContractAsync(contract);
+                await CleanupBookingRequestsAfterSigningAsync(contract);
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
@@ -669,6 +674,32 @@ namespace MARN_API.Services.Implementations
         private static string BilingualValue(string english, string arabic)
         {
             return $"{english} / {arabic}";
+        }
+
+        private async Task CleanupBookingRequestsAfterSigningAsync(Contract contract)
+        {
+            await _bookingRequestRepo.DeleteByPropertyIdAndRenterIdAsync(contract.PropertyId, contract.RenterId);
+
+            if (!await ShouldDeleteOtherPropertyBookingRequestsAsync(contract))
+            {
+                return;
+            }
+
+            await _bookingRequestRepo.DeleteByPropertyIdExceptRenterIdAsync(contract.PropertyId, contract.RenterId);
+        }
+
+        private async Task<bool> ShouldDeleteOtherPropertyBookingRequestsAsync(Contract contract)
+        {
+            if (!contract.Property.IsShared)
+            {
+                return true;
+            }
+
+            var activeContractsCount = await _context.Contracts.CountAsync(c =>
+                c.PropertyId == contract.PropertyId &&
+                c.Status == ContractStatus.Active);
+
+            return activeContractsCount >= contract.Property.MaxOccupants;
         }
         #endregion
     }
