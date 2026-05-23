@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260523152815_init")]
+    [Migration("20260523160105_init")]
     partial class init
     {
         /// <inheritdoc />
