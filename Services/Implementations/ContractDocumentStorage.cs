@@ -62,6 +62,8 @@ namespace MARN_API.Services.Implementations
 
         private async Task<string> SaveAsync(string relativePath, byte[] fileBytes, CancellationToken cancellationToken)
         {
+            Directory.CreateDirectory(ContractDocumentPathBuilder.BuildContractsRootAbsolutePath(_environment.ContentRootPath));
+
             if (!TryResolveAbsolutePath(relativePath, out var absolutePath))
             {
                 throw new InvalidOperationException("Could not resolve contract document storage path.");

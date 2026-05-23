@@ -65,8 +65,8 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> Generate()
         {
             var generatedAtUtc = DateTime.UtcNow;
-            var resultsPath = Path.Combine(_env.ContentRootPath, "Data", "Seed", "Files");
-            if (!Directory.Exists(resultsPath)) Directory.CreateDirectory(resultsPath);
+            var resultsPath = ContractDocumentPathBuilder.BuildContractsRootAbsolutePath(_env.ContentRootPath);
+            Directory.CreateDirectory(resultsPath);
 
             var contracts = new[]
             {
