@@ -1,11 +1,10 @@
 using MARN_API.Services.Interfaces;
+using MARN_API.Utilities;
 
 namespace MARN_API.Services.Implementations
 {
     public class ContractDocumentStorage : IContractDocumentStorage
     {
-        private const string StorageRootFolder = "Storage";
-        private const string ContractsFolder = "contracts";
         private readonly IWebHostEnvironment _environment;
 
         public ContractDocumentStorage(IWebHostEnvironment environment)
@@ -15,12 +14,12 @@ namespace MARN_API.Services.Implementations
 
         public Task<string> SaveContractPdfAsync(long contractId, byte[] fileBytes, CancellationToken cancellationToken = default)
         {
-            return SaveAsync(contractId, "document.pdf", fileBytes, cancellationToken);
+            return SaveAsync(ContractDocumentPathBuilder.BuildPdfRelativePath(contractId), fileBytes, cancellationToken);
         }
 
         public Task<string> SaveOtsProofAsync(long contractId, byte[] fileBytes, CancellationToken cancellationToken = default)
         {
-            return SaveAsync(contractId, "proof.ots", fileBytes, cancellationToken);
+            return SaveAsync(ContractDocumentPathBuilder.BuildOtsRelativePath(contractId), fileBytes, cancellationToken);
         }
 
         public async Task<byte[]?> ReadAsync(string? relativePath, CancellationToken cancellationToken = default)
@@ -61,10 +60,8 @@ namespace MARN_API.Services.Implementations
             return Task.CompletedTask;
         }
 
-        private async Task<string> SaveAsync(long contractId, string fileName, byte[] fileBytes, CancellationToken cancellationToken)
+        private async Task<string> SaveAsync(string relativePath, byte[] fileBytes, CancellationToken cancellationToken)
         {
-            var relativePath = Path.Combine(StorageRootFolder, ContractsFolder, contractId.ToString(), fileName).Replace("\\", "/");
-
             if (!TryResolveAbsolutePath(relativePath, out var absolutePath))
             {
                 throw new InvalidOperationException("Could not resolve contract document storage path.");
