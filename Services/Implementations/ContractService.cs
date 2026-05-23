@@ -363,6 +363,11 @@ namespace MARN_API.Services.Implementations
             {
                 ContractStatus = contract.Status,
                 ContractStatusDisplayName = _localizer.GetEnumDisplayName(contract.Status),
+                TransactionId = contract.TransactionId,
+                MerkleRoot = contract.MerkleRoot,
+                AnchoringStatus = contract.AnchoringStatus,
+                AnchoringStatusDisplayName = _localizer.GetEnumDisplayName(contract.AnchoringStatus),
+                IsAnchoredToBlockChain = contract.AnchoringStatus == ContractAnchoringStatus.Anchored,
                 ContractId = contract.Id,
                 Duration = FormatDuration(contract.LeaseStartDate, contract.LeaseEndDate, property.RentalUnit),
                 StartDate = contract.LeaseStartDate,

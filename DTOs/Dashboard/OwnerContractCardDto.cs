@@ -7,6 +7,11 @@ namespace MARN_API.DTOs.Dashboard
         public long ContractId { get; set; }
         public ContractStatus ContractStatus { get; set; }
         public string ContractStatusDisplayName { get; set; } = string.Empty;
+        public string? TransactionId { get; set; }
+        public string? MerkleRoot { get; set; }
+        public ContractAnchoringStatus AnchoringStatus { get; set; }
+        public string AnchoringStatusDisplayName { get; set; } = string.Empty;
+        public bool IsAnchoredToBlockChain { get; set; }
         public DateTime ExpiryDate { get; set; }
 
         public Guid RenterId { get; set; }

@@ -431,6 +431,9 @@ namespace MARN_API.Repositories.Implementations
                 {
                     c.Id,
                     c.Status,
+                    c.TransactionId,
+                    c.MerkleRoot,
+                    c.AnchoringStatus,
                     c.CreatedAt,
                     c.LeaseStartDate,
                     c.LeaseEndDate,
@@ -450,6 +453,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     Status = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == ContractAnchoringStatus.Anchored,
                     CanCancel = c.Status == ContractStatus.Pending || c.Status == ContractStatus.Active,
                     CreatedAt = c.CreatedAt,
                     LeaseStartDate = c.LeaseStartDate,

@@ -30,6 +30,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == ContractAnchoringStatus.Anchored,
                     StartDate = c.LeaseStartDate.ToDateTime(TimeOnly.MinValue),
                     EndDate = c.LeaseEndDate.ToDateTime(TimeOnly.MinValue),
 
@@ -85,6 +89,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == ContractAnchoringStatus.Anchored,
                     ExpiryDate = c.LeaseEndDate.ToDateTime(TimeOnly.MinValue),
 
                     PropertyId = c.PropertyId,
@@ -106,6 +114,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == ContractAnchoringStatus.Anchored,
                     ExpiryDate = c.LeaseEndDate.ToDateTime(TimeOnly.MinValue),
 
                     OwnerId = c.Property.OwnerId,
@@ -127,6 +139,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == ContractAnchoringStatus.Anchored,
                     ExpiryDate = c.LeaseEndDate.ToDateTime(TimeOnly.MinValue),
 
                     PropertyId = c.PropertyId,

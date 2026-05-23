@@ -332,6 +332,11 @@ namespace MARN_API.DTOs.Admin
         public long ContractId { get; set; }
         public ContractStatus Status { get; set; }
         public string StatusDisplayName { get; set; } = string.Empty;
+        public string? TransactionId { get; set; }
+        public string? MerkleRoot { get; set; }
+        public ContractAnchoringStatus AnchoringStatus { get; set; }
+        public string AnchoringStatusDisplayName { get; set; } = string.Empty;
+        public bool IsAnchoredToBlockChain { get; set; }
         public bool CanCancel { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateOnly LeaseStartDate { get; set; }

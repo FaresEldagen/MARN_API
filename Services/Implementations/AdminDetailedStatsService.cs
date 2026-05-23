@@ -364,6 +364,11 @@ namespace MARN_API.Services.Implementations
                 ContractId = contract.Id,
                 Status = contract.Status,
                 StatusDisplayName = _localizer.GetEnumDisplayName(contract.Status),
+                TransactionId = contract.TransactionId,
+                MerkleRoot = contract.MerkleRoot,
+                AnchoringStatus = contract.AnchoringStatus,
+                AnchoringStatusDisplayName = _localizer.GetEnumDisplayName(contract.AnchoringStatus),
+                IsAnchoredToBlockChain = contract.AnchoringStatus == ContractAnchoringStatus.Anchored,
                 CanCancel = contract.Status == ContractStatus.Pending || contract.Status == ContractStatus.Active,
                 CreatedAt = contract.CreatedAt,
                 LeaseStartDate = contract.LeaseStartDate,
@@ -451,6 +456,7 @@ namespace MARN_API.Services.Implementations
             foreach (var item in items)
             {
                 item.StatusDisplayName = _localizer.GetEnumDisplayName(item.Status);
+                item.AnchoringStatusDisplayName = _localizer.GetEnumDisplayName(item.AnchoringStatus);
 
                 if (Enum.TryParse<PaymentFrequency>(item.PaymentFrequency, true, out var paymentFrequency))
                 {

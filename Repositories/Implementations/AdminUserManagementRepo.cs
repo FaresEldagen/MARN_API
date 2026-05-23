@@ -138,6 +138,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == MARN_API.Enums.Contract.ContractAnchoringStatus.Anchored,
                     ExpiryDate = c.LeaseEndDate.ToDateTime(TimeOnly.MinValue),
                     OwnerId = c.Property.OwnerId,
                     OwnerName = (c.Property.Owner.FirstName + " " + c.Property.Owner.LastName).Trim(),
@@ -154,6 +158,10 @@ namespace MARN_API.Repositories.Implementations
                 {
                     ContractId = c.Id,
                     ContractStatus = c.Status,
+                    TransactionId = c.TransactionId,
+                    MerkleRoot = c.MerkleRoot,
+                    AnchoringStatus = c.AnchoringStatus,
+                    IsAnchoredToBlockChain = c.AnchoringStatus == MARN_API.Enums.Contract.ContractAnchoringStatus.Anchored,
                     ExpiryDate = c.LeaseEndDate.ToDateTime(TimeOnly.MinValue),
                     RenterId = c.RenterId,
                     RenterName = (c.Renter.FirstName + " " + c.Renter.LastName).Trim(),

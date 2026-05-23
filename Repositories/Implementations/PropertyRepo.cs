@@ -56,6 +56,10 @@ namespace MARN_API.Repositories.Implementations
                         .Select(c => new OwnerPropertyContractDto
                         {
                             ContractId = c.Id,
+                            TransactionId = c.TransactionId,
+                            MerkleRoot = c.MerkleRoot,
+                            AnchoringStatus = c.AnchoringStatus,
+                            IsAnchoredToBlockChain = c.AnchoringStatus == ContractAnchoringStatus.Anchored,
                             RenterId = c.RenterId,
                             RenterName = $"{c.Renter.FirstName} {c.Renter.LastName}",
                             RenterProfileImage = c.Renter.ProfileImage
