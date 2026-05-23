@@ -217,7 +217,7 @@ namespace MARN_API.Repositories.Implementations
                     Status = p.Status,
                     Type = p.Type,
                     City = p.City,
-                    State = p.State,
+                    Governorate = p.State,
                     Price = p.Price,
                     AverageRating = p.PropertyRatings.Any()
                         ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
@@ -265,7 +265,7 @@ namespace MARN_API.Repositories.Implementations
                     RentalUnit = p.RentalUnit,
                     Address = p.Address,
                     City = p.City,
-                    State = p.State,
+                    Governorate = p.State,
                     ZipCode = p.ZipCode,
                     Latitude = p.Latitude,
                     Longitude = p.Longitude,

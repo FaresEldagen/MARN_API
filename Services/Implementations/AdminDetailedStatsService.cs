@@ -399,8 +399,8 @@ namespace MARN_API.Services.Implementations
                 TypeDisplayName = _localizer.GetEnumDisplayName(property.Type),
                 City = property.City,
                 CityDisplayName = GetLocationDisplayName<City>(property.City),
-                State = property.State,
-                StateDisplayName = GetLocationDisplayName<Governorate>(property.State),
+                Governorate = property.State,
+                GovernorateDisplayName = GetLocationDisplayName<Governorate>(property.State),
                 Price = property.Price,
                 AverageRating = property.PropertyRatings.Any()
                     ? property.PropertyRatings.Average(rating => (float?)rating.Rating) ?? 0f
@@ -421,7 +421,7 @@ namespace MARN_API.Services.Implementations
                 item.StatusDisplayName = _localizer.GetEnumDisplayName(item.Status);
                 item.TypeDisplayName = _localizer.GetEnumDisplayName(item.Type);
                 item.CityDisplayName = GetLocationDisplayName<City>(item.City);
-                item.StateDisplayName = GetLocationDisplayName<Governorate>(item.State);
+                item.GovernorateDisplayName = GetLocationDisplayName<Governorate>(item.Governorate);
             }
         }
 
@@ -431,7 +431,7 @@ namespace MARN_API.Services.Implementations
             property.TypeDisplayName = _localizer.GetEnumDisplayName(property.Type);
             property.RentalUnitDisplayName = _localizer.GetEnumDisplayName(property.RentalUnit);
             property.CityDisplayName = GetLocationDisplayName<City>(property.City);
-            property.StateDisplayName = GetLocationDisplayName<Governorate>(property.State);
+            property.GovernorateDisplayName = GetLocationDisplayName<Governorate>(property.Governorate);
 
             foreach (var amenity in property.Amenities)
             {

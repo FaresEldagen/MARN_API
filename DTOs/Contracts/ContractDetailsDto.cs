@@ -29,8 +29,8 @@ namespace MARN_API.DTOs.Contracts
         public string StreetAddress { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string CityDisplayName { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string StateDisplayName { get; set; } = string.Empty;
+        public string Governorate { get; set; } = string.Empty;
+        public string GovernorateDisplayName { get; set; } = string.Empty;
         public string RentalDuration { get; set; } = string.Empty;
         public string RentalDurationDisplayName { get; set; } = string.Empty;
         public decimal Price { get; set; }
