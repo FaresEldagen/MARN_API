@@ -71,7 +71,6 @@ namespace MARN_API.Controllers
                 NotificationTypes = GetEnumValues<NotificationType>(),
                 NotificationActionTypes = GetEnumValues<NotificationActionType>(),
                 ServiceResultTypes = GetEnumValues<ServiceResultType>(),
-                UserActivityTypes = GetEnumValues<UserActivityType>(),
                 ContractAnchoringStatuses = GetEnumValues<ContractAnchoringStatus>(),
                 RoommateSearchStatuses = GetEnumValues<RoommateSearchStatus>(),
                 AdminAnalyticsReportFormats = GetEnumValues<AdminAnalyticsReportFormat>(),
@@ -162,9 +161,6 @@ namespace MARN_API.Controllers
 
         [HttpGet("service-result-types")]
         public IActionResult GetServiceResultTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ServiceResultType>()));
-
-        [HttpGet("user-activity-types")]
-        public IActionResult GetUserActivityTypes() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<UserActivityType>()));
 
         [HttpGet("contract-anchoring-statuses")]
         public IActionResult GetContractAnchoringStatuses() => HandleServiceResult(ServiceResult<List<EnumValueDto>>.Ok(GetEnumValues<ContractAnchoringStatus>()));

@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using MARN_API.Enums.Contract;
 using MARN_API.Enums.Property;
 using Hangfire;
+using MARN_API.Utilities;
 
 namespace MARN_API.Services.Implementations
 {
@@ -38,6 +39,8 @@ namespace MARN_API.Services.Implementations
         private readonly MARN_API.Data.AppDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly IRoommateMatchingService _matchingService;
+        private readonly IUserActivityService _userActivityService;
+        private readonly IExternalPropertyAiClient _externalPropertyAiClient;
 
         public PropertyService(
             IPropertyRepo propertyRepo, 
@@ -55,7 +58,9 @@ namespace MARN_API.Services.Implementations
             IPropertyCommentRepo propertyCommentRepo,
             MARN_API.Data.AppDbContext context,
             INotificationService notificationService,
-            IRoommateMatchingService matchingService)
+            IRoommateMatchingService matchingService,
+            IUserActivityService userActivityService,
+            IExternalPropertyAiClient externalPropertyAiClient)
         {
             _propertyRepo = propertyRepo;
             _userManager = userManager;
@@ -73,6 +78,8 @@ namespace MARN_API.Services.Implementations
             _context = context;
             _notificationService = notificationService;
             _matchingService = matchingService;
+            _userActivityService = userActivityService;
+            _externalPropertyAiClient = externalPropertyAiClient;
         }
 
         public async Task<ServiceResult<bool>> AddPropertyAsync(AddPropertyDto dto, Guid userId)
@@ -172,6 +179,7 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Successfully fully mapped and saved property {PropertyId}", property.Id);
+            await NotifyExternalPropertyAddedAsync(property.Id);
 
             try
             {
@@ -204,6 +212,11 @@ namespace MARN_API.Services.Implementations
             _logger.LogInformation("SearchProperties called with keyword: {Keyword}, page: {Page}", filter.Keyword, filter.Page);
 
             var result = await _propertyRepo.SearchPropertiesAsync(filter, userId);
+            if (userId.HasValue)
+            {
+                await TryRecordActivityAsync(userId.Value, UserActivityTypes.Search, metadata: filter);
+            }
+
             return ServiceResult<PropertySearchResultDto>.Ok(result);
         }
 
@@ -216,16 +229,10 @@ namespace MARN_API.Services.Implementations
             }
 
             var isOwner = userId.HasValue && property.OwnerId == userId.Value;
-            var isAdmin = false;
-
-            if (userId.HasValue && !isOwner)
-            {
-                var currentUser = await _userManager.FindByIdAsync(userId.Value.ToString());
-                if (currentUser != null)
-                {
-                    isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
-                }
-            }
+            var currentUser = userId.HasValue
+                ? await _userManager.FindByIdAsync(userId.Value.ToString())
+                : null;
+            var isAdmin = currentUser != null && await _userManager.IsInRoleAsync(currentUser, "Admin");
 
             if (!isOwner && !isAdmin && (!property.IsActive || property.Status != PropertyStatus.Verified))
             {
@@ -246,6 +253,11 @@ namespace MARN_API.Services.Implementations
             {
                 await _propertyRepo.IncrementViewsAsync(propertyId);
                 dto.ViewsCount += 1;
+            }
+
+            if (userId.HasValue && !isAdmin)
+            {
+                await TryRecordActivityAsync(userId.Value, UserActivityTypes.View, propertyId);
             }
 
             if (userId.HasValue && dto.HostedBy.Id == userId.Value)
@@ -488,6 +500,7 @@ namespace MARN_API.Services.Implementations
             }
 
             _logger.LogInformation("Property {PropertyId} edited successfully by user {UserId}", propertyId, userId);
+            await NotifyExternalPropertyUpdatedAsync(propertyId);
 
             try
             {
@@ -526,6 +539,7 @@ namespace MARN_API.Services.Implementations
             if (isSaved)
             {
                 await _savedPropertyRepo.UnsavePropertyAsync(userId, propertyId);
+                await TryRemoveActivityAsync(userId, UserActivityTypes.Save, propertyId);
                 return ServiceResult<bool>.Ok(false, "Property unsaved successfully.", code: "ZZ_PROPERTY_UNSAVED_SUCCESSFULLY");
             }
             else
@@ -536,6 +550,7 @@ namespace MARN_API.Services.Implementations
                     PropertyId = propertyId
                 };
                 await _savedPropertyRepo.SavePropertyAsync(savedProperty);
+                await TryRecordActivityAsync(userId, UserActivityTypes.Save, propertyId);
                 return ServiceResult<bool>.Ok(true, "Property saved successfully.", code: "ZZ_PROPERTY_SAVED_SUCCESSFULLY");
             }
         }
@@ -609,6 +624,8 @@ namespace MARN_API.Services.Implementations
                 return ServiceResult<bool>.Fail("Error deleting property.", resultType: ServiceResultType.BadRequest);
             }
 
+            await NotifyExternalPropertyDeletedAsync(propertyId);
+
             if (!suppressNotification)
             {
                 await _notificationService.SendNotificationAsync(new NotificationRequestDto
@@ -667,6 +684,55 @@ namespace MARN_API.Services.Implementations
 
             await _propertyRepo.DeleteMediaByPropertyIdsAsync([propertyId]);
             await _context.SaveChangesAsync();
+        }
+
+        private async Task TryRecordActivityAsync(Guid userId, string activityType, long? propertyId = null, object? metadata = null)
+        {
+            try
+            {
+                await _userActivityService.RecordAsync(userId, activityType, propertyId, metadata);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to record user activity {ActivityType} for user {UserId} and property {PropertyId}",
+                    activityType,
+                    userId,
+                    propertyId);
+            }
+        }
+
+        private async Task TryRemoveActivityAsync(Guid userId, string activityType, long? propertyId = null)
+        {
+            try
+            {
+                await _userActivityService.RemoveAsync(userId, activityType, propertyId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to remove user activity {ActivityType} for user {UserId} and property {PropertyId}",
+                    activityType,
+                    userId,
+                    propertyId);
+            }
+        }
+
+        private Task NotifyExternalPropertyAddedAsync(long propertyId)
+        {
+            return _externalPropertyAiClient.NotifyPropertyAddedAsync(propertyId);
+        }
+
+        private Task NotifyExternalPropertyUpdatedAsync(long propertyId)
+        {
+            return _externalPropertyAiClient.NotifyPropertyUpdatedAsync(propertyId);
+        }
+
+        private Task NotifyExternalPropertyDeletedAsync(long propertyId)
+        {
+            return _externalPropertyAiClient.NotifyPropertyDeletedAsync(propertyId);
         }
     }
 }

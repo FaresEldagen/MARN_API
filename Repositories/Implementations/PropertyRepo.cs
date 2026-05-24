@@ -398,6 +398,98 @@ namespace MARN_API.Repositories.Implementations
             };
         }
 
+        public async Task<List<PropertyCardDto>> GetPublicPropertyCardsByIdsAsync(List<long> propertyIds, Guid? currentUserId)
+        {
+            if (propertyIds.Count == 0)
+            {
+                return [];
+            }
+
+            var hasUser = currentUserId.HasValue;
+            var userId = currentUserId ?? Guid.Empty;
+            var orderedIds = propertyIds
+                .Distinct()
+                .Select((id, index) => new { id, index })
+                .ToDictionary(item => item.id, item => item.index);
+
+            var items = await Context.Properties
+                .AsNoTracking()
+                .Where(p => propertyIds.Contains(p.Id)
+                         && p.IsActive
+                         && p.Status == PropertyStatus.Verified
+                         && p.DeletedAt == null)
+                .Select(p => new PropertyCardDto
+                {
+                    Id = p.Id,
+                    ImagePath = p.Media
+                        .Where(m => m.IsPrimary)
+                        .Select(m => m.Path)
+                        .FirstOrDefault() ?? string.Empty,
+                    Title = p.Title,
+                    Address = p.Address,
+                    Bedrooms = p.Bedrooms,
+                    Bathrooms = p.Bathrooms,
+                    MaxOccupants = p.MaxOccupants,
+                    Type = p.Type,
+                    AverageRating = p.PropertyRatings.Any()
+                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
+                        : 0f,
+                    Ratings = p.PropertyRatings.Count,
+                    Price = p.Price,
+                    RentalUnit = p.RentalUnit,
+                    IsSaved = hasUser && p.SavedProperty.Any(s => s.UserId == userId),
+                })
+                .ToListAsync();
+
+            return items
+                .OrderBy(item => orderedIds[item.Id])
+                .ToList();
+        }
+
+        public async Task<List<PropertyCardDto>> GetTopViewedPublicPropertyCardsAsync(int count, List<long>? excludedPropertyIds, Guid? currentUserId)
+        {
+            if (count <= 0)
+            {
+                return [];
+            }
+
+            var hasUser = currentUserId.HasValue;
+            var userId = currentUserId ?? Guid.Empty;
+            var excludedIds = excludedPropertyIds ?? [];
+
+            return await Context.Properties
+                .AsNoTracking()
+                .Where(p => p.IsActive
+                         && p.Status == PropertyStatus.Verified
+                         && p.DeletedAt == null
+                         && !excludedIds.Contains(p.Id))
+                .OrderByDescending(p => p.Views)
+                .ThenByDescending(p => p.Id)
+                .Take(count)
+                .Select(p => new PropertyCardDto
+                {
+                    Id = p.Id,
+                    ImagePath = p.Media
+                        .Where(m => m.IsPrimary)
+                        .Select(m => m.Path)
+                        .FirstOrDefault() ?? string.Empty,
+                    Title = p.Title,
+                    Address = p.Address,
+                    Bedrooms = p.Bedrooms,
+                    Bathrooms = p.Bathrooms,
+                    MaxOccupants = p.MaxOccupants,
+                    Type = p.Type,
+                    AverageRating = p.PropertyRatings.Any()
+                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
+                        : 0f,
+                    Ratings = p.PropertyRatings.Count,
+                    Price = p.Price,
+                    RentalUnit = p.RentalUnit,
+                    IsSaved = hasUser && p.SavedProperty.Any(s => s.UserId == userId),
+                })
+                .ToListAsync();
+        }
+
         public async Task<Property?> GetByIdAsync(long id)
         {
             return await Context.Properties.Include(p => p.Contracts).FirstOrDefaultAsync(p => p.Id == id);

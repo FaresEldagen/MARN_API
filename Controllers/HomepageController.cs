@@ -1,8 +1,9 @@
 using MARN_API.Models;
+using MARN_API.DTOs.Common;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using MARN_API.DTOs.Property;
 
 namespace MARN_API.Controllers
 {
@@ -26,18 +27,13 @@ namespace MARN_API.Controllers
         /// Retrieves recommended properties for the authenticated user.
         /// </summary>
         /// <returns>A list of recommended property cards.</returns>
-        [AllowAnonymous]
         [HttpGet("recommendations")]
-        [ProducesResponseType(typeof(List<MARN_API.DTOs.Property.PropertyCardDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseDto<PropertySearchResultDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetRecommendations()
         {
-            Guid? userId = null;
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            if (!string.IsNullOrEmpty(userIdString) && Guid.TryParse(userIdString, out Guid parsedId))
-            {
-                userId = parsedId;
-            }
+            if (!TryGetUserId(out var userId))
+                return UnauthorizedUserIdMissing();
 
             var result = await _homepageService.GetRecommendedPropertiesAsync(userId);
             return HandleServiceResult(result);

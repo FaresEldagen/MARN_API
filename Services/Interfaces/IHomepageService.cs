@@ -5,6 +5,6 @@ namespace MARN_API.Services.Interfaces
 {
     public interface IHomepageService
     {
-        Task<ServiceResult<List<PropertyCardDto>>> GetRecommendedPropertiesAsync(Guid? userId);
+        Task<ServiceResult<PropertySearchResultDto>> GetRecommendedPropertiesAsync(Guid userId);
     }
 }

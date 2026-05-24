@@ -23,6 +23,7 @@ namespace MARN_API.Services.Implementations
         private readonly ILogger<AdminDetailedStatsService> _logger;
         private readonly IPropertyService _propertyService;
         private readonly IPropertyRepo _propertyRepo;
+        private readonly IExternalPropertyAiClient _externalPropertyAiClient;
 
         public AdminDetailedStatsService(
             IAdminDetailedStatsRepo detailedStatsRepo,
@@ -30,7 +31,8 @@ namespace MARN_API.Services.Implementations
             IAppTextLocalizer localizer,
             ILogger<AdminDetailedStatsService> logger,
             IPropertyService propertyService,
-            IPropertyRepo propertyRepo)
+            IPropertyRepo propertyRepo,
+            IExternalPropertyAiClient externalPropertyAiClient)
         {
             _detailedStatsRepo = detailedStatsRepo;
             _notificationService = notificationService;
@@ -38,6 +40,7 @@ namespace MARN_API.Services.Implementations
             _logger = logger;
             _propertyService = propertyService;
             _propertyRepo = propertyRepo;
+            _externalPropertyAiClient = externalPropertyAiClient;
         }
 
         public async Task<ServiceResult<AdminDetailedUsersResponseDto>> GetUsersAsync(AdminDetailedUsersQueryDto query)
@@ -123,6 +126,7 @@ namespace MARN_API.Services.Implementations
             }
 
             await _detailedStatsRepo.SaveAdminContractChangesAsync();
+            await _externalPropertyAiClient.NotifyPropertyAddedAsync(propertyId);
             await NotifyDeletedPropertyRestoredAsync(property, imagesWereDeleted);
 
             _logger.LogInformation(

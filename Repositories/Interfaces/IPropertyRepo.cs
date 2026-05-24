@@ -21,6 +21,8 @@ namespace MARN_API.Repositories.Interfaces
         Task<Property?> GetByIdAsync(long id);
         Task<PropertyDetailsDto?> GetPropertyDetailsAsync(long propertyId, Guid? currentUserId);
         Task<PropertySearchResultDto> SearchPropertiesAsync(PropertySearchFilterDto filter, Guid? currentUserId);
+        Task<List<PropertyCardDto>> GetPublicPropertyCardsByIdsAsync(List<long> propertyIds, Guid? currentUserId);
+        Task<List<PropertyCardDto>> GetTopViewedPublicPropertyCardsAsync(int count, List<long>? excludedPropertyIds, Guid? currentUserId);
         Task IncrementViewsAsync(long propertyId);
         Task UpdatePropertyAsync(Property property);
         Task AddPropertyAsync(Property property);
