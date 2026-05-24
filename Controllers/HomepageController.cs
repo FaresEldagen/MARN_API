@@ -24,16 +24,21 @@ namespace MARN_API.Controllers
 
 
         /// <summary>
-        /// Retrieves recommended properties for the authenticated user.
+        /// Retrieves recommended properties.
+        /// Authenticated users get personalized recommendations with fallback.
+        /// Anonymous users get top-viewed properties only.
         /// </summary>
         /// <returns>A list of recommended property cards.</returns>
+        [AllowAnonymous]
         [HttpGet("recommendations")]
         [ProducesResponseType(typeof(ApiResponseDto<PropertySearchResultDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetRecommendations()
         {
-            if (!TryGetUserId(out var userId))
-                return UnauthorizedUserIdMissing();
+            Guid? userId = null;
+            if (TryGetUserId(out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
 
             var result = await _homepageService.GetRecommendedPropertiesAsync(userId);
             return HandleServiceResult(result);

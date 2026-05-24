@@ -23,15 +23,35 @@ namespace MARN_API.Services.Implementations
         }
 
 
-        public async Task<ServiceResult<PropertySearchResultDto>> GetRecommendedPropertiesAsync(Guid userId)
+        public async Task<ServiceResult<PropertySearchResultDto>> GetRecommendedPropertiesAsync(Guid? userId)
         {
             _logger.LogInformation("Retrieving recommended properties for userId: {userId}", userId);
 
-            var externalResult = await _externalPropertyAiClient.GetRecommendedPropertyIdsAsync(userId);
+            if (!userId.HasValue)
+            {
+                var anonymousFallback = await _propertyRepo.GetTopViewedPublicPropertyCardsAsync(
+                    RecommendationCount,
+                    null,
+                    null);
+
+                _logger.LogInformation(
+                    "Recommendations requested anonymously. Returned {Count} top-viewed properties without calling the external recommendation endpoint.",
+                    anonymousFallback.Count);
+
+                return ServiceResult<PropertySearchResultDto>.Ok(new PropertySearchResultDto
+                {
+                    Items = anonymousFallback,
+                    TotalCount = anonymousFallback.Count,
+                    Page = 1,
+                    PageSize = RecommendationCount
+                });
+            }
+
+            var externalResult = await _externalPropertyAiClient.GetRecommendedPropertyIdsAsync(userId.Value);
             var recommendedIds = DeduplicatePreservingOrder(externalResult.PropertyIds);
 
             var recommendedProperties = externalResult.Success && recommendedIds.Count > 0
-                ? await _propertyRepo.GetPublicPropertyCardsByIdsAsync(recommendedIds, userId)
+                ? await _propertyRepo.GetPublicPropertyCardsByIdsAsync(recommendedIds, userId.Value)
                 : [];
 
             var finalProperties = recommendedProperties
@@ -44,7 +64,7 @@ namespace MARN_API.Services.Implementations
                 var fallbackProperties = await _propertyRepo.GetTopViewedPublicPropertyCardsAsync(
                     RecommendationCount - finalProperties.Count,
                     finalProperties.Select(property => property.Id).ToList(),
-                    userId);
+                    userId.Value);
 
                 fallbackPropertiesAdded = fallbackProperties.Count;
                 finalProperties.AddRange(fallbackProperties);
@@ -54,7 +74,7 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogWarning(
                     "Recommendations failed entirely for user {UserId}. Reason: {Reason}. Returned {FallbackCount} top-viewed properties instead.",
-                    userId,
+                    userId.Value,
                     externalResult.FailureReason ?? "No recommendation ids were returned.",
                     finalProperties.Count);
             }
@@ -62,7 +82,7 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogInformation(
                     "Recommendations partially succeeded for user {UserId}. Accepted {RecommendedCount} external properties and filled {FallbackCount} with top-viewed properties.",
-                    userId,
+                    userId.Value,
                     recommendedProperties.Count,
                     fallbackPropertiesAdded);
             }
@@ -70,7 +90,7 @@ namespace MARN_API.Services.Implementations
             {
                 _logger.LogInformation(
                     "Recommendations succeeded for user {UserId}. Returned {RecommendedCount} external properties without fallback.",
-                    userId,
+                    userId.Value,
                     finalProperties.Count);
             }
 
