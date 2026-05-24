@@ -22,6 +22,7 @@ namespace MARN_API.DTOs.Profile
         public Country Country { get; set; } = Country.Unknown;
         public string CountryDisplayName { get; set; } = string.Empty;
         public string? Bio { get; set; }
+        public bool TwoFactorEnabled { get; set; } = false;
 
 
         // Verification Info
