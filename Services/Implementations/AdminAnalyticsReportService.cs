@@ -356,7 +356,7 @@ namespace MARN_API.Services.Implementations
                             T("Status"),
                             T("Type"),
                             T("City"),
-                            T("State"),
+                            T("Governorate"),
                             T("Price"),
                             T("Is Active"),
                             T("Is Deleted"),
@@ -371,7 +371,7 @@ namespace MARN_API.Services.Implementations
                             _localizer.GetEnumDisplayName(x.Status),
                             _localizer.GetEnumDisplayName(x.Type),
                             GetLocationDisplayName<Enums.Property.City>(x.City),
-                            GetLocationDisplayName<Enums.Property.Governorate>(x.State),
+                            GetLocationDisplayName<Enums.Property.Governorate>(x.Governorate),
                             x.Price,
                             x.IsActive,
                             x.IsDeleted,
@@ -645,7 +645,7 @@ namespace MARN_API.Services.Implementations
                     x.Title,
                     x.OwnerName,
                     _localizer.GetEnumDisplayName(x.Status),
-                    $"{GetLocationDisplayName<Enums.Property.City>(x.City)}, {GetLocationDisplayName<Enums.Property.Governorate>(x.State)}"
+                    $"{GetLocationDisplayName<Enums.Property.City>(x.City)}, {GetLocationDisplayName<Enums.Property.Governorate>(x.Governorate)}"
                 }));
         }
 

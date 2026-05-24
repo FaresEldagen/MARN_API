@@ -7,11 +7,11 @@ using MARN_API.Enums.Account;
 using MARN_API.Enums.Payment;
 using MARN_API.Enums.Property;
 using MARN_API.Models;
-using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using MARN_API.Services.Implementations;
+using MARN_API.Utilities;
 
 namespace MARN_API.Controllers
 {
@@ -29,6 +29,7 @@ namespace MARN_API.Controllers
         private readonly IHashingService _hashingService;
         private readonly IOpenTimestampsService _openTimestampsService;
         private readonly IOpenTimestampsProofReader _proofReader;
+        private readonly IContractDocumentStorage _contractDocumentStorage;
         private readonly IWebHostEnvironment _env;
         private readonly AppDbContext _dbContext;
         private readonly IAppTextLocalizer _localizer;
@@ -39,6 +40,7 @@ namespace MARN_API.Controllers
             IHashingService hashingService,
             IOpenTimestampsService openTimestampsService,
             IOpenTimestampsProofReader proofReader,
+            IContractDocumentStorage contractDocumentStorage,
             IWebHostEnvironment env,
             AppDbContext dbContext,
             IAppTextLocalizer localizer,
@@ -48,6 +50,7 @@ namespace MARN_API.Controllers
             _hashingService = hashingService;
             _openTimestampsService = openTimestampsService;
             _proofReader = proofReader;
+            _contractDocumentStorage = contractDocumentStorage;
             _env = env;
             _dbContext = dbContext;
             _localizer = localizer;
@@ -62,8 +65,8 @@ namespace MARN_API.Controllers
         public async Task<IActionResult> Generate()
         {
             var generatedAtUtc = DateTime.UtcNow;
-            var seedPath = Path.Combine(_env.ContentRootPath, "Data", "Seed", "Files");
-            if (!Directory.Exists(seedPath)) Directory.CreateDirectory(seedPath);
+            var resultsPath = ContractDocumentPathBuilder.BuildContractsRootAbsolutePath(_env.ContentRootPath);
+            Directory.CreateDirectory(resultsPath);
 
             var contracts = new[]
             {
@@ -129,7 +132,7 @@ namespace MARN_API.Controllers
                         Country = GetEnumBilingualDisplayName(Country.Egypt), 
                         Description = property.Description,
                         Type = GetEnumBilingualDisplayName(property.Type),
-                        State = GetLocationBilingualDisplayName<Governorate>(property.State),
+                        Governorate = GetLocationBilingualDisplayName<Governorate>(property.State),
                         ZipCode = property.ZipCode,
                         Latitude = property.Latitude,
                         Longitude = property.Longitude,
@@ -181,11 +184,10 @@ namespace MARN_API.Controllers
                     otsFileBytes = _openTimestampsService.BuildDetachedOtsFile(hash, DummyOtsAttestation);
                 }
 
-                var pdfPath = Path.Combine(seedPath, $"{c.Id}.pdf");
-                var otsPath = Path.Combine(seedPath, $"{c.Id}.ots");
-
-                await System.IO.File.WriteAllBytesAsync(pdfPath, pdfResult.Content);
-                await System.IO.File.WriteAllBytesAsync(otsPath, otsFileBytes);
+                var pdfRelativePath = await _contractDocumentStorage.SaveContractPdfAsync(c.Id, pdfResult.Content);
+                var otsRelativePath = await _contractDocumentStorage.SaveOtsProofAsync(c.Id, otsFileBytes);
+                var pdfPath = Path.Combine(_env.ContentRootPath, pdfRelativePath.Replace('/', Path.DirectorySeparatorChar));
+                var otsPath = Path.Combine(_env.ContentRootPath, otsRelativePath.Replace('/', Path.DirectorySeparatorChar));
 
                 var txId = proofData?.TransactionIds.FirstOrDefault();
                 var merkleRoot = proofData?.MerkleRoots.FirstOrDefault();
@@ -196,8 +198,8 @@ namespace MARN_API.Controllers
                 {
                     dbContract.FileName = pdfResult.FileName;
                     dbContract.Hash = hash;
-                    dbContract.FileBytes = pdfResult.Content;
-                    dbContract.OtsFileBytes = otsFileBytes;
+                    dbContract.FilePath = pdfRelativePath;
+                    dbContract.OtsFilePath = otsRelativePath;
                     dbContract.TransactionId = txId;
                     dbContract.MerkleRoot = merkleRoot;
                     _dbContext.Contracts.Update(dbContract);
@@ -224,14 +226,14 @@ namespace MARN_API.Controllers
             var outputStr = string.Join(
                 Environment.NewLine + Environment.NewLine,
                 results.Select(FormatSeedResult));
-            await System.IO.File.WriteAllTextAsync(Path.Combine(seedPath, "results.txt"), outputStr);
+            await System.IO.File.WriteAllTextAsync(Path.Combine(resultsPath, "results.txt"), outputStr);
 
             await _dbContext.SaveChangesAsync();
 
             return Ok(new
             {
                 generatedAtUtc,
-                seedPath,
+                seedPath = resultsPath,
                 totalContracts = results.Count,
                 successfulContracts = results.Count(r => r.Success),
                 fallbackProofContracts = results.Count(r => r.UsedFallbackProof),
@@ -321,7 +323,7 @@ namespace MARN_API.Controllers
                     Country = GetEnumBilingualDisplayName(Country.Egypt),
                     Description = property.Description,
                     Type = GetEnumBilingualDisplayName(property.Type),
-                    State = GetLocationBilingualDisplayName<Governorate>(property.State),
+                    Governorate = GetLocationBilingualDisplayName<Governorate>(property.State),
                     ZipCode = property.ZipCode,
                     Latitude = property.Latitude,
                     Longitude = property.Longitude,
@@ -425,8 +427,8 @@ FileName = ""{result.FileName}"",
 Hash = ""{result.Hash}"",
 TransactionId = {(result.TransactionId != null ? $"\"{result.TransactionId}\"" : "null")},
 MerkleRoot = {(result.MerkleRoot != null ? $"\"{result.MerkleRoot}\"" : "null")},
-// Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{result.ContractId}.pdf""))
-// Use File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, ""Data"", ""Seed"", ""Files"", ""{result.ContractId}.ots""))".Trim();
+FilePath = ""{ContractDocumentPathBuilder.BuildPdfRelativePath(result.ContractId)}"",
+OtsFilePath = ""{ContractDocumentPathBuilder.BuildOtsRelativePath(result.ContractId)}""".Trim();
         }
 
         private sealed class TempGeneratedContractResult

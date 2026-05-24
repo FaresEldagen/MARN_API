@@ -23,9 +23,9 @@ namespace MARN_API.Models
 
         // Fields for contract anchoring
         public string FileName { get; set; } = string.Empty;
-        public byte[]? FileBytes { get; set; }
+        public string? FilePath { get; set; }
         public string Hash { get; set; } = string.Empty;
-        public byte[]? OtsFileBytes { get; set; }
+        public string? OtsFilePath { get; set; }
         public string? TransactionId { get; set; }
         public string? MerkleRoot { get; set; }
         public ContractAnchoringStatus AnchoringStatus { get; set; } = ContractAnchoringStatus.Pending;

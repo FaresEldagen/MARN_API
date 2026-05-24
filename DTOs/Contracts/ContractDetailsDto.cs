@@ -6,6 +6,11 @@ namespace MARN_API.DTOs.Contracts
     {
         public ContractStatus ContractStatus { get; set; }
         public string ContractStatusDisplayName { get; set; } = string.Empty;
+        public string? TransactionId { get; set; }
+        public string? MerkleRoot { get; set; }
+        public ContractAnchoringStatus AnchoringStatus { get; set; }
+        public string AnchoringStatusDisplayName { get; set; } = string.Empty;
+        public bool IsAnchoredToBlockChain { get; set; }
         public long ContractId { get; set; }
         public string Duration { get; set; } = string.Empty;
         public DateOnly? StartDate { get; set; }
@@ -24,8 +29,8 @@ namespace MARN_API.DTOs.Contracts
         public string StreetAddress { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string CityDisplayName { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string StateDisplayName { get; set; } = string.Empty;
+        public string Governorate { get; set; } = string.Empty;
+        public string GovernorateDisplayName { get; set; } = string.Empty;
         public string RentalDuration { get; set; } = string.Empty;
         public string RentalDurationDisplayName { get; set; } = string.Empty;
         public decimal Price { get; set; }

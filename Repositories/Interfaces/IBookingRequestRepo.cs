@@ -15,6 +15,8 @@ namespace MARN_API.Repositories.Interfaces
         #region User and Property Deletion
         public Task DeleteByUserIdAsync(Guid userId);
         public Task DeleteByPropertyIdAsync(long propertyId);
+        public Task DeleteByPropertyIdAndRenterIdAsync(long propertyId, Guid renterId);
+        public Task DeleteByPropertyIdExceptRenterIdAsync(long propertyId, Guid renterId);
         public Task DeleteByPropertyIdsAsync(List<long> propertyIds);
         #endregion
 

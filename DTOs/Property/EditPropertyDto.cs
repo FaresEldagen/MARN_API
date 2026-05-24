@@ -51,7 +51,7 @@ namespace MARN_API.DTOs.Property
         public string City { get; set; } = string.Empty;
 
         [Required]
-        public string State { get; set; } = string.Empty;
+        public Governorate Governorate { get; set; }
 
         [Required]
         public string ZipCode { get; set; } = string.Empty;

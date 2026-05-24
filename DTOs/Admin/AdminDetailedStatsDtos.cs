@@ -177,8 +177,8 @@ namespace MARN_API.DTOs.Admin
         public string TypeDisplayName { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string CityDisplayName { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string StateDisplayName { get; set; } = string.Empty;
+        public string Governorate { get; set; } = string.Empty;
+        public string GovernorateDisplayName { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public float AverageRating { get; set; }
         public int CommentsCount { get; set; }
@@ -208,8 +208,8 @@ namespace MARN_API.DTOs.Admin
         public string Address { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string CityDisplayName { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string StateDisplayName { get; set; } = string.Empty;
+        public string Governorate { get; set; } = string.Empty;
+        public string GovernorateDisplayName { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
@@ -332,6 +332,11 @@ namespace MARN_API.DTOs.Admin
         public long ContractId { get; set; }
         public ContractStatus Status { get; set; }
         public string StatusDisplayName { get; set; } = string.Empty;
+        public string? TransactionId { get; set; }
+        public string? MerkleRoot { get; set; }
+        public ContractAnchoringStatus AnchoringStatus { get; set; }
+        public string AnchoringStatusDisplayName { get; set; } = string.Empty;
+        public bool IsAnchoredToBlockChain { get; set; }
         public bool CanCancel { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateOnly LeaseStartDate { get; set; }

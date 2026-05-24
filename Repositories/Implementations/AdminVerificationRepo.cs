@@ -145,7 +145,7 @@ namespace MARN_API.Repositories.Implementations
                 RentalUnit = p.RentalUnit,
                 Address = p.Address,
                 City = p.City,
-                State = p.State,
+                Governorate = p.State,
                 ZipCode = p.ZipCode,
                 Latitude = p.Latitude,
                 Longitude = p.Longitude

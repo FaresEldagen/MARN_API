@@ -12,8 +12,6 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-using MARN_API.Services.Interfaces;
-
 namespace MARN_API.Services.Implementations
 {
     public class ContractPdfGenerator : IContractPdfGenerator
@@ -175,7 +173,7 @@ namespace MARN_API.Services.Implementations
                             (T("Type", "النوع", isArabic), ValueText(property.Type, isArabic)),
                             (T("Address", "العنوان", isArabic), ValueText(property.AddressLine, isArabic)),
                             (T("City", "المدينة", isArabic), ValueText(property.City, isArabic)),
-                            (T("State", "المحافظة", isArabic), ValueText(property.State, isArabic)),
+                            (T("Governorate", "المحافظة", isArabic), ValueText(property.Governorate, isArabic)),
                             (T("Zip Code", "الرمز البريدي", isArabic), ValueText(property.ZipCode, isArabic)),
                             (T("Coordinates", "الإحداثيات", isArabic), TextValue($"{property.Latitude:F4}, {property.Longitude:F4}", isArabic))
                         }, isArabic));

@@ -747,7 +747,7 @@
     <value>قيد الانتظار</value>
   </data>
   <data name="ENUM_ContractAnchoringStatus_Anchored" xml:space="preserve">
-    <value>تم التثبيت</value>
+    <value>تم التثبيت علي البلوك تشين</value>
   </data>
   <data name="ENUM_ContractAnchoringStatus_Failed" xml:space="preserve">
     <value>فشل</value>

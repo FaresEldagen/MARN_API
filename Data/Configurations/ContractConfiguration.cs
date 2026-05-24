@@ -10,7 +10,9 @@ namespace MARN_API.Data.Configurations
         public void Configure(EntityTypeBuilder<Contract> builder)
         {
             builder.Property(c => c.FileName).IsRequired().HasMaxLength(260);
+            builder.Property(c => c.FilePath).HasMaxLength(500);
             builder.Property(c => c.Hash).IsRequired().HasMaxLength(128);
+            builder.Property(c => c.OtsFilePath).HasMaxLength(500);
             builder.Property(c => c.LeaseStartDate).IsRequired().HasColumnType("date");
             builder.Property(c => c.LeaseEndDate).IsRequired().HasColumnType("date");
             builder.Property(c => c.PropertyId).IsRequired();
