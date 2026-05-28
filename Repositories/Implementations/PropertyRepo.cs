@@ -168,7 +168,9 @@ namespace MARN_API.Repositories.Implementations
             if (!string.IsNullOrWhiteSpace(filter.Keyword))
             {
                 var kw = filter.Keyword.Trim().ToLower();
+                var isPropertyIdKeyword = long.TryParse(kw, out var propertyIdKeyword);
                 query = query.Where(p =>
+                    (isPropertyIdKeyword && p.Id == propertyIdKeyword) ||
                     p.Title.ToLower().Contains(kw) ||
                     p.Description.ToLower().Contains(kw) ||
                     p.Address.ToLower().Contains(kw) ||
