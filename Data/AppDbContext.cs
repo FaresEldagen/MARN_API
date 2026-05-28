@@ -92,7 +92,6 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new AdminDashboardScenarioMessageSeed());
             builder.ApplyConfiguration(new ReportSeed());
             builder.ApplyConfiguration(new AdminDashboardScenarioReportSeed());
-            builder.ApplyConfiguration(new UserActivitySeed());
             builder.ApplyConfiguration(new UserDeviceSeed());
             builder.ApplyConfiguration(new PaymentScheduleSeed());
             builder.ApplyConfiguration(new AdminDashboardScenarioContractSeed());

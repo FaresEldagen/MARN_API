@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using MARN_API.DTOs.Common;
 using MARN_API.Enums.Payment;
 using MARN_API.Enums.Contract;
+using MARN_API.Utilities;
 
 namespace MARN_API.Services.Implementations
 {
@@ -32,6 +33,7 @@ namespace MARN_API.Services.Implementations
         private readonly IChatService _chatService;
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IAppTextLocalizer _localizer;
+        private readonly IUserActivityService _userActivityService;
 
         public BookingRequestService(
             IBookingRequestRepo bookingRequestRepo,
@@ -43,7 +45,8 @@ namespace MARN_API.Services.Implementations
             INotificationService notificationService,
             IChatService chatService,
             IHubContext<ChatHub> hubContext,
-            IAppTextLocalizer localizer)
+            IAppTextLocalizer localizer,
+            IUserActivityService userActivityService)
         {
             _bookingRequestRepo = bookingRequestRepo;
             _propertyRepo = propertyRepo;
@@ -55,6 +58,7 @@ namespace MARN_API.Services.Implementations
             _chatService = chatService;
             _hubContext = hubContext;
             _localizer = localizer;
+            _userActivityService = userActivityService;
         }
 
 
@@ -140,6 +144,7 @@ namespace MARN_API.Services.Implementations
             bookingRequest.CreatedAt = DateTime.UtcNow;
 
             await _bookingRequestRepo.AddBookingRequestAsync(bookingRequest);
+            await TryRecordActivityAsync(userId, UserActivityTypes.Booking, dto.PropertyId);
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {
@@ -254,6 +259,23 @@ namespace MARN_API.Services.Implementations
 
             _logger.LogInformation("Start Chat successful for userId: {userId}, bookingRequestId: {bookingRequestId}", userId, bookingRequestId);
             return ServiceResult<bool>.Ok(true, "Chat started successfully.", code: "ZZ_BOOKING_REQUEST_CHAT_STARTED_SUCCESSFULLY");
+        }
+
+        private async Task TryRecordActivityAsync(Guid userId, string activityType, long? propertyId = null)
+        {
+            try
+            {
+                await _userActivityService.RecordAsync(userId, activityType, propertyId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to record user activity {ActivityType} for user {UserId} and property {PropertyId}",
+                    activityType,
+                    userId,
+                    propertyId);
+            }
         }
         
 

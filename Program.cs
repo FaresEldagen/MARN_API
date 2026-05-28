@@ -208,6 +208,7 @@ namespace MARN_API
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IPropertyRatingService, PropertyRatingService>();
             builder.Services.AddScoped<IPropertyCommentService, PropertyCommentService>();
+            builder.Services.AddScoped<ICsvSeedImportService, CsvSeedImportService>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IContractDocumentStorage, ContractDocumentStorage>();
             builder.Services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
@@ -223,12 +224,14 @@ namespace MARN_API
             builder.Services.AddScoped<IResponsePayloadLocalizer, ResponsePayloadLocalizer>();
             builder.Services.AddScoped<IUserCultureService, UserCultureService>();
             builder.Services.AddScoped<INotificationContentLocalizer, NotificationContentLocalizer>();
+            builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 
             builder.Services.AddScoped<IContractPdfGenerator, ContractPdfGenerator>();
             builder.Services.AddScoped<IHashingService, HashingService>();
             builder.Services.AddScoped<IOpenTimestampsProofReader, OpenTimestampsProofReader>();
             builder.Services.AddHttpClient<IOpenTimestampsService, OpenTimestampsService>();
             builder.Services.AddHttpClient<ICurrencyExchangeService, CurrencyExchangeService>();
+            builder.Services.AddHttpClient<IExternalPropertyAiClient, ExternalPropertyAiClient>();
 
             builder.Services.AddScoped<PaymentScheduleJob>();
             builder.Services.AddScoped<PaymentJob>();
@@ -405,6 +408,8 @@ namespace MARN_API
 
             builder.Services.Configure<JwtOptions>(
                 builder.Configuration.GetSection("Jwt"));
+            builder.Services.Configure<ExternalPropertyAiOptions>(
+                builder.Configuration.GetSection("ExternalPropertyAi"));
             #endregion
 
 

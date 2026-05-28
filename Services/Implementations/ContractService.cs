@@ -15,6 +15,7 @@ using System.Globalization;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MARN_API.Utilities;
 
 namespace MARN_API.Services.Implementations
 {
@@ -35,6 +36,7 @@ namespace MARN_API.Services.Implementations
         private readonly IAppTextLocalizer _localizer;
         private readonly ILogger<ContractService> _logger;
         private readonly MARN_API.Data.AppDbContext _context;
+        private readonly IUserActivityService _userActivityService;
 
         public ContractService(
             IContractRepo contractRepo,
@@ -49,7 +51,8 @@ namespace MARN_API.Services.Implementations
             INotificationService notificationService,
             IAppTextLocalizer localizer,
             ILogger<ContractService> logger,
-            MARN_API.Data.AppDbContext context)
+            MARN_API.Data.AppDbContext context,
+            IUserActivityService userActivityService)
         {
             _contractRepo = contractRepo;
             _hashingService = hashingService;
@@ -64,6 +67,7 @@ namespace MARN_API.Services.Implementations
             _localizer = localizer;
             _logger = logger;
             _context = context;
+            _userActivityService = userActivityService;
         }
 
 
@@ -319,6 +323,8 @@ namespace MARN_API.Services.Implementations
                     "An error occurred while saving the contract and generating payment schedules. Please try again.",
                     resultType: ServiceResultType.InternalError);
             }
+
+            await TryRecordActivityAsync(userId, UserActivityTypes.Rent, contract.PropertyId);
 
             await _notificationService.SendNotificationAsync(new NotificationRequestDto
             {
@@ -700,6 +706,23 @@ namespace MARN_API.Services.Implementations
                 c.Status == ContractStatus.Active);
 
             return activeContractsCount >= contract.Property.MaxOccupants;
+        }
+
+        private async Task TryRecordActivityAsync(Guid userId, string activityType, long? propertyId = null)
+        {
+            try
+            {
+                await _userActivityService.RecordAsync(userId, activityType, propertyId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to record user activity {ActivityType} for user {UserId} and property {PropertyId}",
+                    activityType,
+                    userId,
+                    propertyId);
+            }
         }
         #endregion
     }
