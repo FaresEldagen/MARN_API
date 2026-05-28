@@ -190,6 +190,7 @@ namespace MARN_API
             builder.Services.AddScoped<IAdminRoleManagementRepo, AdminRoleManagementRepo>();
             builder.Services.AddScoped<IAdminVerificationRepo, AdminVerificationRepo>();
             builder.Services.AddScoped<IAdminUserManagementRepo, AdminUserManagementRepo>();
+            builder.Services.AddScoped<IAssistantChatRepo, AssistantChatRepo>();
 
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
@@ -225,6 +226,7 @@ namespace MARN_API
             builder.Services.AddScoped<IUserCultureService, UserCultureService>();
             builder.Services.AddScoped<INotificationContentLocalizer, NotificationContentLocalizer>();
             builder.Services.AddScoped<IUserActivityService, UserActivityService>();
+            builder.Services.AddScoped<IAssistantChatService, AssistantChatService>();
 
             builder.Services.AddScoped<IContractPdfGenerator, ContractPdfGenerator>();
             builder.Services.AddScoped<IHashingService, HashingService>();
@@ -232,6 +234,7 @@ namespace MARN_API
             builder.Services.AddHttpClient<IOpenTimestampsService, OpenTimestampsService>();
             builder.Services.AddHttpClient<ICurrencyExchangeService, CurrencyExchangeService>();
             builder.Services.AddHttpClient<IExternalPropertyAiClient, ExternalPropertyAiClient>();
+            builder.Services.AddHttpClient<IAssistantAiClient, AssistantAiClient>();
 
             builder.Services.AddScoped<PaymentScheduleJob>();
             builder.Services.AddScoped<PaymentJob>();
@@ -410,6 +413,8 @@ namespace MARN_API
                 builder.Configuration.GetSection("Jwt"));
             builder.Services.Configure<ExternalPropertyAiOptions>(
                 builder.Configuration.GetSection("ExternalPropertyAi"));
+            builder.Services.Configure<AssistantAiOptions>(
+                builder.Configuration.GetSection("AssistantAi"));
             #endregion
 
 

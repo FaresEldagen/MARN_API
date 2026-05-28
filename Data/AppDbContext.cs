@@ -31,6 +31,8 @@ namespace MARN_API.Data
         public DbSet<AdminAnalyticsReport> AdminAnalyticsReports => Set<AdminAnalyticsReport>();
         public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+        public DbSet<AssistantSession> AssistantSessions => Set<AssistantSession>();
+        public DbSet<AssistantMessage> AssistantMessages => Set<AssistantMessage>();
 
         public DbSet<Message> Messages { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
@@ -60,6 +62,8 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new AdminAnalyticsReportConfiguration());
             builder.ApplyConfiguration(new AdminActionLogConfiguration());
             builder.ApplyConfiguration(new UserActivityConfiguration());
+            builder.ApplyConfiguration(new AssistantSessionConfiguration());
+            builder.ApplyConfiguration(new AssistantMessageConfiguration());
 
             builder.ApplyConfiguration(new SavedPropertyConfiguration());
             builder.ApplyConfiguration(new MessageConfiguration());
