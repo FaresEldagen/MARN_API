@@ -41,6 +41,7 @@ Stores all messages for an assistant session.
 | `Role` | `nvarchar(20)` | Must be one of: `user`, `assistant`, `tool`. |
 | `ToolOnly` | `bit` | `false` for user-visible messages, `true` for tool/internal AI messages. |
 | `Content` | `nvarchar(max)` | Plaintext message content. |
+| `ImagePathsJson` | `nvarchar(max)` | Nullable JSON array of image path strings for assistant messages. |
 | `CreatedAt` | `datetime2` | Created timestamp in UTC. |
 
 Important:
@@ -49,6 +50,7 @@ Important:
 - The frontend should normally see only `Role = user` and `Role = assistant`.
 - AI/tool internals can be stored with `Role = tool` and `ToolOnly = true`.
 - Content is plaintext so the AI service can read session history directly from the database.
+- Assistant messages can include image paths in `ImagePathsJson`; old rows or text-only messages can leave it `null`.
 
 ## Backend Endpoints
 
@@ -108,6 +110,7 @@ Response data shape:
     "sessionId": "11111111-2222-3333-4444-555555555555",
     "role": "assistant",
     "content": "Sure, I can help with that.",
+    "imagePaths": [],
     "createdAt": "2026-05-28T18:52:00Z"
   }
 }
@@ -167,6 +170,7 @@ Response item shape:
   "sessionId": "11111111-2222-3333-4444-555555555555",
   "role": "assistant",
   "content": "Sure, I can help with that.",
+  "imagePaths": [],
   "createdAt": "2026-05-28T18:52:00Z"
 }
 ```
@@ -242,7 +246,11 @@ JSON object with one of these string fields:
 
 ```json
 {
-  "content": "Sure, I can help with that."
+  "content": "Sure, I can help with that.",
+  "imagePaths": [
+    "/images/properties/example-1.jpg",
+    "/images/properties/example-2.jpg"
+  ]
 }
 ```
 
@@ -263,6 +271,18 @@ or:
 ```
 
 The backend stores the extracted text as the visible assistant message.
+
+`imagePaths` is optional. When present, it must be an array of strings. Backend stores only valid paths:
+
+- non-empty strings;
+- paths starting with `/`, for example `/images/...`;
+- no external URLs;
+- no Windows absolute paths;
+- no backslashes;
+- no `..` path traversal segments;
+- max 20 image paths.
+
+Invalid paths are ignored. If the response has valid text content and some invalid image paths, the assistant message is still saved with only the valid image paths.
 
 ## Tool/Internal Messages
 
@@ -285,6 +305,7 @@ Example:
   "role": "tool",
   "toolOnly": true,
   "content": "{ \"tool\": \"property_search\", \"resultCount\": 5 }",
+  "imagePathsJson": null,
   "createdAt": "2026-05-28T18:51:00Z"
 }
 ```
@@ -296,7 +317,7 @@ These records will not appear in the frontend chat history because the backend f
 When the AI service reads context, a typical query is:
 
 ```sql
-SELECT MessageId, UserId, SessionId, Role, ToolOnly, Content, CreatedAt
+SELECT MessageId, UserId, SessionId, Role, ToolOnly, Content, ImagePathsJson, CreatedAt
 FROM assistantMessages
 WHERE SessionId = @sessionId
 ORDER BY CreatedAt ASC;
@@ -305,7 +326,7 @@ ORDER BY CreatedAt ASC;
 If the AI only wants user-visible messages:
 
 ```sql
-SELECT MessageId, UserId, SessionId, Role, Content, CreatedAt
+SELECT MessageId, UserId, SessionId, Role, Content, ImagePathsJson, CreatedAt
 FROM assistantMessages
 WHERE SessionId = @sessionId
   AND ToolOnly = 0
@@ -329,3 +350,4 @@ WHERE SessionId = @sessionId;
 - Backend-created roles are only `user` and `assistant`.
 - AI/tool-created internal messages should use `tool` and `ToolOnly = true`.
 - The backend does not encrypt assistant message content.
+- Text-only assistant responses return `imagePaths: []` to the frontend.

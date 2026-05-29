@@ -5,12 +5,14 @@ using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace MARN_API.Services.Implementations
 {
     public class AssistantChatService : IAssistantChatService
     {
         private const int MaxMessageLength = 8000;
+        private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
         private readonly IAssistantChatRepo _assistantChatRepo;
         private readonly IAssistantAiClient _assistantAiClient;
         private readonly AppDbContext _dbContext;
@@ -86,10 +88,10 @@ namespace MARN_API.Services.Implementations
 
             await _assistantChatRepo.AddMessageAsync(userMessage);
 
-            string assistantContent;
+            AssistantAiResponse assistantResponse;
             try
             {
-                assistantContent = await _assistantAiClient.GetAssistantResponseAsync(session.SessionId, cancellationToken);
+                assistantResponse = await _assistantAiClient.GetAssistantResponseAsync(session.SessionId, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -107,7 +109,8 @@ namespace MARN_API.Services.Implementations
                 SessionId = session.SessionId,
                 Role = AssistantMessageRoles.Assistant,
                 ToolOnly = false,
-                Content = assistantContent,
+                Content = assistantResponse.Content,
+                ImagePathsJson = SerializeImagePaths(assistantResponse.ImagePaths),
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -201,8 +204,31 @@ namespace MARN_API.Services.Implementations
                 SessionId = message.SessionId,
                 Role = message.Role,
                 Content = message.Content,
+                ImagePaths = DeserializeImagePaths(message.ImagePathsJson),
                 CreatedAt = message.CreatedAt
             };
+        }
+
+        private static string? SerializeImagePaths(List<string> imagePaths)
+        {
+            return imagePaths.Count == 0
+                ? null
+                : JsonSerializer.Serialize(imagePaths, JsonOptions);
+        }
+
+        private static List<string> DeserializeImagePaths(string? imagePathsJson)
+        {
+            if (string.IsNullOrWhiteSpace(imagePathsJson))
+                return [];
+
+            try
+            {
+                return JsonSerializer.Deserialize<List<string>>(imagePathsJson, JsonOptions) ?? [];
+            }
+            catch (JsonException)
+            {
+                return [];
+            }
         }
 
         private static AssistantSessionDto MapSession(AssistantSession session)

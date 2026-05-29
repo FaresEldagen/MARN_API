@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using MARN_API.Configurations;
+using MARN_API.DTOs.Assistant;
 using MARN_API.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
@@ -8,6 +9,7 @@ namespace MARN_API.Services.Implementations
 {
     public class AssistantAiClient : IAssistantAiClient
     {
+        private const int MaxImagePaths = 20;
         private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
         private readonly HttpClient _httpClient;
         private readonly AssistantAiOptions _options;
@@ -23,7 +25,7 @@ namespace MARN_API.Services.Implementations
             _logger = logger;
         }
 
-        public async Task<string> GetAssistantResponseAsync(Guid sessionId, CancellationToken cancellationToken = default)
+        public async Task<AssistantAiResponse> GetAssistantResponseAsync(Guid sessionId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(_options.ChatUrl))
                 throw new InvalidOperationException("Assistant AI chat URL is not configured.");
@@ -47,11 +49,11 @@ namespace MARN_API.Services.Implementations
                 throw new HttpRequestException($"Assistant AI request failed with status {(int)response.StatusCode}.");
             }
 
-            var content = ExtractAssistantContent(responseBody);
-            if (string.IsNullOrWhiteSpace(content))
+            var assistantResponse = ExtractAssistantResponse(responseBody);
+            if (string.IsNullOrWhiteSpace(assistantResponse.Content))
                 throw new InvalidOperationException("Assistant AI response content was empty.");
 
-            return content;
+            return assistantResponse;
         }
 
         private static StringContent CreateJsonContent<T>(T payload)
@@ -62,10 +64,10 @@ namespace MARN_API.Services.Implementations
                 "application/json");
         }
 
-        private static string ExtractAssistantContent(string responseBody)
+        private static AssistantAiResponse ExtractAssistantResponse(string responseBody)
         {
             if (string.IsNullOrWhiteSpace(responseBody))
-                return string.Empty;
+                return new AssistantAiResponse();
 
             try
             {
@@ -73,26 +75,63 @@ namespace MARN_API.Services.Implementations
                 var root = document.RootElement;
 
                 if (root.ValueKind == JsonValueKind.String)
-                    return root.GetString() ?? string.Empty;
+                    return new AssistantAiResponse { Content = root.GetString() ?? string.Empty };
 
                 if (root.ValueKind == JsonValueKind.Object)
                 {
+                    var result = new AssistantAiResponse();
+
                     foreach (var propertyName in new[] { "content", "message", "response" })
                     {
                         if (root.TryGetProperty(propertyName, out var property) &&
                             property.ValueKind == JsonValueKind.String)
                         {
-                            return property.GetString() ?? string.Empty;
+                            result.Content = property.GetString() ?? string.Empty;
+                            break;
                         }
                     }
+
+                    if (root.TryGetProperty("imagePaths", out var imagePathsProperty) &&
+                        imagePathsProperty.ValueKind == JsonValueKind.Array)
+                    {
+                        result.ImagePaths = imagePathsProperty
+                            .EnumerateArray()
+                            .Where(path => path.ValueKind == JsonValueKind.String)
+                            .Select(path => path.GetString() ?? string.Empty)
+                            .Where(IsValidImagePath)
+                            .Select(path => path.Trim())
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Take(MaxImagePaths)
+                            .ToList();
+                    }
+
+                    return result;
                 }
             }
             catch (JsonException)
             {
-                return responseBody;
+                return new AssistantAiResponse { Content = responseBody };
             }
 
-            return responseBody;
+            return new AssistantAiResponse();
+        }
+
+        private static bool IsValidImagePath(string? value)
+        {
+            var path = value?.Trim();
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+
+            if (!path.StartsWith('/') || path.StartsWith("//"))
+                return false;
+
+            if (path.Contains('\\') || path.Contains("..", StringComparison.Ordinal))
+                return false;
+
+            if (Uri.TryCreate(path, UriKind.Absolute, out _))
+                return false;
+
+            return true;
         }
     }
 }
