@@ -28,6 +28,9 @@ namespace MARN_API.Data.Configurations
                 .IsRequired()
                 .HasColumnType("nvarchar(max)");
 
+            builder.Property(m => m.ImagePathsJson)
+                .HasColumnType("nvarchar(max)");
+
             builder.Property(m => m.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
