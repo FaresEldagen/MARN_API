@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MARN_API.Enums;
 using MARN_API.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using MARN_API.Attributes;
 
 namespace MARN_API.Controllers
 {
@@ -65,7 +66,7 @@ namespace MARN_API.Controllers
         /// <response code="200">Returns the Stripe onboarding URL for the owner's Connect account.</response>
         /// <response code="401">If the user is not authenticated, not found, or not an Owner.</response>
         /// <response code="400">If saving the Stripe account fails.</response>
-        [Authorize(Roles = "Owner")]
+        [CheckRole("Owner")]
         [HttpPost("connect-account")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -86,7 +87,7 @@ namespace MARN_API.Controllers
         /// <response code="200">Withdrawal initiated successfully.</response>
         /// <response code="401">If the user is not authenticated or not an Owner.</response>
         /// <response code="400">If no funds are available, Stripe account is not connected, or Stripe transfer fails.</response>
-        [Authorize(Roles = "Owner")]
+        [CheckRole("Owner")]
         [HttpPost("withdraw")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

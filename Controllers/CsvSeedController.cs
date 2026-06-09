@@ -2,12 +2,14 @@ using MARN_API.DTOs.Common;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MARN_API.Attributes;
 
 namespace MARN_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
+    [CheckRole("Admin")]
     public class CsvSeedController : BaseController
     {
         private readonly ICsvSeedImportService _csvSeedImportService;

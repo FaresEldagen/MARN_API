@@ -36,7 +36,8 @@ namespace MARN_API.Controllers
         /// <response code="403">If the user is not the owner of the property.</response>
         /// <response code="404">If the booking request is not found.</response>
         /// <response code="409">If the property already has active contracts.</response>
-        [Authorize(Roles = "Owner")]
+        [Authorize]
+        [CheckRole("Owner")]
         [HttpPost("create/{bookingRequestId:long}")]
         [DisallowBannedUser]
         [ProducesResponseType(typeof(ApiResponseDto<ContractResponseDto>), StatusCodes.Status201Created)]

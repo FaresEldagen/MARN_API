@@ -3,6 +3,7 @@ using MARN_API.DTOs.Moderation;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MARN_API.Attributes;
 
 namespace MARN_API.Controllers
 {
@@ -17,7 +18,8 @@ namespace MARN_API.Controllers
     /// </remarks>
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
+    [CheckRole("Admin")]
     public class AdminController : BaseController
     {
         private readonly IAdminDashboardService _adminDashboardService;

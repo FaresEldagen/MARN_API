@@ -1,4 +1,4 @@
-﻿using MARN_API.Models;
+using MARN_API.Models;
 using MARN_API.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,8 +28,8 @@ namespace MARN_API.Services.Implementations
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
             };
 
-            foreach (var role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role));
+            // foreach (var role in roles)
+            //     claims.Add(new Claim(ClaimTypes.Role, role));
 
             if (includeMfaClaim)
                 claims.Add(new Claim("amr", "mfa"));
