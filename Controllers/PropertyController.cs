@@ -144,8 +144,7 @@ namespace MARN_API.Controllers
         /// <response code="403">Caller doesn't own this property</response>
         /// <response code="404">Property not found</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
-        [CheckRole("Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpGet("edit/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -171,8 +170,7 @@ namespace MARN_API.Controllers
         /// <response code="401">Unauthorized requester</response>
         /// <response code="403">Requester fails ownership verification</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
-        [CheckRole("Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpPut("edit/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -197,8 +195,7 @@ namespace MARN_API.Controllers
         /// <response code="401">Unauthorized requester</response>
         /// <response code="403">Requester fails ownership verification</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
-        [CheckRole("Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpPut("deactivate/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -247,8 +244,7 @@ namespace MARN_API.Controllers
         /// <response code="401">Unauthorized requester</response>
         /// <response code="403">Requester fails ownership verification</response>
         /// <response code="429">If rate limit is exceeded</response>
-        [Authorize]
-        [CheckRole("Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpDelete("delete/{propertyId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
