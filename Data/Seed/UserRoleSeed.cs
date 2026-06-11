@@ -14,7 +14,6 @@ namespace MARN_API.Data.Seed
         {
             var renterRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var ownerRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-
             var adminRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
             var renterAId = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -27,19 +26,39 @@ namespace MARN_API.Data.Seed
             var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
             var adminId = Guid.Parse("99999999-9999-9999-9999-999999999999");
 
+            // Scenario user IDs (merged from AdminDashboardScenarioUserRoleSeed)
+            var pendingRenterId = Guid.Parse("10000000-0000-0000-0000-000000000001");
+            var bannedRenterId = Guid.Parse("10000000-0000-0000-0000-000000000002");
+            var deletedRenterId = Guid.Parse("10000000-0000-0000-0000-000000000003");
+            var recentRenterId = Guid.Parse("10000000-0000-0000-0000-000000000004");
+            var secondAdminId = Guid.Parse("30000000-0000-0000-0000-000000000001");
+
+
+
             builder.HasData(
+                // Core renters
                 new IdentityUserRole<Guid> { UserId = renterAId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterBId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterCId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterDId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterEId, RoleId = renterRoleId },
+
+                // Core owners
                 new IdentityUserRole<Guid> { UserId = ownerXId, RoleId = ownerRoleId },
                 new IdentityUserRole<Guid> { UserId = ownerYId, RoleId = ownerRoleId },
                 // Owner Z gets both roles for dual-dashboard testing
                 new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = ownerRoleId },
                 new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = renterRoleId },
+
                 // Admin role assignment
-                new IdentityUserRole<Guid> { UserId = adminId, RoleId = adminRoleId }
+                new IdentityUserRole<Guid> { UserId = adminId, RoleId = adminRoleId },
+
+                // Scenario users (merged from AdminDashboardScenarioUserRoleSeed)
+                new IdentityUserRole<Guid> { UserId = pendingRenterId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = bannedRenterId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = deletedRenterId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = recentRenterId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = secondAdminId, RoleId = adminRoleId }
             );
         }
     }

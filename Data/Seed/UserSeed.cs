@@ -18,7 +18,17 @@ namespace MARN_API.Data.Seed
             var ownerXId = Guid.Parse("44444444-4444-4444-4444-444444444444");
             var ownerYId = Guid.Parse("55555555-5555-5555-5555-555555555555");
             var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
             var adminId = Guid.Parse("99999999-9999-9999-9999-999999999999");
+            var secondAdminId = Guid.Parse("30000000-0000-0000-0000-000000000001");
+
+            // Scenario users (merged from AdminDashboardScenarioIdentitySeed)
+            var pendingRenterId = Guid.Parse("10000000-0000-0000-0000-000000000001");
+            var bannedRenterId = Guid.Parse("10000000-0000-0000-0000-000000000002");
+            var deletedRenterId = Guid.Parse("10000000-0000-0000-0000-000000000003");
+            var recentRenterId = Guid.Parse("10000000-0000-0000-0000-000000000004");
+
+            
 
             // All seeded users share the same demo password:
             // Password: Password123!
@@ -42,19 +52,18 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-RENTER-A-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-RENTER-A-CONCURRENCY-STAMP",
-
-                    FirstName = "Renter",
-                    LastName = "Alpha",
-                    ArabicFullName = "رينتر ألفا",
-                    ArabicAddress = "123 شارع النيل، القاهرة",
-                    NationalIDNumber = "12345678901234",
-                    FrontIdPhoto = "/images/idCards/95c1567c-357c-4c0a-b711-e0ba27c1a96f.jpg",
-                    BackIdPhoto = "/images/idCards/b8ee0c84-7a46-457d-a6d5-9696166b3c87.jpg",
-                    Language = Language.Arabic,
+                    FirstName = "Karim",
+                    LastName = "Hassan",
+                    ArabicFullName = "كريم حسن",
+                    ArabicAddress = "المعادي، القاهرة",
+                    NationalIDNumber = "30101010101010",
+                    FrontIdPhoto = "/images/idCards/user-cairo-mid-front.jpg",
+                    BackIdPhoto = "/images/idCards/user-cairo-mid-back.jpg",
+                    Language = Language.English,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
-                    ProfileImage = "/images/profiles/78e645e4-7c92-4cdc-b3bc-11a8f4ef796c.png",
+                    ProfileImage = "/images/profiles/user-cairo-mid.png",
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -72,18 +81,18 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-RENTER-B-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-RENTER-B-CONCURRENCY-STAMP",
-
-                    FirstName = "Renter",
-                    LastName = "Beta",
-                    ArabicFullName = "رينتر بيتا",
-                    ArabicAddress = "456 شارع المعادي، القاهرة",
-                    NationalIDNumber = "23456789012345",
-                    FrontIdPhoto = "/images/idCards/f9797aa8-46ce-4dbb-ad14-2a521ed962fc.jpg",
-                    BackIdPhoto = "/images/idCards/0b2b1890-82ff-4459-be9a-6dc65971849a.jpg",
+                    FirstName = "Mariam",
+                    LastName = "Fouad",
+                    ArabicFullName = "مريم فؤاد",
+                    ArabicAddress = "سيدي جابر، الإسكندرية",
+                    NationalIDNumber = "30202020202020",
+                    FrontIdPhoto = "/images/idCards/user-alex-low-front.jpg",
+                    BackIdPhoto = "/images/idCards/user-alex-low-back.jpg",
                     Language = Language.English,
                     Gender = Gender.Female,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/user-alex-low.png",
                     CreatedAt = new DateTime(2025, 1, 2, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -101,13 +110,18 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-RENTER-C-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-RENTER-C-CONCURRENCY-STAMP",
-
-                    FirstName = "Renter",
-                    LastName = "Gamma",
-                    Language = Language.English,
+                    FirstName = "Ahmed",
+                    LastName = "Nabil",
+                    ArabicFullName = "أحمد نبيل",
+                    ArabicAddress = "الزقازيق، الشرقية",
+                    NationalIDNumber = "30303030303030",
+                    FrontIdPhoto = "/images/idCards/user-delta-multi-front.jpg",
+                    BackIdPhoto = "/images/idCards/user-delta-multi-back.jpg",
+                    Language = Language.Arabic,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/user-delta-multi.png",
                     CreatedAt = new DateTime(2025, 1, 3, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -125,12 +139,18 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-RENTER-D-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-RENTER-D-CONCURRENCY-STAMP",
-                    FirstName = "Renter",
-                    LastName = "Delta",
+                    FirstName = "Sara",
+                    LastName = "Adel",
+                    ArabicFullName = "سارة عادل",
+                    ArabicAddress = "القاهرة الجديدة، القاهرة",
+                    NationalIDNumber = "30404040404040",
+                    FrontIdPhoto = "/images/idCards/user-family-high-front.jpg",
+                    BackIdPhoto = "/images/idCards/user-family-high-back.jpg",
                     Language = Language.English,
-                    Gender = Gender.Male,
+                    Gender = Gender.Female,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/user-family-high.png",
                     CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -148,12 +168,18 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-RENTER-E-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-RENTER-E-CONCURRENCY-STAMP",
-                    FirstName = "Renter",
-                    LastName = "Epsilon",
-                    Language = Language.English,
+                    FirstName = "Omar",
+                    LastName = "Samir",
+                    ArabicFullName = "عمر سمير",
+                    ArabicAddress = "رأس البر، دمياط",
+                    NationalIDNumber = "30505050505050",
+                    FrontIdPhoto = "/images/idCards/user-coastal-flex-front.jpg",
+                    BackIdPhoto = "/images/idCards/user-coastal-flex-back.jpg",
+                    Language = Language.Arabic,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/user-coastal-flex.png",
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 },
 
@@ -173,13 +199,18 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-OWNER-X-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-OWNER-X-CONCURRENCY-STAMP",
-
-                    FirstName = "Owner",
-                    LastName = "X",
-                    Language = Language.English,
+                    FirstName = "Mahmoud",
+                    LastName = "Fahmy",
+                    ArabicFullName = "محمود فهمي",
+                    ArabicAddress = "التجمع الخامس، القاهرة",
+                    NationalIDNumber = "28010101010101",
+                    FrontIdPhoto = "/images/idCards/owner-x-front.jpg",
+                    BackIdPhoto = "/images/idCards/owner-x-back.jpg",
+                    Language = Language.Arabic,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/owner-x.png",
                     CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -197,16 +228,20 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-OWNER-Y-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-OWNER-Y-CONCURRENCY-STAMP",
-
-                    FirstName = "Owner",
-                    LastName = "Y",
+                    FirstName = "Heba",
+                    LastName = "Youssef",
+                    ArabicFullName = "هبة يوسف",
+                    ArabicAddress = "سموحة، الإسكندرية",
+                    NationalIDNumber = "28502020202020",
+                    FrontIdPhoto = "/images/idCards/owner-y-front.jpg",
+                    BackIdPhoto = "/images/idCards/owner-y-back.jpg",
                     Language = Language.English,
                     Gender = Gender.Female,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/owner-y.png",
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 },
-                // Owner Z: dual-role account (Owner + Renter) with data for both dashboards
                 new ApplicationUser
                 {
                     Id = ownerZId,
@@ -222,17 +257,22 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-OWNER-Z-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-OWNER-Z-CONCURRENCY-STAMP",
-
-                    FirstName = "Owner",
-                    LastName = "Z",
-                    Language = Language.English,
+                    FirstName = "Tarek",
+                    LastName = "Zaki",
+                    ArabicFullName = "طارق زكي",
+                    ArabicAddress = "المهندسين، الجيزة",
+                    NationalIDNumber = "27003030303030",
+                    FrontIdPhoto = "/images/idCards/owner-z-front.jpg",
+                    BackIdPhoto = "/images/idCards/owner-z-back.jpg",
+                    Language = Language.Arabic,
                     Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/owner-z.png",
                     CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, DateTimeKind.Utc)
                 },
 
-                // ── Admin (role determined by AspNetUserRoles) ──
+                // ── Admins ──
                 new ApplicationUser
                 {
                     Id = adminId,
@@ -248,14 +288,171 @@ namespace MARN_API.Data.Seed
                     AccessFailedCount = 0,
                     SecurityStamp = "SEED-ADMIN-SECURITY-STAMP",
                     ConcurrencyStamp = "SEED-ADMIN-CONCURRENCY-STAMP",
-
-                    FirstName = "System",
+                    FirstName = "Yasser",
                     LastName = "Admin",
-                    Language = Language.English,
-                    Gender = Gender.Unknown,
+                    ArabicFullName = "ياسر أدمن",
+                    ArabicAddress = "مصر الجديدة، القاهرة",
+                    NationalIDNumber = "29010101010101",
+                    FrontIdPhoto = "/images/idCards/admin-front.jpg",
+                    BackIdPhoto = "/images/idCards/admin-back.jpg",
+                    Language = Language.Arabic,
+                    Gender = Gender.Male,
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/admin.png",
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ApplicationUser
+                {
+                    Id = secondAdminId,
+                    UserName = "assistant.admin@marn.com",
+                    NormalizedUserName = "ASSISTANT.ADMIN@MARN.COM",
+                    Email = "assistant.admin@marn.com",
+                    NormalizedEmail = "ASSISTANT.ADMIN@MARN.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SCENARIO-SECOND-ADMIN-SECURITY-STAMP",
+                    ConcurrencyStamp = "SCENARIO-SECOND-ADMIN-CONCURRENCY-STAMP",
+                    FirstName = "Mona",
+                    LastName = "Admin",
+                    ArabicFullName = "منى أدمن",
+                    ArabicAddress = "الدقي، الجيزة",
+                    NationalIDNumber = "29502020202020",
+                    FrontIdPhoto = "/images/idCards/assistant-admin-front.jpg",
+                    BackIdPhoto = "/images/idCards/assistant-admin-back.jpg",
+                    Language = Language.English,
+                    Gender = Gender.Female,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/assistant-admin.png",
+                    CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, DateTimeKind.Utc)
+                },
+
+                // ── Admin Dashboard Scenario Users ──
+                // 1. Pending Renter (Needs verification approval)
+                new ApplicationUser
+                {
+                    Id = pendingRenterId,
+                    UserName = "pending.renter@example.com",
+                    NormalizedUserName = "PENDING.RENTER@EXAMPLE.COM",
+                    Email = "pending.renter@example.com",
+                    NormalizedEmail = "PENDING.RENTER@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SCENARIO-PENDING-SECURITY-STAMP",
+                    ConcurrencyStamp = "SCENARIO-PENDING-CONCURRENCY-STAMP",
+                    FirstName = "Khaled",
+                    LastName = "Pending",
+                    ArabicFullName = "خالد قيد الانتظار",
+                    ArabicAddress = "مدينة نصر، القاهرة",
+                    NationalIDNumber = "30001010101010",
+                    FrontIdPhoto = "/images/idCards/pending-renter-front.jpg",
+                    BackIdPhoto = "/images/idCards/pending-renter-back.jpg",
+                    Language = Language.Arabic,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Pending,
+                    ProfileImage = "/images/profiles/pending-renter.png",
+                    CreatedAt = new DateTime(2026, 5, 10, 10, 0, 0, DateTimeKind.Utc)
+                },
+                // 2. Banned Renter
+                new ApplicationUser
+                {
+                    Id = bannedRenterId,
+                    UserName = "banned.renter@example.com",
+                    NormalizedUserName = "BANNED.RENTER@EXAMPLE.COM",
+                    Email = "banned.renter@example.com",
+                    NormalizedEmail = "BANNED.RENTER@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SCENARIO-BANNED-SECURITY-STAMP",
+                    ConcurrencyStamp = "SCENARIO-BANNED-CONCURRENCY-STAMP",
+                    FirstName = "Sayed",
+                    LastName = "Banned",
+                    ArabicFullName = "سيد محظور",
+                    ArabicAddress = "شبرا، القاهرة",
+                    NationalIDNumber = "30002020202020",
+                    FrontIdPhoto = "/images/idCards/banned-renter-front.jpg",
+                    BackIdPhoto = "/images/idCards/banned-renter-back.jpg",
+                    Language = Language.Arabic,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Banned,
+                    ProfileImage = "/images/profiles/banned-renter.png",
+                    CreatedAt = new DateTime(2026, 3, 5, 14, 0, 0, DateTimeKind.Utc)
+                },
+                // 3. Deleted Renter (Soft Deleted)
+                new ApplicationUser
+                {
+                    Id = deletedRenterId,
+                    UserName = "deleted.renter@example.com",
+                    NormalizedUserName = "DELETED.RENTER@EXAMPLE.COM",
+                    Email = "deleted.renter@example.com",
+                    NormalizedEmail = "DELETED.RENTER@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SCENARIO-DELETED-SECURITY-STAMP",
+                    ConcurrencyStamp = "SCENARIO-DELETED-CONCURRENCY-STAMP",
+                    FirstName = "Ramy",
+                    LastName = "Deleted",
+                    ArabicFullName = "رامي محذوف",
+                    ArabicAddress = "العجوزة، الجيزة",
+                    NationalIDNumber = "30003030303030",
+                    FrontIdPhoto = "/images/idCards/deleted-renter-front.jpg",
+                    BackIdPhoto = "/images/idCards/deleted-renter-back.jpg",
+                    Language = Language.Arabic,
+                    Gender = Gender.Male,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/deleted-renter.png",
+                    CreatedAt = new DateTime(2026, 2, 20, 11, 0, 0, DateTimeKind.Utc),
+                    DeletedAt = new DateTime(2026, 4, 1, 9, 0, 0, DateTimeKind.Utc)
+                },
+                // 4. Recent Renter (Created very recently for trends testing)
+                new ApplicationUser
+                {
+                    Id = recentRenterId,
+                    UserName = "recent.renter@example.com",
+                    NormalizedUserName = "RECENT.RENTER@EXAMPLE.COM",
+                    Email = "recent.renter@example.com",
+                    NormalizedEmail = "RECENT.RENTER@EXAMPLE.COM",
+                    PasswordHash = demoPasswordHash,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    LockoutEnabled = false,
+                    AccessFailedCount = 0,
+                    SecurityStamp = "SCENARIO-RECENT-SECURITY-STAMP",
+                    ConcurrencyStamp = "SCENARIO-RECENT-CONCURRENCY-STAMP",
+                    FirstName = "Nour",
+                    LastName = "Recent",
+                    ArabicFullName = "نور حديث",
+                    ArabicAddress = "الشيخ زايد، الجيزة",
+                    NationalIDNumber = "30004040404040",
+                    FrontIdPhoto = "/images/idCards/recent-renter-front.jpg",
+                    BackIdPhoto = "/images/idCards/recent-renter-back.jpg",
+                    Language = Language.English,
+                    Gender = Gender.Female,
+                    Country = Country.Egypt,
+                    AccountStatus = AccountStatus.Verified,
+                    ProfileImage = "/images/profiles/recent-renter.png",
+                    CreatedAt = new DateTime(2026, 5, 25, 16, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

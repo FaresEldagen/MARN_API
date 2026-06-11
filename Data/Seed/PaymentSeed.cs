@@ -70,7 +70,7 @@ namespace MARN_API.Data.Seed
                     Status = PaymentStatus.Withdrawn
                 },
 
-                // Schedule 20004 – PaidOnTime (Paid late in actual seed: 2026-05-05 relative to 2026-04-30 due date)
+                // Schedule 20004 – PaidOnTime
                 new Payment
                 {
                     Id = 30004,
@@ -85,7 +85,7 @@ namespace MARN_API.Data.Seed
                     Status = PaymentStatus.Available
                 },
 
-                // Schedule 20005 – PaidOnTime (Paid late in actual seed: 2026-06-05 relative to 2026-05-31 due date)
+                // Schedule 20005 – PaidOnTime
                 new Payment
                 {
                     Id = 30005,
@@ -284,6 +284,87 @@ namespace MARN_API.Data.Seed
                     PaidAt = new DateTime(2025, 8, 29, 10, 0, 0, DateTimeKind.Utc),
                     AvailableAt = new DateTime(2025, 9, 8, 10, 0, 0, DateTimeKind.Utc),
                     Status = PaymentStatus.Withdrawn
+                },
+
+                // ── Revenue Graph Payments (merged from AdminDashboardScenarioPaymentSeed) ──
+
+                new Payment
+                {
+                    Id = 30101,
+                    PaymentScheduleId = 20101,
+                    AmountTotal = 6000m,
+                    PlatformFee = 600m,
+                    OwnerAmount = 5400m,
+                    Currency = "egp",
+                    PaymentIntentId = "pi_seed_20101",
+                    PaidAt = new DateTime(2025, 12, 1, 10, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2025, 12, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
+                },
+                new Payment
+                {
+                    Id = 30102,
+                    PaymentScheduleId = 20102,
+                    AmountTotal = 6000m,
+                    PlatformFee = 600m,
+                    OwnerAmount = 5400m,
+                    Currency = "egp",
+                    PaymentIntentId = "pi_seed_20102",
+                    PaidAt = new DateTime(2026, 1, 1, 10, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2026, 1, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
+                },
+                new Payment
+                {
+                    Id = 30103,
+                    PaymentScheduleId = 20103,
+                    AmountTotal = 6000m,
+                    PlatformFee = 600m,
+                    OwnerAmount = 5400m,
+                    Currency = "egp",
+                    PaymentIntentId = "pi_seed_20103",
+                    PaidAt = new DateTime(2026, 2, 1, 10, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2026, 2, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
+                },
+                new Payment
+                {
+                    Id = 30104,
+                    PaymentScheduleId = 20104,
+                    AmountTotal = 6000m,
+                    PlatformFee = 600m,
+                    OwnerAmount = 5400m,
+                    Currency = "egp",
+                    PaymentIntentId = "pi_seed_20104",
+                    PaidAt = new DateTime(2026, 3, 1, 10, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2026, 3, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
+                },
+                new Payment
+                {
+                    Id = 30105,
+                    PaymentScheduleId = 20105,
+                    AmountTotal = 6000m,
+                    PlatformFee = 600m,
+                    OwnerAmount = 5400m,
+                    Currency = "egp",
+                    PaymentIntentId = "pi_seed_20105",
+                    PaidAt = new DateTime(2026, 4, 1, 10, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2026, 4, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
+                },
+                new Payment
+                {
+                    Id = 30106,
+                    PaymentScheduleId = 20106,
+                    AmountTotal = 6000m,
+                    PlatformFee = 600m,
+                    OwnerAmount = 5400m,
+                    Currency = "egp",
+                    PaymentIntentId = "pi_seed_20106",
+                    PaidAt = new DateTime(2026, 5, 1, 10, 0, 0, DateTimeKind.Utc),
+                    AvailableAt = new DateTime(2026, 5, 11, 10, 0, 0, DateTimeKind.Utc),
+                    Status = PaymentStatus.Available
                 }
 
             );

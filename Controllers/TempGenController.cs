@@ -70,12 +70,17 @@ namespace MARN_API.Controllers
 
             var contracts = new[]
             {
-                new { Id = 1000001, PropertyId = 1001L, RenterId = Guid.Parse("11111111-1111-1111-1111-111111111111"), Amount = 60000m, Start = new DateTime(2025, 1, 1), End = new DateTime(2026, 1, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
-                new { Id = 1000002, PropertyId = 1002L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 90000m, Start = new DateTime(2025, 1, 1), End = new DateTime(2026, 1, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Quarterly },
-                new { Id = 1000003, PropertyId = 1100L, RenterId = Guid.Parse("11111111-1111-1111-1111-111111111111"), Amount = 96000m, Start = new DateTime(2024, 6, 1), End = new DateTime(2026, 6, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.OneTime },
-                new { Id = 1000004, PropertyId = 1100L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 480000m, Start = new DateTime(2025, 2, 1), End = new DateTime(2026, 2, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
+                new { Id = 1000001, PropertyId = 1001L, RenterId = Guid.Parse("11111111-1111-1111-1111-111111111111"), Amount = 60000m, Start = new DateTime(2026, 1, 1), End = new DateTime(2027, 1, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
+                new { Id = 1000002, PropertyId = 1002L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 90000m, Start = new DateTime(2026, 1, 1), End = new DateTime(2027, 1, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Quarterly },
+                new { Id = 1000003, PropertyId = 1100L, RenterId = Guid.Parse("11111111-1111-1111-1111-111111111111"), Amount = 96000m, Start = new DateTime(2025, 6, 1), End = new DateTime(2027, 6, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.OneTime },
+                new { Id = 1000004, PropertyId = 1100L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 48000m, Start = new DateTime(2026, 2, 1), End = new DateTime(2027, 2, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
                 new { Id = 1000005, PropertyId = 1002L, RenterId = Guid.Parse("11111111-1111-1111-1111-111111111111"), Amount = 90000m, Start = new DateTime(2024, 1, 1), End = new DateTime(2024, 12, 31), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Quarterly },
-                new { Id = 1000006, PropertyId = 1004L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 180000m, Start = new DateTime(2025, 5, 1), End = new DateTime(2026, 5, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly }
+                new { Id = 1000006, PropertyId = 1004L, RenterId = Guid.Parse("22222222-2222-2222-2222-222222222222"), Amount = 180000m, Start = new DateTime(2026, 5, 1), End = new DateTime(2027, 5, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
+                
+                // Dashboard Scenario Contracts
+                new { Id = 1000101, PropertyId = 1204L, RenterId = Guid.Parse("10000000-0000-0000-0000-000000000004"), Amount = 15600m, Start = new DateTime(2026, 6, 1), End = new DateTime(2026, 7, 31), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
+                new { Id = 1000102, PropertyId = 1003L, RenterId = Guid.Parse("88888888-8888-8888-8888-888888888888"), Amount = 42000m, Start = new DateTime(2025, 12, 1), End = new DateTime(2026, 6, 30), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly },
+                new { Id = 1000103, PropertyId = 1205L, RenterId = Guid.Parse("10000000-0000-0000-0000-000000000002"), Amount = 30000m, Start = new DateTime(2026, 6, 1), End = new DateTime(2026, 12, 1), Frequency = MARN_API.Enums.Payment.PaymentFrequency.Monthly }
             };
 
             var results = new List<TempGeneratedContractResult>();

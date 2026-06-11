@@ -11,16 +11,16 @@ namespace MARN_API.Data.Seed
     /// <summary>
     /// Seed contracts that cover every meaningful business scenario:
     ///
-    ///  ID         | Property | Renter  | Frequency   | Status   | Scenario
-    /// ------------|----------|---------|-------------|----------|-----------------------------------------
-    ///  1000001    | 1001     | A       | Monthly     | Active   | Healthy active monthly rental (main test)
-    ///  1000002    | 1002     | B       | Quarterly   | Pending  | Active quarterly rental with overdue schedule
-    ///  1000003    | 1100     | A       | Onetime     | Active   | Active yearly rental – NotAvailableYet future
-    ///  1000004    | 1100     | B       | Monthly     | Active   | Owner Z property – for owner dashboard earnings
-    ///  1000005    | 1002     | A       | Monthly     | Expired  | Fully paid expired contract (history)
-    ///  1000006    | 1004     | B       | Monthly     | Cancelled| Cancelled – no schedules should be payable
-    ///
-    /// Using IDs starting from 1,000,001 to avoid conflicts with existing manual or old seed data.
+    ///  ID         | Property | Renter       | Frequency   | Status    | Scenario
+    /// ------------|----------|--------------|-------------|-----------|------------------------------------------
+    ///  1000001    | 1001     | Renter A     | Monthly     | Active    | Healthy active monthly rental (main test)
+    ///  1000002    | 1002     | Renter B     | Quarterly   | Pending   | Active quarterly rental with overdue schedule
+    ///  1000003    | 1100     | Renter A     | Onetime     | Active    | Active yearly rental – NotAvailableYet future
+    ///  1000004    | 1100     | Renter B     | Monthly     | Active    | Owner Z property – for owner dashboard earnings
+    ///  1000005    | 1002     | Renter A     | Monthly     | Expired   | Fully paid expired contract (history)
+    ///  1000006    | 1004     | Renter B     | Monthly     | Cancelled | Cancelled – no schedules should be payable
+    ///  1000101    | 1204     | Recent       | Monthly     | Pending   | Dashboard pending contract scenario
+    ///  1000102    | 1003     | Renter E     | Monthly     | Active    | Dashboard revenue graph scenario
     /// </summary>
     public class ContractSeed : IEntityTypeConfiguration<Contract>
     {
@@ -28,7 +28,9 @@ namespace MARN_API.Data.Seed
         {
             var renterAId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var renterBId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-            var renterCId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            var renterEId = Guid.Parse("88888888-8888-8888-8888-888888888888");
+            var recentRenterId = Guid.Parse("10000000-0000-0000-0000-000000000004");
+            var bannedRenterId = Guid.Parse("10000000-0000-0000-0000-000000000002");
 
             builder.HasData(
 
@@ -180,6 +182,64 @@ namespace MARN_API.Data.Seed
                     MerkleRoot = null,
                     FilePath = ContractDocumentPathBuilder.BuildPdfRelativePath(1000006),
                     OtsFilePath = ContractDocumentPathBuilder.BuildOtsRelativePath(1000006)
+                },
+
+                // ── Scenario Contracts (merged from AdminDashboardScenarioContractSeed) ──
+
+                // Pending contract for dashboard testing
+                new Contract
+                {
+                    Id = 1000101,
+                    PropertyId = 1204,
+                    RenterId = recentRenterId,
+                    Status = ContractStatus.Pending,
+                    CreatedAt = new DateTime(2026, 5, 8, 13, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly,
+                    TotalContractAmount = 15600m,
+                    LeaseStartDate = new DateOnly(2026, 6, 1),
+                    LeaseEndDate = new DateOnly(2026, 7, 31),
+                    SignedByRenterAt = null,
+                    FileName = "seed-contract-1000101.pdf",
+                    Hash = "SEEDHASH1000101PENDINGADMINDASHBOARD",
+                    AnchoringStatus = ContractAnchoringStatus.Pending
+                },
+
+                // Active contract for revenue graph testing
+                new Contract
+                {
+                    Id = 1000102,
+                    PropertyId = 1003,
+                    RenterId = renterEId,
+                    Status = ContractStatus.Active,
+                    CreatedAt = new DateTime(2025, 11, 28, 12, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly,
+                    TotalContractAmount = 42000m,
+                    LeaseStartDate = new DateOnly(2025, 12, 1),
+                    LeaseEndDate = new DateOnly(2026, 6, 30),
+                    SignedByRenterAt = new DateTime(2025, 11, 29, 10, 0, 0, DateTimeKind.Utc),
+                    FileName = "seed-contract-1000102.pdf",
+                    Hash = "SEEDHASH1000102REVENUEGRAPHADMINDASHBOARD",
+                    AnchoringStatus = ContractAnchoringStatus.Anchored,
+                    AnchoredAt = new DateTime(2025, 11, 30, 9, 0, 0, DateTimeKind.Utc)
+                },
+
+                // Active contract for banned renter testing
+                new Contract
+                {
+                    Id = 1000103,
+                    PropertyId = 1205,
+                    RenterId = bannedRenterId,
+                    Status = ContractStatus.Active,
+                    CreatedAt = new DateTime(2026, 5, 20, 12, 0, 0, DateTimeKind.Utc),
+                    PaymentFrequency = PaymentFrequency.Monthly,
+                    TotalContractAmount = 30000m,
+                    LeaseStartDate = new DateOnly(2026, 6, 1),
+                    LeaseEndDate = new DateOnly(2026, 12, 1),
+                    SignedByRenterAt = new DateTime(2026, 5, 21, 10, 0, 0, DateTimeKind.Utc),
+                    FileName = "seed-contract-1000103.pdf",
+                    Hash = "SEEDHASH1000103BANNEDRENTERDASHBOARD",
+                    AnchoringStatus = ContractAnchoringStatus.Anchored,
+                    AnchoredAt = new DateTime(2026, 5, 22, 9, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

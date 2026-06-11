@@ -209,7 +209,6 @@ namespace MARN_API
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IPropertyRatingService, PropertyRatingService>();
             builder.Services.AddScoped<IPropertyCommentService, PropertyCommentService>();
-            builder.Services.AddScoped<ICsvSeedImportService, CsvSeedImportService>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IContractDocumentStorage, ContractDocumentStorage>();
             builder.Services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();

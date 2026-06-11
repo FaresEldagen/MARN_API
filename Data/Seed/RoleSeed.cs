@@ -16,7 +16,3 @@ namespace MARN_API.Data.Seed
         }
     }
 }
-
-
-
-

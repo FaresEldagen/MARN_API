@@ -71,38 +71,26 @@ namespace MARN_API.Data
 
             // Seed initial data
             builder.ApplyConfiguration(new RoleSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioRoleSeed());
             builder.ApplyConfiguration(new UserSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioUserSeed());
-
-
             builder.ApplyConfiguration(new UserRoleSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioUserRoleSeed());
             builder.ApplyConfiguration(new PropertySeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioPropertySeed());
             builder.ApplyConfiguration(new PropertyMediaSeed());
             builder.ApplyConfiguration(new BookingRequestSeed());
             builder.ApplyConfiguration(new SavedPropertySeed());
             builder.ApplyConfiguration(new NotificationSeed());
-
             builder.ApplyConfiguration(new RoommatePreferenceSeed());
             builder.ApplyConfiguration(new ContractSeed());
             builder.ApplyConfiguration(new PropertyRatingSeed());
             builder.ApplyConfiguration(new PropertyCommentSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioPropertyCommentSeed());
             builder.ApplyConfiguration(new PropertyAmenitySeed());
             builder.ApplyConfiguration(new PropertyRuleSeed());
             builder.ApplyConfiguration(new MessageSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioMessageSeed());
             builder.ApplyConfiguration(new ReportSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioReportSeed());
             builder.ApplyConfiguration(new UserDeviceSeed());
             builder.ApplyConfiguration(new PaymentScheduleSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioContractSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioPaymentScheduleSeed());
             builder.ApplyConfiguration(new PaymentSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioPaymentSeed());
-            builder.ApplyConfiguration(new AdminDashboardScenarioAdminActionLogSeed());
+            builder.ApplyConfiguration(new AdminActionLogSeed());
+            builder.ApplyConfiguration(new UserActivitySeed());
         }
 
 

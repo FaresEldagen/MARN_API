@@ -12,9 +12,10 @@ namespace MARN_API.Data.Seed
             var renterAId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var renterBId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var ownerZId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+            var bannedRenterId = Guid.Parse("10000000-0000-0000-0000-000000000002");
 
             builder.HasData(
-                // Renter A saves Property 1001 and 1003
+                // Renter A saves Property 1001, 1003, 2001
                 new SavedProperty
                 {
                     PropertyId = 1001,
@@ -24,6 +25,18 @@ namespace MARN_API.Data.Seed
                 {
                     PropertyId = 1003,
                     UserId = renterAId
+                },
+                new SavedProperty
+                {
+                    PropertyId = 2001,
+                    UserId = renterAId
+                },
+
+                // Banned Renter saves Property 1004
+                new SavedProperty
+                {
+                    PropertyId = 1004,
+                    UserId = bannedRenterId
                 },
 
                 // Renter B saves Property 1002
