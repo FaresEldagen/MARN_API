@@ -291,8 +291,12 @@ namespace MARN_API.Repositories.Implementations
             IOrderedQueryable<Models.Property> orderedQuery = sortBy switch
             {
                 PropertySortBy.Price => filter.SortAscending ?? true
-                    ? query.OrderBy(p => p.Price)
-                    : query.OrderByDescending(p => p.Price),
+                    ? query.OrderBy(p => p.RentalUnit == RentalUnit.Daily ? p.Price :
+                                         p.RentalUnit == RentalUnit.Monthly ? p.Price / 30m :
+                                         p.Price / 365m)
+                    : query.OrderByDescending(p => p.RentalUnit == RentalUnit.Daily ? p.Price :
+                                                   p.RentalUnit == RentalUnit.Monthly ? p.Price / 30m :
+                                                   p.Price / 365m),
 
                 PropertySortBy.Rating => filter.SortAscending ?? false
                     ? query.OrderBy(p => p.PropertyRatings.Any() ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f : 0f)

@@ -1,5 +1,6 @@
 using MARN_API.DTOs.Moderation;
 using MARN_API.Enums;
+using MARN_API.Enums.Report;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;

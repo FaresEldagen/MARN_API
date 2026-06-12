@@ -1,5 +1,5 @@
 using System;
-using MARN_API.Enums;
+using MARN_API.Enums.Report;
 
 namespace MARN_API.Models
 {

@@ -2,6 +2,7 @@ using CsvHelper;
 using MARN_API.DTOs.Admin;
 using MARN_API.DTOs.Common;
 using MARN_API.Enums;
+using MARN_API.Enums.Admin;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using MARN_API.Services.Interfaces;

@@ -1,5 +1,5 @@
 using MARN_API.DTOs.Common;
-using MARN_API.Enums;
+using MARN_API.Enums.Report;
 using System.ComponentModel.DataAnnotations;
 
 namespace MARN_API.DTOs.Moderation

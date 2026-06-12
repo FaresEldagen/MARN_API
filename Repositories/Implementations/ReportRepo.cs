@@ -1,7 +1,7 @@
 using MARN_API.Data;
 using MARN_API.DTOs.Common;
 using MARN_API.DTOs.Moderation;
-using MARN_API.Enums;
+using MARN_API.Enums.Report;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;

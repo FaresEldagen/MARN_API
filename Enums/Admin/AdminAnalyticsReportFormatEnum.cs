@@ -1,4 +1,4 @@
-namespace MARN_API.Enums
+namespace MARN_API.Enums.Admin
 {
     public enum AdminAnalyticsReportFormat
     {

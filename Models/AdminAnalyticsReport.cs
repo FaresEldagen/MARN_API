@@ -1,4 +1,4 @@
-using MARN_API.Enums;
+using MARN_API.Enums.Admin;
 
 namespace MARN_API.Models
 {

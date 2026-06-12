@@ -46,6 +46,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "RENTER.A@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201012345671",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -64,6 +65,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/user-cairo-mid.png",
+                    DateOfBirth = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Student at Cairo University, loves football and reading.",
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -75,6 +78,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "RENTER.B@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201112345672",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -93,6 +97,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/user-alex-low.png",
+                    DateOfBirth = new DateTime(2002, 5, 15, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Graphic designer looking for a shared apartment in Alexandria.",
                     CreatedAt = new DateTime(2025, 1, 2, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -104,6 +110,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "RENTER.C@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201212345673",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -122,6 +129,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/user-delta-multi.png",
+                    DateOfBirth = new DateTime(2003, 3, 3, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Software engineer looking for a room in Delta region near transport.",
                     CreatedAt = new DateTime(2025, 1, 3, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -133,6 +142,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "RENTER.D@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201512345674",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -151,6 +161,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/user-family-high.png",
+                    DateOfBirth = new DateTime(2004, 4, 4, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Marketing specialist, quiet and clean, looking for a roommate in New Cairo.",
                     CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -162,6 +174,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "RENTER.E@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201023456785",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -180,6 +193,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/user-coastal-flex.png",
+                    DateOfBirth = new DateTime(2005, 5, 5, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Engineering student looking for a cozy place in Damietta.",
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 },
 
@@ -193,6 +208,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "OWNER.X@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201123456786",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -211,6 +227,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/owner-x.png",
+                    DateOfBirth = new DateTime(1980, 10, 10, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Property owner offering premium apartments in Fifth Settlement, Cairo.",
                     CreatedAt = new DateTime(2025, 1, 4, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -222,6 +240,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "OWNER.Y@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201223456787",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -240,6 +259,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/owner-y.png",
+                    DateOfBirth = new DateTime(1985, 2, 20, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Real estate investor with multiple listings in Alexandria and Giza.",
                     CreatedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -251,6 +272,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "OWNER.Z@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201523456788",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -269,6 +291,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/owner-z.png",
+                    DateOfBirth = new DateTime(1970, 3, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Providing high-quality rental options in Mohandessin and Dokki.",
                     CreatedAt = new DateTime(2025, 1, 6, 0, 0, 0, DateTimeKind.Utc)
                 },
 
@@ -282,6 +306,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "ADMIN@MARN.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201098765432",
                     PhoneNumberConfirmed = true,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -300,6 +325,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/admin.png",
+                    DateOfBirth = new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Lead System Administrator for MARN platform.",
                     CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
@@ -311,6 +338,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "ASSISTANT.ADMIN@MARN.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201198765431",
                     PhoneNumberConfirmed = true,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -329,6 +357,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/assistant-admin.png",
+                    DateOfBirth = new DateTime(1995, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Assistant Administrator managing compliance and user verifications.",
                     CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, DateTimeKind.Utc)
                 },
 
@@ -343,6 +373,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "PENDING.RENTER@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201298765430",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -361,6 +392,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Pending,
                     ProfileImage = "/images/profiles/pending-renter.png",
+                    DateOfBirth = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Fresh graduate looking to relocate for work in Nasr City.",
                     CreatedAt = new DateTime(2026, 5, 10, 10, 0, 0, DateTimeKind.Utc)
                 },
                 // 2. Banned Renter
@@ -373,6 +406,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "BANNED.RENTER@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201598765429",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -391,6 +425,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Banned,
                     ProfileImage = "/images/profiles/banned-renter.png",
+                    DateOfBirth = new DateTime(2000, 2, 2, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Banned user account for terms of service violations.",
                     CreatedAt = new DateTime(2026, 3, 5, 14, 0, 0, DateTimeKind.Utc)
                 },
                 // 3. Deleted Renter (Soft Deleted)
@@ -403,6 +439,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "DELETED.RENTER@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201098765428",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -421,6 +458,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/deleted-renter.png",
+                    DateOfBirth = new DateTime(2000, 3, 3, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Inactive account deleted by the user.",
                     CreatedAt = new DateTime(2026, 2, 20, 11, 0, 0, DateTimeKind.Utc),
                     DeletedAt = new DateTime(2026, 4, 1, 9, 0, 0, DateTimeKind.Utc)
                 },
@@ -434,6 +473,7 @@ namespace MARN_API.Data.Seed
                     NormalizedEmail = "RECENT.RENTER@EXAMPLE.COM",
                     PasswordHash = demoPasswordHash,
                     EmailConfirmed = true,
+                    PhoneNumber = "+201198765427",
                     PhoneNumberConfirmed = false,
                     TwoFactorEnabled = false,
                     LockoutEnabled = false,
@@ -452,6 +492,8 @@ namespace MARN_API.Data.Seed
                     Country = Country.Egypt,
                     AccountStatus = AccountStatus.Verified,
                     ProfileImage = "/images/profiles/recent-renter.png",
+                    DateOfBirth = new DateTime(2000, 4, 4, 0, 0, 0, DateTimeKind.Utc),
+                    Bio = "Looking for a roommate in Sheikh Zayed area. Friendly and outgoing.",
                     CreatedAt = new DateTime(2026, 5, 25, 16, 0, 0, DateTimeKind.Utc)
                 }
             );

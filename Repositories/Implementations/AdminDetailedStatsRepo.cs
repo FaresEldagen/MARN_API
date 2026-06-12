@@ -2,11 +2,11 @@ using System.Globalization;
 using MARN_API.Data;
 using MARN_API.DTOs.Admin;
 using MARN_API.DTOs.Common;
-using MARN_API.Enums;
 using MARN_API.Enums.Contract;
 using MARN_API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using MARN_API.Models;
+using MARN_API.Enums.Report;
 
 namespace MARN_API.Repositories.Implementations
 {
