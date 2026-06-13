@@ -279,6 +279,20 @@ namespace MARN_API.Services.Implementations
                                 resultType: ServiceResultType.Conflict
                             );
                         }
+
+                        IdentityResult roleAssignResult = await _userManager.AddToRoleAsync(user, "Renter");
+                        if (!roleAssignResult.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            _logger.LogError(
+                                "Registration failed for {Email}. Errors: {@Errors}",
+                                user.Email,
+                                roleAssignResult.Errors.Select(e => e.Description)
+                            );
+                            return ServiceResult<LoginResponseDto>.Fail(
+                                "Failed to Register", 
+                                roleAssignResult.Errors.Select(e => e.Description).ToList());
+                        }
                     }
 
                     await transaction.CommitAsync();

@@ -4,6 +4,7 @@ using MARN_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260613145338_AddDummyPropertiesAndFixedNotificationSeeds")]
+    partial class AddDummyPropertiesAndFixedNotificationSeeds
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -8046,31 +8049,6 @@ namespace MARN_API.Migrations
                         new
                         {
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -8085,12 +8063,12 @@ namespace MARN_API.Migrations
                         },
                         new
                         {
-                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
-                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
-                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -8112,6 +8090,11 @@ namespace MARN_API.Migrations
                         {
                             UserId = new Guid("10000000-0000-0000-0000-000000000004"),
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         });
                 });
 

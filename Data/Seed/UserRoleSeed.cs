@@ -42,23 +42,26 @@ namespace MARN_API.Data.Seed
                 new IdentityUserRole<Guid> { UserId = renterCId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterDId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = renterEId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = ownerXId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = ownerYId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = adminId, RoleId = renterRoleId },
+                new IdentityUserRole<Guid> { UserId = secondAdminId, RoleId = renterRoleId },
 
                 // Core owners
                 new IdentityUserRole<Guid> { UserId = ownerXId, RoleId = ownerRoleId },
                 new IdentityUserRole<Guid> { UserId = ownerYId, RoleId = ownerRoleId },
-                // Owner Z gets both roles for dual-dashboard testing
                 new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = ownerRoleId },
-                new IdentityUserRole<Guid> { UserId = ownerZId, RoleId = renterRoleId },
 
                 // Admin role assignment
                 new IdentityUserRole<Guid> { UserId = adminId, RoleId = adminRoleId },
+                new IdentityUserRole<Guid> { UserId = secondAdminId, RoleId = adminRoleId },
 
                 // Scenario users (merged from AdminDashboardScenarioUserRoleSeed)
                 new IdentityUserRole<Guid> { UserId = pendingRenterId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = bannedRenterId, RoleId = renterRoleId },
                 new IdentityUserRole<Guid> { UserId = deletedRenterId, RoleId = renterRoleId },
-                new IdentityUserRole<Guid> { UserId = recentRenterId, RoleId = renterRoleId },
-                new IdentityUserRole<Guid> { UserId = secondAdminId, RoleId = adminRoleId }
+                new IdentityUserRole<Guid> { UserId = recentRenterId, RoleId = renterRoleId }
             );
         }
     }
