@@ -144,6 +144,12 @@
   <data name="NOTIFICATION_PROPERTY_DELETED_BODY" xml:space="preserve">
     <value>تم حذف عقارك "{0}" بنجاح. إذا كان هذا عن طريق الخطأ أو كنت ترغب في استعادته، يرجى التواصل مع فريق الدعم.</value>
   </data>
+  <data name="NOTIFICATION_PROPERTY_ACCEPTED_TITLE" xml:space="preserve">
+    <value>تم قبول التحقق من العقار</value>
+  </data>
+  <data name="NOTIFICATION_PROPERTY_ACCEPTED_BODY" xml:space="preserve">
+    <value>تمت الموافقة على عقارك "{0}" وأصبح الآن مرئيًا للمستأجرين.</value>
+  </data>
   <data name="NOTIFICATION_PROPERTY_REJECTED_TITLE" xml:space="preserve">
     <value>تم رفض التحقق من العقار</value>
   </data>
@@ -847,6 +853,9 @@
   </data>
   <data name="ENUM_NotificationType_PropertyDeleted" xml:space="preserve">
     <value>تم حذف العقار</value>
+  </data>
+  <data name="ENUM_NotificationType_PropertyAccepted" xml:space="preserve">
+    <value>تم قبول العقار</value>
   </data>
   <data name="ENUM_NotificationType_PropertyRejected" xml:space="preserve">
     <value>تم رفض العقار</value>

@@ -118,6 +118,7 @@ namespace MARN_API.Services.Implementations
 
             property.Status = PropertyStatus.Verified;
             await _verificationRepo.SaveChangesAsync();
+            await TrySendPropertyAcceptedNotificationAsync(property);
 
             _logger.LogInformation("Admin approved property verification for property {PropertyId}", propertyId);
             return ServiceResult<bool>.Ok(true, "Property verification approved.", code: "ZZ_ADMIN_PROPERTY_VERIFICATION_APPROVED");
@@ -144,6 +145,30 @@ namespace MARN_API.Services.Implementations
 
             _logger.LogInformation("Admin declined property verification for property {PropertyId}. Reason: {Reason}", propertyId, decision.Reason);
             return ServiceResult<bool>.Ok(true, "Property verification declined.", code: "ZZ_ADMIN_PROPERTY_VERIFICATION_DECLINED");
+        }
+
+        private async Task TrySendPropertyAcceptedNotificationAsync(Property property)
+        {
+            try
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = property.OwnerId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.PropertyAccepted,
+                    TitleKey = "NOTIFICATION_PROPERTY_ACCEPTED_TITLE",
+                    BodyKey = "NOTIFICATION_PROPERTY_ACCEPTED_BODY",
+                    LocalizationArguments = new() { property.Title },
+                    Title = "Property Verification Accepted",
+                    Body = $"Your property \"{property.Title}\" has been approved and is now visible to renters.",
+                    ActionType = NotificationActionType.Property,
+                    ActionId = property.Id.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send property acceptance notification for property {PropertyId}", property.Id);
+            }
         }
 
         private async Task TrySendPropertyRejectedNotificationAsync(Property property, string? reason)
