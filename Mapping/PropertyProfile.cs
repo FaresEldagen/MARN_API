@@ -36,8 +36,10 @@ namespace MARN_API.Mapping
             CreateMap<PropertyRule, PropertyRuleDto>();
             CreateMap<PropertyMedia, PropertyMediaDto>();
 
-            CreateMap<PropertyComment, PropertyCommentMutationDto>();
-            CreateMap<PropertyRating, PropertyRatingDto>();
+            CreateMap<PropertyFeedback, PropertyFeedbackDto>()
+                .ForMember(dest => dest.FeedbackId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.UserDisplayName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}".Trim()))
+                .ForMember(dest => dest.UserProfileImage, opt => opt.MapFrom(src => src.User.ProfileImage));
         }
     }
 }

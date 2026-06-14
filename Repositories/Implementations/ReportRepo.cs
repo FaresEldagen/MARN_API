@@ -60,9 +60,9 @@ namespace MARN_API.Repositories.Implementations
                             .Where(m => m.Id == r.ReportableGuidId)
                             .Select(m => "Message between " + m.Sender.FirstName + " " + m.Sender.LastName + " and " + m.Receiver.FirstName + " " + m.Receiver.LastName)
                             .FirstOrDefault() ?? "[Deleted message]"
-                        : Context.PropertyComments
-                            .Where(c => c.Id == r.ReportableId)
-                            .Select(c => "Comment on " + c.Property.Title)
+                        : Context.PropertyFeedbacks
+                            .Where(f => f.Id == r.ReportableId)
+                            .Select(f => "Comment on " + f.Property.Title)
                             .FirstOrDefault() ?? "[Deleted comment]"
                 })
                 .ToListAsync();
@@ -180,13 +180,13 @@ namespace MARN_API.Repositories.Implementations
                 .FirstOrDefaultAsync(m => m.Id == messageId);
         }
 
-        public Task<PropertyComment?> GetPropertyCommentTargetAsync(long commentId)
+        public Task<PropertyFeedback?> GetPropertyCommentTargetAsync(long commentId)
         {
-            return Context.PropertyComments
-                .Include(c => c.Property)
+            return Context.PropertyFeedbacks
+                .Include(f => f.Property)
                 .ThenInclude(p => p.Owner)
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(c => c.Id == commentId);
+                .Include(f => f.User)
+                .FirstOrDefaultAsync(f => f.Id == commentId);
         }
 
         public async Task AddAsync(Report report)
@@ -266,10 +266,10 @@ namespace MARN_API.Repositories.Implementations
                          ((m.Sender.FirstName + " " + m.Sender.LastName).ToLower().Contains(trimmedSearch) ||
                           (m.Receiver.FirstName + " " + m.Receiver.LastName).ToLower().Contains(trimmedSearch)))) ||
                     (r.ReportableType == ReportableType.PropertyComment &&
-                     Context.PropertyComments.Any(c =>
-                         c.Id == r.ReportableId &&
-                         (c.Content.ToLower().Contains(trimmedSearch) ||
-                          c.Property.Title.ToLower().Contains(trimmedSearch)))));
+                     Context.PropertyFeedbacks.Any(f =>
+                         f.Id == r.ReportableId &&
+                         ((f.Content != null && f.Content.ToLower().Contains(trimmedSearch)) ||
+                          f.Property.Title.ToLower().Contains(trimmedSearch)))));
             }
 
             return query;

@@ -21,8 +21,7 @@ namespace MARN_API.Data
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<PaymentSchedule> PaymentSchedules => Set<PaymentSchedule>();
         public DbSet<RoommatePreference> RoommatePreferences => Set<RoommatePreference>();
-        public DbSet<PropertyRating> PropertyRatings => Set<PropertyRating>();
-        public DbSet<PropertyComment> PropertyComments => Set<PropertyComment>();
+        public DbSet<PropertyFeedback> PropertyFeedbacks => Set<PropertyFeedback>();
         public DbSet<PropertyAmenity> PropertyAmenities => Set<PropertyAmenity>();
         public DbSet<PropertyRule> PropertyRules => Set<PropertyRule>();
         public DbSet<PropertyMedia> PropertyMedia => Set<PropertyMedia>();
@@ -52,8 +51,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new PaymentConfiguration());
             builder.ApplyConfiguration(new PaymentScheduleConfiguration());
             builder.ApplyConfiguration(new RoommatePreferenceConfiguration());
-            builder.ApplyConfiguration(new PropertyRatingConfiguration());
-            builder.ApplyConfiguration(new PropertyCommentConfiguration());
+            builder.ApplyConfiguration(new PropertyFeedbackConfiguration());
             builder.ApplyConfiguration(new PropertyAmenityConfiguration());
             builder.ApplyConfiguration(new PropertyRuleConfiguration());
             builder.ApplyConfiguration(new PropertyMediaConfiguration());
@@ -80,8 +78,7 @@ namespace MARN_API.Data
             builder.ApplyConfiguration(new NotificationSeed());
             builder.ApplyConfiguration(new RoommatePreferenceSeed());
             builder.ApplyConfiguration(new ContractSeed());
-            builder.ApplyConfiguration(new PropertyRatingSeed());
-            builder.ApplyConfiguration(new PropertyCommentSeed());
+            builder.ApplyConfiguration(new PropertyFeedbackSeed());
             builder.ApplyConfiguration(new PropertyAmenitySeed());
             builder.ApplyConfiguration(new PropertyRuleSeed());
             builder.ApplyConfiguration(new MessageSeed());

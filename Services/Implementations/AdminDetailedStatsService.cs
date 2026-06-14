@@ -406,10 +406,10 @@ namespace MARN_API.Services.Implementations
                 Governorate = property.State,
                 GovernorateDisplayName = GetLocationDisplayName<Governorate>(property.State),
                 Price = property.Price,
-                AverageRating = property.PropertyRatings.Any()
-                    ? property.PropertyRatings.Average(rating => (float?)rating.Rating) ?? 0f
+                AverageRating = property.PropertyFeedbacks.Any()
+                    ? property.PropertyFeedbacks.Average(feedback => (float?)feedback.Rating) ?? 0f
                     : 0f,
-                CommentsCount = property.PropertyComments.Count(comment => !comment.IsHiddenByModeration),
+                CommentsCount = property.PropertyFeedbacks.Count(feedback => !feedback.IsHiddenByModeration && !string.IsNullOrWhiteSpace(feedback.Content)),
                 IsActive = property.IsActive,
                 CanDeactivate = property.IsActive && property.DeletedAt == null,
                 CanRestore = false,

@@ -219,10 +219,10 @@ namespace MARN_API.Repositories.Implementations
                     City = p.City,
                     Governorate = p.State,
                     Price = p.Price,
-                    AverageRating = p.PropertyRatings.Any()
-                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
+                    AverageRating = p.PropertyFeedbacks.Any()
+                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
                         : 0f,
-                    CommentsCount = p.PropertyComments.Count(c => !c.IsHiddenByModeration),
+                    CommentsCount = p.PropertyFeedbacks.Count(f => !f.IsHiddenByModeration && f.Content != null && f.Content != ""),
                     IsActive = p.IsActive,
                     CanDeactivate = p.IsActive && p.DeletedAt == null,
                     CanRestore = !p.IsActive && p.DeletedAt == null,
@@ -281,11 +281,11 @@ namespace MARN_API.Repositories.Implementations
                     IsDeleted = p.DeletedAt != null,
                     CreatedAt = p.CreatedAt,
                     ProofOfOwnership = p.ProofOfOwnership,
-                    AverageRating = p.PropertyRatings.Any()
-                        ? p.PropertyRatings.Average(r => (float?)r.Rating) ?? 0f
+                    AverageRating = p.PropertyFeedbacks.Any()
+                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
                         : 0f,
-                    RatingsCount = p.PropertyRatings.Count,
-                    CommentsCount = p.PropertyComments.Count(c => !c.IsHiddenByModeration),
+                    RatingsCount = p.PropertyFeedbacks.Count,
+                    CommentsCount = p.PropertyFeedbacks.Count(f => !f.IsHiddenByModeration && f.Content != null && f.Content != ""),
                     SavedByUsersCount = p.SavedProperty.Count,
                     BookingRequestsCount = p.BookingRequests.Count,
                     Amenities = p.Amenities
@@ -314,38 +314,36 @@ namespace MARN_API.Repositories.Implementations
                             IsPrimary = m.IsPrimary
                         })
                         .ToList(),
-                    Comments = p.PropertyComments
-                        .OrderByDescending(c => c.CreatedAt)
-                        .Select(c => new AdminPropertyCommentDto
+                    Comments = p.PropertyFeedbacks
+                        .Where(f => f.Content != null && f.Content != "")
+                        .OrderByDescending(f => f.CreatedAt)
+                        .Select(f => new AdminPropertyCommentDto
                         {
-                            CommentId = c.Id,
-                            UserId = c.UserId,
-                            UserName = (c.User.FirstName + " " + c.User.LastName).Trim(),
-                            UserProfileImage = c.User.ProfileImage,
-                            Content = c.Content,
-                            Rating = p.PropertyRatings
-                                .Where(r => r.UserId == c.UserId)
-                                .Select(r => (int?)r.Rating)
-                                .FirstOrDefault(),
-                            CreatedAt = c.CreatedAt,
-                            UpdatedAt = c.UpdatedAt,
-                            IsHiddenByModeration = c.IsHiddenByModeration,
-                            HiddenAt = c.HiddenAt,
-                            HiddenByAdminId = c.HiddenByAdminId,
-                            HiddenReason = c.HiddenReason
+                            CommentId = f.Id,
+                            UserId = f.UserId,
+                            UserName = (f.User.FirstName + " " + f.User.LastName).Trim(),
+                            UserProfileImage = f.User.ProfileImage,
+                            Content = f.Content!,
+                            Rating = f.Rating,
+                            CreatedAt = f.CreatedAt,
+                            UpdatedAt = f.UpdatedAt,
+                            IsHiddenByModeration = f.IsHiddenByModeration,
+                            HiddenAt = f.HiddenAt,
+                            HiddenByAdminId = f.HiddenByAdminId,
+                            HiddenReason = f.HiddenReason
                         })
                         .ToList(),
-                    Ratings = p.PropertyRatings
-                        .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
-                        .Select(r => new AdminPropertyRatingDto
+                    Ratings = p.PropertyFeedbacks
+                        .OrderByDescending(f => f.UpdatedAt ?? f.CreatedAt)
+                        .Select(f => new AdminPropertyRatingDto
                         {
-                            RatingId = r.Id,
-                            UserId = r.UserId,
-                            UserName = (r.User.FirstName + " " + r.User.LastName).Trim(),
-                            UserProfileImage = r.User.ProfileImage,
-                            Rating = r.Rating,
-                            CreatedAt = r.CreatedAt,
-                            UpdatedAt = r.UpdatedAt
+                            RatingId = f.Id,
+                            UserId = f.UserId,
+                            UserName = (f.User.FirstName + " " + f.User.LastName).Trim(),
+                            UserProfileImage = f.User.ProfileImage,
+                            Rating = f.Rating,
+                            CreatedAt = f.CreatedAt,
+                            UpdatedAt = f.UpdatedAt
                         })
                         .ToList(),
                     Contracts = p.Contracts
@@ -573,8 +571,7 @@ namespace MARN_API.Repositories.Implementations
             return _context.Properties
                 .IgnoreQueryFilters()
                 .Include(p => p.Owner)
-                .Include(p => p.PropertyRatings)
-                .Include(p => p.PropertyComments)
+                .Include(p => p.PropertyFeedbacks)
                 .FirstOrDefaultAsync(p => p.Id == propertyId);
         }
 
