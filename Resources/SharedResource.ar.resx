@@ -2842,4 +2842,31 @@
   <data name="ZZ_REPORT_SUBMITTED_SUCCESSFULLY" xml:space="preserve">
     <value>تم إرسال البلاغ بنجاح.</value>
   </data>
+  <data name="ZZ_PROPERTY_FEEDBACK_ALREADY_EXISTS" xml:space="preserve">
+    <value>لقد قمت بإرسال تقييم لهذا العقار مسبقًا.</value>
+</data>
+<data name="ZZ_PROPERTY_FEEDBACK_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم إرسال تقييم العقار بنجاح.</value>
+</data>
+<data name="ZZ_PROPERTY_FEEDBACK_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم تحديث تقييم العقار بنجاح.</value>
+</data>
+<data name="ZZ_PROPERTY_FEEDBACK_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>تم حذف تقييم العقار بنجاح.</value>
+</data>
+<data name="NOTIFICATION_NEW_FEEDBACK_TITLE" xml:space="preserve">
+    <value>تقييم جديد على عقارك</value>
+</data>
+
+<data name="NOTIFICATION_NEW_FEEDBACK_BODY" xml:space="preserve">
+    <value>قام أحد المستخدمين بإضافة تقييم {0} نجوم إلى عقارك "{1}".</value>
+</data>
+
+<data name="NOTIFICATION_FEEDBACK_UPDATED_TITLE" xml:space="preserve">
+    <value>تم تحديث تقييم عقارك</value>
+</data>
+
+<data name="NOTIFICATION_FEEDBACK_UPDATED_BODY" xml:space="preserve">
+    <value>قام أحد المستخدمين بتحديث تقييمه إلى {0} نجوم على عقارك "{1}".</value>
+</data>
 </root>
