@@ -12,7 +12,7 @@ namespace MARN_API.Repositories.Interfaces
         Task<ApplicationUser?> GetUserTargetAsync(Guid userId);
         Task<Property?> GetPropertyTargetAsync(long propertyId);
         Task<Message?> GetMessageTargetAsync(Guid messageId);
-        Task<PropertyComment?> GetPropertyCommentTargetAsync(long commentId);
+        Task<PropertyFeedback?> GetPropertyCommentTargetAsync(long commentId);
 
         Task AddAsync(Report report);
         Task AddActionLogAsync(AdminActionLog actionLog);

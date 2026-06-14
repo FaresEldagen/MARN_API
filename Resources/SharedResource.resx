@@ -2842,4 +2842,32 @@ that paid at {3} is now available for withdrawal.</value>
   <data name="ZZ_REPORT_SUBMITTED_SUCCESSFULLY" xml:space="preserve">
     <value>Report submitted successfully.</value>
   </data>
+<data name="ZZ_PROPERTY_FEEDBACK_ALREADY_EXISTS" xml:space="preserve">
+    <value>You have already submitted feedback for this property.</value>
+</data>
+<data name="ZZ_PROPERTY_FEEDBACK_CREATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property feedback submitted successfully.</value>
+</data>
+<data name="ZZ_PROPERTY_FEEDBACK_UPDATED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property feedback updated successfully.</value>
+</data>
+
+<data name="ZZ_PROPERTY_FEEDBACK_DELETED_SUCCESSFULLY" xml:space="preserve">
+    <value>Property feedback deleted successfully.</value>
+</data>
+<data name="NOTIFICATION_NEW_FEEDBACK_TITLE" xml:space="preserve">
+    <value>New Feedback on Your Property</value>
+</data>
+
+<data name="NOTIFICATION_NEW_FEEDBACK_BODY" xml:space="preserve">
+    <value>A user has left {0}-star feedback on your property "{1}".</value>
+</data>
+
+<data name="NOTIFICATION_FEEDBACK_UPDATED_TITLE" xml:space="preserve">
+    <value>Feedback Updated on Your Property</value>
+</data>
+
+<data name="NOTIFICATION_FEEDBACK_UPDATED_BODY" xml:space="preserve">
+    <value>A user has updated their feedback to {0} stars on your property "{1}".</value>
+</data>
 </root>

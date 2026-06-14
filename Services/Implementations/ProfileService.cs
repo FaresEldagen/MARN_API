@@ -28,8 +28,7 @@ namespace MARN_API.Services.Implementations
         private readonly IRoommatePreferenceRepo _roommatePreferenceRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
         private readonly IReportRepo _reportRepo;
-        private readonly IPropertyRatingRepo _propertyRatingRepo;
-        private readonly IPropertyCommentRepo _propertyCommentRepo;
+        private readonly IPropertyFeedbackRepo _propertyFeedbackRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _dbContext;
         private readonly IFileService _fileService;
@@ -50,8 +49,7 @@ namespace MARN_API.Services.Implementations
             IRoommatePreferenceRepo roommatePreferenceRepo,
             ISavedPropertyRepo savedPropertyRepo,
             IReportRepo reportRepo,
-            IPropertyRatingRepo propertyRatingRepo,
-            IPropertyCommentRepo propertyCommentRepo,
+            IPropertyFeedbackRepo propertyFeedbackRepo,
             UserManager<ApplicationUser> userManager,
             AppDbContext dbContext,
             INotificationService notificationService,
@@ -72,8 +70,7 @@ namespace MARN_API.Services.Implementations
             _roommatePreferenceRepo = roommatePreferenceRepo;
             _savedPropertyRepo = savedPropertyRepo;
             _reportRepo = reportRepo;
-            _propertyRatingRepo = propertyRatingRepo;
-            _propertyCommentRepo = propertyCommentRepo;
+            _propertyFeedbackRepo = propertyFeedbackRepo;
             _userManager = userManager;
             _dbContext = dbContext;
             _notificationService = notificationService;
@@ -753,12 +750,9 @@ namespace MARN_API.Services.Implementations
                     }
                 }
 
-                // 6. Hard delete all property ratings and comments written by this user
-                _logger.LogInformation("Deleting property ratings for userId: {userId}", userId);
-                await _propertyRatingRepo.DeleteByUserIdAsync(userId);
-
-                _logger.LogInformation("Deleting property comments for userId: {userId}", userId);
-                await _propertyCommentRepo.DeleteByUserIdAsync(userId);
+                // 6. Hard delete all property feedback written by this user
+                _logger.LogInformation("Deleting property feedback for userId: {userId}", userId);
+                await _propertyFeedbackRepo.DeleteByUserIdAsync(userId);
 
                 // 7. Delay User images deletion for 7 days
                 string jobId = BackgroundJob.Schedule(

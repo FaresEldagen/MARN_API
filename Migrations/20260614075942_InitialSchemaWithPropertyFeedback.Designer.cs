@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARN_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260613145338_AddDummyPropertiesAndFixedNotificationSeeds")]
-    partial class AddDummyPropertiesAndFixedNotificationSeeds
+    [Migration("20260614075942_InitialSchemaWithPropertyFeedback")]
+    partial class InitialSchemaWithPropertyFeedback
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -6281,7 +6281,7 @@ namespace MARN_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MARN_API.Models.PropertyComment", b =>
+            modelBuilder.Entity("MARN_API.Models.PropertyFeedback", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -6290,7 +6290,6 @@ namespace MARN_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -6315,6 +6314,9 @@ namespace MARN_API.Migrations
                     b.Property<long>("PropertyId")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -6323,11 +6325,15 @@ namespace MARN_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PropertyId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("PropertyComments");
+                    b.HasIndex("PropertyId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("PropertyFeedbacks", t =>
+                        {
+                            t.HasCheckConstraint("CK_PropertyFeedback_Rating", "[Rating] >= 1 AND [Rating] <= 5");
+                        });
 
                     b.HasData(
                         new
@@ -6337,6 +6343,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsHiddenByModeration = false,
                             PropertyId = 1001L,
+                            Rating = 5,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -6346,6 +6353,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsHiddenByModeration = false,
                             PropertyId = 1001L,
+                            Rating = 4,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -6355,6 +6363,7 @@ namespace MARN_API.Migrations
                             CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsHiddenByModeration = false,
                             PropertyId = 1004L,
+                            Rating = 5,
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -6367,6 +6376,7 @@ namespace MARN_API.Migrations
                             HiddenReason = "Seeded moderation example for admin dashboard testing.",
                             IsHiddenByModeration = true,
                             PropertyId = 1001L,
+                            Rating = 1,
                             UserId = new Guid("10000000-0000-0000-0000-000000000002")
                         });
                 });
@@ -6815,70 +6825,6 @@ namespace MARN_API.Migrations
                             IsPrimary = false,
                             Path = "/images/properties/property1205-sec.jpg",
                             PropertyId = 1205L
-                        });
-                });
-
-            modelBuilder.Entity("MARN_API.Models.PropertyRating", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<long>("PropertyId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("PropertyId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("PropertyRatings", t =>
-                        {
-                            t.HasCheckConstraint("CK_PropertyRating_Rating", "[Rating] >= 1 AND [Rating] <= 5");
-                        });
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 900001L,
-                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PropertyId = 1001L,
-                            Rating = 5,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = 900002L,
-                            CreatedAt = new DateTime(2025, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PropertyId = 1001L,
-                            Rating = 4,
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
-                        },
-                        new
-                        {
-                            Id = 900003L,
-                            CreatedAt = new DateTime(2025, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            PropertyId = 1004L,
-                            Rating = 5,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         });
                 });
 
@@ -8049,6 +7995,31 @@ namespace MARN_API.Migrations
                         new
                         {
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("55555555-5555-5555-5555-555555555555"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            UserId = new Guid("44444444-4444-4444-4444-444444444444"),
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -8063,12 +8034,12 @@ namespace MARN_API.Migrations
                         },
                         new
                         {
-                            UserId = new Guid("66666666-6666-6666-6666-666666666666"),
-                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
+                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
                         {
-                            UserId = new Guid("99999999-9999-9999-9999-999999999999"),
+                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -8090,11 +8061,6 @@ namespace MARN_API.Migrations
                         {
                             UserId = new Guid("10000000-0000-0000-0000-000000000004"),
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            UserId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         });
                 });
 
@@ -8292,16 +8258,16 @@ namespace MARN_API.Migrations
                     b.Navigation("Property");
                 });
 
-            modelBuilder.Entity("MARN_API.Models.PropertyComment", b =>
+            modelBuilder.Entity("MARN_API.Models.PropertyFeedback", b =>
                 {
                     b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("PropertyComments")
+                        .WithMany("PropertyFeedbacks")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MARN_API.Models.ApplicationUser", "User")
-                        .WithMany("PropertyComments")
+                        .WithMany("PropertyFeedbacks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -8320,25 +8286,6 @@ namespace MARN_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Property");
-                });
-
-            modelBuilder.Entity("MARN_API.Models.PropertyRating", b =>
-                {
-                    b.HasOne("MARN_API.Models.Property", "Property")
-                        .WithMany("PropertyRatings")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MARN_API.Models.ApplicationUser", "User")
-                        .WithMany("PropertyRatings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Property");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MARN_API.Models.PropertyRule", b =>
@@ -8478,9 +8425,7 @@ namespace MARN_API.Migrations
 
                     b.Navigation("Properties");
 
-                    b.Navigation("PropertyComments");
-
-                    b.Navigation("PropertyRatings");
+                    b.Navigation("PropertyFeedbacks");
 
                     b.Navigation("ReceivedMessages");
 
@@ -8520,9 +8465,7 @@ namespace MARN_API.Migrations
 
                     b.Navigation("Media");
 
-                    b.Navigation("PropertyComments");
-
-                    b.Navigation("PropertyRatings");
+                    b.Navigation("PropertyFeedbacks");
 
                     b.Navigation("Rules");
 

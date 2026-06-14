@@ -34,8 +34,7 @@ namespace MARN_API.Services.Implementations
         private readonly IBookingRequestRepo _bookingRequestRepo;
         private readonly ISavedPropertyRepo _savedPropertyRepo;
         private readonly IContractRepo _contractRepo;
-        private readonly IPropertyRatingRepo _propertyRatingRepo;
-        private readonly IPropertyCommentRepo _propertyCommentRepo;
+        private readonly IPropertyFeedbackRepo _propertyFeedbackRepo;
         private readonly MARN_API.Data.AppDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly IRoommateMatchingService _matchingService;
@@ -54,8 +53,7 @@ namespace MARN_API.Services.Implementations
             IBookingRequestRepo bookingRequestRepo,
             ISavedPropertyRepo savedPropertyRepo,
             IContractRepo contractRepo,
-            IPropertyRatingRepo propertyRatingRepo,
-            IPropertyCommentRepo propertyCommentRepo,
+            IPropertyFeedbackRepo propertyFeedbackRepo,
             MARN_API.Data.AppDbContext context,
             INotificationService notificationService,
             IRoommateMatchingService matchingService,
@@ -73,8 +71,7 @@ namespace MARN_API.Services.Implementations
             _bookingRequestRepo = bookingRequestRepo;
             _savedPropertyRepo = savedPropertyRepo;
             _contractRepo = contractRepo;
-            _propertyRatingRepo = propertyRatingRepo;
-            _propertyCommentRepo = propertyCommentRepo;
+            _propertyFeedbackRepo = propertyFeedbackRepo;
             _context = context;
             _notificationService = notificationService;
             _matchingService = matchingService;
@@ -597,8 +594,7 @@ namespace MARN_API.Services.Implementations
             try
             {
                 await _bookingRequestRepo.DeleteByPropertyIdAsync(propertyId);
-                await _propertyCommentRepo.DeleteByPropertyIdAsync(propertyId);
-                await _propertyRatingRepo.DeleteByPropertyIdAsync(propertyId);
+                await _propertyFeedbackRepo.DeleteByPropertyIdAsync(propertyId);
 
                 string jobId = BackgroundJob.Schedule(
                     () => DeletePropertyMediaAfterGracePeriod(propertyId, filesToDelete),
