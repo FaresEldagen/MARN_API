@@ -1,7 +1,9 @@
 using MARN_API.DTOs.Admin;
 using MARN_API.DTOs.Common;
+using MARN_API.DTOs.Notification;
 using MARN_API.Enums;
 using MARN_API.Enums.Account;
+using MARN_API.Enums.Notification;
 using MARN_API.Enums.Property;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
@@ -14,15 +16,18 @@ namespace MARN_API.Services.Implementations
         private const int MaxPageSize = 100;
         private readonly IAdminVerificationRepo _verificationRepo;
         private readonly IAppTextLocalizer _localizer;
+        private readonly INotificationService _notificationService;
         private readonly ILogger<AdminVerificationService> _logger;
 
         public AdminVerificationService(
             IAdminVerificationRepo verificationRepo,
             IAppTextLocalizer localizer,
+            INotificationService notificationService,
             ILogger<AdminVerificationService> logger)
         {
             _verificationRepo = verificationRepo;
             _localizer = localizer;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -113,6 +118,7 @@ namespace MARN_API.Services.Implementations
 
             property.Status = PropertyStatus.Verified;
             await _verificationRepo.SaveChangesAsync();
+            await TrySendPropertyAcceptedNotificationAsync(property);
 
             _logger.LogInformation("Admin approved property verification for property {PropertyId}", propertyId);
             return ServiceResult<bool>.Ok(true, "Property verification approved.", code: "ZZ_ADMIN_PROPERTY_VERIFICATION_APPROVED");
@@ -135,9 +141,66 @@ namespace MARN_API.Services.Implementations
 
             property.Status = PropertyStatus.Declined;
             await _verificationRepo.SaveChangesAsync();
+            await TrySendPropertyRejectedNotificationAsync(property, decision.Reason);
 
             _logger.LogInformation("Admin declined property verification for property {PropertyId}. Reason: {Reason}", propertyId, decision.Reason);
             return ServiceResult<bool>.Ok(true, "Property verification declined.", code: "ZZ_ADMIN_PROPERTY_VERIFICATION_DECLINED");
+        }
+
+        private async Task TrySendPropertyAcceptedNotificationAsync(Property property)
+        {
+            try
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = property.OwnerId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.PropertyAccepted,
+                    TitleKey = "NOTIFICATION_PROPERTY_ACCEPTED_TITLE",
+                    BodyKey = "NOTIFICATION_PROPERTY_ACCEPTED_BODY",
+                    LocalizationArguments = new() { property.Title },
+                    Title = "Property Verification Accepted",
+                    Body = $"Your property \"{property.Title}\" has been approved and is now visible to renters.",
+                    ActionType = NotificationActionType.Property,
+                    ActionId = property.Id.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send property acceptance notification for property {PropertyId}", property.Id);
+            }
+        }
+
+        private async Task TrySendPropertyRejectedNotificationAsync(Property property, string? reason)
+        {
+            var trimmedReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
+
+            try
+            {
+                await _notificationService.SendNotificationAsync(new NotificationRequestDto
+                {
+                    UserId = property.OwnerId.ToString(),
+                    UserType = NotificationUserType.Owner,
+                    Type = NotificationType.PropertyRejected,
+                    TitleKey = "NOTIFICATION_PROPERTY_REJECTED_TITLE",
+                    BodyKey = trimmedReason == null
+                        ? "NOTIFICATION_PROPERTY_REJECTED_BODY"
+                        : "NOTIFICATION_PROPERTY_REJECTED_WITH_REASON_BODY",
+                    LocalizationArguments = trimmedReason == null
+                        ? new() { property.Title }
+                        : new() { property.Title, trimmedReason },
+                    Title = "Property Verification Rejected",
+                    Body = trimmedReason == null
+                        ? $"Your property \"{property.Title}\" was rejected during admin verification. Please review your property details and submit it again."
+                        : $"Your property \"{property.Title}\" was rejected during admin verification. Reason: {trimmedReason}",
+                    ActionType = NotificationActionType.Property,
+                    ActionId = property.Id.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send property rejection notification for property {PropertyId}", property.Id);
+            }
         }
 
         private static (int PageNumber, int PageSize) NormalizePaging(AdminVerificationQueryDto query)
