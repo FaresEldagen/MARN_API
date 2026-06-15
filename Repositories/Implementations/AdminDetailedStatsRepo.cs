@@ -220,7 +220,7 @@ namespace MARN_API.Repositories.Implementations
                     Governorate = p.State,
                     Price = p.Price,
                     AverageRating = p.PropertyFeedbacks.Any()
-                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
+                        ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1)
                         : 0f,
                     CommentsCount = p.PropertyFeedbacks.Count(f => !f.IsHiddenByModeration && f.Content != null && f.Content != ""),
                     IsActive = p.IsActive,
@@ -282,7 +282,7 @@ namespace MARN_API.Repositories.Implementations
                     CreatedAt = p.CreatedAt,
                     ProofOfOwnership = p.ProofOfOwnership,
                     AverageRating = p.PropertyFeedbacks.Any()
-                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
+                        ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1)
                         : 0f,
                     RatingsCount = p.PropertyFeedbacks.Count,
                     CommentsCount = p.PropertyFeedbacks.Count(f => !f.IsHiddenByModeration && f.Content != null && f.Content != ""),

@@ -473,6 +473,9 @@ namespace MARN_API
 
 
             var app = builder.Build();
+
+
+            #region Localization Configuration
             var requestLocalizationOptions = new RequestLocalizationOptions
             {
                 DefaultRequestCulture = new RequestCulture(LocalizationConstants.DefaultCulture),
@@ -504,6 +507,7 @@ namespace MARN_API
                     return new ProviderCultureResult(culture.Name);
                 })
             };
+            #endregion
 
 
             #region Middleware Pipeline
@@ -579,6 +583,7 @@ namespace MARN_API
 
             await app.RunAsync();
         }
+
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {

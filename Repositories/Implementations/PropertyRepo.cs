@@ -48,7 +48,7 @@ namespace MARN_API.Repositories.Implementations
                     Price = p.Price,
                     RentalUnit = p.RentalUnit,
                     
-                    AverageRating = p.PropertyFeedbacks.Any() ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f : 0f,
+                    AverageRating = p.PropertyFeedbacks.Any() ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1) : 0f,
                     Ratings = p.PropertyFeedbacks.Count,
 
                     ActiveContracts = p.Contracts
@@ -83,6 +83,8 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty,
                     Title = p.Title,
                     Address = p.Address,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
                     IsSaved = p.SavedProperty.Any(s => s.UserId == userId),
 
                     MaxOccupants = p.MaxOccupants,
@@ -90,7 +92,7 @@ namespace MARN_API.Repositories.Implementations
                     Bathrooms = p.Bathrooms,
 
                     Type = p.Type,
-                    AverageRating = p.PropertyFeedbacks.Any() ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f : 0f,
+                    AverageRating = p.PropertyFeedbacks.Any() ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1) : 0f,
                     Ratings = p.PropertyFeedbacks.Count,
 
                     Price = p.Price,
@@ -120,7 +122,7 @@ namespace MARN_API.Repositories.Implementations
                 .SelectMany(p => p.PropertyFeedbacks)
                 .AverageAsync(f => (float?)f.Rating);
 
-            return avg ?? 0f;
+            return (float)Math.Round((double)(avg ?? 0f), 1);
         }
 
         public Task<int> GetOwnerRatingsCount(Guid userId)
@@ -381,12 +383,14 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty,
                     Title = p.Title,
                     Address = p.Address,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
                     Bedrooms = p.Bedrooms,
                     Bathrooms = p.Bathrooms,
                     MaxOccupants = p.MaxOccupants,
                     Type = p.Type,
                     AverageRating = p.PropertyFeedbacks.Any()
-                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
+                        ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1)
                         : 0f,
                     Ratings = p.PropertyFeedbacks.Count,
                     Price = p.Price,
@@ -433,12 +437,14 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty,
                     Title = p.Title,
                     Address = p.Address,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
                     Bedrooms = p.Bedrooms,
                     Bathrooms = p.Bathrooms,
                     MaxOccupants = p.MaxOccupants,
                     Type = p.Type,
                     AverageRating = p.PropertyFeedbacks.Any()
-                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
+                        ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1)
                         : 0f,
                     Ratings = p.PropertyFeedbacks.Count,
                     Price = p.Price,
@@ -481,12 +487,14 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty,
                     Title = p.Title,
                     Address = p.Address,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
                     Bedrooms = p.Bedrooms,
                     Bathrooms = p.Bathrooms,
                     MaxOccupants = p.MaxOccupants,
                     Type = p.Type,
                     AverageRating = p.PropertyFeedbacks.Any()
-                        ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f
+                        ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1)
                         : 0f,
                     Ratings = p.PropertyFeedbacks.Count,
                     Price = p.Price,
@@ -536,7 +544,7 @@ namespace MARN_API.Repositories.Implementations
                         : !p.Contracts.Any(c => c.Status == ContractStatus.Active),
                     CreatedAt = p.CreatedAt,
                     IsSaved = hasCurrentUser && p.SavedProperty.Any(s => s.UserId == userId),
-                    AverageRating = p.PropertyFeedbacks.Any() ? p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f : 0f,
+                    AverageRating = p.PropertyFeedbacks.Any() ? (float)Math.Round((double)(p.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1) : 0f,
                     RatingsCount = p.PropertyFeedbacks.Count,
                     CommentsCount = p.PropertyFeedbacks.Count(f => !f.IsHiddenByModeration && f.Content != null && f.Content != ""),
                     CurrentUserRating = hasCurrentUser
@@ -634,10 +642,10 @@ namespace MARN_API.Repositories.Implementations
                         FullName = $"{p.Owner.FirstName} {p.Owner.LastName}",
                         ProfileImage = string.IsNullOrEmpty(p.Owner.ProfileImage) ? null : p.Owner.ProfileImage,
                         Bio = p.Owner.Bio,
-                        AverageRating = Context.Properties
+                        AverageRating = (float)Math.Round((double)(Context.Properties
                             .Where(op => op.OwnerId == p.OwnerId)
                             .SelectMany(op => op.PropertyFeedbacks)
-                            .Average(f => (float?)f.Rating) ?? 0f,
+                            .Average(f => (float?)f.Rating) ?? 0f), 1),
                         PropertiesCount = Context.Properties.Count(op => op.OwnerId == p.OwnerId),
                     },
 

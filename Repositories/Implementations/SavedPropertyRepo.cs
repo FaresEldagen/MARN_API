@@ -1,4 +1,4 @@
-﻿using MARN_API.Data;
+using MARN_API.Data;
 using MARN_API.DTOs.Property;
 using MARN_API.Models;
 using MARN_API.Repositories.Interfaces;
@@ -29,6 +29,8 @@ namespace MARN_API.Repositories.Implementations
                         .FirstOrDefault() ?? string.Empty,
                     Title = s.Property.Title,
                     Address = s.Property.Address,
+                    Latitude = s.Property.Latitude,
+                    Longitude = s.Property.Longitude,
                     IsSaved = true,
 
                     MaxOccupants = s.Property.MaxOccupants,
@@ -36,7 +38,7 @@ namespace MARN_API.Repositories.Implementations
                     Bathrooms = s.Property.Bathrooms,
 
                     Type = s.Property.Type,
-                    AverageRating = s.Property.PropertyFeedbacks.Any() ? s.Property.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f : 0f,
+                    AverageRating = s.Property.PropertyFeedbacks.Any() ? (float)Math.Round((double)(s.Property.PropertyFeedbacks.Average(f => (float?)f.Rating) ?? 0f), 1) : 0f,
                     Ratings = s.Property.PropertyFeedbacks.Count,
 
                     Price = s.Property.Price,

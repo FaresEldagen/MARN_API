@@ -407,7 +407,7 @@ namespace MARN_API.Services.Implementations
                 GovernorateDisplayName = GetLocationDisplayName<Governorate>(property.State),
                 Price = property.Price,
                 AverageRating = property.PropertyFeedbacks.Any()
-                    ? property.PropertyFeedbacks.Average(feedback => (float?)feedback.Rating) ?? 0f
+                    ? (float)Math.Round((double)(property.PropertyFeedbacks.Average(feedback => (float?)feedback.Rating) ?? 0f), 1)
                     : 0f,
                 CommentsCount = property.PropertyFeedbacks.Count(feedback => !feedback.IsHiddenByModeration && !string.IsNullOrWhiteSpace(feedback.Content)),
                 IsActive = property.IsActive,

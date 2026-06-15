@@ -26,6 +26,7 @@ namespace MARN_API.Repositories.Implementations
             var averageRating = ratingsCount == 0
                 ? 0f
                 : await allFeedback.AverageAsync(f => (float)f.Rating);
+            averageRating = (float)Math.Round((double)averageRating, 1);
 
             var visibleComments = allFeedback
                 .Where(f => !f.IsHiddenByModeration && f.Content != null && f.Content != "")

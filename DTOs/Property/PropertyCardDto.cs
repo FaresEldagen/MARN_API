@@ -1,4 +1,4 @@
-﻿using MARN_API.Enums.Property;
+using MARN_API.Enums.Property;
 
 namespace MARN_API.DTOs.Property
 {
@@ -8,6 +8,8 @@ namespace MARN_API.DTOs.Property
         public string ImagePath { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
         public int Bedrooms { get; set; }
         public int Bathrooms { get; set; }
