@@ -32,6 +32,8 @@ namespace MARN_API.Enums.Notification
 
         PropertyAdded,
         PropertyEdited,
-        PropertyDeleted
+        PropertyDeleted,
+        PropertyAccepted,
+        PropertyRejected
     }
 }
