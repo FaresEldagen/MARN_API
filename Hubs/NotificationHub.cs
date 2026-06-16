@@ -1,4 +1,4 @@
-﻿using MARN_API.Services.Implementations;
+using MARN_API.Services.Implementations;
 using MARN_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -11,10 +11,31 @@ namespace MARN_API.Hubs
     public class NotificationHub : Hub
     {
         private readonly INotificationService _notificationService;
-        public NotificationHub(INotificationService notificationService)
+        private readonly ConnectionTracker _tracker;
+        public NotificationHub(INotificationService notificationService, ConnectionTracker tracker)
         {
             _notificationService = notificationService;
+            _tracker = tracker;
         }
+
+
+        //public override async Task OnConnectedAsync()
+        //{
+        //    var userId = Context.UserIdentifier;
+        //    if (userId != null)
+        //        _tracker.UserConnected(userId);
+
+        //    await base.OnConnectedAsync();
+        //}
+
+        //public override async Task OnDisconnectedAsync(Exception? exception)
+        //{
+        //    var userId = Context.UserIdentifier;
+        //    if (userId != null)
+        //        _tracker.UserDisconnected(userId);
+
+        //    await base.OnDisconnectedAsync(exception);
+        //}
 
 
         public async Task MarkAllNotificationsAsRead()
@@ -23,7 +44,7 @@ namespace MARN_API.Hubs
             if (string.IsNullOrEmpty(currentUserId)) return;
 
             await _notificationService.MarkAllNotificationsAsReadAsync(currentUserId);
-            await Clients.Caller.SendAsync("AllNotificationsMarkedAsRead");
+            await Clients.User(currentUserId.ToLower()).SendAsync("AllNotificationsMarkedAsRead");
 
         }
 
@@ -33,7 +54,7 @@ namespace MARN_API.Hubs
             if (string.IsNullOrEmpty(currentUserId)) return;
 
             await _notificationService.MarkNotificationAsReadAsync(currentUserId, notificationId);
-            await Clients.Caller.SendAsync("NotificationMarkedAsRead", notificationId);
+            await Clients.User(currentUserId.ToLower()).SendAsync("NotificationMarkedAsRead", notificationId);
 
         }
     }

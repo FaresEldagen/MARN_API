@@ -6,7 +6,7 @@ namespace MARN_API.Hubs
     {
         #region Online Users
         // Maps UserId to the number of active connections they have
-        public ConcurrentDictionary<string, int> OnlineUsers { get; } = new();
+        public ConcurrentDictionary<string, int> OnlineUsers { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public bool UserConnected(string userId)
         {
@@ -18,16 +18,29 @@ namespace MARN_API.Hubs
 
         public bool UserDisconnected(string userId)
         {
-            var count = OnlineUsers.AddOrUpdate(userId, 0, (_, currentCount) => 
+            // Use an atomic loop to avoid the race condition where AddOrUpdate
+            // could re-insert a removed key with value 0, then a concurrent
+            // UserConnected gets its entry deleted by TryRemove.
+            while (true)
             {
-                return currentCount > 0 ? currentCount - 1 : 0;
-            });
+                if (!OnlineUsers.TryGetValue(userId, out var currentCount))
+                    return false; // Already gone — no-op, don't fire offline again
 
-            // Clean up stale entry if user is fully offline
-            if (count == 0)
-                OnlineUsers.TryRemove(userId, out _);
-
-            return count == 0;
+                if (currentCount <= 1)
+                {
+                    // Try to atomically remove the entry
+                    if (OnlineUsers.TryRemove(userId, out _))
+                        return true; // Now fully offline
+                    // Another thread changed it — retry
+                }
+                else
+                {
+                    var newCount = currentCount - 1;
+                    if (OnlineUsers.TryUpdate(userId, newCount, currentCount))
+                        return false; // Still online with other connections
+                    // Another thread changed it — retry
+                }
+            }
         }
         
         public bool IsOnline(string userId)
@@ -38,44 +51,94 @@ namespace MARN_API.Hubs
 
 
         #region Active Chats
-        // Maps ReceiverId to a set of UserIds they are currently actively chatting with
-        public ConcurrentDictionary<string, HashSet<string>> ActiveChattingUsers { get; } = new();
+        // Maps UserId -> (OtherUserId -> connection count viewing that chat)
+        // Reference-counted so multiple devices can view the same chat simultaneously
+        private ConcurrentDictionary<string, ConcurrentDictionary<string, int>> ActiveChattingUsers { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-        public void SetActiveChat(string userId, string otherUserId)
+        // Maps ConnectionId -> set of OtherUserIds that connection is viewing
+        // Used to clean up only that connection's chats on disconnect
+        private ConcurrentDictionary<string, HashSet<string>> ConnectionActiveChats { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public void SetActiveChat(string connectionId, string userId, string otherUserId)
         {
-            var chats = ActiveChattingUsers.GetOrAdd(userId, _ => new HashSet<string>());
-
-            lock (chats)
+            // 1. Track which chats this specific connection is viewing
+            var connChats = ConnectionActiveChats.GetOrAdd(connectionId, _ => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            lock (connChats)
             {
-                chats.Add(otherUserId);
+                if (!connChats.Add(otherUserId))
+                    return; // This connection was already tracking this chat — no-op
             }
+
+            // 2. Increment the reference count for (userId, otherUserId)
+            var userChats = ActiveChattingUsers.GetOrAdd(userId, _ => new ConcurrentDictionary<string, int>(StringComparer.OrdinalIgnoreCase));
+            userChats.AddOrUpdate(otherUserId, 1, (_, count) => count + 1);
         }
 
-        public void RemoveActiveChat(string userId, string otherUserId)
+        public void RemoveActiveChat(string connectionId, string userId, string otherUserId)
         {
-            if (ActiveChattingUsers.TryGetValue(userId, out var chats))
+            // 1. Remove from this connection's tracking
+            if (ConnectionActiveChats.TryGetValue(connectionId, out var connChats))
             {
-                lock (chats)
+                bool wasTracked;
+                lock (connChats)
                 {
-                    chats.Remove(otherUserId);
-
-                    if (chats.Count == 0)
-                        ActiveChattingUsers.TryRemove(userId, out _);
+                    wasTracked = connChats.Remove(otherUserId);
+                    if (connChats.Count == 0)
+                        ConnectionActiveChats.TryRemove(connectionId, out _);
                 }
+
+                if (!wasTracked)
+                    return; // This connection wasn't tracking this chat — no-op
+            }
+            else
+            {
+                return;
+            }
+
+            // 2. Decrement the reference count for (userId, otherUserId)
+            DecrementActiveChat(userId, otherUserId);
+        }
+
+        public void RemoveAllActiveChatsForConnection(string connectionId, string userId)
+        {
+            // Get and remove all chats this specific connection was viewing
+            if (!ConnectionActiveChats.TryRemove(connectionId, out var connChats))
+                return;
+
+            HashSet<string> chatsCopy;
+            lock (connChats)
+            {
+                chatsCopy = new HashSet<string>(connChats, StringComparer.OrdinalIgnoreCase);
+            }
+
+            // Decrement the reference count for each chat this connection had open
+            foreach (var otherUserId in chatsCopy)
+            {
+                DecrementActiveChat(userId, otherUserId);
             }
         }
 
         public bool IsUserInChatWith(string userId, string otherUserId)
         {
-            if (ActiveChattingUsers.TryGetValue(userId, out var chats))
-            {
-                lock (chats)
-                {
-                    return chats.Contains(otherUserId);
-                }
-            }
+            return ActiveChattingUsers.TryGetValue(userId, out var userChats)
+                && userChats.TryGetValue(otherUserId, out var count)
+                && count > 0;
+        }
 
-            return false;
+        private void DecrementActiveChat(string userId, string otherUserId)
+        {
+            if (!ActiveChattingUsers.TryGetValue(userId, out var userChats))
+                return;
+
+            var newCount = userChats.AddOrUpdate(otherUserId, 0, (_, count) => count > 0 ? count - 1 : 0);
+
+            if (newCount == 0)
+            {
+                userChats.TryRemove(otherUserId, out _);
+
+                if (userChats.IsEmpty)
+                    ActiveChattingUsers.TryRemove(userId, out _);
+            }
         }
         #endregion
     }

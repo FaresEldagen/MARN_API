@@ -29,11 +29,14 @@ namespace MARN_API.Hubs
                     // Only broadcast online status to users who have an active chat history with the connected user
                     var ChatUsers = await _chatService.GetActiveUsersWithStatusAsync(userId);
 
-                    foreach (var ChatUser in ChatUsers.Data!)
+                    if (ChatUsers.Success && ChatUsers.Data != null)
                     {
-                        if (ChatUser.IsOnline)
+                        foreach (var ChatUser in ChatUsers.Data)
                         {
-                            await Clients.User(ChatUser.Id.ToLower()).SendAsync("UserOnline", userId);
+                            if (ChatUser.IsOnline)
+                            {
+                                await Clients.User(ChatUser.Id.ToLower()).SendAsync("UserOnline", userId);
+                            }
                         }
                     }
                 }
@@ -46,17 +49,23 @@ namespace MARN_API.Hubs
             var userId = Context.UserIdentifier;
             if (userId != null)
             {
+                //// Clean up active chat tracking before checking offline
+                //_tracker.RemoveAllActiveChats(userId);
+
                 var isOffline = _tracker.UserDisconnected(userId);
                 if (isOffline)
                 {
-                    // Only broadcast online status to users who have an active chat history with the connected user
+                    // Only broadcast offline status to users who have an active chat history with the disconnected user
                     var ChatUsers = await _chatService.GetActiveUsersWithStatusAsync(userId);
 
-                    foreach (var ChatUser in ChatUsers.Data!)
+                    if (ChatUsers.Success && ChatUsers.Data != null)
                     {
-                        if (ChatUser.IsOnline)
+                        foreach (var ChatUser in ChatUsers.Data)
                         {
-                            await Clients.User(ChatUser.Id.ToLower()).SendAsync("UserOffline", userId);
+                            if (ChatUser.IsOnline)
+                            {
+                                await Clients.User(ChatUser.Id.ToLower()).SendAsync("UserOffline", userId);
+                            }
                         }
                     }
                 }
@@ -70,7 +79,7 @@ namespace MARN_API.Hubs
             var currentUserId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(currentUserId) && !string.IsNullOrEmpty(userId))
             {
-                _tracker.SetActiveChat(currentUserId, userId);
+                _tracker.SetActiveChat(Context.ConnectionId, currentUserId, userId);
             }
         }
 
@@ -79,7 +88,7 @@ namespace MARN_API.Hubs
             var currentUserId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(currentUserId))
             {
-                _tracker.RemoveActiveChat(currentUserId, userId);
+                _tracker.RemoveActiveChat(Context.ConnectionId, currentUserId, userId);
             }
         }
 
@@ -106,10 +115,10 @@ namespace MARN_API.Hubs
             var payload = result.Data;
 
             // 2. Deliver message in real-time to the Receiver (if they are online)
-            await Clients.User(receiverId).SendAsync("ReceiveMessage", payload);
+            await Clients.User(receiverId.ToLower()).SendAsync("ReceiveMessage", payload);
 
             // 3. Echo the saved message back to the sender (confirmation with server-generated fields)
-            await Clients.Caller.SendAsync("SendMessage", payload);
+            await Clients.User(senderId.ToLower()).SendAsync("SendMessage", payload);
         }
 
         public async Task MarkChatAsRead(string senderId)
